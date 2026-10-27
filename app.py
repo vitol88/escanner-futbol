@@ -479,6 +479,7 @@ else:
                     "note": f"Historial automático no disponible: {history_exc}",
                 }
         st.session_state.last_scan_history_api_calls = st.session_state.api_request_count - history_calls_before
+        st.session_state.last_scan_api_calls = st.session_state.api_request_count - scan_api_calls_start
         st.session_state.corner_scan_results = corner_results
 
         # Attach live context to the corresponding goal scan. Missing statistics remain missing.
