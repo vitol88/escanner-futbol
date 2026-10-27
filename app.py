@@ -206,15 +206,25 @@ else:
                 away_name = ((fixture.get("teams") or {}).get("away") or {}).get("name", "Visitante")
                 for target, item in estimate.get("home_final_goals_at_least", {}).items():
                     if not item.get("already_settled"):
-                        candidates.append((f"{home_name}: terminará con {target} goles o más", item["probability"]))
+                        goal_word = "gol" if int(target) == 1 else "goles"
+                        candidates.append((f"{home_name}: terminará con {target} {goal_word} o más", item["probability"]))
                 for target, item in estimate.get("away_final_goals_at_least", {}).items():
                     if not item.get("already_settled"):
-                        candidates.append((f"{away_name}: terminará con {target} goles o más", item["probability"]))
+                        goal_word = "gol" if int(target) == 1 else "goles"
+                        candidates.append((f"{away_name}: terminará con {target} {goal_word} o más", item["probability"]))
 
                 candidates.append(("Empate final", estimate["draw_final"]))
                 # If both teams have already scored, BTTS is settled, not a future tip.
                 if not estimate.get("btts_already_settled"):
-                    candidates.append(("Ambos equipos marcan (faltan goles de ambos)", estimate["btts_final"]))
+                    score_home_now = goals_data.get("home")
+                    score_away_now = goals_data.get("away")
+                    if score_home_now == 0 and score_away_now == 0:
+                        btts_label = "Ambos equipos marcan (deben marcar ambos equipos)"
+                    elif score_home_now == 0:
+                        btts_label = f"Ambos equipos marcan (falta que marque {home_name})"
+                    else:
+                        btts_label = f"Ambos equipos marcan (falta que marque {away_name})"
+                    candidates.append((btts_label, estimate["btts_final"]))
                 # Only show candidate markets that pass the experimental screening threshold.
                 # Otherwise the match is omitted from the opportunity list.
                 tips = [(name, probability) for name, probability in candidates if probability >= 0.65]
@@ -385,6 +395,11 @@ else:
                             f"aprox. {projected_additional:.1f} córners adicionales. "
                             "No usa todavía promedios históricos de córners por liga/equipo."
                         )
+                        if minute_now <= 20 or total_corners_now <= 2:
+                            st.caption(
+                                "Confianza muy baja: hay pocos minutos y/o córners observados. "
+                                "Es una extrapolación lineal, no un tip confirmado."
+                            )
                     total_shots_now = (item.get("home_shots") or 0) + (item.get("away_shots") or 0)
                     if isinstance(minute_now, int) and 15 <= minute_now <= 78 and total_corners_now >= 5 and item["pace"] >= 10 and total_shots_now >= 8:
                         st.warning("CANDIDATO EXPERIMENTAL · ritmo de córners elevado y actividad de tiros. Revisar mercados de córners restantes y cuota disponible; no es una probabilidad validada ni una apuesta automática.")
