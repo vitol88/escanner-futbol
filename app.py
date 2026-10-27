@@ -48,6 +48,16 @@ st.markdown("""
   [data-testid="stDataFrame"] { border: 1px solid #3A3426; border-radius: 10px; overflow: hidden; }
   [data-testid="stExpander"] { background: #15191F; border: 1px solid #3A3426; border-radius: 12px; }
   hr { border-color: #38342B; }
+  .brand-header { display:flex; align-items:center; gap:14px; padding:14px 16px; margin:0 0 14px 0; background:linear-gradient(120deg,#15191F,#0B0D10); border:1px solid #393326; border-radius:16px; }
+  .brand-mark { width:48px; height:48px; display:flex; align-items:center; justify-content:center; background:#FACC15; border-radius:13px; font-size:26px; }
+  .brand-title { font-size:22px; line-height:1.15; letter-spacing:1.5px; font-weight:900; color:#F4F4F5; }
+  .brand-title span { color:#FACC15; }
+  .brand-subtitle { color:#A1A1AA; font-size:10px; letter-spacing:1px; margin-top:5px; }
+  .brand-pill { margin-left:auto; white-space:nowrap; color:#FACC15; border:1px solid #554719; background:#242014; border-radius:999px; padding:6px 9px; font-size:10px; font-weight:800; }
+  [data-testid="stExpander"] summary p { font-weight:700; }
+  [data-testid="stExpander"] summary:hover { color:#FACC15; }
+  div[data-testid="stMetricLabel"] p { color:#A1A1AA !important; font-size: .78rem; }
+  div[data-testid="stMetricValue"] { color:#FACC15 !important; }
   @media (max-width: 640px) {
     .block-container {padding-left: .8rem; padding-right: .8rem;}
     h1 {font-size: 1.7rem !important;}
@@ -56,8 +66,17 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.title("⚽ Escáner Fútbol")
-st.caption("Panel de análisis en vivo · goles, córners, empate y ambos marcan")
+st.markdown("""
+<div class="brand-header">
+  <div class="brand-mark">⚽</div>
+  <div>
+    <div class="brand-title">FOOTBALL <span>LAB</span></div>
+    <div class="brand-subtitle">LIVE ANALYTICS TERMINAL · GOLES · CÓRNERS · EMPATE</div>
+  </div>
+  <div class="brand-pill">● LIVE SCANNER</div>
+</div>
+""", unsafe_allow_html=True)
+st.caption("Terminal de análisis deportivo · probabilidades exploratorias, no garantías de resultado")
 
 MODEL_DATA = load_league_baselines()
 
@@ -174,19 +193,36 @@ if st.session_state.last_refresh:
 
 fixtures = st.session_state.live_fixtures
 if not fixtures:
-    st.info("Pulsa «Actualizar partidos» para cargar el listado. Para conectar la API, primero configura la clave en Secrets.")
+    st.markdown("### Tu centro de análisis")
+    st.info("Pulsa «Actualizar partidos» para cargar los encuentros en vivo. Después podrás escanear goles, córners, empate y ambos equipos marcan.")
+    st.markdown("""
+    <div class="brand-header">
+      <div>
+        <div class="brand-title">DETECTA. <span>COMPARA.</span> ANALIZA.</div>
+        <div class="brand-subtitle">Un panel único para explorar los mercados disponibles en los partidos en vivo.</div>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
 else:
     leagues = sorted({
         (f.get("league") or {}).get("name", "Liga")
         for f in fixtures
     })
-    chosen_leagues = st.multiselect("Filtrar ligas", leagues, default=leagues)
+    chosen_leagues = st.multiselect("🏆 Ligas", leagues, default=leagues)
     filtered = [
         f for f in fixtures
         if (f.get("league") or {}).get("name", "Liga") in chosen_leagues
     ]
-    st.metric("Partidos recibidos", len(fixtures))
-    st.caption("El escáner evalúa primero los mercados que se pueden analizar con el marcador y el minuto. Las estadísticas detalladas de córners se consultan aparte para controlar el consumo de la API.")
+    goal_results_now = st.session_state.get("goal_scan_results", [])
+    corner_results_now = st.session_state.get("corner_scan_results", [])
+    current_tips_count = sum(len(item[2]) for item in goal_results_now)
+    st.markdown("### Resumen de sesión")
+    metric_cols = st.columns(4)
+    metric_cols[0].metric("Partidos en vivo", len(fixtures))
+    metric_cols[1].metric("Ligas activas", len(chosen_leagues))
+    metric_cols[2].metric("Tips de goles", current_tips_count)
+    metric_cols[3].metric("Partidos revisados córners", len(corner_results_now))
+    st.caption("Las métricas resumen la última consulta y el último escaneo guardado en esta sesión. Las estadísticas detalladas de córners se consultan en una muestra para cuidar el límite de la API.")
     max_corner_scan = st.select_slider(
         "Partidos para comprobar estadísticas de córners",
         options=[1, 3, 5, 10],
@@ -370,12 +406,16 @@ else:
         goal_results = st.session_state.get("goal_scan_results", [])
         if goal_results:
             st.subheader("Tips preliminares del escáner")
-            st.caption("Se evalúan todos los partidos filtrados con marcador y minuto disponibles. Las estadísticas detalladas se consultan en una muestra priorizada para respetar el plan gratuito; la falta de esas estadísticas no elimina una señal preliminar. El umbral del 65% es experimental y no está validado.")
+            st.caption("Abre cada partido para comparar sus mercados. Las probabilidades son exploratorias y el filtro del 65% todavía no está validado.")
+            search_matches = st.text_input("🔎 Buscar equipo o liga", placeholder="Ej. Roma, Premier League…", key="search_goal_matches").strip().casefold()
             tips_found = 0
             for fixture, estimate, tips, context in goal_results:
                 if not estimate.get("available"):
                     continue
                 if not tips:
+                    continue
+                searchable = f"{fixture_label(fixture)} {((fixture.get('teams') or {}).get('home') or {}).get('name', '')} {((fixture.get('teams') or {}).get('away') or {}).get('name', '')}".casefold()
+                if search_matches and search_matches not in searchable:
                     continue
                 tips_found += len(tips)
                 with st.expander(f"⚽ {fixture_label(fixture)} · {len(tips)} mercados", expanded=False):
