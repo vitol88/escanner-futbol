@@ -10,6 +10,7 @@ import streamlit as st
 from models.live_context import qualifies_as_corner_candidate, summarize_live_context
 from models.backtest import evaluate_binary_predictions
 from models.late_goal_history import estimate_late_goals_from_history
+from models.corner_history import estimate_remaining_corners
 from models.probabilities import (
     corner_pace_per_90,
     estimate_live_goal_markets,
@@ -670,6 +671,28 @@ else:
     
     
     with tab_corners:
+        st.markdown("### Historial de córners desde el minuto de corte")
+        st.caption("Carga datos históricos con córners al minuto exacto y córners que ocurrieron después. La API suele exponer estadísticas finales por partido; no se deben inventar córners por minuto si no hay eventos temporales disponibles.")
+        corner_history_file = st.file_uploader(
+            "CSV histórico de córners por equipo, sede y minuto",
+            type=["csv"],
+            key="corner_history_csv",
+            help="Columnas: league, team, venue, minute, corners_for, corners_against, corners_for_after, corners_against_after. venue debe ser home o away."
+        )
+        if corner_history_file is not None:
+            try:
+                uploaded_corner_rows = list(csv.DictReader(io.StringIO(corner_history_file.getvalue().decode("utf-8-sig"))))
+                required_corner_columns = {"league", "team", "venue", "minute", "corners_for", "corners_against", "corners_for_after", "corners_against_after"}
+                if uploaded_corner_rows and required_corner_columns.issubset(set(uploaded_corner_rows[0].keys())):
+                    st.session_state["corner_history_rows"] = uploaded_corner_rows
+                    st.success(f"Historial de córners cargado: {len(uploaded_corner_rows)} filas de equipo-partido.")
+                else:
+                    st.error("El CSV de córners no tiene todas las columnas requeridas. Revisa el formato indicado.")
+            except (UnicodeDecodeError, csv.Error) as corner_history_exc:
+                st.error(f"No se pudo leer el CSV de córners: {corner_history_exc}")
+        corner_history_rows = st.session_state.get("corner_history_rows", [])
+        if not corner_history_rows:
+            st.info("El módulo histórico de córners queda preparado para comparar minuto, sede y estado de córners cuando se cargue una base con eventos por minuto. Las estadísticas finales no permiten deducir con fiabilidad cuántos córners habían ocurrido en el minuto 70.")
         corner_results = st.session_state.get("corner_scan_results", [])
         if corner_results:
             st.subheader("Córners · revisión en vivo")
@@ -751,6 +774,39 @@ else:
                             away_shots=item.get("away_shots"),
                         ):
                             st.warning("CANDIDATO EXPERIMENTAL · ritmo de córners elevado y actividad de tiros. Revisar mercados de córners restantes y cuota disponible; no es una probabilidad validada ni una apuesta automática.")
+                    if corner_history_rows and isinstance(minute_now, int):
+                        current_corner_history_rows = []
+                        home_team_name = (((item.get("fixture") or {}).get("teams") or {}).get("home") or {}).get("name", "")
+                        away_team_name = (((item.get("fixture") or {}).get("teams") or {}).get("away") or {}).get("name", "")
+                        league_name_corner_history = (((item.get("fixture") or {}).get("league") or {}).get("name") or "")
+                        for side, team_name, team_corners, opp_corners, venue in (
+                            ("home", home_team_name, item.get("home_corners"), item.get("away_corners"), "home"),
+                            ("away", away_team_name, item.get("away_corners"), item.get("home_corners"), "away"),
+                        ):
+                            if isinstance(team_corners, (int, float)) and isinstance(opp_corners, (int, float)):
+                                hist_corner = estimate_remaining_corners(
+                                    corner_history_rows,
+                                    league=league_name_corner_history,
+                                    team=team_name,
+                                    venue=venue,
+                                    minute=minute_now,
+                                    corners_for=int(team_corners),
+                                    corners_against=int(opp_corners),
+                                )
+                                current_corner_history_rows.append({
+                                    "Equipo": team_name,
+                                    "Sede": "Local" if venue == "home" else "Visitante",
+                                    "Muestra": hist_corner.get("sample_size", 0),
+                                    "Estado exacto": "Sí" if hist_corner.get("matched_exact_state") else ("Muestra general" if hist_corner.get("available") else "Insuficiente"),
+                                    "Prob. ≥1 córner más (partido)": round(hist_corner["prob_at_least_1_corner"] * 100, 1) if hist_corner.get("available") else "N/D",
+                                    "Prob. ≥2 córners más (partido)": round(hist_corner["prob_at_least_2_corners"] * 100, 1) if hist_corner.get("available") else "N/D",
+                                    "Prob. equipo consigue ≥1": round(hist_corner["prob_team_gets_corner"] * 100, 1) if hist_corner.get("available") else "N/D",
+                                    "Media córners restantes": round(hist_corner["mean_corners_after"], 2) if hist_corner.get("available") else "N/D",
+                                })
+                        if current_corner_history_rows:
+                            st.markdown("**Frecuencia histórica desde este minuto**")
+                            st.dataframe(current_corner_history_rows, hide_index=True, use_container_width=True)
+                            st.caption("Se prioriza el mismo minuto, equipo, sede y estado de córners si hay al menos 8 casos. Si no, se usa la muestra del equipo y sede en esa liga y minuto. Frecuencias empíricas, no probabilidades calibradas.")
                     st.caption(f"Tiros totales: local {item.get('home_shots')} · visitante {item.get('away_shots')} | a puerta: local {item.get('home_shots_on')} · visitante {item.get('away_shots_on')}.")
                     st.caption(f"Posesión: local {item.get('home_possession') or 'N/D'} · visitante {item.get('away_possession') or 'N/D'}.")
                     st.caption(f"Tarjetas amarillas: local {item.get('home_yellow') if item.get('home_yellow') is not None else 'N/D'} · visitante {item.get('away_yellow') if item.get('away_yellow') is not None else 'N/D'} | rojas: local {item.get('home_red') if item.get('home_red') is not None else 'N/D'} · visitante {item.get('away_red') if item.get('away_red') is not None else 'N/D'}.")
