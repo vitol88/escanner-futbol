@@ -29,6 +29,14 @@ class LiveContextTests(unittest.TestCase):
         self.assertIsNone(result["shots_total"])
         self.assertIsNone(result["shots_on_total"])
 
+    def test_missing_red_card_values_do_not_become_zero(self):
+        stats = [
+            team_stats({"Red Cards": 0}),
+            team_stats({"Yellow Cards": 1}),
+        ]
+        result = summarize_live_context(stats, 40)
+        self.assertIsNone(result["red_cards_total"])
+
     def test_zero_values_are_not_treated_as_missing(self):
         stats = [
             team_stats({"Corner Kicks": 0, "Total Shots": 0}),
