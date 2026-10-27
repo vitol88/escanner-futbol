@@ -103,6 +103,24 @@ def estimate_live_goal_markets(
     remaining_fraction = max(0.0, (90 - minute) / 90.0)
     home_rate = max(0.0, float(baseline["avg_home_goals"]) * remaining_fraction)
     away_rate = max(0.0, float(baseline["avg_away_goals"]) * remaining_fraction)
+    current_total = score_home + score_away
+    # Use the observed score as a weak signal of match pace. If the match has
+    # already produced substantially more goals than the league baseline would
+    # expect by this minute, modestly raise the remaining-goal rates. This is
+    # deliberately capped: goals are not a reliable standalone predictor.
+    expected_goals_so_far = (
+        float(baseline.get("avg_home_goals", 0.0))
+        + float(baseline.get("avg_away_goals", 0.0))
+    ) * min(elapsed_minute, 90) / 90.0
+    score_pace_factor = 1.0
+    if elapsed_minute >= 15 and expected_goals_so_far > 0:
+        score_pace_factor = min(
+            1.35,
+            max(0.90, 1.0 + 0.12 * (current_total - expected_goals_so_far)
+                / max(1.0, expected_goals_so_far)),
+        )
+        home_rate *= score_pace_factor
+        away_rate *= score_pace_factor
     # Conservative live-activity adjustment. It only applies when observed stats are
     # available; missing stats never become zero and cannot create a false signal.
     live_stats = live_stats or {}
@@ -138,7 +156,6 @@ def estimate_live_goal_markets(
         home_rate *= 1.08
         away_rate *= 1.08
     total_rate = home_rate + away_rate
-    current_total = score_home + score_away
 
     # Evaluate only future total-goal targets, relative to the current score.
     # This prevents already-won markets from being shown as new live opportunities.
@@ -191,6 +208,7 @@ def estimate_live_goal_markets(
         "expected_away_goals_remaining": away_rate,
         "expected_total_goals_remaining": total_rate,
         "live_activity_adjustment": round(activity_factor, 3),
+        "score_pace_adjustment": round(score_pace_factor, 3),
         "live_stats_used": bool(activity_components or (reds is not None and reds > 0)),
         "live_stats_status": "ajuste moderado por actividad en vivo" if activity_components or (reds is not None and reds > 0) else "sin ajuste: estadísticas insuficientes",
         "probability_no_more_goals": poisson_pmf(total_rate, 0),
@@ -201,7 +219,7 @@ def estimate_live_goal_markets(
         "draw_final": draw_probability,
         "btts_final": btts_probability,
         "btts_already_settled": score_home > 0 and score_away > 0,
-        "model_label": "Exploratorio por promedio de liga; no calibrado ni validado para apuestas",
+        "model_label": "Exploratorio por promedio de liga y ritmo de goles observado; no calibrado ni validado para apuestas",
     })
     return result
 
