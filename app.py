@@ -378,18 +378,17 @@ else:
                 if not tips:
                     continue
                 tips_found += len(tips)
-                st.markdown(f"**{fixture_label(fixture)}**")
-                market_rows = [
-                    {
-                        "Mercado": market,
-                        "Probabilidad exploratoria": f"{probability * 100:.1f}%",
-                        "Filtro experimental": "Supera 65%" if probability >= 0.65 else "No supera 65%",
-                    }
-                    for market, probability in sorted(tips, key=lambda item: item[1], reverse=True)
-                ]
-                st.dataframe(market_rows, hide_index=True, use_container_width=True)
-                st.caption(f"Referencia: {estimate['baseline_league']}, {estimate['baseline_matches']} partidos históricos. Contexto en vivo: {context['context_status']}; córners {context.get('corners_total') if context.get('corners_total') is not None else 'N/D'}, tiros {context.get('shots_total') if context.get('shots_total') is not None else 'N/D'}, a puerta {context.get('shots_on_total') if context.get('shots_on_total') is not None else 'N/D'}, rojas {context.get('red_cards_total') if context.get('red_cards_total') is not None else 'N/D'}. Estos datos filtran disponibilidad, no ajustan aún la probabilidad.")
-                st.divider()
+                with st.expander(f"⚽ {fixture_label(fixture)} · {len(tips)} mercados", expanded=False):
+                    market_rows = [
+                        {
+                            "Mercado": market,
+                            "Probabilidad exploratoria": f"{probability * 100:.1f}%",
+                            "Filtro experimental": "Supera 65%" if probability >= 0.65 else "No supera 65%",
+                        }
+                        for market, probability in sorted(tips, key=lambda item: item[1], reverse=True)
+                    ]
+                    st.dataframe(market_rows, hide_index=True, use_container_width=True)
+                    st.caption(f"Referencia: {estimate['baseline_league']}, {estimate['baseline_matches']} partidos históricos. Contexto en vivo: {context['context_status']}; córners {context.get('corners_total') if context.get('corners_total') is not None else 'N/D'}, tiros {context.get('shots_total') if context.get('shots_total') is not None else 'N/D'}, a puerta {context.get('shots_on_total') if context.get('shots_on_total') is not None else 'N/D'}, rojas {context.get('red_cards_total') if context.get('red_cards_total') is not None else 'N/D'}. Estos datos filtran disponibilidad, no ajustan aún la probabilidad.")
             if tips_found == 0:
                 st.info("No hay oportunidades preliminares para mostrar en esta ronda; se omiten los partidos sin una estimación útil.")
             unavailable = sum(1 for item in goal_results if not item[1].get("available"))
