@@ -44,6 +44,7 @@ class ScannerUnitTests(unittest.TestCase):
         self.assertFalse(enough)
         self.assertIn("córners", missing)
         self.assertIn("tiros", missing)
+        self.assertIn("tiros", missing)
 
     def test_complete_core_stats_passes_gate(self):
         stats = [
