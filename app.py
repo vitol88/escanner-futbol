@@ -682,9 +682,9 @@ else:
                 metric_cols[3].metric("Filas excluidas", metrics["excluded"])
                 if metrics["sample_size"]:
                     st.caption(
-                        f"Probabilidad media pronosticada: {metrics['mean_probability']:.1%} · "
-                        f"frecuencia observada de acierto: {metrics['observed_rate']:.1%}. "
-                        "Brier score: cuanto más bajo, mejor (0 es perfecto); interprétalo con una muestra suficiente."
+                        f"Probabilidad media pronosticada: {metrics['mean_probability']:.1%} frente a "
+                        f"frecuencia real de acierto: {metrics['observed_rate']:.1%}. "
+                        "Una diferencia grande puede indicar mala calibración; evalúa cada mercado por separado y con una muestra suficiente. Brier score: cuanto más bajo, mejor (0 es perfecto)."
                     )
                 else:
                     st.info("Todavía no hay filas con probabilidad válida y resultado binario marcado como verificado.")
