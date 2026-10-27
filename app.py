@@ -68,7 +68,7 @@ st.markdown("""
 
 st.markdown("""
 <div class="brand-header">
-  <div class="brand-mark">⚽</div>
+  <div class="brand-mark"><svg viewBox="0 0 64 64" width="42" height="42" aria-label="Football Lab logo"><circle cx="27" cy="29" r="20" fill="#101216" stroke="#FACC15" stroke-width="2.5"/><path d="M27 17l9 6-3 10H21l-4-9z" fill="#FACC15"/><path d="M17 24l-8-2m27 1 8-5m-9 15 8 8M21 33l-3 11m15-1-1 6" stroke="#F4F4F5" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M39 51V38h6v13m4 0V29h6v22m4 0V20h5v31" fill="#FACC15" stroke="#FACC15" stroke-width="1"/><path d="M9 53Q28 61 53 53" fill="none" stroke="#FACC15" stroke-width="2.5" stroke-linecap="round"/></svg></div>
   <div>
     <div class="brand-title">FOOTBALL <span>LAB</span></div>
     <div class="brand-subtitle">LIVE ANALYTICS TERMINAL · GOLES · CÓRNERS · EMPATE</div>
@@ -232,7 +232,7 @@ else:
     if st.button("⚡ Escanear todos los partidos en vivo", type="primary"):
         st.session_state.goal_scan_results = []
         st.session_state.corner_scan_results = []
-        st.markdown("""<div class="loading-brand"><div class="loading-orbit"></div><div><div class="loading-title">FOOTBALL LAB · ESCÁNER EN VIVO</div><div class="loading-subtitle">Evaluando mercados de goles y preparando revisión de córners…</div></div></div>""", unsafe_allow_html=True)
+        st.markdown("""<div class="loading-brand"><div class="brand-mark"><svg viewBox="0 0 64 64" width="38" height="38"><circle cx="27" cy="29" r="20" fill="#101216" stroke="#FACC15" stroke-width="2.5"/><path d="M27 17l9 6-3 10H21l-4-9z" fill="#FACC15"/><path d="M17 24l-8-2m27 1 8-5m-9 15 8 8M21 33l-3 11m15-1-1 6" stroke="#F4F4F5" stroke-width="2" fill="none"/><path d="M39 51V38h6v13m4 0V29h6v22m4 0V20h5v31" fill="#FACC15"/></svg></div><div class="loading-orbit"></div><div><div class="loading-title">FOOTBALL LAB · ESCÁNER EN VIVO</div><div class="loading-subtitle">Evaluando mercados de goles y preparando revisión de córners…</div></div></div>""", unsafe_allow_html=True)
         progress = st.progress(0)
         for idx, fixture in enumerate(filtered):
             league_data = fixture.get("league") or {}
