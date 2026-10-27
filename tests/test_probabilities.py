@@ -115,6 +115,37 @@ class ProbabilityModelTests(unittest.TestCase):
         self.assertGreater(active["expected_total_goals_remaining"], baseline["expected_total_goals_remaining"])
         self.assertLessEqual(active["live_activity_adjustment"], 1.25)
 
+    def test_missing_score_or_minute_withholds_estimate(self):
+        cases = [
+            {"score_home": None, "score_away": 0, "elapsed_minute": 30},
+            {"score_home": 0, "score_away": 0, "elapsed_minute": None},
+            {"score_home": -1, "score_away": 0, "elapsed_minute": 30},
+        ]
+        for case in cases:
+            with self.subTest(case=case):
+                result = estimate_live_goal_markets(
+                    country="England", league_name="EPL", data=TEST_DATA, **case
+                )
+                self.assertFalse(result["available"])
+                self.assertIsNotNone(result["reason"])
+                self.assertNotIn("draw_final", result)
+
+    def test_missing_live_stats_do_not_change_baseline_estimate(self):
+        baseline = estimate_live_goal_markets(
+            country="England", league_name="EPL", score_home=0, score_away=0,
+            elapsed_minute=60, data=TEST_DATA
+        )
+        missing = estimate_live_goal_markets(
+            country="England", league_name="EPL", score_home=0, score_away=0,
+            elapsed_minute=60, data=TEST_DATA,
+            live_stats={"shots_on_total": None, "corners_total": None, "red_cards_total": None}
+        )
+        self.assertEqual(
+            missing["expected_total_goals_remaining"],
+            baseline["expected_total_goals_remaining"],
+        )
+        self.assertFalse(missing["live_stats_used"])
+
     def test_corner_pace_is_descriptive(self):
         self.assertAlmostEqual(corner_pace_per_90(8, 40), 18.0)
         self.assertIsNone(corner_pace_per_90(None, 40))
