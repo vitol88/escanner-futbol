@@ -230,15 +230,26 @@ else:
     corner_results_now = st.session_state.get("corner_scan_results", [])
     current_tips_count = sum(len(item[2]) for item in goal_results_now)
     st.markdown("### Resumen de sesión")
-    metric_cols = st.columns(4)
+    metric_cols = st.columns(5)
     metric_cols[0].metric("Partidos en vivo", len(fixtures))
     metric_cols[1].metric("Ligas activas", len(chosen_leagues))
     metric_cols[2].metric("Tips de goles", current_tips_count)
-    metric_cols[3].metric("Partidos revisados córners", len(corner_results_now))
-    st.caption("Las métricas resumen la última consulta y el último escaneo guardado en esta sesión. El escáner intenta obtener estadísticas en vivo para todos los partidos filtrados y reutiliza las respuestas en caché para reducir llamadas.")
-    st.caption("El escaneo completo consulta estadísticas para los partidos filtrados y reutiliza cada respuesta dentro de la ronda actual.")
+    metric_cols[3].metric("Partidos córners", len(corner_results_now))
+    metric_cols[4].metric("Solicitudes API (sesión)", st.session_state.api_request_count)
+    st.caption(
+        f"Último escaneo: {st.session_state.last_scan_api_calls} solicitudes API y "
+        f"{st.session_state.last_scan_stats_matches} partidos con estadísticas detalladas. "
+        "El contador incluye solicitudes intentadas en esta sesión."
+    )
+    stats_limit = st.slider(
+        "Máximo de partidos a consultar con estadísticas detalladas por escaneo",
+        min_value=5, max_value=50, value=20, step=5,
+        help="Todos los partidos filtrados se evalúan con la información disponible. Este límite controla las consultas adicionales a fixtures/statistics para proteger tu cuota de API."
+    )
+    st.caption("El listado en vivo usa una solicitud. Cada partido al que se consultan estadísticas detalladas puede consumir otra; los demás se evalúan sin ese contexto en vivo.")
     if st.button("⚡ Escanear todos los partidos en vivo", type="primary"):
-        # Force fresh live statistics for this scan; cache is then reused within this run.
+        scan_api_calls_start = st.session_state.api_request_count
+        # Force fresh statistics for this scan; cap detailed-stat calls to protect API quota.
         st.session_state.stats_cache = {}
         st.session_state.goal_scan_results = []
         st.session_state.corner_scan_results = []
@@ -247,7 +258,8 @@ else:
         # actually use the activity context instead of only using a cache from a
         # previous run. One request per fixture; subsequent sections reuse the cache.
         stats_fetch_progress = st.progress(0, text="Cargando estadísticas en vivo para el análisis de goles…")
-        for stats_idx, stats_fixture in enumerate(filtered):
+        stats_fixtures = filtered[:stats_limit]
+        for stats_idx, stats_fixture in enumerate(stats_fixtures):
             stats_fixture_id = (stats_fixture.get("fixture") or {}).get("id")
             if stats_fixture_id is not None:
                 stats_cache_key = str(stats_fixture_id)
@@ -266,8 +278,15 @@ else:
                                 if remaining_id is not None:
                                     st.session_state.stats_cache[str(remaining_id)] = []
                             break
-            stats_fetch_progress.progress((stats_idx + 1) / max(1, len(filtered)))
+            stats_fetch_progress.progress((stats_idx + 1) / max(1, len(stats_fixtures)))
+        # Mark fixtures beyond the configured detail limit as unavailable for this
+        # scan, so the corners pass does not issue hidden extra API requests.
+        for skipped_fixture in filtered[len(stats_fixtures):]:
+            skipped_id = (skipped_fixture.get("fixture") or {}).get("id")
+            if skipped_id is not None:
+                st.session_state.stats_cache[str(skipped_id)] = []
         stats_fetch_progress.empty()
+        st.session_state.last_scan_stats_matches = min(len(stats_fixtures), len(filtered))
 
         progress = st.progress(0)
         for idx, fixture in enumerate(filtered):
@@ -441,6 +460,7 @@ else:
                     "outcome_verified": "",
                 })
         st.session_state.signal_rows = signal_rows
+        st.session_state.last_scan_api_calls = st.session_state.api_request_count - scan_api_calls_start
 
     tab_goals, tab_corners, tab_overview = st.tabs(["⚽ Goles y señales", "🚩 Córners", "📊 Estado y registro"])
 
