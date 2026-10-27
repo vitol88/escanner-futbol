@@ -70,6 +70,36 @@ class ProbabilityModelTests(unittest.TestCase):
         self.assertGreater(result["btts_final"], 0.0)
         self.assertLess(result["btts_final"], 1.0)  # only the away team still needs to score
 
+    def test_goal_targets_are_relative_to_current_total(self):
+        result = estimate_live_goal_markets(
+            country="England", league_name="EPL",
+            score_home=2, score_away=1, elapsed_minute=35, data=TEST_DATA
+        )
+        self.assertTrue(result["available"])
+        self.assertEqual(result["current_total_goals"], 3)
+        self.assertEqual(list(result["over_total_goals"].keys()), ["4", "5", "6"])
+        self.assertEqual(result["over_total_goals"]["5"], poisson_at_least(
+            result["expected_total_goals_remaining"], 2
+        ))
+
+    def test_btts_is_marked_settled_when_both_teams_have_scored(self):
+        result = estimate_live_goal_markets(
+            country="England", league_name="EPL",
+            score_home=2, score_away=1, elapsed_minute=35, data=TEST_DATA
+        )
+        self.assertTrue(result["btts_already_settled"])
+
+    def test_probability_no_more_goals_is_valid(self):
+        result = estimate_live_goal_markets(
+            country="England", league_name="EPL",
+            score_home=2, score_away=1, elapsed_minute=35, data=TEST_DATA
+        )
+        self.assertTrue(0.0 <= result["probability_no_more_goals"] <= 1.0)
+        self.assertAlmostEqual(
+            result["probability_no_more_goals"],
+            poisson_pmf(result["expected_total_goals_remaining"], 0),
+        )
+
     def test_corner_pace_is_descriptive(self):
         self.assertAlmostEqual(corner_pace_per_90(8, 40), 18.0)
         self.assertIsNone(corner_pace_per_90(None, 40))

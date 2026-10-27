@@ -103,10 +103,12 @@ def estimate_live_goal_markets(
     total_rate = home_rate + away_rate
     current_total = score_home + score_away
 
+    # Evaluate only future total-goal targets, relative to the current score.
+    # This prevents already-won markets from being shown as new live opportunities.
     over = {}
-    for line, target in ((0.5, 1), (1.5, 2), (2.5, 3), (3.5, 4)):
-        need = max(0, target - current_total)
-        over[str(line)] = poisson_at_least(total_rate, need)
+    for additional_goals in (1, 2, 3):
+        final_total_target = current_total + additional_goals
+        over[str(final_total_target)] = poisson_at_least(total_rate, additional_goals)
 
     draw_probability = 0.0
     # Independent Poisson approximation for future goals; truncate where tail mass is negligible.
@@ -134,9 +136,12 @@ def estimate_live_goal_markets(
         "expected_home_goals_remaining": home_rate,
         "expected_away_goals_remaining": away_rate,
         "expected_total_goals_remaining": total_rate,
+        "probability_no_more_goals": poisson_pmf(total_rate, 0),
+        "current_total_goals": current_total,
         "over_total_goals": over,
         "draw_final": draw_probability,
         "btts_final": btts_probability,
+        "btts_already_settled": score_home > 0 and score_away > 0,
         "model_label": "Exploratorio por promedio de liga; no calibrado ni validado para apuestas",
     })
     return result
