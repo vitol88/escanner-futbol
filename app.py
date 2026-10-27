@@ -79,6 +79,18 @@ st.markdown("""
   .team-badge { width:25px; height:25px; object-fit:contain; flex:0 0 25px; }
   .team-badge-fallback { width:25px; height:25px; display:inline-flex; align-items:center; justify-content:center; flex:0 0 25px; background:#242014; border-radius:50%; }
   .live-match-score { white-space:nowrap; background:#0B0D10; border:1px solid #393326; border-radius:8px; padding:5px 8px; color:#FACC15; font-weight:900; font-size:1rem; }
+  .fixture-hero { background:linear-gradient(135deg,#171B21,#0D1014); border:1px solid #393326; border-radius:14px; padding:12px 13px; margin:.55rem 0 .8rem; box-shadow:0 5px 16px rgba(0,0,0,.18); }
+  .fixture-hero-top { display:flex; justify-content:space-between; align-items:center; gap:8px; color:#A1A1AA; font-size:.72rem; margin-bottom:12px; }
+  .fixture-clock { display:inline-flex; align-items:center; gap:5px; padding:4px 8px; border-radius:999px; border:1px solid #51451E; background:#242014; color:#FACC15; font-weight:800; white-space:nowrap; }
+  .fixture-hero-teams { display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); gap:9px; align-items:center; }
+  .fixture-hero-team { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; min-width:0; text-align:center; color:#F4F4F5; font-weight:750; font-size:.82rem; }
+  .fixture-hero-team img { width:38px; height:38px; object-fit:contain; }
+  .fixture-hero-team span { overflow-wrap:anywhere; }
+  .fixture-hero-score { color:#FACC15; background:#080A0D; border:1px solid #3B3525; border-radius:10px; padding:7px 12px; font-size:1.55rem; font-weight:950; white-space:nowrap; letter-spacing:.5px; }
+  .fixture-hero-league { color:#A1A1AA; font-size:.7rem; text-align:center; margin-top:10px; }
+  .fixture-hero-fallback { font-size:30px; line-height:38px; }
+  @media (max-width: 420px) { .fixture-hero-team {font-size:.72rem;} .fixture-hero-team img {width:31px;height:31px;} .fixture-hero-score {font-size:1.25rem;padding:6px 9px;} }
+
   .history-table { width:100%; border-collapse:separate; border-spacing:0; border:1px solid #4A4024; border-radius:12px; overflow:hidden; font-size:.9rem; margin:.5rem 0 1rem; }
   .history-table th { background:#FACC15; color:#151515; text-align:left; padding:.72rem .65rem; font-weight:850; }
   .history-table td { background:#15191F; color:#F4F4F5; padding:.68rem .65rem; border-top:1px solid #34302A; }
@@ -210,6 +222,37 @@ def fixture_card_html(fixture: dict[str, Any]) -> str:
         f'<div class="live-match-score">{home_score} – {away_score}</div>'
         f'<div class="live-match-team away-team">{away_badge}<span>{away_name}</span></div>'
         '</div></div>'
+    )
+
+def fixture_hero_html(fixture: dict[str, Any]) -> str:
+    """Larger team/score/minute header for goal and corner analysis sections."""
+    teams = fixture.get("teams") or {}
+    home = teams.get("home") or {}
+    away = teams.get("away") or {}
+    goals = fixture.get("goals") or {}
+    fixture_data = fixture.get("fixture") or {}
+    status = fixture_data.get("status") or {}
+    league = (fixture.get("league") or {}).get("name") or "Liga"
+    minute = status.get("elapsed")
+    minute_label = f"{minute}′" if minute is not None else str(status.get("short") or "EN VIVO")
+    home_name = html.escape(str(home.get("name") or "Local"))
+    away_name = html.escape(str(away.get("name") or "Visitante"))
+    home_logo = html.escape(str(home.get("logo") or ""), quote=True)
+    away_logo = html.escape(str(away.get("logo") or ""), quote=True)
+    home_score = goals.get("home") if goals.get("home") is not None else "–"
+    away_score = goals.get("away") if goals.get("away") is not None else "–"
+    home_badge = f'<img src="{home_logo}" alt="" onerror="this.style.display=\'none\'">' if home_logo else '<div class="fixture-hero-fallback">⚽</div>'
+    away_badge = f'<img src="{away_logo}" alt="" onerror="this.style.display=\'none\'">' if away_logo else '<div class="fixture-hero-fallback">⚽</div>'
+    return (
+        '<div class="fixture-hero">'
+        f'<div class="fixture-hero-top"><span>⚽ PARTIDO EN ANÁLISIS</span><span class="fixture-clock">◷ {html.escape(minute_label)}</span></div>'
+        '<div class="fixture-hero-teams">'
+        f'<div class="fixture-hero-team">{home_badge}<span>{home_name}</span></div>'
+        f'<div class="fixture-hero-score">{home_score} – {away_score}</div>'
+        f'<div class="fixture-hero-team">{away_badge}<span>{away_name}</span></div>'
+        '</div>'
+        f'<div class="fixture-hero-league">{html.escape(str(league))}</div>'
+        '</div>'
     )
 
 def has_core_stats(stats: list[dict[str, Any]]) -> tuple[bool, list[str]]:
@@ -622,7 +665,8 @@ else:
                 fixture_id = (fixture.get("fixture") or {}).get("id")
                 history = corner_history_by_id.get(fixture_id, {})
                 if history.get("available"):
-                    st.markdown(f"**📊 Promedios de goles · {fixture_label(fixture)}**")
+                    st.markdown(fixture_hero_html(fixture), unsafe_allow_html=True)
+                    st.markdown("**📊 Promedios de goles**")
                     goal_history_rows = [
                         {"Indicador": "Goles a favor del local en casa", "Promedio": history.get("home_goals_for") if history.get("home_goals_for") is not None else "N/D", "Muestra": history.get("home_goal_sample", 0)},
                         {"Indicador": "Goles concedidos por el local en casa", "Promedio": history.get("home_goals_against") if history.get("home_goals_against") is not None else "N/D", "Muestra": history.get("home_goal_sample", 0)},
@@ -643,6 +687,7 @@ else:
                     continue
                 tips_found += len(tips)
                 with st.expander(f"⚽ {fixture_label(fixture)} · {len(tips)} mercados", expanded=False):
+                    st.markdown(fixture_hero_html(fixture), unsafe_allow_html=True)
                     rows = [{"Mercado": name, "Probabilidad exploratoria": round(prob * 100, 1)} for name, prob in sorted(tips, key=lambda pair: pair[1], reverse=True)]
                     st.dataframe(rows, hide_index=True, use_container_width=True)
                     st.caption(f"Referencia de liga: {estimate['baseline_league']} ({estimate['baseline_matches']} partidos). Contexto en vivo: {context['context_status']}.")
@@ -658,7 +703,7 @@ else:
         corner_results = st.session_state.get("corner_scan_results", [])
         if corner_results:
             for item in corner_results:
-                st.markdown(f"**{fixture_label(item['fixture'])}**")
+                st.markdown(fixture_hero_html(item["fixture"]), unsafe_allow_html=True)
                 if item.get("error"):
                     st.caption("Las estadísticas en vivo no están disponibles para este partido.")
                 else:
