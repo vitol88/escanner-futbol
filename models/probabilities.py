@@ -72,6 +72,7 @@ def estimate_live_goal_markets(
     score_away: int | None,
     elapsed_minute: int | None,
     data: dict[str, Any] | None = None,
+    live_stats: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Return provisional remaining-goal, draw, and BTTS probabilities.
 
@@ -100,6 +101,40 @@ def estimate_live_goal_markets(
     remaining_fraction = max(0.0, (90 - minute) / 90.0)
     home_rate = max(0.0, float(baseline["avg_home_goals"]) * remaining_fraction)
     away_rate = max(0.0, float(baseline["avg_away_goals"]) * remaining_fraction)
+    # Conservative live-activity adjustment. It only applies when observed stats are
+    # available; missing stats never become zero and cannot create a false signal.
+    live_stats = live_stats or {}
+    def valid_nonnegative(key: str) -> float | None:
+        value = live_stats.get(key)
+        try:
+            number = float(value)
+        except (TypeError, ValueError):
+            return None
+        return number if math.isfinite(number) and number >= 0 else None
+
+    shots_on = valid_nonnegative("shots_on_total")
+    corners = valid_nonnegative("corners_total")
+    reds = valid_nonnegative("red_cards_total")
+    activity_factor = 1.0
+    activity_components = []
+    if isinstance(elapsed_minute, int) and elapsed_minute >= 15:
+        # Compare observed activity with modest time-based expectations. Clamp the
+        # multiplier so small samples cannot dominate the league baseline.
+        if shots_on is not None:
+            expected_sot = max(0.5, elapsed_minute * 0.065)
+            activity_components.append(min(1.25, max(0.78, 1 + 0.10 * (shots_on - expected_sot) / max(1.0, expected_sot))) )
+        if corners is not None:
+            expected_corners = max(0.5, elapsed_minute * 0.09)
+            activity_components.append(min(1.18, max(0.85, 1 + 0.06 * (corners - expected_corners) / max(1.0, expected_corners))) )
+    if activity_components:
+        activity_factor = sum(activity_components) / len(activity_components)
+        home_rate *= activity_factor
+        away_rate *= activity_factor
+    # A red card can open the match, but its impact is uncertain; use a small
+    # symmetric increase rather than guessing which side will score.
+    if reds is not None and reds > 0:
+        home_rate *= 1.08
+        away_rate *= 1.08
     total_rate = home_rate + away_rate
     current_total = score_home + score_away
 
@@ -153,6 +188,9 @@ def estimate_live_goal_markets(
         "expected_home_goals_remaining": home_rate,
         "expected_away_goals_remaining": away_rate,
         "expected_total_goals_remaining": total_rate,
+        "live_activity_adjustment": round(activity_factor, 3),
+        "live_stats_used": bool(activity_components or (reds is not None and reds > 0)),
+        "live_stats_status": "ajuste moderado por actividad en vivo" if activity_components or (reds is not None and reds > 0) else "sin ajuste: estadísticas insuficientes",
         "probability_no_more_goals": poisson_pmf(total_rate, 0),
         "current_total_goals": current_total,
         "over_total_goals": over,
