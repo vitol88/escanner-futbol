@@ -61,12 +61,19 @@ def build_automatic_history(
     def team_fixtures(team_id: int) -> list[dict[str, Any]]:
         key = f"team-fixtures:{team_id}:{league_id}:{season}"
         if key not in cache:
+            # Cap team-fixture discovery calls for the whole scan; cached teams do not
+            # consume the budget again. This avoids one hidden request per live fixture.
+            if int(cache.get("_automatic_history_team_fixture_calls", 0)) >= 12:
+                cache[key] = []
+                cache["error:" + key] = "Límite de consultas históricas por escaneo alcanzado."
+                return cache[key]
             params = {"team": team_id, "last": 8, "league": league_id, "season": season}
             try:
+                cache["_automatic_history_team_fixture_calls"] = int(cache.get("_automatic_history_team_fixture_calls", 0)) + 1
                 cache[key] = (api_get("fixtures", params).get("response") or [])
             except Exception as exc:
                 cache[key] = []
-                cache[f"error:{key}"] = str(exc)
+                cache["error:" + key] = str(exc)
         return cache[key]
 
     home_fixtures = [f for f in team_fixtures(home["id"]) if (f.get("fixture") or {}).get("status", {}).get("short") in {"FT", "AET", "PEN"}]
