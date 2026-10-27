@@ -238,7 +238,7 @@ else:
     metric_cols[4].metric("Solicitudes API (sesión)", st.session_state.api_request_count)
     st.caption(
         f"Último escaneo: {st.session_state.last_scan_api_calls} solicitudes API y "
-        f"{st.session_state.last_scan_stats_matches} partidos con estadísticas detalladas. "
+        f"{st.session_state.last_scan_stats_matches} consultas de estadísticas intentadas. "
         "El contador incluye solicitudes intentadas en esta sesión."
     )
     stats_limit = st.slider(
