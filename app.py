@@ -930,24 +930,34 @@ else:
                         hist_rate = None
                         if history.get("home_corners_for") is not None and history.get("away_corners_for") is not None:
                             hist_rate = float(history["home_corners_for"]) + float(history["away_corners_for"])
-                        if hist_rate is not None:
-                            projected = 0.5 * hist_rate + 0.5 * (total_now * 90 / max(1, minute))
-                            # 10.4 -> Más de 10.5; round upward to the next half-corner line.
-                            import math
-                            suggested_line = math.ceil(projected * 2) / 2
-                            line_text = str(int(suggested_line)) if suggested_line.is_integer() else f"{suggested_line:.1f}"
-                            st.markdown(
-                                '<div class="signal-card">'
-                                '<div class="signal-kicker">🚩 Tip sugerido · mercado de córners</div>'
-                                '<div class="signal-title">Línea orientativa de córners totales</div>'
-                                f'<div class="signal-pick">Más de {line_text}</div>'
-                                f'<div class="signal-meta">Proyección del modelo: {projected:.1f} córners · En vivo: {total_now} córners al minuto {minute}</div>'
-                                '</div>',
-                                unsafe_allow_html=True,
-                            )
-                            st.caption("Tip orientativo calculado con promedios históricos y ritmo en vivo. No es una apuesta segura ni una probabilidad validada; verifica la línea y la cuota disponibles en tu casa de apuestas.")
+                        # Live-first fallback: if history is unavailable, estimate remaining
+                        # corner pace from the observed match, using shots as a weak context cue.
+                        history_used = hist_rate is not None
+                        if hist_rate is None:
+                            hist_rate = 9.6
+                        live_projection = total_now * 90 / max(1, minute)
+                        projected = (0.55 * hist_rate + 0.45 * live_projection) if history_used else max(total_now, 0.70 * hist_rate + 0.30 * live_projection)
+                        shots_total = (item.get("home_shots") or 0) + (item.get("away_shots") or 0)
+                        if isinstance(shots_total, (int, float)) and shots_total >= 10 and minute >= 20:
+                            projected *= 1.05
+                        # Round projected total to a sensible half-corner line.
+                        import math
+                        suggested_line = max(0.5, math.floor(projected * 2) / 2)
+                        line_text = str(int(suggested_line)) if suggested_line.is_integer() else f"{suggested_line:.1f}"
+                        remaining_expected = max(0.0, projected - total_now)
+                        st.markdown(
+                            '<div class="signal-card">'
+                            '<div class="signal-kicker">🚩 Tip sugerido · mercado de córners</div>'
+                            '<div class="signal-title">Línea orientativa según ritmo del partido</div>'
+                            f'<div class="signal-pick">Más de {line_text} córners totales</div>'
+                            f'<div class="signal-meta">Proyección: {projected:.1f} · Actual: {total_now} · Minuto: {minute} · Restantes estimados: {remaining_expected:.1f}</div>'
+                            '</div>',
+                            unsafe_allow_html=True,
+                        )
+                        if history_used:
+                            st.caption("Tip exploratorio que combina promedios históricos y ritmo en vivo; no es una probabilidad validada.")
                         else:
-                            st.info("Tip de córners no disponible: faltan promedios históricos de ambos equipos para estimar la línea con el método actual. N/D significa dato ausente, no cero.")
+                            st.caption("Tip provisional basado en el ritmo en vivo y una referencia genérica porque falta historial. Confirma la línea y cuota disponibles antes de evaluar una apuesta.")
                         if minute <= 5:
                             st.caption("Partido muy reciente: el ritmo en vivo todavía tiene poca muestra.")
                 st.divider()
