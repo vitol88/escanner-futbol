@@ -366,6 +366,13 @@ else:
         corner_progress = st.progress(0)
         for idx, fixture in enumerate(corner_fixtures):
             fixture_id = (fixture.get("fixture") or {}).get("id")
+            if fixture_id is None:
+                corner_results.append({
+                    "fixture": fixture,
+                    "error": "El partido no tiene un ID de fixture válido; se omite la consulta de estadísticas.",
+                })
+                corner_progress.progress((idx + 1) / max(1, len(corner_fixtures)))
+                continue
             try:
                 cache_key = str(fixture_id)
                 if cache_key not in st.session_state.stats_cache:
