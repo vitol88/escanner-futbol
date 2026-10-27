@@ -358,11 +358,15 @@ else:
                 continue
             tips_found += len(tips)
             st.markdown(f"**{fixture_label(fixture)}**")
-            for market, probability in sorted(tips, key=lambda item: item[1], reverse=True):
-                if probability >= 0.65:
-                    st.success(f"SEÑAL EXPERIMENTAL (≥65%) · {market} · probabilidad exploratoria {probability * 100:.1f}%")
-                else:
-                    st.caption(f"Estimación · {market} · probabilidad exploratoria {probability * 100:.1f}%")
+            market_rows = [
+                {
+                    "Mercado": market,
+                    "Probabilidad exploratoria": f"{probability * 100:.1f}%",
+                    "Filtro experimental": "Supera 65%" if probability >= 0.65 else "No supera 65%",
+                }
+                for market, probability in sorted(tips, key=lambda item: item[1], reverse=True)
+            ]
+            st.dataframe(market_rows, hide_index=True, use_container_width=True)
             st.caption(f"Referencia: {estimate['baseline_league']}, {estimate['baseline_matches']} partidos históricos. Contexto en vivo: {context['context_status']}; córners {context.get('corners_total') if context.get('corners_total') is not None else 'N/D'}, tiros {context.get('shots_total') if context.get('shots_total') is not None else 'N/D'}, a puerta {context.get('shots_on_total') if context.get('shots_on_total') is not None else 'N/D'}, rojas {context.get('red_cards_total') if context.get('red_cards_total') is not None else 'N/D'}. Estos datos filtran disponibilidad, no ajustan aún la probabilidad.")
             st.divider()
         if tips_found == 0:
