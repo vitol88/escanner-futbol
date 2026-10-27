@@ -369,6 +369,11 @@ else:
                     for target, probability in estimate["over_total_goals"].items()
                 ]
                 candidates.append(("No habrá más goles", estimate["probability_no_more_goals"]))
+                for line, probability in estimate.get("under_total_goals", {}).items():
+                    # Avoid presenting a line as a live under when the current score
+                    # has already exceeded that line.
+                    if estimate["current_total_goals"] <= int(float(line)):
+                        candidates.append((f"Menos de {line} goles totales", probability))
 
                 # Team-specific goal markets: e.g. local/visitor to finish with 2+ goals.
                 home_name = ((fixture.get("teams") or {}).get("home") or {}).get("name", "Local")
@@ -394,9 +399,9 @@ else:
                     else:
                         btts_label = f"Ambos equipos marcan (falta que marque {away_name})"
                     candidates.append((btts_label, estimate["btts_final"]))
-                # Only show candidate markets that pass the experimental screening threshold.
-                # Otherwise the match is omitted from the opportunity list.
-                tips = [(name, probability) for name, probability in candidates if probability >= 0.65]
+                # Slightly wider screening to surface more candidate markets without forcing a tip.
+                # These are model probabilities, not validated betting edges.
+                tips = [(name, probability) for name, probability in candidates if probability >= 0.60]
             st.session_state.goal_scan_results.append((fixture, estimate, tips))
             progress.progress((idx + 1) / max(1, len(filtered)))
         corner_results = []
@@ -557,7 +562,7 @@ else:
         goal_results = st.session_state.get("goal_scan_results", [])
         if goal_results:
             st.subheader("Tips preliminares del escáner")
-            st.caption("Probabilidades exploratorias; no están calibradas ni garantizan resultados.")
+            st.caption("Probabilidades exploratorias; se muestran candidatos desde el 60 %, pero no están calibradas ni garantizan resultados.")
             # Show the automatic home/away goal averages alongside goal-market analysis.
             corner_history_by_id = {
                 (item.get("fixture", {}).get("fixture") or {}).get("id"): item.get("automatic_history") or {}
