@@ -67,7 +67,8 @@ class ProbabilityModelTests(unittest.TestCase):
         self.assertTrue(result["available"])
         values = list(result["over_total_goals"].values()) + [result["draw_final"], result["btts_final"]]
         self.assertTrue(all(0.0 <= p <= 1.0 for p in values))
-        self.assertEqual(result["btts_final"], 1.0 if 1 == 1 and 0 == 0 else 0.0)  # only home has scored: away must score
+        self.assertGreater(result["btts_final"], 0.0)
+        self.assertLess(result["btts_final"], 1.0)  # only the away team still needs to score
 
     def test_corner_pace_is_descriptive(self):
         self.assertAlmostEqual(corner_pace_per_90(8, 40), 18.0)
