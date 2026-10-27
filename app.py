@@ -361,7 +361,13 @@ else:
             else:
                 st.caption(f"Córners: local {item['home_corners']} · visitante {item['away_corners']} · total {item['home_corners'] + item['away_corners']}.")
                 if item.get("pace") is not None:
-                    st.caption(f"Ritmo de córners extrapolado: {item['pace']:.1f}/90 min (descriptivo, no predicción).")
+                    st.caption(f"Ritmo de córners extrapolado: {item['pace']:.1f}/90 min (indicador descriptivo, no probabilidad validada).")
+                    elapsed_now = ((item.get("fixture") or {}).get("fixture") or {}).get("status") or {}
+                    minute_now = elapsed_now.get("elapsed")
+                    total_corners_now = item["home_corners"] + item["away_corners"]
+                    total_shots_now = (item.get("home_shots") or 0) + (item.get("away_shots") or 0)
+                    if isinstance(minute_now, int) and 15 <= minute_now <= 78 and total_corners_now >= 5 and item["pace"] >= 10 and total_shots_now >= 8:
+                        st.warning("CANDIDATO EXPERIMENTAL · ritmo de córners elevado y actividad de tiros. Revisar mercados de córners restantes y cuota disponible; no es una probabilidad validada ni una apuesta automática.")
                 st.caption(f"Tiros totales: local {item.get('home_shots')} · visitante {item.get('away_shots')} | a puerta: local {item.get('home_shots_on')} · visitante {item.get('away_shots_on')}.")
                 st.caption(f"Posesión: local {item.get('home_possession') or 'N/D'} · visitante {item.get('away_possession') or 'N/D'}.")
                 st.caption(f"Tarjetas amarillas: local {item.get('home_yellow') if item.get('home_yellow') is not None else 'N/D'} · visitante {item.get('away_yellow') if item.get('away_yellow') is not None else 'N/D'} | rojas: local {item.get('home_red') if item.get('home_red') is not None else 'N/D'} · visitante {item.get('away_red') if item.get('away_red') is not None else 'N/D'}.")
