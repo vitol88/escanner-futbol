@@ -227,42 +227,41 @@ else:
         else:
             st.warning("Datos insuficientes para evaluar córners. Faltan: " + (", ".join(missing) if missing else "estadísticas válidas") + ".")
 
-        if not error:
-            league_data = fixture.get("league") or {}
-            goals_data = fixture.get("goals") or {}
-            elapsed_value = ((fixture.get("fixture") or {}).get("status") or {}).get("elapsed")
-            score_h = goals_data.get("home")
-            score_a = goals_data.get("away")
-            estimate = estimate_live_goal_markets(
-                country=league_data.get("country"),
-                league_name=league_data.get("name"),
-                score_home=score_h if isinstance(score_h, int) else None,
-                score_away=score_a if isinstance(score_a, int) else None,
-                elapsed_minute=elapsed_value if isinstance(elapsed_value, int) else None,
-                data=MODEL_DATA,
+        league_data = fixture.get("league") or {}
+        goals_data = fixture.get("goals") or {}
+        elapsed_value = ((fixture.get("fixture") or {}).get("status") or {}).get("elapsed")
+        score_h = goals_data.get("home")
+        score_a = goals_data.get("away")
+        estimate = estimate_live_goal_markets(
+            country=league_data.get("country"),
+            league_name=league_data.get("name"),
+            score_home=score_h if isinstance(score_h, int) else None,
+            score_away=score_a if isinstance(score_a, int) else None,
+            elapsed_minute=elapsed_value if isinstance(elapsed_value, int) else None,
+            data=MODEL_DATA,
+        )
+        st.markdown("**Mercados de goles · estimación exploratoria**")
+        if estimate.get("available"):
+            st.caption(
+                f"Referencia histórica: {estimate['baseline_league']} · "
+                f"{estimate['baseline_matches']} partidos · minuto {estimate['minute_used']}. "
+                f"Modelo provisional por promedio de liga; no calibrado ni validado para apuestas."
             )
-            st.markdown("**Mercados de goles · estimación exploratoria**")
-            if estimate.get("available"):
-                st.caption(
-                    f"Referencia histórica: {estimate['baseline_league']} · "
-                    f"{estimate['baseline_matches']} partidos · minuto {estimate['minute_used']}. "
-                    f"Modelo provisional por promedio de liga; no calibrado ni validado para apuestas."
-                )
-                g1, g2 = st.columns(2)
-                g1.metric("Más de 0.5 goles finales", f"{estimate['over_total_goals']['0.5'] * 100:.1f}%")
-                g2.metric("Más de 1.5 goles finales", f"{estimate['over_total_goals']['1.5'] * 100:.1f}%")
-                g3, g4 = st.columns(2)
-                g3.metric("Más de 2.5 goles finales", f"{estimate['over_total_goals']['2.5'] * 100:.1f}%")
-                g4.metric("Más de 3.5 goles finales", f"{estimate['over_total_goals']['3.5'] * 100:.1f}%")
-                g5, g6 = st.columns(2)
-                g5.metric("Empate final", f"{estimate['draw_final'] * 100:.1f}%")
-                g6.metric("Ambos equipos marcan", f"{estimate['btts_final'] * 100:.1f}%")
-                st.caption(
-                    f"Goles restantes esperados por el modelo: local {estimate['expected_home_goals_remaining']:.2f}, "
-                    f"visitante {estimate['expected_away_goals_remaining']:.2f}."
-                )
-            else:
-                st.caption("Sin probabilidad calculada: " + str(estimate.get("reason") or "faltan datos fiables"))
+            g1, g2 = st.columns(2)
+            g1.metric("Más de 0.5 goles finales", f"{estimate['over_total_goals']['0.5'] * 100:.1f}%")
+            g2.metric("Más de 1.5 goles finales", f"{estimate['over_total_goals']['1.5'] * 100:.1f}%")
+            g3, g4 = st.columns(2)
+            g3.metric("Más de 2.5 goles finales", f"{estimate['over_total_goals']['2.5'] * 100:.1f}%")
+            g4.metric("Más de 3.5 goles finales", f"{estimate['over_total_goals']['3.5'] * 100:.1f}%")
+            g5, g6 = st.columns(2)
+            g5.metric("Empate final", f"{estimate['draw_final'] * 100:.1f}%")
+            g6.metric("Ambos equipos marcan", f"{estimate['btts_final'] * 100:.1f}%")
+            st.caption(
+                f"Goles restantes esperados por el modelo: local {estimate['expected_home_goals_remaining']:.2f}, "
+                f"visitante {estimate['expected_away_goals_remaining']:.2f}."
+            )
+        else:
+            st.caption("Sin probabilidad calculada: " + str(estimate.get("reason") or "faltan datos fiables"))
 
 st.divider()
 st.subheader("Estado de los mercados")
