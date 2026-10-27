@@ -210,7 +210,20 @@ else:
             st.session_state.goal_scan_results.append((fixture, estimate, tips))
             progress.progress((idx + 1) / max(1, len(filtered)))
         corner_results = []
-        corner_fixtures = filtered[:max_corner_scan]
+        # Prioritize fixtures with preliminary goal candidates; the limit only controls detailed API calls.
+        candidate_ids = {
+            (fixture.get("fixture") or {}).get("id")
+            for fixture, estimate, tips in st.session_state.goal_scan_results
+            if estimate.get("available") and tips
+        }
+        prioritized = sorted(
+            filtered,
+            key=lambda item: (
+                (item.get("fixture") or {}).get("id") not in candidate_ids,
+                -int((((item.get("fixture") or {}).get("status") or {}).get("elapsed")) or 0),
+            ),
+        )
+        corner_fixtures = prioritized[:max_corner_scan]
         corner_progress = st.progress(0)
         for idx, fixture in enumerate(corner_fixtures):
             fixture_id = (fixture.get("fixture") or {}).get("id")
@@ -268,16 +281,21 @@ else:
             elapsed = ((item.get("fixture", {}).get("fixture") or {}).get("status") or {}).get("elapsed")
             context_by_fixture[fixture_id] = summarize_live_context(cached_stats, elapsed)
 
-        # Only keep signals for games with core live stats available. We do not adjust probabilities
-        # from corners/cards/possession until historical validation demonstrates predictive value.
+        # Missing detailed stats must not erase candidates from the global scan.
         filtered_goal_results = []
         for fixture, estimate, tips in st.session_state.goal_scan_results:
-            fixture_id = ((fixture.get("fixture") or {}).get("id"))
-            context = context_by_fixture.get(fixture_id)
             if not tips:
                 continue
-            if context is None or not context.get("core_complete"):
-                continue
+            fixture_id = ((fixture.get("fixture") or {}).get("id"))
+            context = context_by_fixture.get(fixture_id)
+            if context is None:
+                context = {
+                    "context_status": "pendiente de estadísticas detalladas",
+                    "corners_total": None, "shots_total": None,
+                    "shots_on_total": None, "red_cards_total": None,
+                    "core_complete": False,
+                    "elapsed": ((fixture.get("fixture") or {}).get("status") or {}).get("elapsed"),
+                }
             filtered_goal_results.append((fixture, estimate, tips, context))
         st.session_state.goal_scan_results = filtered_goal_results
 
@@ -309,7 +327,7 @@ else:
     goal_results = st.session_state.get("goal_scan_results", [])
     if goal_results:
         st.subheader("Tips preliminares del escáner")
-        st.caption("Se evalúan objetivos de goles adicionales desde el marcador actual (por ejemplo, con 8 goles, objetivo de 9+). Solo se muestran oportunidades que superan el filtro experimental del 65%; si ninguna lo supera, se omite el partido. Sin cuotas reales no se calcula valor esperado y no son apuestas validadas.")
+        st.caption("Se evalúan todos los partidos filtrados con marcador y minuto disponibles. Las estadísticas detalladas se consultan en una muestra priorizada para respetar el plan gratuito; la falta de esas estadísticas no elimina una señal preliminar. El umbral del 65% es experimental y no está validado.")
         tips_found = 0
         for fixture, estimate, tips, context in goal_results:
             if not estimate.get("available"):
@@ -327,13 +345,13 @@ else:
             st.divider()
         if tips_found == 0:
             st.info("No hay oportunidades preliminares para mostrar en esta ronda; se omiten los partidos sin una estimación útil.")
-        unavailable = sum(1 for _, estimate, _ in goal_results if not estimate.get("available"))
+        unavailable = sum(1 for item in goal_results if not item[1].get("available"))
         st.caption(f"Partidos evaluados: {len(goal_results)} · sin referencia suficiente para estimar: {unavailable}.")
 
     corner_results = st.session_state.get("corner_scan_results", [])
     if corner_results:
         st.subheader("Córners · revisión en vivo")
-        st.caption("Se consulta una muestra limitada para controlar llamadas a la API. Solo se muestran señales de partidos con córners y tiros completos; las estadísticas contextuales no alteran probabilidades hasta validarlas históricamente.")
+        st.caption("Se consulta una muestra priorizada para controlar llamadas a la API. La muestra no limita la búsqueda global de señales de goles; los datos incompletos se muestran como no disponibles, nunca como cero.")
         for item in corner_results:
             st.markdown(f"**{fixture_label(item['fixture'])}**")
             if item.get("error"):
