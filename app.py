@@ -460,6 +460,8 @@ else:
         # statistics calls per scan so this does not silently consume the whole API quota.
         history_calls_before = st.session_state.api_request_count
         history_cache = st.session_state.setdefault("automatic_history_cache", {})
+        history_cache["_automatic_history_stats_calls"] = 0
+        history_cache["_automatic_history_team_fixture_calls"] = 0
         for corner_item in corner_results:
             if corner_item.get("error"):
                 continue
