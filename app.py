@@ -609,7 +609,7 @@ else:
     with tab_overview:
         st.subheader("Estado de los mercados")
         market_status = [
-            ("Córners", "Se muestran córners observados y proyecciones exploratorias; falta historial fiable por liga/equipo para calibrarlas."),
+            ("Córners", "Consulta automática de promedios recientes local/visitante y combinación exploratoria con el ritmo en vivo; pendiente de validación."),
             ("Goles", "Probabilidades exploratorias basadas en medias históricas de liga; aún no calibradas."),
             ("Empate", "Estimación exploratoria con un modelo Poisson simplificado; requiere validación retrospectiva."),
             ("Ambos equipos marcan", "Estimación condicionada al marcador y a los goles restantes; requiere validación retrospectiva."),
