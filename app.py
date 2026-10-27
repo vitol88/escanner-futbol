@@ -73,11 +73,21 @@ def api_get(endpoint: str, params: dict[str, Any] | None = None) -> dict[str, An
         raise RuntimeError(f"API-Football reportó un error: {payload['errors']}")
     return payload
 
-def safe_stat(stats: list[dict[str, Any]], stat_name: str):
-    for team_stats in stats or []:
-        for item in team_stats.get("statistics") or []:
-            if item.get("type") == stat_name:
-                return item.get("value")
+def safe_stat(
+    stats: list[dict[str, Any]],
+    stat_name: str,
+    team_index: int = 0,
+):
+    """Return a statistic for one team only (0=home, 1=away).
+
+    Never search other teams as a fallback: missing data must remain missing.
+    """
+    if team_index < 0 or team_index >= len(stats or []):
+        return None
+    team_stats = (stats or [])[team_index]
+    for item in team_stats.get("statistics") or []:
+        if item.get("type") == stat_name:
+            return item.get("value")
     return None
 
 def fixture_label(fixture: dict[str, Any]) -> str:
@@ -93,20 +103,12 @@ def fixture_label(fixture: dict[str, Any]) -> str:
     return f"{home} {score} {away} · {minute_text} · {league}"
 
 def has_core_stats(stats: list[dict[str, Any]]) -> tuple[bool, list[str]]:
-    home_corners = safe_stat(stats, "Corner Kicks")
-    away_corners = None
-    if len(stats or []) > 1:
-        for item in (stats[1].get("statistics") or []):
-            if item.get("type") == "Corner Kicks":
-                away_corners = item.get("value")
-                break
-    home_shots = safe_stat(stats, "Total Shots")
-    away_shots = None
-    if len(stats or []) > 1:
-        for item in (stats[1].get("statistics") or []):
-            if item.get("type") == "Total Shots":
-                away_shots = item.get("value")
-                break
+    # API-Football returns one statistics object per team, home first and away second.
+    # Read each team explicitly so one team's values can never fill the other's gap.
+    home_corners = safe_stat(stats, "Corner Kicks", team_index=0)
+    away_corners = safe_stat(stats, "Corner Kicks", team_index=1)
+    home_shots = safe_stat(stats, "Total Shots", team_index=0)
+    away_shots = safe_stat(stats, "Total Shots", team_index=1)
     missing = []
     if home_corners is None or away_corners is None:
         missing.append("córners")
