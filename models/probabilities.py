@@ -136,6 +136,7 @@ def estimate_live_goal_markets(
         "expected_home_goals_remaining": home_rate,
         "expected_away_goals_remaining": away_rate,
         "expected_total_goals_remaining": total_rate,
+        "probability_no_more_goals": poisson_pmf(total_rate, 0),
         "current_total_goals": current_total,
         "over_total_goals": over,
         "draw_final": draw_probability,
