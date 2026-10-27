@@ -259,12 +259,14 @@ else:
         # previous run. One request per fixture; subsequent sections reuse the cache.
         stats_fetch_progress = st.progress(0, text="Cargando estadísticas en vivo para el análisis de goles…")
         stats_fixtures = filtered[:stats_limit]
+        stats_queries_attempted = 0
         for stats_idx, stats_fixture in enumerate(stats_fixtures):
             stats_fixture_id = (stats_fixture.get("fixture") or {}).get("id")
             if stats_fixture_id is not None:
                 stats_cache_key = str(stats_fixture_id)
                 if stats_cache_key not in st.session_state.stats_cache:
                     try:
+                        stats_queries_attempted += 1
                         stats_payload = api_get("fixtures/statistics", {"fixture": stats_fixture_id})
                         st.session_state.stats_cache[stats_cache_key] = stats_payload.get("response", [])
                     except Exception as stats_exc:
@@ -286,7 +288,7 @@ else:
             if skipped_id is not None:
                 st.session_state.stats_cache[str(skipped_id)] = []
         stats_fetch_progress.empty()
-        st.session_state.last_scan_stats_matches = min(len(stats_fixtures), len(filtered))
+        st.session_state.last_scan_stats_matches = stats_queries_attempted
 
         progress = st.progress(0)
         for idx, fixture in enumerate(filtered):
