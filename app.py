@@ -9,8 +9,6 @@ import streamlit as st
 
 from models.live_context import qualifies_as_corner_candidate, summarize_live_context
 from models.backtest import evaluate_binary_predictions
-from models.late_goal_history import estimate_late_goals_from_history
-from models.corner_history import estimate_remaining_corners
 from models.automatic_history import build_automatic_history
 from models.probabilities import (
     corner_pace_per_90,
@@ -540,302 +538,72 @@ else:
     tab_goals, tab_corners, tab_overview = st.tabs(["⚽ Goles y señales", "🚩 Córners", "📊 Estado y registro"])
 
     with tab_goals:
-        st.markdown("### Historial de goles en los minutos finales")
-        st.caption("Carga un CSV de partidos históricos por equipo y minuto de corte. El escáner comparará liga, equipo, minuto y, si hay muestra suficiente, marcador al corte. No inventa tasas si faltan datos.")
-        late_history_file = st.file_uploader(
-            "CSV histórico de goles después del minuto de corte",
-            type=["csv"],
-            key="late_goal_history_csv",
-            help="Columnas: league, team, minute, score_for, score_against, goals_for_after, goals_against_after."
-        )
-        if late_history_file is not None:
-            try:
-                late_history_rows = list(csv.DictReader(io.StringIO(late_history_file.getvalue().decode("utf-8-sig"))))
-                required_late_columns = {"league", "team", "minute", "score_for", "score_against", "goals_for_after", "goals_against_after"}
-                if late_history_rows and required_late_columns.issubset(set(late_history_rows[0].keys())):
-                    st.session_state["late_goal_history_rows"] = late_history_rows
-                    st.success(f"Historial cargado: {len(late_history_rows)} filas de equipo-partido.")
-                else:
-                    st.error("El CSV no tiene todas las columnas requeridas. Revisa el formato indicado.")
-            except (UnicodeDecodeError, csv.Error) as history_exc:
-                st.error(f"No se pudo leer el CSV histórico: {history_exc}")
-        late_history_rows = st.session_state.get("late_goal_history_rows", [])
-        if not late_history_rows:
-            st.info("La estimación histórica de minutos finales estará disponible cuando cargues un CSV con minutos reales de gol. La base actual de resultados finales no contiene ese detalle.")
+        st.markdown("### Señales automáticas de goles")
+        st.caption("El escáner combina las referencias disponibles de liga y el contexto en vivo. El historial reciente se consulta automáticamente durante el escaneo; no necesitas cargar archivos históricos.")
         goal_results = st.session_state.get("goal_scan_results", [])
         if goal_results:
             st.subheader("Tips preliminares del escáner")
-            st.caption("Abre cada partido para comparar sus mercados. Las probabilidades son exploratorias y el filtro del 65% todavía no está validado.")
+            st.caption("Probabilidades exploratorias; no están calibradas ni garantizan resultados.")
             search_matches = st.text_input("🔎 Buscar equipo o liga", placeholder="Ej. Roma, Premier League…", key="search_goal_matches").strip().casefold()
             tips_found = 0
             for fixture, estimate, tips, context in goal_results:
-                if not estimate.get("available"):
+                if not estimate.get("available") or not tips:
                     continue
-                if not tips:
-                    continue
-                searchable = f"{fixture_label(fixture)} {((fixture.get('teams') or {}).get('home') or {}).get('name', '')} {((fixture.get('teams') or {}).get('away') or {}).get('name', '')}".casefold()
-                if search_matches and search_matches not in searchable:
+                if search_matches and search_matches not in fixture_label(fixture).casefold():
                     continue
                 tips_found += len(tips)
                 with st.expander(f"⚽ {fixture_label(fixture)} · {len(tips)} mercados", expanded=False):
-                    market_rows = [
-                        {
-                            "Mercado": market,
-                            "Probabilidad exploratoria": round(probability * 100, 1),
-                            "Filtro experimental": "Supera 65%" if probability >= 0.65 else "No supera 65%",
-                        }
-                        for market, probability in sorted(tips, key=lambda item: item[1], reverse=True)
-                    ]
-                    st.dataframe(
-                        market_rows,
-                        hide_index=True,
-                        use_container_width=True,
-                        column_config={
-                            "Probabilidad exploratoria": st.column_config.ProgressColumn(
-                                "Probabilidad exploratoria",
-                                help="Estimación experimental; no equivale a una garantía de acierto.",
-                                format="%.1f%%",
-                                min_value=0,
-                                max_value=100,
-                            )
-                        },
-                    )
-                    st.caption(f"Referencia histórica: {estimate['baseline_league']} ({estimate['baseline_matches']} partidos). Contexto en vivo: {context['context_status']}; córners {context.get('corners_total') if context.get('corners_total') is not None else 'N/D'}, tiros {context.get('shots_total') if context.get('shots_total') is not None else 'N/D'}, a puerta {context.get('shots_on_total') if context.get('shots_on_total') is not None else 'N/D'}, rojas {context.get('red_cards_total') if context.get('red_cards_total') is not None else 'N/D'}.")
-                    st.caption(f"Ajustes exploratorios: ritmo del marcador ×{estimate.get('score_pace_adjustment', 1.0):.3f} · goles entre escaneos ×{estimate.get('recent_goal_adjustment', 1.0):.3f} ({estimate.get('recent_goals_observed', 0)} detectados) · actividad en vivo ×{estimate.get('live_activity_adjustment', 1.0):.3f}. No están calibrados ni validados retrospectivamente.")
-                    if estimate.get("compatibility_fallback"):
-                        st.warning("Esta ejecución está usando compatibilidad temporal porque el módulo de probabilidades cargado no acepta aún los parámetros nuevos. Reinicia la aplicación para cargar la versión completa.")
-                    st.info("Importante: «Empate final» y «No habrá más goles» son mercados distintos. Un 2-2 no significa que el partido vaya a terminar empatado; goles recientes y actividad alta pueden anticipar más acción. Estas estimaciones no son certezas.")
-                    if late_history_rows:
-                        league_name_history = ((fixture.get("league") or {}).get("name") or "")
-                        score_h_history = ((fixture.get("goals") or {}).get("home"))
-                        score_a_history = ((fixture.get("goals") or {}).get("away"))
-                        minute_history = ((fixture.get("fixture") or {}).get("status") or {}).get("elapsed")
-                        teams_history = fixture.get("teams") or {}
-                        if isinstance(score_h_history, int) and isinstance(score_a_history, int) and isinstance(minute_history, int):
-                            late_rows_ui = []
-                            for side, team_score, opponent_score in (
-                                ("home", score_h_history, score_a_history),
-                                ("away", score_a_history, score_h_history),
-                            ):
-                                team_name_history = ((teams_history.get(side) or {}).get("name") or "")
-                                historical_estimate = estimate_late_goals_from_history(
-                                    late_history_rows,
-                                    league=league_name_history,
-                                    team=team_name_history,
-                                    minute=minute_history,
-                                    score_for=team_score,
-                                    score_against=opponent_score,
-                                )
-                                if historical_estimate.get("available"):
-                                    late_rows_ui.append({
-                                        "Equipo": team_name_history,
-                                        "Muestra": historical_estimate["sample_size"],
-                                        "Marcador exacto": "Sí" if historical_estimate.get("matched_exact_score") else "No; muestra general",
-                                        "Prob. ≥1 gol más": round(historical_estimate["prob_at_least_1_goal"] * 100, 1),
-                                        "Prob. ≥2 goles más": round(historical_estimate["prob_at_least_2_goals"] * 100, 1),
-                                        "Media goles restantes": round(historical_estimate["mean_goals_after"], 2),
-                                    })
-                                else:
-                                    late_rows_ui.append({
-                                        "Equipo": team_name_history,
-                                        "Muestra": historical_estimate.get("sample_size", 0),
-                                        "Marcador exacto": "Muestra insuficiente",
-                                        "Prob. ≥1 gol más": "N/D",
-                                        "Prob. ≥2 goles más": "N/D",
-                                        "Media goles restantes": "N/D",
-                                    })
-                            st.markdown("**Frecuencia histórica desde este minuto**")
-                            st.dataframe(late_rows_ui, hide_index=True, use_container_width=True)
-                            st.caption("Frecuencias empíricas de los partidos cargados, no probabilidades calibradas. Si el marcador exacto no tiene al menos 8 casos, se usa el historial del equipo en esa liga y minuto; la muestra se muestra para valorar la fiabilidad.")
+                    rows = [{"Mercado": name, "Probabilidad exploratoria": round(prob * 100, 1)} for name, prob in sorted(tips, key=lambda pair: pair[1], reverse=True)]
+                    st.dataframe(rows, hide_index=True, use_container_width=True)
+                    st.caption(f"Referencia de liga: {estimate['baseline_league']} ({estimate['baseline_matches']} partidos). Contexto en vivo: {context['context_status']}.")
+                    st.caption("Modelo exploratorio; requiere validación retrospectiva antes de tratarlo como señal fiable.")
             if tips_found == 0:
-                st.info("No hay oportunidades preliminares para mostrar en esta ronda; se omiten los partidos sin una estimación útil.")
-            unavailable_items = [item for item in goal_results if not item[1].get("available")]
-            unavailable = len(unavailable_items)
-            no_tip_count = sum(1 for item in goal_results if item[1].get("available") and not item[2])
-            if unavailable_items:
-                reason_counts = {}
-                for item in unavailable_items:
-                    reason = item[1].get("reason") or "Motivo no especificado"
-                    reason_counts[reason] = reason_counts.get(reason, 0) + 1
-                with st.expander(f"📊 Resumen de causas de estimaciones no disponibles ({unavailable})"):
-                    st.dataframe(
-                        [{"Causa": reason, "Partidos": count} for reason, count in sorted(reason_counts.items(), key=lambda pair: pair[1], reverse=True)],
-                        hide_index=True,
-                        use_container_width=True,
-                    )
-            if no_tip_count:
-                st.caption(
-                    f"{no_tip_count} partidos sí tuvieron estimación, pero ningún mercado superó el 65%; "
-                    "esto es diferente de datos incompletos o de una liga sin referencia histórica."
-                )
-            st.caption(
-                f"Partidos evaluados: {len(goal_results)} · sin estimación disponible: {unavailable} "
-                f"· con estimación pero sin mercados que superen el filtro: {no_tip_count}."
-            )
-            if unavailable_items:
-                with st.expander(f"ℹ️ ¿Por qué no se estiman {unavailable} partidos?"):
-                    unavailable_rows = [
-                        {
-                            "Partido": fixture_label(item[0]),
-                            "Motivo": item[1].get("reason") or "Motivo no especificado",
-                        }
-                        for item in unavailable_items
-                    ]
-                    st.dataframe(
-                        unavailable_rows,
-                        hide_index=True,
-                        use_container_width=True,
-                    )
-                    st.caption(
-                        "Estos partidos no se convierten en tips: falta una referencia histórica compatible, "
-                        "la muestra de esa liga es pequeña o faltan datos básicos del encuentro."
-                    )
-    
-    
+                st.info("No hay oportunidades que superen el filtro en esta ronda.")
+        else:
+            st.info("Pulsa «Escanear todos los partidos en vivo» para calcular las señales.")
+
     with tab_corners:
-        st.markdown("### Historial de córners desde el minuto de corte")
-        st.caption("Carga datos históricos con córners al minuto exacto y córners que ocurrieron después. La API suele exponer estadísticas finales por partido; no se deben inventar córners por minuto si no hay eventos temporales disponibles.")
-        corner_history_file = st.file_uploader(
-            "CSV histórico de córners por equipo, sede y minuto",
-            type=["csv"],
-            key="corner_history_csv",
-            help="Columnas: league, team, venue, minute, corners_for, corners_against, corners_for_after, corners_against_after. venue debe ser home o away."
-        )
-        if corner_history_file is not None:
-            try:
-                uploaded_corner_rows = list(csv.DictReader(io.StringIO(corner_history_file.getvalue().decode("utf-8-sig"))))
-                required_corner_columns = {"league", "team", "venue", "minute", "corners_for", "corners_against", "corners_for_after", "corners_against_after"}
-                if uploaded_corner_rows and required_corner_columns.issubset(set(uploaded_corner_rows[0].keys())):
-                    st.session_state["corner_history_rows"] = uploaded_corner_rows
-                    st.success(f"Historial de córners cargado: {len(uploaded_corner_rows)} filas de equipo-partido.")
-                else:
-                    st.error("El CSV de córners no tiene todas las columnas requeridas. Revisa el formato indicado.")
-            except (UnicodeDecodeError, csv.Error) as corner_history_exc:
-                st.error(f"No se pudo leer el CSV de córners: {corner_history_exc}")
-        corner_history_rows = st.session_state.get("corner_history_rows", [])
-        if not corner_history_rows:
-            st.info("El módulo histórico de córners queda preparado para comparar minuto, sede y estado de córners cuando se cargue una base con eventos por minuto. Las estadísticas finales no permiten deducir con fiabilidad cuántos córners habían ocurrido en el minuto 70.")
+        st.markdown("### Córners · historial automático y ritmo en vivo")
+        st.caption("El bot consulta partidos anteriores por API, distingue local/visitante y cachea los resultados. No tienes que subir CSV.")
         corner_results = st.session_state.get("corner_scan_results", [])
         if corner_results:
-            st.subheader("Córners · revisión en vivo")
-            st.caption("Se consulta una muestra priorizada para controlar llamadas a la API. La muestra no limita la búsqueda global de señales de goles; los datos incompletos se muestran como no disponibles, nunca como cero.")
             for item in corner_results:
                 st.markdown(f"**{fixture_label(item['fixture'])}**")
                 if item.get("error"):
-                    st.caption("Estadísticas de córners no disponibles en la API para este partido.")
-                elif item.get("home_corners") is None or item.get("away_corners") is None:
-                    st.caption("Sin córners completos para este partido; no se interpreta el dato ausente como cero.")
+                    st.caption("Las estadísticas en vivo no están disponibles para este partido.")
                 else:
-                    st.caption(f"Córners: local {item['home_corners']} · visitante {item['away_corners']} · total {item['home_corners'] + item['away_corners']}.")
-                    if item.get("pace") is not None:
-                        st.caption(f"Ritmo de córners extrapolado: {item['pace']:.1f}/90 min (indicador descriptivo, no probabilidad validada).")
-                        elapsed_now = ((item.get("fixture") or {}).get("fixture") or {}).get("status") or {}
-                        minute_now = elapsed_now.get("elapsed")
-                        total_corners_now = item["home_corners"] + item["away_corners"]
-                        if isinstance(minute_now, int) and minute_now >= 10:
-                            projected_additional = item["pace"] * max(0, 90 - min(minute_now, 90)) / 90
-                            projected_final = total_corners_now + projected_additional
-                            st.info(
-                                f"Proyección orientativa si continúa el ritmo actual: "
-                                f"{projected_final:.1f} córners totales al final; "
-                                f"aprox. {projected_additional:.1f} córners adicionales. "
-                                "No usa todavía promedios históricos de córners por liga/equipo."
-                            )
-                            if minute_now <= 20 or total_corners_now <= 2:
-                                st.caption(
-                                    "Confianza muy baja: hay pocos minutos y/o córners observados. "
-                                    "Es una extrapolación lineal, no un tip confirmado."
-                                )
-                        # Exploratory corner-market probabilities from a Poisson model whose
-                        # remaining-corner rate is the observed live pace. This is not calibrated
-                        # and must be labelled low-confidence early in the match.
-                        if isinstance(minute_now, int) and minute_now < 90:
-                            remaining_corner_rate = max(0.0, item["pace"] * (90 - min(minute_now, 90)) / 90)
-                            corner_market_rows = []
-                            for line in (6.5, 7.5, 8.5, 9.5, 10.5, 11.5):
-                                target_total = int(line) + 1
-                                if total_corners_now >= target_total:
-                                    corner_market_rows.append({
-                                        "Mercado": f"Más de {line:.1f} córners",
-                                        "Prob. exploratoria": "Ya superado",
-                                        "Estado": "No es una oportunidad futura",
-                                    })
-                                else:
-                                    corners_needed = target_total - total_corners_now
-                                    probability = poisson_at_least(remaining_corner_rate, corners_needed)
-                                    corner_market_rows.append({
-                                        "Mercado": f"Más de {line:.1f} córners",
-                                        "Prob. exploratoria": round(probability * 100, 1),
-                                        "Estado": "Candidato experimental" if probability >= 0.65 else "Por debajo del filtro (65%)",
-                                    })
-                            st.markdown("**Mercados de córners · probabilidad exploratoria**")
-                            st.dataframe(
-                                corner_market_rows,
-                                hide_index=True,
-                                use_container_width=True,
-                                column_config={
-                                    "Prob. exploratoria": st.column_config.ProgressColumn(
-                                        "Prob. exploratoria",
-                                        help="Modelo preliminar basado en el ritmo observado; no está calibrado.",
-                                        format="%.1f%%",
-                                        min_value=0,
-                                        max_value=100,
-                                    )
-                                },
-                            )
-                            if minute_now <= 20 or total_corners_now <= 2:
-                                st.caption(
-                                    "Probabilidades de muy baja confianza: se basan en el ritmo observado y una distribución Poisson simplificada. "
-                                    "Todavía no incorporan promedios históricos fiables por liga/equipo ni están validadas retrospectivamente."
-                                )
-                        if qualifies_as_corner_candidate(
-                            minute=minute_now,
-                            total_corners=total_corners_now,
-                            pace_per_90=item.get("pace"),
-                            home_shots=item.get("home_shots"),
-                            away_shots=item.get("away_shots"),
-                        ):
-                            st.warning("CANDIDATO EXPERIMENTAL · ritmo de córners elevado y actividad de tiros. Revisar mercados de córners restantes y cuota disponible; no es una probabilidad validada ni una apuesta automática.")
-                    if corner_history_rows and isinstance(minute_now, int):
-                        current_corner_history_rows = []
-                        home_team_name = (((item.get("fixture") or {}).get("teams") or {}).get("home") or {}).get("name", "")
-                        away_team_name = (((item.get("fixture") or {}).get("teams") or {}).get("away") or {}).get("name", "")
-                        league_name_corner_history = (((item.get("fixture") or {}).get("league") or {}).get("name") or "")
-                        for side, team_name, team_corners, opp_corners, venue in (
-                            ("home", home_team_name, item.get("home_corners"), item.get("away_corners"), "home"),
-                            ("away", away_team_name, item.get("away_corners"), item.get("home_corners"), "away"),
-                        ):
-                            if isinstance(team_corners, (int, float)) and isinstance(opp_corners, (int, float)):
-                                hist_corner = estimate_remaining_corners(
-                                    corner_history_rows,
-                                    league=league_name_corner_history,
-                                    team=team_name,
-                                    venue=venue,
-                                    minute=minute_now,
-                                    corners_for=int(team_corners),
-                                    corners_against=int(opp_corners),
-                                )
-                                current_corner_history_rows.append({
-                                    "Equipo": team_name,
-                                    "Sede": "Local" if venue == "home" else "Visitante",
-                                    "Muestra": hist_corner.get("sample_size", 0),
-                                    "Estado exacto": "Sí" if hist_corner.get("matched_exact_state") else ("Muestra general" if hist_corner.get("available") else "Insuficiente"),
-                                    "Prob. ≥1 córner más (partido)": round(hist_corner["prob_at_least_1_corner"] * 100, 1) if hist_corner.get("available") else "N/D",
-                                    "Prob. ≥2 córners más (partido)": round(hist_corner["prob_at_least_2_corners"] * 100, 1) if hist_corner.get("available") else "N/D",
-                                    "Prob. equipo consigue ≥1": round(hist_corner["prob_team_gets_corner"] * 100, 1) if hist_corner.get("available") else "N/D",
-                                    "Media córners restantes": round(hist_corner["mean_corners_after"], 2) if hist_corner.get("available") else "N/D",
-                                })
-                        if current_corner_history_rows:
-                            st.markdown("**Frecuencia histórica desde este minuto**")
-                            st.dataframe(current_corner_history_rows, hide_index=True, use_container_width=True)
-                            st.caption("Se prioriza el mismo minuto, equipo, sede y estado de córners si hay al menos 8 casos. Si no, se usa la muestra del equipo y sede en esa liga y minuto. Frecuencias empíricas, no probabilidades calibradas.")
-                    st.caption(f"Tiros totales: local {item.get('home_shots')} · visitante {item.get('away_shots')} | a puerta: local {item.get('home_shots_on')} · visitante {item.get('away_shots_on')}.")
-                    st.caption(f"Posesión: local {item.get('home_possession') or 'N/D'} · visitante {item.get('away_possession') or 'N/D'}.")
-                    st.caption(f"Tarjetas amarillas: local {item.get('home_yellow') if item.get('home_yellow') is not None else 'N/D'} · visitante {item.get('away_yellow') if item.get('away_yellow') is not None else 'N/D'} | rojas: local {item.get('home_red') if item.get('home_red') is not None else 'N/D'} · visitante {item.get('away_red') if item.get('away_red') is not None else 'N/D'}.")
-                    st.caption("Estas estadísticas describen el partido; aún no ajustan automáticamente las probabilidades porque el modelo debe calibrarse antes de usarlas como factores predictivos.")
+                    if item.get("home_corners") is not None and item.get("away_corners") is not None:
+                        st.caption(f"Córners actuales: local {item['home_corners']} · visitante {item['away_corners']} · total {item['home_corners'] + item['away_corners']}.")
+                    history = item.get("automatic_history") or {}
+                    if history.get("available"):
+                        history_rows = [
+                            {"Indicador": "Córners a favor del local en casa", "Promedio": history.get("home_corners_for") if history.get("home_corners_for") is not None else "N/D", "Muestra": history.get("home_corner_sample", 0)},
+                            {"Indicador": "Córners concedidos por el local en casa", "Promedio": history.get("home_corners_against") if history.get("home_corners_against") is not None else "N/D", "Muestra": history.get("home_corner_sample", 0)},
+                            {"Indicador": "Córners a favor del visitante fuera", "Promedio": history.get("away_corners_for") if history.get("away_corners_for") is not None else "N/D", "Muestra": history.get("away_corner_sample", 0)},
+                            {"Indicador": "Córners concedidos por el visitante fuera", "Promedio": history.get("away_corners_against") if history.get("away_corners_against") is not None else "N/D", "Muestra": history.get("away_corner_sample", 0)},
+                            {"Indicador": "Goles a favor del local en casa", "Promedio": history.get("home_goals_for") if history.get("home_goals_for") is not None else "N/D", "Muestra": history.get("home_goal_sample", 0)},
+                            {"Indicador": "Goles a favor del visitante fuera", "Promedio": history.get("away_goals_for") if history.get("away_goals_for") is not None else "N/D", "Muestra": history.get("away_goal_sample", 0)},
+                        ]
+                        st.dataframe(history_rows, hide_index=True, use_container_width=True)
+                        st.caption(history.get("note", "Historial automático de partidos anteriores."))
+                    else:
+                        st.caption(history.get("note", "Historial automático no disponible para este encuentro."))
+                    minute = (((item.get("fixture") or {}).get("fixture") or {}).get("status") or {}).get("elapsed")
+                    if item.get("home_corners") is not None and item.get("away_corners") is not None and isinstance(minute, int) and minute < 90:
+                        total_now = item["home_corners"] + item["away_corners"]
+                        hist_rate = None
+                        if history.get("home_corners_for") is not None and history.get("away_corners_for") is not None:
+                            hist_rate = float(history["home_corners_for"]) + float(history["away_corners_for"])
+                        if hist_rate is not None:
+                            projected = 0.5 * hist_rate + 0.5 * (total_now * 90 / max(1, minute))
+                            st.metric("Proyección exploratoria de córners totales", f"{projected:.1f}")
+                            st.caption("Combina promedios históricos de sede con el ritmo observado; estimación exploratoria, no probabilidad validada.")
+                        elif minute <= 5:
+                            st.caption("Partido muy reciente: el historial disponible orienta la estimación inicial; todavía no se fuerza una señal por ritmo.")
                 st.divider()
-    
-    
+        else:
+            st.info("Pulsa «Escanear todos los partidos en vivo» para obtener el análisis automático.")
+
     with tab_overview:
         st.subheader("Estado de los mercados")
         market_status = [
