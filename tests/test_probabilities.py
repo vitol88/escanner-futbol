@@ -1,0 +1,78 @@
+import unittest
+
+from models.probabilities import (
+    corner_pace_per_90,
+    estimate_live_goal_markets,
+    find_league_baseline,
+    poisson_at_least,
+    poisson_pmf,
+)
+
+
+TEST_DATA = {
+    "minimum_matches_for_estimate": 3,
+    "leagues": [
+        {
+            "country": "England",
+            "country_aliases": ["Inglaterra"],
+            "league": "Premier League",
+            "aliases": ["EPL"],
+            "matches": 10,
+            "avg_home_goals": 1.5,
+            "avg_away_goals": 1.2,
+            "draw_rate": 0.25,
+            "btts_rate": 0.55,
+            "avg_total_goals": 2.7,
+        }
+    ],
+}
+
+
+class ProbabilityModelTests(unittest.TestCase):
+    def test_poisson_pmf_zero_rate(self):
+        self.assertEqual(poisson_pmf(0, 0), 1.0)
+        self.assertEqual(poisson_pmf(0, 1), 0.0)
+
+    def test_poisson_tail_bounds_and_zero_target(self):
+        self.assertEqual(poisson_at_least(0.4, 0), 1.0)
+        self.assertGreater(poisson_at_least(1.0, 1), 0.0)
+        self.assertLessEqual(poisson_at_least(1.0, 1), 1.0)
+
+    def test_country_disambiguates_serie_a(self):
+        data = {"minimum_matches_for_estimate": 1, "leagues": [
+            {"country": "Italy", "country_aliases": [], "league": "Serie A", "aliases": [], "matches": 50,
+             "avg_home_goals": 1.5, "avg_away_goals": 1.2, "draw_rate": .2, "btts_rate": .5, "avg_total_goals": 2.7},
+            {"country": "Brazil", "country_aliases": [], "league": "Brasileirão Série A", "aliases": ["Serie A"], "matches": 50,
+             "avg_home_goals": 1.5, "avg_away_goals": 1.2, "draw_rate": .2, "btts_rate": .5, "avg_total_goals": 2.7},
+        ]}
+        self.assertEqual(find_league_baseline("Italy", "Serie A", data)["country"], "Italy")
+        self.assertEqual(find_league_baseline("Brazil", "Serie A", data)["country"], "Brazil")
+
+    def test_missing_baseline_is_not_reported_as_probability(self):
+        result = estimate_live_goal_markets(country="Sweden", league_name="Superettan",
+            score_home=0, score_away=0, elapsed_minute=30, data=TEST_DATA)
+        self.assertFalse(result["available"])
+        self.assertIsNone(result.get("draw_final"))
+
+    def test_low_sample_is_withheld(self):
+        small = {"minimum_matches_for_estimate": 30, "leagues": [dict(TEST_DATA["leagues"][0], matches=10)]}
+        result = estimate_live_goal_markets(country="England", league_name="Premier League",
+            score_home=0, score_away=0, elapsed_minute=30, data=small)
+        self.assertFalse(result["available"])
+        self.assertIn("Muestra histórica insuficiente", result["reason"])
+
+    def test_model_probabilities_are_bounded(self):
+        result = estimate_live_goal_markets(country="England", league_name="EPL",
+            score_home=1, score_away=0, elapsed_minute=45, data=TEST_DATA)
+        self.assertTrue(result["available"])
+        values = list(result["over_total_goals"].values()) + [result["draw_final"], result["btts_final"]]
+        self.assertTrue(all(0.0 <= p <= 1.0 for p in values))
+        self.assertEqual(result["btts_final"], 1.0 if 1 == 1 and 0 == 0 else 0.0)  # only home has scored: away must score
+
+    def test_corner_pace_is_descriptive(self):
+        self.assertAlmostEqual(corner_pace_per_90(8, 40), 18.0)
+        self.assertIsNone(corner_pace_per_90(None, 40))
+
+
+if __name__ == "__main__":
+    unittest.main()
