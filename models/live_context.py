@@ -22,6 +22,8 @@ def summarize_live_context(stats: list[dict[str, Any]], elapsed: int | None) -> 
     shots_on = [num(result.get(k)) for k in ("shots_on_home", "shots_on_away")]
     result["shots_on_total"] = sum(shots_on) if all(v is not None for v in shots_on) else None
     red_cards = [num(result.get(k)) for k in ("red_home", "red_away")]
+    result["red_cards_home"] = red_cards[0]
+    result["red_cards_away"] = red_cards[1]
     result["red_cards_total"] = sum(red_cards) if all(value is not None for value in red_cards) else None
     has_any_stats = any(v is not None for k, v in result.items() if k not in ("elapsed", "core_complete", "context_status"))
     result["context_status"] = "completo" if result["core_complete"] and result["possession_home"] is not None and result["possession_away"] is not None else "parcial" if has_any_stats else "sin datos"
