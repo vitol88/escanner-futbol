@@ -100,6 +100,21 @@ class ProbabilityModelTests(unittest.TestCase):
             poisson_pmf(result["expected_total_goals_remaining"], 0),
         )
 
+    def test_live_activity_adjustment_is_bounded_and_reported(self):
+        baseline = estimate_live_goal_markets(
+            country="England", league_name="EPL", score_home=0, score_away=0,
+            elapsed_minute=60, data=TEST_DATA
+        )
+        active = estimate_live_goal_markets(
+            country="England", league_name="EPL", score_home=0, score_away=0,
+            elapsed_minute=60, data=TEST_DATA,
+            live_stats={"shots_on_total": 9, "corners_total": 12, "red_cards_total": 0}
+        )
+        self.assertTrue(active["available"])
+        self.assertTrue(active["live_stats_used"])
+        self.assertGreater(active["expected_total_goals_remaining"], baseline["expected_total_goals_remaining"])
+        self.assertLessEqual(active["live_activity_adjustment"], 1.25)
+
     def test_corner_pace_is_descriptive(self):
         self.assertAlmostEqual(corner_pace_per_90(8, 40), 18.0)
         self.assertIsNone(corner_pace_per_90(None, 40))
