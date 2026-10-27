@@ -558,9 +558,33 @@ else:
         if goal_results:
             st.subheader("Tips preliminares del escáner")
             st.caption("Probabilidades exploratorias; no están calibradas ni garantizan resultados.")
+            # Show the automatic home/away goal averages alongside goal-market analysis.
+            corner_history_by_id = {
+                (item.get("fixture", {}).get("fixture") or {}).get("id"): item.get("automatic_history") or {}
+                for item in st.session_state.get("corner_scan_results", [])
+            }
             search_matches = st.text_input("🔎 Buscar equipo o liga", placeholder="Ej. Roma, Premier League…", key="search_goal_matches").strip().casefold()
             tips_found = 0
             for fixture, estimate, tips, context in goal_results:
+                fixture_id = (fixture.get("fixture") or {}).get("id")
+                history = corner_history_by_id.get(fixture_id, {})
+                if history.get("available"):
+                    st.markdown(f"**📊 Promedios de goles · {fixture_label(fixture)}**")
+                    goal_history_rows = [
+                        {"Indicador": "Goles a favor del local en casa", "Promedio": history.get("home_goals_for") if history.get("home_goals_for") is not None else "N/D", "Muestra": history.get("home_goal_sample", 0)},
+                        {"Indicador": "Goles concedidos por el local en casa", "Promedio": history.get("home_goals_against") if history.get("home_goals_against") is not None else "N/D", "Muestra": history.get("home_goal_sample", 0)},
+                        {"Indicador": "Goles a favor del visitante fuera", "Promedio": history.get("away_goals_for") if history.get("away_goals_for") is not None else "N/D", "Muestra": history.get("away_goal_sample", 0)},
+                        {"Indicador": "Goles concedidos por el visitante fuera", "Promedio": history.get("away_goals_against") if history.get("away_goals_against") is not None else "N/D", "Muestra": history.get("away_goal_sample", 0)},
+                    ]
+                    goal_table_html = '<table class="history-table"><thead><tr><th>Indicador</th><th>Promedio</th><th>Muestra</th></tr></thead><tbody>'
+                    for goal_row in goal_history_rows:
+                        avg = goal_row["Promedio"]
+                        avg_text = f"{avg:.2f}".rstrip("0").rstrip(".") if isinstance(avg, (int, float)) else str(avg)
+                        goal_table_html += f"<tr><td>{goal_row['Indicador']}</td><td>{avg_text}</td><td>{goal_row['Muestra']}</td></tr>"
+                    goal_table_html += "</tbody></table>"
+                    st.markdown(goal_table_html, unsafe_allow_html=True)
+                    st.caption("Promedios históricos automáticos de localía; la muestra puede variar según los datos disponibles de la API.")
+                if not estimate.get("available") or not tips:
                 if not estimate.get("available") or not tips:
                     continue
                 if search_matches and search_matches not in fixture_label(fixture).casefold():
@@ -595,8 +619,6 @@ else:
                             {"Indicador": "Córners concedidos por el local en casa", "Promedio": history.get("home_corners_against") if history.get("home_corners_against") is not None else "N/D", "Muestra": history.get("home_corner_sample", 0)},
                             {"Indicador": "Córners a favor del visitante fuera", "Promedio": history.get("away_corners_for") if history.get("away_corners_for") is not None else "N/D", "Muestra": history.get("away_corner_sample", 0)},
                             {"Indicador": "Córners concedidos por el visitante fuera", "Promedio": history.get("away_corners_against") if history.get("away_corners_against") is not None else "N/D", "Muestra": history.get("away_corner_sample", 0)},
-                            {"Indicador": "Goles a favor del local en casa", "Promedio": history.get("home_goals_for") if history.get("home_goals_for") is not None else "N/D", "Muestra": history.get("home_goal_sample", 0)},
-                            {"Indicador": "Goles a favor del visitante fuera", "Promedio": history.get("away_goals_for") if history.get("away_goals_for") is not None else "N/D", "Muestra": history.get("away_goal_sample", 0)},
                         ]
                         table_html = '<table class="history-table"><thead><tr><th>Indicador</th><th>Promedio</th><th>Muestra</th></tr></thead><tbody>'
                         for history_row in history_rows:
@@ -636,8 +658,10 @@ else:
                                 unsafe_allow_html=True,
                             )
                             st.caption("Tip orientativo calculado con promedios históricos y ritmo en vivo. No es una apuesta segura ni una probabilidad validada; verifica la línea y la cuota disponibles en tu casa de apuestas.")
-                        elif minute <= 5:
-                            st.caption("Partido muy reciente: el historial disponible orienta la estimación inicial; todavía no se fuerza una señal por ritmo.")
+                        else:
+                            st.info("Tip de córners no disponible: faltan promedios históricos de ambos equipos para estimar la línea con el método actual. N/D significa dato ausente, no cero.")
+                        if minute <= 5:
+                            st.caption("Partido muy reciente: el ritmo en vivo todavía tiene poca muestra.")
                 st.divider()
         else:
             st.info("Pulsa «Escanear todos los partidos en vivo» para obtener el análisis automático.")
