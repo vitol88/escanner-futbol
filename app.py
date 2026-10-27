@@ -7,6 +7,7 @@ from typing import Any
 import requests
 import streamlit as st
 
+from models.live_context import summarize_live_context
 from models.probabilities import (
     corner_pace_per_90,
     estimate_live_goal_markets,
@@ -99,61 +100,6 @@ def safe_stat(
         if item.get("type") == stat_name:
             return item.get("value")
     return None
-
-def numeric_stat(value: Any) -> float | None:
-    """Normalize numeric API stats while preserving missing values."""
-    if isinstance(value, bool):
-        return None
-    if isinstance(value, (int, float)):
-        return float(value)
-    if isinstance(value, str):
-        cleaned = value.strip().replace("%", "")
-        try:
-            return float(cleaned)
-        except ValueError:
-            return None
-    return None
-
-
-def summarize_live_context(stats: list[dict[str, Any]], elapsed: int | None) -> dict[str, Any]:
-    """Describe available live context; deliberately does not change probabilities."""
-    names = {
-        "corners_home": "Corner Kicks", "shots_home": "Total Shots",
-        "shots_on_home": "Shots on Goal", "possession_home": "Ball Possession",
-        "yellow_home": "Yellow Cards", "red_home": "Red Cards",
-    }
-    result: dict[str, Any] = {}
-    for key, stat_name in names.items():
-        result[key] = safe_stat(stats, stat_name, 0)
-    for key, stat_name in names.items():
-        result[key.replace("_home", "_away")] = safe_stat(stats, stat_name, 1)
-    core_keys = ("corners_home", "corners_away", "shots_home", "shots_away")
-    result["core_complete"] = all(numeric_stat(result.get(key)) is not None for key in core_keys)
-    result["elapsed"] = elapsed
-    result["context_status"] = (
-        "completo" if result["core_complete"] and result.get("possession_home") is not None
-        and result.get("possession_away") is not None else
-        "parcial" if any(value is not None for key, value in result.items() if key not in ("elapsed", "core_complete", "context_status"))
-        else "sin datos"
-    )
-    result["corners_total"] = (
-        numeric_stat(result.get("corners_home")) + numeric_stat(result.get("corners_away"))
-        if numeric_stat(result.get("corners_home")) is not None and numeric_stat(result.get("corners_away")) is not None
-        else None
-    )
-    result["shots_total"] = (
-        numeric_stat(result.get("shots_home")) + numeric_stat(result.get("shots_away"))
-        if numeric_stat(result.get("shots_home")) is not None and numeric_stat(result.get("shots_away")) is not None
-        else None
-    )
-    result["shots_on_total"] = (
-        numeric_stat(result.get("shots_on_home")) + numeric_stat(result.get("shots_on_away"))
-        if numeric_stat(result.get("shots_on_home")) is not None and numeric_stat(result.get("shots_on_away")) is not None
-        else None
-    )
-    result["red_cards_total"] = sum(numeric_stat(result.get(key)) or 0 for key in ("red_home", "red_away"))
-    return result
-
 
 def fixture_label(fixture: dict[str, Any]) -> str:
     teams = fixture.get("teams") or {}
