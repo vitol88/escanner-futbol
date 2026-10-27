@@ -411,7 +411,7 @@ else:
 
         # Session-local audit log: user can download it before leaving the app.
         signal_rows = st.session_state.get("signal_rows", [])
-        for fixture, estimate, tips, context in filtered_goal_results:
+        for fixture, estimate, tips, context in goal_results_with_context:
             for market, probability in tips:
                 signal_rows.append({
                     "recorded_at": datetime.now().isoformat(timespec="seconds"),
