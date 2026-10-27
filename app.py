@@ -665,7 +665,7 @@ else:
                 st.caption(status_text)
         st.caption("Las probabilidades no están validadas. No hay cuotas verificadas de RushBet ni EV calculado todavía; no se ejecutan apuestas automáticamente.")
         st.markdown("### Validación retrospectiva")
-        st.caption("Carga un CSV de señales completado manualmente con el resultado real. Para cada señal, escribe outcome=1 si el mercado se cumplió o outcome=0 si no se cumplió, y outcome_verified=true. No se puntúan filas sin verificar.")
+        st.caption("En cada fila, outcome=1 si se cumplió ESE mercado y outcome=0 si no se cumplió (no escribas el marcador final). Marca outcome_verified=true solo después de comprobar el resultado real. Las filas no verificadas o inválidas se excluyen.")
         backtest_file = st.file_uploader(
             "Cargar CSV de señales con resultados verificados",
             type=["csv"],
