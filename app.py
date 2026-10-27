@@ -200,6 +200,17 @@ else:
                     for target, probability in estimate["over_total_goals"].items()
                 ]
                 candidates.append(("No habrá más goles", estimate["probability_no_more_goals"]))
+
+                # Team-specific goal markets: e.g. local/visitor to finish with 2+ goals.
+                home_name = ((fixture.get("teams") or {}).get("home") or {}).get("name", "Local")
+                away_name = ((fixture.get("teams") or {}).get("away") or {}).get("name", "Visitante")
+                for target, item in estimate.get("home_final_goals_at_least", {}).items():
+                    if not item.get("already_settled"):
+                        candidates.append((f"{home_name}: terminará con {target} goles o más", item["probability"]))
+                for target, item in estimate.get("away_final_goals_at_least", {}).items():
+                    if not item.get("already_settled"):
+                        candidates.append((f"{away_name}: terminará con {target} goles o más", item["probability"]))
+
                 candidates.append(("Empate final", estimate["draw_final"]))
                 # If both teams have already scored, BTTS is settled, not a future tip.
                 if not estimate.get("btts_already_settled"):
