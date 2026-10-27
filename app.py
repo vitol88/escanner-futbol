@@ -12,6 +12,7 @@ from models.probabilities import (
     corner_pace_per_90,
     estimate_live_goal_markets,
     load_league_baselines,
+    poisson_at_least,
 )
 
 API_BASE = "https://v3.football.api-sports.io"
@@ -399,6 +400,35 @@ else:
                             st.caption(
                                 "Confianza muy baja: hay pocos minutos y/o córners observados. "
                                 "Es una extrapolación lineal, no un tip confirmado."
+                            )
+                    # Exploratory corner-market probabilities from a Poisson model whose
+                    # remaining-corner rate is the observed live pace. This is not calibrated
+                    # and must be labelled low-confidence early in the match.
+                    if isinstance(minute_now, int) and minute_now < 90:
+                        remaining_corner_rate = max(0.0, item["pace"] * (90 - min(minute_now, 90)) / 90)
+                        corner_market_rows = []
+                        for line in (6.5, 7.5, 8.5, 9.5, 10.5, 11.5):
+                            target_total = int(line) + 1
+                            if total_corners_now >= target_total:
+                                corner_market_rows.append({
+                                    "Mercado": f"Más de {line:.1f} córners",
+                                    "Prob. exploratoria": "Ya superado",
+                                    "Estado": "No es una oportunidad futura",
+                                })
+                            else:
+                                corners_needed = target_total - total_corners_now
+                                probability = poisson_at_least(remaining_corner_rate, corners_needed)
+                                corner_market_rows.append({
+                                    "Mercado": f"Más de {line:.1f} córners",
+                                    "Prob. exploratoria": f"{probability * 100:.1f}%",
+                                    "Estado": "Candidato experimental" if probability >= 0.65 else "Por debajo del filtro (65%)",
+                                })
+                        st.markdown("**Mercados de córners · probabilidad exploratoria**")
+                        st.dataframe(corner_market_rows, hide_index=True, use_container_width=True)
+                        if minute_now <= 20 or total_corners_now <= 2:
+                            st.caption(
+                                "Probabilidades de muy baja confianza: se basan en el ritmo observado y una distribución Poisson simplificada. "
+                                "Todavía no incorporan promedios históricos fiables por liga/equipo ni están validadas retrospectivamente."
                             )
                     total_shots_now = (item.get("home_shots") or 0) + (item.get("away_shots") or 0)
                     if isinstance(minute_now, int) and 15 <= minute_now <= 78 and total_corners_now >= 5 and item["pace"] >= 10 and total_shots_now >= 8:
