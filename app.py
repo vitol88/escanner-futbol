@@ -201,8 +201,9 @@ else:
                 # If both teams have already scored, BTTS is settled, not a future tip.
                 if not estimate.get("btts_already_settled"):
                     candidates.append(("Ambos equipos marcan (faltan goles de ambos)", estimate["btts_final"]))
-                # Keep all future targets visible; the threshold only labels an experimental signal.
-                tips = candidates
+                # Only show candidate markets that pass the experimental screening threshold.
+                # Otherwise the match is omitted from the opportunity list.
+                tips = [(name, probability) for name, probability in candidates if probability >= 0.65]
             st.session_state.goal_scan_results.append((fixture, estimate, tips))
             progress.progress((idx + 1) / max(1, len(filtered)))
         corner_results = []
@@ -257,7 +258,7 @@ else:
     goal_results = st.session_state.get("goal_scan_results", [])
     if goal_results:
         st.subheader("Tips preliminares del escáner")
-        st.caption("Se evalúan objetivos de goles adicionales desde el marcador actual (por ejemplo, con 8 goles, objetivo de 9+). El umbral del 65% es experimental; sin cuotas reales no se calcula valor esperado y no son apuestas validadas.")
+        st.caption("Se evalúan objetivos de goles adicionales desde el marcador actual (por ejemplo, con 8 goles, objetivo de 9+). Solo se muestran oportunidades que superan el filtro experimental del 65%; si ninguna lo supera, se omite el partido. Sin cuotas reales no se calcula valor esperado y no son apuestas validadas.")
         tips_found = 0
         for fixture, estimate, tips in goal_results:
             if not estimate.get("available"):
