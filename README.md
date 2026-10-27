@@ -71,3 +71,21 @@ El panel estima frecuencias de al menos un gol adicional, al menos dos y probabi
 
 **Limitación actual:** el escáner todavía no recopila automáticamente todo el historial de eventos de cada equipo. API-Football requiere consultar los eventos por partido, lo que puede consumir muchas llamadas; por eso esta primera versión recibe el historial mediante CSV y no realiza barridos históricos ocultos que agoten el plan gratuito. Las frecuencias no están calibradas y no garantizan resultados.
 
+
+
+## Historial empírico de córners por minuto
+
+La pestaña **Córners** permite cargar una base histórica para estimar frecuencias de córners posteriores al minuto actual. El CSV requiere una fila por equipo y partido terminado, con estas columnas:
+
+`league,team,venue,minute,corners_for,corners_against,corners_for_after,corners_against_after`
+
+- `league`: nombre de liga tal como aparece en el escáner.
+- `team`: nombre del equipo.
+- `venue`: `home` o `away`, según la sede de ese equipo.
+- `minute`: minuto de corte exacto.
+- `corners_for` y `corners_against`: córners del equipo y del rival acumulados al corte.
+- `corners_for_after` y `corners_against_after`: córners que consiguió cada lado después del corte y hasta el final.
+
+El estimador busca primero el mismo equipo, liga, sede, minuto y estado de córners, siempre que haya al menos 8 casos. Si no alcanza esa muestra, intenta la frecuencia del equipo por liga, sede y minuto; si sigue siendo pequeña, muestra N/D. Los porcentajes son frecuencias históricas observadas, no probabilidades calibradas.
+
+**Importante:** las estadísticas finales de un partido no indican por sí solas cuántos córners había en el minuto 50, 70 u 80. No se debe reconstruir ese dato a partir del total final. Para que este módulo produzca resultados se necesita una fuente histórica con marcas de tiempo de córners o un CSV construido con datos minuto a minuto. La API puede aportar estadísticas en vivo y otros datos, pero no se hacen consultas históricas ocultas ni se asume que un dato ausente sea cero.
