@@ -200,8 +200,8 @@ else:
                 # If both teams have already scored, BTTS is settled, not a future tip.
                 if not estimate.get("btts_already_settled"):
                     candidates.append(("Ambos equipos marcan (faltan goles de ambos)", estimate["btts_final"]))
-                # Screening threshold only, not a validated betting signal or EV filter.
-                tips = [(name, probability) for name, probability in candidates if probability >= 0.65]
+                # Keep all future targets visible; the threshold only labels an experimental signal.
+                tips = candidates
             st.session_state.goal_scan_results.append((fixture, estimate, tips))
             progress.progress((idx + 1) / max(1, len(filtered)))
         corner_results = []
@@ -250,7 +250,10 @@ else:
             tips_found += len(tips)
             st.markdown(f"**{fixture_label(fixture)}**")
             for market, probability in sorted(tips, key=lambda item: item[1], reverse=True):
-                st.success(f"SEÑAL PRELIMINAR · {market} · probabilidad exploratoria {probability * 100:.1f}%")
+                if probability >= 0.65:
+                    st.success(f"SEÑAL EXPERIMENTAL (≥65%) · {market} · probabilidad exploratoria {probability * 100:.1f}%")
+                else:
+                    st.caption(f"Estimación · {market} · probabilidad exploratoria {probability * 100:.1f}%")
             st.caption(f"Referencia: {estimate['baseline_league']}, {estimate['baseline_matches']} partidos históricos. Modelo de promedio de liga, pendiente de validación.")
             st.divider()
         if tips_found == 0:
