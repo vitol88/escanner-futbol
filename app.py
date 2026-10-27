@@ -7,7 +7,7 @@ from typing import Any
 import requests
 import streamlit as st
 
-from models.live_context import summarize_live_context
+from models.live_context import qualifies_as_corner_candidate, summarize_live_context
 from models.probabilities import (
     corner_pace_per_90,
     estimate_live_goal_markets,
@@ -617,21 +617,12 @@ else:
                                     "Probabilidades de muy baja confianza: se basan en el ritmo observado y una distribución Poisson simplificada. "
                                     "Todavía no incorporan promedios históricos fiables por liga/equipo ni están validadas retrospectivamente."
                                 )
-                        home_shots_now = item.get("home_shots")
-                        away_shots_now = item.get("away_shots")
-                        total_shots_now = (
-                            home_shots_now + away_shots_now
-                            if isinstance(home_shots_now, (int, float))
-                            and isinstance(away_shots_now, (int, float))
-                            else None
-                        )
-                        if (
-                            isinstance(minute_now, int)
-                            and 15 <= minute_now <= 78
-                            and total_corners_now >= 5
-                            and item["pace"] >= 10
-                            and total_shots_now is not None
-                            and total_shots_now >= 8
+                        if qualifies_as_corner_candidate(
+                            minute=minute_now,
+                            total_corners=total_corners_now,
+                            pace_per_90=item.get("pace"),
+                            home_shots=item.get("home_shots"),
+                            away_shots=item.get("away_shots"),
                         ):
                             st.warning("CANDIDATO EXPERIMENTAL · ritmo de córners elevado y actividad de tiros. Revisar mercados de córners restantes y cuota disponible; no es una probabilidad validada ni una apuesta automática.")
                     st.caption(f"Tiros totales: local {item.get('home_shots')} · visitante {item.get('away_shots')} | a puerta: local {item.get('home_shots_on')} · visitante {item.get('away_shots_on')}.")
