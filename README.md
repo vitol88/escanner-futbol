@@ -55,37 +55,10 @@ La evaluación es manual y experimental: no consulta resultados finales automát
 5. Desplegar y verificar el enlace final.
 
 
-## Estimación histórica de goles en los minutos finales
+## Historial automático de equipos
 
-En la pestaña de goles se puede cargar un CSV con el historial de cada equipo al llegar a un minuto de corte. Formato requerido (una fila por equipo y partido terminado):
+Durante el escaneo, la app consulta los últimos partidos de cada equipo dentro de la liga y temporada del encuentro. Calcula promedios de goles por sede y, cuando las estadísticas históricas de la API están disponibles, córners a favor y en contra. Los resultados y estadísticas históricas se cachean durante la sesión.
 
-`league,team,minute,score_for,score_against,goals_for_after,goals_against_after`
+Para limitar consumo de API, la primera versión limita las búsquedas históricas de equipos a 12 consultas por escaneo y las consultas de estadísticas históricas a 8 por escaneo. Cuando se alcanza el límite, los datos no disponibles se muestran como N/D; no se inventan valores. El caché de sesión desaparece al reiniciarse la aplicación.
 
-- `league`: nombre de la competición tal como aparece en el escáner (por ejemplo, `Serie A`).
-- `team`: nombre del equipo.
-- `minute`: minuto de corte histórico (por ejemplo, `70`).
-- `score_for` y `score_against`: goles del equipo y rival en ese minuto.
-- `goals_for_after` y `goals_against_after`: goles de cada lado desde después del corte hasta el final.
-
-El panel estima frecuencias de al menos un gol adicional, al menos dos y probabilidad empírica de que ese equipo vuelva a marcar. Prioriza el marcador exacto si hay al menos 8 casos; si no, usa la muestra del equipo en esa liga y minuto, siempre que tenga al menos 8 registros. Muestra insuficiente significa `N/D`, no cero.
-
-**Limitación actual:** el escáner todavía no recopila automáticamente todo el historial de eventos de cada equipo. API-Football requiere consultar los eventos por partido, lo que puede consumir muchas llamadas; por eso esta primera versión recibe el historial mediante CSV y no realiza barridos históricos ocultos que agoten el plan gratuito. Las frecuencias no están calibradas y no garantizan resultados.
-
-
-
-## Historial empírico de córners por minuto
-
-La pestaña **Córners** permite cargar una base histórica para estimar frecuencias de córners posteriores al minuto actual. El CSV requiere una fila por equipo y partido terminado, con estas columnas:
-
-`league,team,venue,minute,corners_for,corners_against,corners_for_after,corners_against_after`
-
-- `league`: nombre de liga tal como aparece en el escáner.
-- `team`: nombre del equipo.
-- `venue`: `home` o `away`, según la sede de ese equipo.
-- `minute`: minuto de corte exacto.
-- `corners_for` y `corners_against`: córners del equipo y del rival acumulados al corte.
-- `corners_for_after` y `corners_against_after`: córners que consiguió cada lado después del corte y hasta el final.
-
-El estimador busca primero el mismo equipo, liga, sede, minuto y estado de córners, siempre que haya al menos 8 casos. Si no alcanza esa muestra, intenta la frecuencia del equipo por liga, sede y minuto; si sigue siendo pequeña, muestra N/D. Los porcentajes son frecuencias históricas observadas, no probabilidades calibradas.
-
-**Importante:** las estadísticas finales de un partido no indican por sí solas cuántos córners había en el minuto 50, 70 u 80. No se debe reconstruir ese dato a partir del total final. Para que este módulo produzca resultados se necesita una fuente histórica con marcas de tiempo de córners o un CSV construido con datos minuto a minuto. La API puede aportar estadísticas en vivo y otros datos, pero no se hacen consultas históricas ocultas ni se asume que un dato ausente sea cero.
+Esta versión aún no incorpora un archivo histórico minuto a minuto ni un historial de enfrentamientos directos al modelo. Los promedios de resultados recientes y córners por sede son contexto exploratorio; no son probabilidades calibradas ni garantías de rentabilidad.
