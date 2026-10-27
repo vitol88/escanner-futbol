@@ -377,7 +377,8 @@ else:
     if not goal_results and not corner_results:
         st.info("Pulsa «Escanear todos los partidos en vivo» para generar el primer informe.")
     elif not goal_results:
-        st.info("No se encontraron señales que superen el filtro con estadísticas principales completas. Se omiten los partidos sin datos suficientes.")
+        st.info("En esta ronda no hubo señales de goles que superaran el umbral experimental del 65%. Esto no significa que todos los partidos carezcan de datos ni que no existan candidatos de córners: la revisión detallada de córners se limita a la muestra indicada arriba para proteger tu cuota de API.")
+        st.caption("El escáner sí evaluó los partidos filtrados para mercados de goles, pero el modelo actual usa promedios de liga y aún no integra clasificación, fuerza de cada equipo ni historial de córners en sus probabilidades.")
 
 signal_rows = st.session_state.get("signal_rows", [])
 if signal_rows:
