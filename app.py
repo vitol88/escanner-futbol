@@ -310,6 +310,8 @@ if "corner_rotation_index" not in st.session_state:
     st.session_state.corner_rotation_index = 0
 if "auto_scan_summary" not in st.session_state:
     st.session_state.auto_scan_summary = {}
+if "last_auto_market_scan_epoch" not in st.session_state:
+    st.session_state.last_auto_market_scan_epoch = 0
 
 controls = st.columns([1.4, 1, 1])
 with controls[0]:
@@ -534,7 +536,15 @@ else:
         help="Todos los partidos filtrados se evalúan con la información disponible. Este límite controla las consultas adicionales a fixtures/statistics para proteger tu cuota de API."
     )
     st.caption("El listado en vivo usa una solicitud. Cada partido al que se consultan estadísticas detalladas puede consumir otra; los demás se evalúan sin ese contexto en vivo.")
-    if st.button("⚡ Escanear todos los partidos en vivo", type="primary"):
+    manual_scan = st.button("⚡ Escanear todos los partidos en vivo", type="primary")
+    now_epoch = int(datetime.now().timestamp())
+    auto_scan_due = (
+        st.session_state.auto_refresh_enabled
+        and should_refresh
+        and now_epoch - int(st.session_state.last_auto_market_scan_epoch) >= 300
+    )
+    if manual_scan or auto_scan_due:
+        st.session_state.last_auto_market_scan_epoch = now_epoch
         scan_api_calls_start = st.session_state.api_request_count
         # Force fresh statistics for this scan; cap detailed-stat calls to protect API quota.
         st.session_state.stats_cache = {}
@@ -545,7 +555,8 @@ else:
         # actually use the activity context instead of only using a cache from a
         # previous run. One request per fixture; subsequent sections reuse the cache.
         stats_fetch_progress = st.progress(0, text="Cargando estadísticas en vivo para el análisis de goles…")
-        stats_fixtures = filtered[:stats_limit]
+        effective_stats_limit = min(stats_limit, 5) if auto_scan_due and not manual_scan else stats_limit
+        stats_fixtures = filtered[:effective_stats_limit]
         stats_queries_attempted = 0
         for stats_idx, stats_fixture in enumerate(stats_fixtures):
             stats_fixture_id = (stats_fixture.get("fixture") or {}).get("id")
@@ -752,6 +763,8 @@ else:
         history_cache = st.session_state.setdefault("automatic_history_cache", {})
         history_cache["_automatic_history_stats_calls"] = 0
         history_cache["_automatic_history_team_fixture_calls"] = 0
+        if auto_scan_due and not manual_scan:
+            history_cache["_automatic_history_team_fixture_calls"] = 10
         for corner_item in corner_results:
             if corner_item.get("error"):
                 continue
@@ -761,7 +774,7 @@ else:
                     corner_item["fixture"],
                     api_get=api_get,
                     cache=history_cache,
-                    stats_budget=max(0, 8 - used_history_stats),
+                    stats_budget=max(0, (2 if auto_scan_due and not manual_scan else 8) - used_history_stats),
                 )
             except Exception as history_exc:
                 corner_item["automatic_history"] = {
