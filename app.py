@@ -304,6 +304,12 @@ if "notification_events" not in st.session_state:
     st.session_state.notification_events = []
 if "last_auto_refresh_error" not in st.session_state:
     st.session_state.last_auto_refresh_error = ""
+if "corner_snapshot" not in st.session_state:
+    st.session_state.corner_snapshot = {}
+if "corner_rotation_index" not in st.session_state:
+    st.session_state.corner_rotation_index = 0
+if "auto_scan_summary" not in st.session_state:
+    st.session_state.auto_scan_summary = {}
 
 controls = st.columns([1.4, 1, 1])
 with controls[0]:
@@ -360,12 +366,57 @@ if should_refresh:
         st.session_state.live_fixtures = new_fixtures
         st.session_state.last_refresh = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         st.session_state.last_auto_refresh_error = ""
+
+        # Rotate through at most 5 fixtures per minute for corner stats. This keeps
+        # the Pro daily quota safe; it deliberately does not query every match every minute.
+        live_for_corners = [
+            match for match in new_fixtures
+            if (match.get("fixture") or {}).get("id") is not None
+            and (((match.get("fixture") or {}).get("status") or {}).get("short") not in {"HT", "FT", "AET", "PEN", "NS"})
+        ]
+        corner_events = []
+        if live_for_corners:
+            batch_size = min(5, len(live_for_corners))
+            offset = st.session_state.corner_rotation_index % len(live_for_corners)
+            rotated = live_for_corners[offset:] + live_for_corners[:offset]
+            for match in rotated[:batch_size]:
+                fixture_data = match.get("fixture") or {}
+                fixture_id = str(fixture_data.get("id"))
+                try:
+                    stat_payload = api_get("fixtures/statistics", {"fixture": fixture_id})
+                    stat_rows = stat_payload.get("response") or []
+                    home_c = safe_stat(stat_rows, "Corner Kicks", 0)
+                    away_c = safe_stat(stat_rows, "Corner Kicks", 1)
+                    if home_c is None or away_c is None:
+                        continue
+                    now_total = home_c + away_c
+                    previous_total = st.session_state.corner_snapshot.get(fixture_id)
+                    st.session_state.corner_snapshot[fixture_id] = now_total
+                    if previous_total is not None and now_total > previous_total:
+                        teams = match.get("teams") or {}
+                        corner_events.append({
+                            "id": f"corner:{fixture_id}:{now_total}",
+                            "title": "🚩 ¡NUEVO CÓRNER!",
+                            "message": f"{(teams.get('home') or {}).get('name', 'Local')} vs {(teams.get('away') or {}).get('name', 'Visitante')} · total {now_total}"
+                        })
+                except Exception as stats_exc:
+                    if "HTTP 429" in str(stats_exc):
+                        st.session_state.last_auto_refresh_error = "Se alcanzó el límite de la API; se pausaron las consultas de córners en este ciclo."
+                        break
+            st.session_state.corner_rotation_index = (offset + batch_size) % max(1, len(live_for_corners))
+
+        all_events = new_events + corner_events
         seen_ids = {event.get("id") for event in st.session_state.notification_events}
-        for event in new_events:
+        for event in all_events:
             if event["id"] not in seen_ids:
                 st.session_state.notification_events.append(event)
                 st.toast(f"{event['title']} · {event['message']}", icon="⚽")
         st.session_state.notification_events = st.session_state.notification_events[-5:]
+        st.session_state.auto_scan_summary = {
+            "live_matches": len(new_fixtures),
+            "corner_stats_checked": min(5, len(live_for_corners)),
+            "last_auto_scan": st.session_state.last_refresh,
+        }
     except Exception as exc:
         st.session_state.last_auto_refresh_error = str(exc)
 
@@ -426,7 +477,9 @@ left, right = st.columns([2, 1])
 with left:
     st.subheader("Partidos en vivo")
 with right:
-    st.caption("Los goles se detectan comparando marcadores entre actualizaciones.")
+    st.caption(
+    "Escáner automático activo: marcadores cada 60 s y estadísticas de córners en rotación (hasta 5 partidos por ciclo) para cuidar la cuota de API."
+)
 
 if st.session_state.last_refresh:
     st.caption(f"Última consulta: {st.session_state.last_refresh}")
