@@ -224,8 +224,13 @@ def fixture_card_html(fixture: dict[str, Any]) -> str:
         '</div></div>'
     )
 
-def fixture_hero_html(fixture: dict[str, Any]) -> str:
-    """Larger team/score/minute header for goal and corner analysis sections."""
+def fixture_hero_html(
+    fixture: dict[str, Any],
+    mode: str = "goals",
+    home_corners: int | None = None,
+    away_corners: int | None = None,
+) -> str:
+    """Larger team/score/minute header; show goals or current corners by section."""
     teams = fixture.get("teams") or {}
     home = teams.get("home") or {}
     away = teams.get("away") or {}
@@ -239,13 +244,19 @@ def fixture_hero_html(fixture: dict[str, Any]) -> str:
     away_name = html.escape(str(away.get("name") or "Visitante"))
     home_logo = html.escape(str(home.get("logo") or ""), quote=True)
     away_logo = html.escape(str(away.get("logo") or ""), quote=True)
-    home_score = goals.get("home") if goals.get("home") is not None else "–"
-    away_score = goals.get("away") if goals.get("away") is not None else "–"
+    if mode == "corners":
+        home_score = home_corners if home_corners is not None else "–"
+        away_score = away_corners if away_corners is not None else "–"
+        header_label = "🚩 CÓRNERS ACTUALES"
+    else:
+        home_score = goals.get("home") if goals.get("home") is not None else "–"
+        away_score = goals.get("away") if goals.get("away") is not None else "–"
+        header_label = "⚽ PARTIDO EN ANÁLISIS"
     home_badge = f'<img src="{home_logo}" alt="" onerror="this.style.display=\'none\'">' if home_logo else '<div class="fixture-hero-fallback">⚽</div>'
     away_badge = f'<img src="{away_logo}" alt="" onerror="this.style.display=\'none\'">' if away_logo else '<div class="fixture-hero-fallback">⚽</div>'
     return (
         '<div class="fixture-hero">'
-        f'<div class="fixture-hero-top"><span>⚽ PARTIDO EN ANÁLISIS</span><span class="fixture-clock">◷ {html.escape(minute_label)}</span></div>'
+        f'<div class="fixture-hero-top"><span>{header_label}</span><span class="fixture-clock">◷ {html.escape(minute_label)}</span></div>'
         '<div class="fixture-hero-teams">'
         f'<div class="fixture-hero-team">{home_badge}<span>{home_name}</span></div>'
         f'<div class="fixture-hero-score">{home_score} – {away_score}</div>'
@@ -703,7 +714,15 @@ else:
         corner_results = st.session_state.get("corner_scan_results", [])
         if corner_results:
             for item in corner_results:
-                st.markdown(fixture_hero_html(item["fixture"]), unsafe_allow_html=True)
+                st.markdown(
+                    fixture_hero_html(
+                        item["fixture"],
+                        mode="corners",
+                        home_corners=item.get("home_corners"),
+                        away_corners=item.get("away_corners"),
+                    ),
+                    unsafe_allow_html=True,
+                )
                 if item.get("error"):
                     st.caption("Las estadísticas en vivo no están disponibles para este partido.")
                 else:
