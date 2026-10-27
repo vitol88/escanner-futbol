@@ -132,6 +132,38 @@ class ProbabilityModelTests(unittest.TestCase):
         self.assertGreater(high_scoring["probability_no_more_goals"], 0.0)
         self.assertLess(high_scoring["probability_no_more_goals"], 1.0)
 
+    def test_recent_goals_between_scans_raise_remaining_goal_rate(self):
+        base = estimate_live_goal_markets(
+            country="England", league_name="EPL", score_home=1, score_away=1,
+            elapsed_minute=60, data=TEST_DATA
+        )
+        recent = estimate_live_goal_markets(
+            country="England", league_name="EPL", score_home=1, score_away=1,
+            elapsed_minute=60, data=TEST_DATA, recent_goals=2,
+            minutes_since_previous_scan=5
+        )
+        self.assertGreater(
+            recent["expected_total_goals_remaining"],
+            base["expected_total_goals_remaining"],
+        )
+        self.assertEqual(recent["recent_goal_adjustment"], 1.24)
+
+    def test_old_scan_does_not_apply_recent_goal_adjustment(self):
+        base = estimate_live_goal_markets(
+            country="England", league_name="EPL", score_home=1, score_away=1,
+            elapsed_minute=60, data=TEST_DATA
+        )
+        stale = estimate_live_goal_markets(
+            country="England", league_name="EPL", score_home=1, score_away=1,
+            elapsed_minute=60, data=TEST_DATA, recent_goals=2,
+            minutes_since_previous_scan=20
+        )
+        self.assertEqual(
+            stale["expected_total_goals_remaining"],
+            base["expected_total_goals_remaining"],
+        )
+        self.assertEqual(stale["recent_goal_adjustment"], 1.0)
+
     def test_missing_score_or_minute_withholds_estimate(self):
         cases = [
             {"score_home": None, "score_away": 0, "elapsed_minute": 30},
