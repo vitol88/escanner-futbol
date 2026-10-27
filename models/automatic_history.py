@@ -72,7 +72,7 @@ def build_automatic_history(
     home_fixtures = [f for f in team_fixtures(home["id"]) if (f.get("fixture") or {}).get("status", {}).get("short") in {"FT", "AET", "PEN"}]
     away_fixtures = [f for f in team_fixtures(away["id"]) if (f.get("fixture") or {}).get("status", {}).get("short") in {"FT", "AET", "PEN"}]
 
-    def averages(matches: list[dict[str, Any]], team_id: int, venue: str) -> dict[str, Any]:
+    budget = [max(0, int(stats_budget))]\n\n    def averages(matches: list[dict[str, Any]], team_id: int, venue: str) -> dict[str, Any]:
         gf: list[float] = []
         ga: list[float] = []
         cf: list[float] = []
@@ -92,11 +92,11 @@ def build_automatic_history(
                 gf.append(float(own_goals)); ga.append(float(opp_goals))
             old_id = (old.get("fixture") or {}).get("id")
             stats_key = f"historical-stats:{old_id}"
-            if old_id and stats_key not in cache and stats_budget > 0:
+            if old_id and stats_key not in cache and budget[0] > 0:
                 try:
                     cache[stats_key] = api_get("fixtures/statistics", {"fixture": old_id}).get("response") or []
                     cache["_automatic_history_stats_calls"] = cache.get("_automatic_history_stats_calls", 0) + 1
-                    stats_budget -= 1
+                    budget[0] -= 1
                 except Exception as exc:
                     cache[stats_key] = []
                     cache[f"error:{stats_key}"] = str(exc)
