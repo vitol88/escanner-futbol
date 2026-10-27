@@ -223,13 +223,10 @@ else:
     metric_cols[2].metric("Tips de goles", current_tips_count)
     metric_cols[3].metric("Partidos revisados córners", len(corner_results_now))
     st.caption("Las métricas resumen la última consulta y el último escaneo guardado en esta sesión. El escáner intenta obtener estadísticas en vivo para todos los partidos filtrados y reutiliza las respuestas en caché para reducir llamadas.")
-    max_corner_scan = st.select_slider(
-        "Partidos para comprobar estadísticas de córners",
-        options=[1, 3, 5, 10],
-        value=5,
-        help="Se conserva como selector visual de prioridad; para enriquecer goles y córners, el escáner intenta consultar estadísticas de todos los partidos filtrados y reutiliza la caché."
-    )
+    st.caption("El escaneo completo consulta estadísticas para los partidos filtrados y reutiliza cada respuesta dentro de la ronda actual.")
     if st.button("⚡ Escanear todos los partidos en vivo", type="primary"):
+        # Force fresh live statistics for this scan; cache is then reused within this run.
+        st.session_state.stats_cache = {}
         st.session_state.goal_scan_results = []
         st.session_state.corner_scan_results = []
         st.markdown("""<div class="loading-brand"><div class="brand-mark"><svg viewBox="0 0 64 64" width="38" height="38"><circle cx="27" cy="29" r="20" fill="#101216" stroke="#FACC15" stroke-width="2.5"/><path d="M27 17l9 6-3 10H21l-4-9z" fill="#FACC15"/><path d="M17 24l-8-2m27 1 8-5m-9 15 8 8M21 33l-3 11m15-1-1 6" stroke="#F4F4F5" stroke-width="2" fill="none"/><path d="M39 51V38h6v13m4 0V29h6v22m4 0V20h5v31" fill="#FACC15"/></svg></div><div class="loading-orbit"></div><div><div class="loading-title">FOOTBALL LAB · ESCÁNER EN VIVO</div><div class="loading-subtitle">Evaluando mercados de goles y preparando revisión de córners…</div></div></div>""", unsafe_allow_html=True)
@@ -593,7 +590,7 @@ else:
     if not goal_results and not corner_results:
         st.info("Pulsa «Escanear todos los partidos en vivo» para generar el primer informe.")
     elif not goal_results:
-        st.info("En esta ronda no hubo señales de goles que superaran el umbral experimental del 65%. Esto no significa que todos los partidos carezcan de datos ni que no existan candidatos de córners: la revisión detallada de córners se limita a la muestra indicada arriba para proteger tu cuota de API.")
-        st.caption("El escáner sí evaluó los partidos filtrados para mercados de goles, pero el modelo actual usa promedios de liga y aún no integra clasificación, fuerza de cada equipo ni historial de córners en sus probabilidades.")
+        st.info("En esta ronda no hubo señales de goles que superaran el umbral experimental del 65%. Esto no significa que todos los partidos carezcan de datos ni que no existan candidatos de córners.")
+        st.caption("El modelo necesita una referencia histórica compatible para estimar goles. Si no la encuentra, la señal se marca como no disponible; las estadísticas en vivo no sustituyen por sí solas una base histórica fiable.")
 
 
