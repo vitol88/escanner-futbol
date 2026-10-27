@@ -422,12 +422,25 @@ else:
                     market_rows = [
                         {
                             "Mercado": market,
-                            "Probabilidad exploratoria": f"{probability * 100:.1f}%",
+                            "Probabilidad exploratoria": round(probability * 100, 1),
                             "Filtro experimental": "Supera 65%" if probability >= 0.65 else "No supera 65%",
                         }
                         for market, probability in sorted(tips, key=lambda item: item[1], reverse=True)
                     ]
-                    st.dataframe(market_rows, hide_index=True, use_container_width=True)
+                    st.dataframe(
+                        market_rows,
+                        hide_index=True,
+                        use_container_width=True,
+                        column_config={
+                            "Probabilidad exploratoria": st.column_config.ProgressColumn(
+                                "Probabilidad exploratoria",
+                                help="Estimación experimental; no equivale a una garantía de acierto.",
+                                format="%.1f%%",
+                                min_value=0,
+                                max_value=100,
+                            )
+                        },
+                    )
                     st.caption(f"Referencia: {estimate['baseline_league']}, {estimate['baseline_matches']} partidos históricos. Contexto en vivo: {context['context_status']}; córners {context.get('corners_total') if context.get('corners_total') is not None else 'N/D'}, tiros {context.get('shots_total') if context.get('shots_total') is not None else 'N/D'}, a puerta {context.get('shots_on_total') if context.get('shots_on_total') is not None else 'N/D'}, rojas {context.get('red_cards_total') if context.get('red_cards_total') is not None else 'N/D'}. Estos datos filtran disponibilidad, no ajustan aún la probabilidad.")
             if tips_found == 0:
                 st.info("No hay oportunidades preliminares para mostrar en esta ronda; se omiten los partidos sin una estimación útil.")
@@ -486,11 +499,24 @@ else:
                                     probability = poisson_at_least(remaining_corner_rate, corners_needed)
                                     corner_market_rows.append({
                                         "Mercado": f"Más de {line:.1f} córners",
-                                        "Prob. exploratoria": f"{probability * 100:.1f}%",
+                                        "Prob. exploratoria": round(probability * 100, 1),
                                         "Estado": "Candidato experimental" if probability >= 0.65 else "Por debajo del filtro (65%)",
                                     })
                             st.markdown("**Mercados de córners · probabilidad exploratoria**")
-                            st.dataframe(corner_market_rows, hide_index=True, use_container_width=True)
+                            st.dataframe(
+                                corner_market_rows,
+                                hide_index=True,
+                                use_container_width=True,
+                                column_config={
+                                    "Prob. exploratoria": st.column_config.ProgressColumn(
+                                        "Prob. exploratoria",
+                                        help="Modelo preliminar basado en el ritmo observado; no está calibrado.",
+                                        format="%.1f%%",
+                                        min_value=0,
+                                        max_value=100,
+                                    )
+                                },
+                            )
                             if minute_now <= 20 or total_corners_now <= 2:
                                 st.caption(
                                     "Probabilidades de muy baja confianza: se basan en el ritmo observado y una distribución Poisson simplificada. "
