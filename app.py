@@ -233,6 +233,26 @@ else:
         st.session_state.goal_scan_results = []
         st.session_state.corner_scan_results = []
         st.markdown("""<div class="loading-brand"><div class="brand-mark"><svg viewBox="0 0 64 64" width="38" height="38"><circle cx="27" cy="29" r="20" fill="#101216" stroke="#FACC15" stroke-width="2.5"/><path d="M27 17l9 6-3 10H21l-4-9z" fill="#FACC15"/><path d="M17 24l-8-2m27 1 8-5m-9 15 8 8M21 33l-3 11m15-1-1 6" stroke="#F4F4F5" stroke-width="2" fill="none"/><path d="M39 51V38h6v13m4 0V29h6v22m4 0V20h5v31" fill="#FACC15"/></svg></div><div class="loading-orbit"></div><div><div class="loading-title">FOOTBALL LAB · ESCÁNER EN VIVO</div><div class="loading-subtitle">Evaluando mercados de goles y preparando revisión de córners…</div></div></div>""", unsafe_allow_html=True)
+        # Fetch live statistics before estimating goals, so this same scan can
+        # actually use the activity context instead of only using a cache from a
+        # previous run. One request per fixture; subsequent sections reuse the cache.
+        stats_fetch_progress = st.progress(0, text="Cargando estadísticas en vivo para el análisis de goles…")
+        for stats_idx, stats_fixture in enumerate(filtered):
+            stats_fixture_id = (stats_fixture.get("fixture") or {}).get("id")
+            if stats_fixture_id is not None:
+                stats_cache_key = str(stats_fixture_id)
+                if stats_cache_key not in st.session_state.stats_cache:
+                    try:
+                        stats_payload = api_get("fixtures/statistics", {"fixture": stats_fixture_id})
+                        st.session_state.stats_cache[stats_cache_key] = stats_payload.get("response", [])
+                    except Exception as stats_exc:
+                        st.session_state.stats_cache[stats_cache_key] = []
+                        if "HTTP 429" in str(stats_exc):
+                            st.warning("Se alcanzó el límite de consultas de la API durante la carga de estadísticas. El escaneo continuará con los datos disponibles.")
+                            break
+            stats_fetch_progress.progress((stats_idx + 1) / max(1, len(filtered)))
+        stats_fetch_progress.empty()
+
         progress = st.progress(0)
         for idx, fixture in enumerate(filtered):
             league_data = fixture.get("league") or {}
@@ -291,7 +311,7 @@ else:
             st.session_state.goal_scan_results.append((fixture, estimate, tips))
             progress.progress((idx + 1) / max(1, len(filtered)))
         corner_results = []
-        # Prioritize fixtures with preliminary goal candidates; the limit only controls detailed API calls.
+        # Prioritize fixtures with preliminary goal candidates; all statistics already fetched above are reused.
         candidate_ids = {
             (fixture.get("fixture") or {}).get("id")
             for fixture, estimate, tips in st.session_state.goal_scan_results
@@ -304,8 +324,7 @@ else:
                 -int((((item.get("fixture") or {}).get("status") or {}).get("elapsed")) or 0),
             ),
         )
-        # Goal estimates now need live context too, so inspect every filtered fixture.
-        # Responses are cached by fixture ID and reused across reruns in this session.
+        # Reuse cached statistics for all fixtures. No additional API calls are made here.
         corner_fixtures = prioritized
         corner_progress = st.progress(0)
         for idx, fixture in enumerate(corner_fixtures):
