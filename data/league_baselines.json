@@ -1,0 +1,193 @@
+{
+  "source_file": "Base_Historica_Futbol_11_Ligas_Corners_Tarjetas_2026-10-26.xlsx",
+  "source_updated": "2026-10-26",
+  "note": "Baselines descriptivos del archivo histórico compartido. Usar solo como modelo exploratorio; no están calibrados para apuestas. Los conteos bajos se excluyen por el umbral en el código.",
+  "minimum_matches_for_estimate": 30,
+  "leagues": [
+    {
+      "country": "Alemania",
+      "country_aliases": [
+        "Germany"
+      ],
+      "league": "Bundesliga",
+      "aliases": [
+        "Bundesliga"
+      ],
+      "matches": 64,
+      "avg_home_goals": 2.188,
+      "avg_away_goals": 1.391,
+      "draw_rate": 0.203,
+      "btts_rate": 0.578,
+      "avg_total_goals": 3.578
+    },
+    {
+      "country": "Argentina",
+      "country_aliases": [
+        "Argentina"
+      ],
+      "league": "Primera División Argentina",
+      "aliases": [
+        "Primera División Argentina",
+        "Primera Division",
+        "Liga Profesional"
+      ],
+      "matches": 10,
+      "avg_home_goals": 0.9,
+      "avg_away_goals": 0.7,
+      "draw_rate": 0.2,
+      "btts_rate": 0.3,
+      "avg_total_goals": 1.6
+    },
+    {
+      "country": "Brasil",
+      "country_aliases": [
+        "Brazil"
+      ],
+      "league": "Brasileirão Série A",
+      "aliases": [
+        "Brasileirão Série A",
+        "Brasileirao Serie A",
+        "Serie A"
+      ],
+      "matches": 318,
+      "avg_home_goals": 1.525,
+      "avg_away_goals": 1.129,
+      "draw_rate": 0.28,
+      "btts_rate": 0.591,
+      "avg_total_goals": 2.654
+    },
+    {
+      "country": "Colombia",
+      "country_aliases": [
+        "Colombia"
+      ],
+      "league": "Liga BetPlay Primera A",
+      "aliases": [
+        "Liga BetPlay Primera A",
+        "Liga BetPlay",
+        "Primera A"
+      ],
+      "matches": 7,
+      "avg_home_goals": 1.429,
+      "avg_away_goals": 0.571,
+      "draw_rate": 0.286,
+      "btts_rate": 0.571,
+      "avg_total_goals": 2
+    },
+    {
+      "country": "España",
+      "country_aliases": [
+        "Spain"
+      ],
+      "league": "LaLiga Primera División",
+      "aliases": [
+        "LaLiga Primera División",
+        "LaLiga",
+        "Primera Division"
+      ],
+      "matches": 10,
+      "avg_home_goals": 1.4,
+      "avg_away_goals": 1,
+      "draw_rate": 0.2,
+      "btts_rate": 0.5,
+      "avg_total_goals": 2.4
+    },
+    {
+      "country": "Finlandia",
+      "country_aliases": [
+        "Finland"
+      ],
+      "league": "Veikkausliiga",
+      "aliases": [
+        "Veikkausliiga"
+      ],
+      "matches": 108,
+      "avg_home_goals": 1.426,
+      "avg_away_goals": 1.139,
+      "draw_rate": 0.25,
+      "btts_rate": 0.472,
+      "avg_total_goals": 2.565
+    },
+    {
+      "country": "Francia",
+      "country_aliases": [
+        "France"
+      ],
+      "league": "Ligue 1",
+      "aliases": [
+        "Ligue 1"
+      ],
+      "matches": 72,
+      "avg_home_goals": 1.611,
+      "avg_away_goals": 1.375,
+      "draw_rate": 0.264,
+      "btts_rate": 0.639,
+      "avg_total_goals": 2.986
+    },
+    {
+      "country": "Inglaterra",
+      "country_aliases": [
+        "England"
+      ],
+      "league": "Premier League",
+      "aliases": [
+        "Premier League"
+      ],
+      "matches": 81,
+      "avg_home_goals": 1.506,
+      "avg_away_goals": 1.259,
+      "draw_rate": 0.296,
+      "btts_rate": 0.506,
+      "avg_total_goals": 2.765
+    },
+    {
+      "country": "Italia",
+      "country_aliases": [
+        "Italy"
+      ],
+      "league": "Serie A",
+      "aliases": [
+        "Serie A"
+      ],
+      "matches": 80,
+      "avg_home_goals": 1.575,
+      "avg_away_goals": 1.438,
+      "draw_rate": 0.175,
+      "btts_rate": 0.562,
+      "avg_total_goals": 3.013
+    },
+    {
+      "country": "México",
+      "country_aliases": [
+        "Mexico"
+      ],
+      "league": "Liga MX",
+      "aliases": [
+        "Liga MX"
+      ],
+      "matches": 120,
+      "avg_home_goals": 1.558,
+      "avg_away_goals": 1.433,
+      "draw_rate": 0.267,
+      "btts_rate": 0.6,
+      "avg_total_goals": 2.992
+    },
+    {
+      "country": "Suiza",
+      "country_aliases": [
+        "Switzerland"
+      ],
+      "league": "Swiss Super League",
+      "aliases": [
+        "Swiss Super League",
+        "Super League"
+      ],
+      "matches": 65,
+      "avg_home_goals": 1.877,
+      "avg_away_goals": 1.754,
+      "draw_rate": 0.169,
+      "btts_rate": 0.646,
+      "avg_total_goals": 3.631
+    }
+  ]
+}
