@@ -291,17 +291,36 @@ else:
         stats_fetch_progress.empty()
         st.session_state.last_scan_stats_matches = stats_queries_attempted
 
+        # Compare current scores with the previous completed scan without extra API calls.
+        previous_scores = st.session_state.get("previous_scan_scores", {})
+        current_scores = {}
         progress = st.progress(0)
         for idx, fixture in enumerate(filtered):
             league_data = fixture.get("league") or {}
             goals_data = fixture.get("goals") or {}
             elapsed_value = ((fixture.get("fixture") or {}).get("status") or {}).get("elapsed")
+            fixture_id_for_score = (fixture.get("fixture") or {}).get("id")
+            score_home_now = goals_data.get("home") if isinstance(goals_data.get("home"), int) else None
+            score_away_now = goals_data.get("away") if isinstance(goals_data.get("away"), int) else None
+            current_scores[str(fixture_id_for_score)] = {
+                "home": score_home_now, "away": score_away_now, "minute": elapsed_value
+            }
+            previous = previous_scores.get(str(fixture_id_for_score), {})
+            recent_goals = 0
+            previous_minute = previous.get("minute")
+            minute_gap = elapsed_value - previous_minute if isinstance(elapsed_value, int) and isinstance(previous_minute, int) else None
+            if minute_gap is not None and 0 < minute_gap <= 10:
+                prev_home, prev_away = previous.get("home"), previous.get("away")
+                if isinstance(prev_home, int) and isinstance(prev_away, int) and isinstance(score_home_now, int) and isinstance(score_away_now, int):
+                    recent_goals = max(0, score_home_now - prev_home) + max(0, score_away_now - prev_away)
             estimate = estimate_live_goal_markets(
                 country=league_data.get("country"),
                 league_name=league_data.get("name"),
                 score_home=goals_data.get("home") if isinstance(goals_data.get("home"), int) else None,
                 score_away=goals_data.get("away") if isinstance(goals_data.get("away"), int) else None,
                 elapsed_minute=elapsed_value if isinstance(elapsed_value, int) else None,
+                recent_goals=recent_goals,
+                minutes_since_previous_scan=minute_gap,
                 data=MODEL_DATA,
                 live_stats=summarize_live_context(
                     st.session_state.stats_cache.get(str((fixture.get("fixture") or {}).get("id")), []),
@@ -445,6 +464,7 @@ else:
                 }
             goal_results_with_context.append((fixture, estimate, tips, context))
         st.session_state.goal_scan_results = goal_results_with_context
+        st.session_state.previous_scan_scores = current_scores
 
         # Session-local audit log: user can download it before leaving the app.
         signal_rows = st.session_state.get("signal_rows", [])
@@ -515,7 +535,7 @@ else:
                         },
                     )
                     st.caption(f"Referencia histórica: {estimate['baseline_league']} ({estimate['baseline_matches']} partidos). Contexto en vivo: {context['context_status']}; córners {context.get('corners_total') if context.get('corners_total') is not None else 'N/D'}, tiros {context.get('shots_total') if context.get('shots_total') is not None else 'N/D'}, a puerta {context.get('shots_on_total') if context.get('shots_on_total') is not None else 'N/D'}, rojas {context.get('red_cards_total') if context.get('red_cards_total') is not None else 'N/D'}.")
-                    st.caption(f"Ajustes exploratorios: ritmo del marcador ×{estimate.get('score_pace_adjustment', 1.0):.3f} · actividad en vivo ×{estimate.get('live_activity_adjustment', 1.0):.3f}. No están calibrados ni validados retrospectivamente.")
+                    st.caption(f"Ajustes exploratorios: ritmo del marcador ×{estimate.get('score_pace_adjustment', 1.0):.3f} · goles entre escaneos ×{estimate.get('recent_goal_adjustment', 1.0):.3f} ({estimate.get('recent_goals_observed', 0)} detectados) · actividad en vivo ×{estimate.get('live_activity_adjustment', 1.0):.3f}. No están calibrados ni validados retrospectivamente.")
                     st.info("Importante: «Empate final» y «No habrá más goles» son mercados distintos. Un 2-2 no significa que el partido vaya a terminar empatado; goles recientes y actividad alta pueden anticipar más acción. Estas estimaciones no son certezas.")
             if tips_found == 0:
                 st.info("No hay oportunidades preliminares para mostrar en esta ronda; se omiten los partidos sin una estimación útil.")
