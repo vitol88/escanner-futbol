@@ -1,12 +1,14 @@
 import csv
 import html
 import io
+import json
 import os
 from datetime import datetime
 from typing import Any
 
 import requests
 import streamlit as st
+from streamlit_autorefresh import st_autorefresh
 
 from models.live_context import qualifies_as_corner_candidate, summarize_live_context
 from models.backtest import evaluate_binary_predictions
@@ -292,22 +294,139 @@ if "last_scan_api_calls" not in st.session_state:
     st.session_state.last_scan_api_calls = 0
 if "last_scan_stats_matches" not in st.session_state:
     st.session_state.last_scan_stats_matches = 0
+if "auto_refresh_enabled" not in st.session_state:
+    st.session_state.auto_refresh_enabled = True
+if "sound_muted" not in st.session_state:
+    st.session_state.sound_muted = False
+if "score_snapshot" not in st.session_state:
+    st.session_state.score_snapshot = {}
+if "notification_events" not in st.session_state:
+    st.session_state.notification_events = []
+if "last_auto_refresh_error" not in st.session_state:
+    st.session_state.last_auto_refresh_error = ""
+
+controls = st.columns([1.4, 1, 1])
+with controls[0]:
+    st.session_state.auto_refresh_enabled = st.toggle(
+        "Actualización automática (60 s)",
+        value=st.session_state.auto_refresh_enabled,
+        help="Actualiza los marcadores cada 60 segundos mientras esta página esté abierta."
+    )
+with controls[1]:
+    if st.button("🔕 Silenciar sonido" if not st.session_state.sound_muted else "🔔 Activar sonido"):
+        st.session_state.sound_muted = not st.session_state.sound_muted
+with controls[2]:
+    refresh = st.button("↻ Actualizar ahora", type="primary")
+
+auto_tick = None
+if st.session_state.auto_refresh_enabled:
+    auto_tick = st_autorefresh(interval=60_000, key="live_fixture_refresh_60s")
+
+should_refresh = refresh or (
+    auto_tick is not None
+    and auto_tick > 0
+    and auto_tick != st.session_state.get("last_auto_tick_seen")
+)
+if auto_tick is not None:
+    st.session_state.last_auto_tick_seen = auto_tick
+
+if should_refresh:
+    try:
+        data = api_get("fixtures", {"live": "all"})
+        new_fixtures = data.get("response", [])
+        old_snapshot = st.session_state.score_snapshot
+        current_snapshot = {}
+        new_events = []
+        for match in new_fixtures:
+            fixture_data = match.get("fixture") or {}
+            fixture_id = str(fixture_data.get("id") or "")
+            if not fixture_id:
+                continue
+            goals_data = match.get("goals") or {}
+            score = (goals_data.get("home"), goals_data.get("away"))
+            current_snapshot[fixture_id] = score
+            previous_score = old_snapshot.get(fixture_id)
+            if previous_score is not None and score != previous_score and all(isinstance(v, int) for v in score):
+                home = (match.get("teams") or {}).get("home") or {}
+                away = (match.get("teams") or {}).get("away") or {}
+                old_total = sum(v for v in previous_score if isinstance(v, int))
+                if sum(score) > old_total:
+                    new_events.append({
+                        "id": f"{fixture_id}:{score[0]}-{score[1]}",
+                        "title": "⚽ ¡GOOOOL!",
+                        "message": f"{home.get('name', 'Local')} {score[0]} - {score[1]} {away.get('name', 'Visitante')}"
+                    })
+        st.session_state.score_snapshot = current_snapshot
+        st.session_state.live_fixtures = new_fixtures
+        st.session_state.last_refresh = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        st.session_state.last_auto_refresh_error = ""
+        seen_ids = {event.get("id") for event in st.session_state.notification_events}
+        for event in new_events:
+            if event["id"] not in seen_ids:
+                st.session_state.notification_events.append(event)
+                st.toast(f"{event['title']} · {event['message']}", icon="⚽")
+        st.session_state.notification_events = st.session_state.notification_events[-5:]
+    except Exception as exc:
+        st.session_state.last_auto_refresh_error = str(exc)
+
+if st.session_state.last_refresh:
+    st.caption(f"Última actualización: {st.session_state.last_refresh} · intervalo: 60 segundos")
+if st.session_state.last_auto_refresh_error:
+    st.warning(f"No se pudo actualizar el listado en vivo: {st.session_state.last_auto_refresh_error}")
+
+recent_events = st.session_state.notification_events[-3:]
+events_json = json.dumps(recent_events, ensure_ascii=False).replace("</", "<\\/")
+muted_js = "true" if st.session_state.sound_muted else "false"
+st.components.v1.html(
+    f"""
+    <div id="scanner-notices" style="font-family:system-ui;color:#f4f4f5"></div>
+    <script>
+    const events = {events_json};
+    const muted = {muted_js};
+    const root = document.getElementById('scanner-notices');
+    const seenKey = 'football-lab-seen-events';
+    let seen = [];
+    try {{ seen = JSON.parse(localStorage.getItem(seenKey) || '[]'); }} catch (e) {{}}
+    const fresh = events.filter(e => !seen.includes(e.id));
+    if (fresh.length) {{
+      fresh.forEach(e => {{
+        const card = document.createElement('div');
+        card.style.cssText = 'margin:8px 0;padding:12px 14px;border-radius:12px;background:#242014;border:1px solid #FACC15;box-shadow:0 6px 20px #0008';
+        card.innerHTML = '<b style="color:#FACC15">' + e.title + '</b><div style="margin-top:4px">' + e.message + '</div>';
+        root.appendChild(card);
+        setTimeout(() => card.remove(), 9000);
+      }});
+      seen = [...seen, ...fresh.map(e => e.id)].slice(-30);
+      try {{ localStorage.setItem(seenKey, JSON.stringify(seen)); }} catch (e) {{}}
+      if (!muted) {{
+        try {{
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) {{
+            const ctx = new AudioCtx();
+            [880, 1175].forEach((freq, i) => {{
+              const osc = ctx.createOscillator(), gain = ctx.createGain(), t = ctx.currentTime + i * 0.14;
+              osc.type = 'sine'; osc.frequency.value = freq;
+              gain.gain.setValueAtTime(0.0001, t);
+              gain.gain.exponentialRampToValueAtTime(0.12, t + 0.025);
+              gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+              osc.connect(gain); gain.connect(ctx.destination); osc.start(t); osc.stop(t + 0.2);
+            }});
+            setTimeout(() => ctx.close(), 700);
+          }}
+        }} catch (e) {{}}
+      }}
+    }}
+    </script>
+    """,
+    height=150,
+    scrolling=False,
+)
 
 left, right = st.columns([2, 1])
 with left:
     st.subheader("Partidos en vivo")
 with right:
-    refresh = st.button("↻ Actualizar partidos", type="primary")
-
-if refresh:
-    try:
-        with st.spinner("FOOTBALL LAB · Consultando partidos en vivo..."):
-            data = api_get("fixtures", {"live": "all"})
-            st.session_state.live_fixtures = data.get("response", [])
-            st.session_state.last_refresh = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        st.success(f"Partidos recibidos: {len(st.session_state.live_fixtures)}")
-    except Exception as exc:
-        st.error(str(exc))
+    st.caption("Los goles se detectan comparando marcadores entre actualizaciones.")
 
 if st.session_state.last_refresh:
     st.caption(f"Última consulta: {st.session_state.last_refresh}")
