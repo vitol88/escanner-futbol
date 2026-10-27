@@ -392,10 +392,10 @@ else:
             context_by_fixture[fixture_id] = summarize_live_context(cached_stats, elapsed)
 
         # Missing detailed stats must not erase candidates from the global scan.
-        filtered_goal_results = []
+        goal_results_with_context = []
         for fixture, estimate, tips in st.session_state.goal_scan_results:
-            if not tips:
-                continue
+            # Keep every evaluated fixture, including unavailable estimates and
+            # matches with no qualifying tips, so the UI can explain omissions.
             fixture_id = ((fixture.get("fixture") or {}).get("id"))
             context = context_by_fixture.get(fixture_id)
             if context is None:
@@ -406,8 +406,8 @@ else:
                     "core_complete": False,
                     "elapsed": ((fixture.get("fixture") or {}).get("status") or {}).get("elapsed"),
                 }
-            filtered_goal_results.append((fixture, estimate, tips, context))
-        st.session_state.goal_scan_results = filtered_goal_results
+            goal_results_with_context.append((fixture, estimate, tips, context))
+        st.session_state.goal_scan_results = goal_results_with_context
 
         # Session-local audit log: user can download it before leaving the app.
         signal_rows = st.session_state.get("signal_rows", [])
