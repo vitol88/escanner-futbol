@@ -1,4 +1,5 @@
 import csv
+import html
 import io
 import os
 from datetime import datetime
@@ -67,6 +68,17 @@ st.markdown("""
   .signal-title { color:#F4F4F5; font-size:1.12rem; font-weight:750; margin-top:.35rem; }
   .signal-pick { color:#FACC15; font-size:clamp(1.8rem,5vw,2.65rem); font-weight:900; line-height:1.15; margin:.45rem 0; }
   .signal-meta { color:#D4D4D8; font-size:.82rem; margin-top:.4rem; }
+  .live-match-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); gap:10px; margin:.5rem 0 1.1rem; }
+  .live-match-card { background:linear-gradient(135deg,#171B21,#101216); border:1px solid #343A44; border-radius:13px; padding:10px 12px; }
+  .live-match-league { color:#A1A1AA; font-size:.72rem; margin-bottom:8px; font-weight:700; }
+  .live-match-league span { color:#FACC15; }
+  .live-match-teams { display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; gap:8px; }
+  .live-match-team { min-width:0; display:flex; align-items:center; gap:7px; color:#F4F4F5; font-size:.82rem; font-weight:700; }
+  .live-match-team span:last-child { overflow-wrap:anywhere; }
+  .live-match-team.away-team { justify-content:flex-end; text-align:right; }
+  .team-badge { width:25px; height:25px; object-fit:contain; flex:0 0 25px; }
+  .team-badge-fallback { width:25px; height:25px; display:inline-flex; align-items:center; justify-content:center; flex:0 0 25px; background:#242014; border-radius:50%; }
+  .live-match-score { white-space:nowrap; background:#0B0D10; border:1px solid #393326; border-radius:8px; padding:5px 8px; color:#FACC15; font-weight:900; font-size:1rem; }
   .history-table { width:100%; border-collapse:separate; border-spacing:0; border:1px solid #4A4024; border-radius:12px; overflow:hidden; font-size:.9rem; margin:.5rem 0 1rem; }
   .history-table th { background:#FACC15; color:#151515; text-align:left; padding:.72rem .65rem; font-weight:850; }
   .history-table td { background:#15191F; color:#F4F4F5; padding:.68rem .65rem; border-top:1px solid #34302A; }
@@ -171,6 +183,35 @@ def fixture_label(fixture: dict[str, Any]) -> str:
     league = (fixture.get("league") or {}).get("name", "Liga")
     return f"{home} {score} {away} · {minute_text} · {league}"
 
+def fixture_card_html(fixture: dict[str, Any]) -> str:
+    """Compact live match card using the team badge URLs supplied by API-Football."""
+    teams = fixture.get("teams") or {}
+    home = teams.get("home") or {}
+    away = teams.get("away") or {}
+    goals = fixture.get("goals") or {}
+    status = (fixture.get("fixture") or {}).get("status") or {}
+    league = (fixture.get("league") or {}).get("name") or "Liga"
+    minute = status.get("elapsed")
+    minute_label = f"{minute}'" if minute is not None else str(status.get("short") or "EN VIVO")
+    home_name = html.escape(str(home.get("name") or "Local"))
+    away_name = html.escape(str(away.get("name") or "Visitante"))
+    league_name = html.escape(str(league))
+    home_logo = html.escape(str(home.get("logo") or ""), quote=True)
+    away_logo = html.escape(str(away.get("logo") or ""), quote=True)
+    home_score = goals.get("home") if goals.get("home") is not None else "-"
+    away_score = goals.get("away") if goals.get("away") is not None else "-"
+    home_badge = f'<img class="team-badge" src="{home_logo}" alt="" onerror="this.style.display=\'none\'">' if home_logo else '<span class="team-badge-fallback">⚽</span>'
+    away_badge = f'<img class="team-badge" src="{away_logo}" alt="" onerror="this.style.display=\'none\'">' if away_logo else '<span class="team-badge-fallback">⚽</span>'
+    return (
+        '<div class="live-match-card">'
+        f'<div class="live-match-league">{league_name} <span>· {html.escape(minute_label)}</span></div>'
+        '<div class="live-match-teams">'
+        f'<div class="live-match-team">{home_badge}<span>{home_name}</span></div>'
+        f'<div class="live-match-score">{home_score} – {away_score}</div>'
+        f'<div class="live-match-team away-team">{away_badge}<span>{away_name}</span></div>'
+        '</div></div>'
+    )
+
 def has_core_stats(stats: list[dict[str, Any]]) -> tuple[bool, list[str]]:
     # API-Football returns one statistics object per team, home first and away second.
     # Read each team explicitly so one team's values can never fill the other's gap.
@@ -239,6 +280,13 @@ else:
         f for f in fixtures
         if (f.get("league") or {}).get("name", "Liga") in chosen_leagues
     ]
+    st.markdown("### Marcadores en vivo")
+    if filtered:
+        match_cards_html = '<div class="live-match-grid">' + "".join(fixture_card_html(match) for match in filtered) + "</div>"
+        st.markdown(match_cards_html, unsafe_allow_html=True)
+    else:
+        st.info("No hay partidos para las ligas seleccionadas.")
+
     goal_results_now = st.session_state.get("goal_scan_results", [])
     corner_results_now = st.session_state.get("corner_scan_results", [])
     current_tips_count = sum(len(item[2]) for item in goal_results_now)
