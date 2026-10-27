@@ -62,6 +62,17 @@ st.markdown("""
   .brand-subtitle { color:#A1A1AA; font-size:10px; letter-spacing:1px; margin-top:5px; }
   .brand-pill { margin-left:auto; white-space:nowrap; color:#FACC15; border:1px solid #554719; background:#242014; border-radius:999px; padding:6px 9px; font-size:10px; font-weight:800; }
   [data-testid="stExpander"] summary p { font-weight:700; }
+  .signal-card { margin:.65rem 0 1rem; padding:1.15rem 1.2rem; border-radius:18px; border:1px solid #FACC15; background:radial-gradient(circle at 92% 8%,rgba(250,204,21,.18),transparent 34%),linear-gradient(135deg,#242014 0%,#171B21 58%,#111419 100%); box-shadow:0 8px 28px rgba(0,0,0,.24); }
+  .signal-kicker { color:#FACC15; font-size:.76rem; font-weight:850; letter-spacing:1.4px; text-transform:uppercase; }
+  .signal-title { color:#F4F4F5; font-size:1.12rem; font-weight:750; margin-top:.35rem; }
+  .signal-pick { color:#FACC15; font-size:clamp(1.8rem,5vw,2.65rem); font-weight:900; line-height:1.15; margin:.45rem 0; }
+  .signal-meta { color:#D4D4D8; font-size:.82rem; margin-top:.4rem; }
+  .history-table { width:100%; border-collapse:separate; border-spacing:0; border:1px solid #4A4024; border-radius:12px; overflow:hidden; font-size:.9rem; margin:.5rem 0 1rem; }
+  .history-table th { background:#FACC15; color:#151515; text-align:left; padding:.72rem .65rem; font-weight:850; }
+  .history-table td { background:#15191F; color:#F4F4F5; padding:.68rem .65rem; border-top:1px solid #34302A; }
+  .history-table tr:nth-child(even) td { background:#1B2027; }
+  .history-table td:nth-child(2), .history-table td:nth-child(3), .history-table th:nth-child(2), .history-table th:nth-child(3) { text-align:center; }
+  @media (max-width: 640px) { .history-table {font-size:.76rem;} .history-table th,.history-table td {padding:.55rem .4rem;} }
   [data-testid="stExpander"] summary:hover { color:#FACC15; }
   div[data-testid="stMetricLabel"] p { color:#A1A1AA !important; font-size: .78rem; }
   div[data-testid="stMetricValue"] { color:#FACC15 !important; }
@@ -587,7 +598,19 @@ else:
                             {"Indicador": "Goles a favor del local en casa", "Promedio": history.get("home_goals_for") if history.get("home_goals_for") is not None else "N/D", "Muestra": history.get("home_goal_sample", 0)},
                             {"Indicador": "Goles a favor del visitante fuera", "Promedio": history.get("away_goals_for") if history.get("away_goals_for") is not None else "N/D", "Muestra": history.get("away_goal_sample", 0)},
                         ]
-                        st.dataframe(history_rows, hide_index=True, use_container_width=True)
+                        table_html = '<table class="history-table"><thead><tr><th>Indicador</th><th>Promedio</th><th>Muestra</th></tr></thead><tbody>'
+                        for history_row in history_rows:
+                            average = history_row["Promedio"]
+                            average_text = f"{average:.2f}".rstrip("0").rstrip(".") if isinstance(average, (int, float)) else str(average)
+                            table_html += (
+                                "<tr>"
+                                f"<td>{history_row['Indicador']}</td>"
+                                f"<td>{average_text}</td>"
+                                f"<td>{history_row['Muestra']}</td>"
+                                "</tr>"
+                            )
+                        table_html += "</tbody></table>"
+                        st.markdown(table_html, unsafe_allow_html=True)
                         st.caption(history.get("note", "Historial automático de partidos anteriores."))
                     else:
                         st.caption(history.get("note", "Historial automático no disponible para este encuentro."))
@@ -599,8 +622,20 @@ else:
                             hist_rate = float(history["home_corners_for"]) + float(history["away_corners_for"])
                         if hist_rate is not None:
                             projected = 0.5 * hist_rate + 0.5 * (total_now * 90 / max(1, minute))
-                            st.metric("Proyección exploratoria de córners totales", f"{projected:.1f}")
-                            st.caption("Combina promedios históricos de sede con el ritmo observado; estimación exploratoria, no probabilidad validada.")
+                            # 10.4 -> Más de 10.5; round upward to the next half-corner line.
+                            import math
+                            suggested_line = math.ceil(projected * 2) / 2
+                            line_text = str(int(suggested_line)) if suggested_line.is_integer() else f"{suggested_line:.1f}"
+                            st.markdown(
+                                '<div class="signal-card">'
+                                '<div class="signal-kicker">🚩 Tip sugerido · mercado de córners</div>'
+                                '<div class="signal-title">Línea orientativa de córners totales</div>'
+                                f'<div class="signal-pick">Más de {line_text}</div>'
+                                f'<div class="signal-meta">Proyección del modelo: {projected:.1f} córners · En vivo: {total_now} córners al minuto {minute}</div>'
+                                '</div>',
+                                unsafe_allow_html=True,
+                            )
+                            st.caption("Tip orientativo calculado con promedios históricos y ritmo en vivo. No es una apuesta segura ni una probabilidad validada; verifica la línea y la cuota disponibles en tu casa de apuestas.")
                         elif minute <= 5:
                             st.caption("Partido muy reciente: el historial disponible orienta la estimación inicial; todavía no se fuerza una señal por ritmo.")
                 st.divider()
