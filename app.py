@@ -9,6 +9,7 @@ import streamlit as st
 
 from models.live_context import qualifies_as_corner_candidate, summarize_live_context
 from models.backtest import evaluate_binary_predictions
+from models.late_goal_history import estimate_late_goals_from_history
 from models.probabilities import (
     corner_pace_per_90,
     estimate_live_goal_markets,
@@ -516,6 +517,28 @@ else:
     tab_goals, tab_corners, tab_overview = st.tabs(["⚽ Goles y señales", "🚩 Córners", "📊 Estado y registro"])
 
     with tab_goals:
+        st.markdown("### Historial de goles en los minutos finales")
+        st.caption("Carga un CSV de partidos históricos por equipo y minuto de corte. El escáner comparará liga, equipo, minuto y, si hay muestra suficiente, marcador al corte. No inventa tasas si faltan datos.")
+        late_history_file = st.file_uploader(
+            "CSV histórico de goles después del minuto de corte",
+            type=["csv"],
+            key="late_goal_history_csv",
+            help="Columnas: league, team, minute, score_for, score_against, goals_for_after, goals_against_after."
+        )
+        if late_history_file is not None:
+            try:
+                late_history_rows = list(csv.DictReader(io.StringIO(late_history_file.getvalue().decode("utf-8-sig"))))
+                required_late_columns = {"league", "team", "minute", "score_for", "score_against", "goals_for_after", "goals_against_after"}
+                if late_history_rows and required_late_columns.issubset(set(late_history_rows[0].keys())):
+                    st.session_state["late_goal_history_rows"] = late_history_rows
+                    st.success(f"Historial cargado: {len(late_history_rows)} filas de equipo-partido.")
+                else:
+                    st.error("El CSV no tiene todas las columnas requeridas. Revisa el formato indicado.")
+            except (UnicodeDecodeError, csv.Error) as history_exc:
+                st.error(f"No se pudo leer el CSV histórico: {history_exc}")
+        late_history_rows = st.session_state.get("late_goal_history_rows", [])
+        if not late_history_rows:
+            st.info("La estimación histórica de minutos finales estará disponible cuando cargues un CSV con minutos reales de gol. La base actual de resultados finales no contiene ese detalle.")
         goal_results = st.session_state.get("goal_scan_results", [])
         if goal_results:
             st.subheader("Tips preliminares del escáner")
@@ -559,6 +582,48 @@ else:
                     if estimate.get("compatibility_fallback"):
                         st.warning("Esta ejecución está usando compatibilidad temporal porque el módulo de probabilidades cargado no acepta aún los parámetros nuevos. Reinicia la aplicación para cargar la versión completa.")
                     st.info("Importante: «Empate final» y «No habrá más goles» son mercados distintos. Un 2-2 no significa que el partido vaya a terminar empatado; goles recientes y actividad alta pueden anticipar más acción. Estas estimaciones no son certezas.")
+                    if late_history_rows:
+                        league_name_history = ((fixture.get("league") or {}).get("name") or "")
+                        score_h_history = ((fixture.get("goals") or {}).get("home"))
+                        score_a_history = ((fixture.get("goals") or {}).get("away"))
+                        minute_history = ((fixture.get("fixture") or {}).get("status") or {}).get("elapsed")
+                        teams_history = fixture.get("teams") or {}
+                        if isinstance(score_h_history, int) and isinstance(score_a_history, int) and isinstance(minute_history, int):
+                            late_rows_ui = []
+                            for side, team_score, opponent_score in (
+                                ("home", score_h_history, score_a_history),
+                                ("away", score_a_history, score_h_history),
+                            ):
+                                team_name_history = ((teams_history.get(side) or {}).get("name") or "")
+                                historical_estimate = estimate_late_goals_from_history(
+                                    late_history_rows,
+                                    league=league_name_history,
+                                    team=team_name_history,
+                                    minute=minute_history,
+                                    score_for=team_score,
+                                    score_against=opponent_score,
+                                )
+                                if historical_estimate.get("available"):
+                                    late_rows_ui.append({
+                                        "Equipo": team_name_history,
+                                        "Muestra": historical_estimate["sample_size"],
+                                        "Marcador exacto": "Sí" if historical_estimate.get("matched_exact_score") else "No; muestra general",
+                                        "Prob. ≥1 gol más": round(historical_estimate["prob_at_least_1_goal"] * 100, 1),
+                                        "Prob. ≥2 goles más": round(historical_estimate["prob_at_least_2_goals"] * 100, 1),
+                                        "Media goles restantes": round(historical_estimate["mean_goals_after"], 2),
+                                    })
+                                else:
+                                    late_rows_ui.append({
+                                        "Equipo": team_name_history,
+                                        "Muestra": historical_estimate.get("sample_size", 0),
+                                        "Marcador exacto": "Muestra insuficiente",
+                                        "Prob. ≥1 gol más": "N/D",
+                                        "Prob. ≥2 goles más": "N/D",
+                                        "Media goles restantes": "N/D",
+                                    })
+                            st.markdown("**Frecuencia histórica desde este minuto**")
+                            st.dataframe(late_rows_ui, hide_index=True, use_container_width=True)
+                            st.caption("Frecuencias empíricas de los partidos cargados, no probabilidades calibradas. Si el marcador exacto no tiene al menos 8 casos, se usa el historial del equipo en esa liga y minuto; la muestra se muestra para valorar la fiabilidad.")
             if tips_found == 0:
                 st.info("No hay oportunidades preliminares para mostrar en esta ronda; se omiten los partidos sin una estimación útil.")
             unavailable_items = [item for item in goal_results if not item[1].get("available")]
