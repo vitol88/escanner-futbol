@@ -89,6 +89,17 @@ class ProbabilityModelTests(unittest.TestCase):
         )
         self.assertTrue(result["btts_already_settled"])
 
+    def test_probability_no_more_goals_is_valid(self):
+        result = estimate_live_goal_markets(
+            country="England", league_name="EPL",
+            score_home=2, score_away=1, elapsed_minute=35, data=TEST_DATA
+        )
+        self.assertTrue(0.0 <= result["probability_no_more_goals"] <= 1.0)
+        self.assertAlmostEqual(
+            result["probability_no_more_goals"],
+            poisson_pmf(result["expected_total_goals_remaining"], 0),
+        )
+
     def test_corner_pace_is_descriptive(self):
         self.assertAlmostEqual(corner_pace_per_90(8, 40), 18.0)
         self.assertIsNone(corner_pace_per_90(None, 40))
