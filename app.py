@@ -376,6 +376,15 @@ else:
                     elapsed_now = ((item.get("fixture") or {}).get("fixture") or {}).get("status") or {}
                     minute_now = elapsed_now.get("elapsed")
                     total_corners_now = item["home_corners"] + item["away_corners"]
+                    if isinstance(minute_now, int) and minute_now >= 10:
+                        projected_additional = item["pace"] * max(0, 90 - min(minute_now, 90)) / 90
+                        projected_final = total_corners_now + projected_additional
+                        st.info(
+                            f"Proyección orientativa si continúa el ritmo actual: "
+                            f"{projected_final:.1f} córners totales al final; "
+                            f"aprox. {projected_additional:.1f} córners adicionales. "
+                            "No usa todavía promedios históricos de córners por liga/equipo."
+                        )
                     total_shots_now = (item.get("home_shots") or 0) + (item.get("away_shots") or 0)
                     if isinstance(minute_now, int) and 15 <= minute_now <= 78 and total_corners_now >= 5 and item["pace"] >= 10 and total_shots_now >= 8:
                         st.warning("CANDIDATO EXPERIMENTAL · ritmo de córners elevado y actividad de tiros. Revisar mercados de córners restantes y cuota disponible; no es una probabilidad validada ni una apuesta automática.")
