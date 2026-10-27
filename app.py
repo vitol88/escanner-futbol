@@ -1,3 +1,5 @@
+import csv
+import io
 import os
 from datetime import datetime
 from typing import Any
@@ -97,6 +99,61 @@ def safe_stat(
         if item.get("type") == stat_name:
             return item.get("value")
     return None
+
+def numeric_stat(value: Any) -> float | None:
+    """Normalize numeric API stats while preserving missing values."""
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, str):
+        cleaned = value.strip().replace("%", "")
+        try:
+            return float(cleaned)
+        except ValueError:
+            return None
+    return None
+
+
+def summarize_live_context(stats: list[dict[str, Any]], elapsed: int | None) -> dict[str, Any]:
+    """Describe available live context; deliberately does not change probabilities."""
+    names = {
+        "corners_home": "Corner Kicks", "shots_home": "Total Shots",
+        "shots_on_home": "Shots on Goal", "possession_home": "Ball Possession",
+        "yellow_home": "Yellow Cards", "red_home": "Red Cards",
+    }
+    result: dict[str, Any] = {}
+    for key, stat_name in names.items():
+        result[key] = safe_stat(stats, stat_name, 0)
+    for key, stat_name in names.items():
+        result[key.replace("_home", "_away")] = safe_stat(stats, stat_name, 1)
+    core_keys = ("corners_home", "corners_away", "shots_home", "shots_away")
+    result["core_complete"] = all(numeric_stat(result.get(key)) is not None for key in core_keys)
+    result["elapsed"] = elapsed
+    result["context_status"] = (
+        "completo" if result["core_complete"] and result.get("possession_home") is not None
+        and result.get("possession_away") is not None else
+        "parcial" if any(value is not None for key, value in result.items() if key not in ("elapsed", "core_complete", "context_status"))
+        else "sin datos"
+    )
+    result["corners_total"] = (
+        numeric_stat(result.get("corners_home")) + numeric_stat(result.get("corners_away"))
+        if numeric_stat(result.get("corners_home")) is not None and numeric_stat(result.get("corners_away")) is not None
+        else None
+    )
+    result["shots_total"] = (
+        numeric_stat(result.get("shots_home")) + numeric_stat(result.get("shots_away"))
+        if numeric_stat(result.get("shots_home")) is not None and numeric_stat(result.get("shots_away")) is not None
+        else None
+    )
+    result["shots_on_total"] = (
+        numeric_stat(result.get("shots_on_home")) + numeric_stat(result.get("shots_on_away"))
+        if numeric_stat(result.get("shots_on_home")) is not None and numeric_stat(result.get("shots_on_away")) is not None
+        else None
+    )
+    result["red_cards_total"] = sum(numeric_stat(result.get(key)) or 0 for key in ("red_home", "red_away"))
+    return result
+
 
 def fixture_label(fixture: dict[str, Any]) -> str:
     teams = fixture.get("teams") or {}
@@ -255,12 +312,60 @@ else:
             corner_progress.progress((idx + 1) / max(1, len(corner_fixtures)))
         st.session_state.corner_scan_results = corner_results
 
+        # Attach live context to the corresponding goal scan. Missing statistics remain missing.
+        context_by_fixture = {}
+        for item in corner_results:
+            fixture_id = (item.get("fixture", {}).get("fixture") or {}).get("id")
+            if not fixture_id or item.get("error"):
+                continue
+            cached_stats = st.session_state.stats_cache.get(str(fixture_id), [])
+            elapsed = ((item.get("fixture", {}).get("fixture") or {}).get("status") or {}).get("elapsed")
+            context_by_fixture[fixture_id] = summarize_live_context(cached_stats, elapsed)
+
+        # Only keep signals for games with core live stats available. We do not adjust probabilities
+        # from corners/cards/possession until historical validation demonstrates predictive value.
+        filtered_goal_results = []
+        for fixture, estimate, tips in st.session_state.goal_scan_results:
+            fixture_id = ((fixture.get("fixture") or {}).get("id"))
+            context = context_by_fixture.get(fixture_id)
+            if not tips:
+                continue
+            if context is None or not context.get("core_complete"):
+                continue
+            filtered_goal_results.append((fixture, estimate, tips, context))
+        st.session_state.goal_scan_results = filtered_goal_results
+
+        # Session-local audit log: user can download it before leaving the app.
+        signal_rows = st.session_state.get("signal_rows", [])
+        for fixture, estimate, tips, context in filtered_goal_results:
+            for market, probability in tips:
+                signal_rows.append({
+                    "recorded_at": datetime.now().isoformat(timespec="seconds"),
+                    "fixture_id": (fixture.get("fixture") or {}).get("id"),
+                    "league": (fixture.get("league") or {}).get("name"),
+                    "home": ((fixture.get("teams") or {}).get("home") or {}).get("name"),
+                    "away": ((fixture.get("teams") or {}).get("away") or {}).get("name"),
+                    "minute": context.get("elapsed"),
+                    "score_home": ((fixture.get("goals") or {}).get("home")),
+                    "score_away": ((fixture.get("goals") or {}).get("away")),
+                    "market": market,
+                    "estimated_probability_exploratory": round(float(probability), 4),
+                    "context_status": context.get("context_status"),
+                    "corners_total": context.get("corners_total"),
+                    "shots_total": context.get("shots_total"),
+                    "shots_on_total": context.get("shots_on_total"),
+                    "red_cards_total": context.get("red_cards_total"),
+                    "final_score": "",
+                    "outcome_verified": "",
+                })
+        st.session_state.signal_rows = signal_rows
+
     goal_results = st.session_state.get("goal_scan_results", [])
     if goal_results:
         st.subheader("Tips preliminares del escáner")
         st.caption("Se evalúan objetivos de goles adicionales desde el marcador actual (por ejemplo, con 8 goles, objetivo de 9+). Solo se muestran oportunidades que superan el filtro experimental del 65%; si ninguna lo supera, se omite el partido. Sin cuotas reales no se calcula valor esperado y no son apuestas validadas.")
         tips_found = 0
-        for fixture, estimate, tips in goal_results:
+        for fixture, estimate, tips, context in goal_results:
             if not estimate.get("available"):
                 continue
             if not tips:
@@ -272,7 +377,7 @@ else:
                     st.success(f"SEÑAL EXPERIMENTAL (≥65%) · {market} · probabilidad exploratoria {probability * 100:.1f}%")
                 else:
                     st.caption(f"Estimación · {market} · probabilidad exploratoria {probability * 100:.1f}%")
-            st.caption(f"Referencia: {estimate['baseline_league']}, {estimate['baseline_matches']} partidos históricos. Modelo de promedio de liga, pendiente de validación.")
+            st.caption(f"Referencia: {estimate['baseline_league']}, {estimate['baseline_matches']} partidos históricos. Contexto en vivo: {context['context_status']}; córners {context.get('corners_total') if context.get('corners_total') is not None else 'N/D'}, tiros {context.get('shots_total') if context.get('shots_total') is not None else 'N/D'}, a puerta {context.get('shots_on_total') if context.get('shots_on_total') is not None else 'N/D'}, rojas {context.get('red_cards_total') if context.get('red_cards_total') is not None else 'N/D'}. Estos datos filtran disponibilidad, no ajustan aún la probabilidad.")
             st.divider()
         if tips_found == 0:
             st.info("No hay oportunidades preliminares para mostrar en esta ronda; se omiten los partidos sin una estimación útil.")
@@ -282,7 +387,7 @@ else:
     corner_results = st.session_state.get("corner_scan_results", [])
     if corner_results:
         st.subheader("Córners · revisión en vivo")
-        st.caption("Se consulta una muestra limitada para controlar llamadas a la API. Se revisan córners, tiros, posesión y tarjetas cuando la API los proporciona; por ahora son contexto descriptivo y no alteran probabilidades sin validación histórica.")
+        st.caption("Se consulta una muestra limitada para controlar llamadas a la API. Solo se muestran señales de partidos con córners y tiros completos; las estadísticas contextuales no alteran probabilidades hasta validarlas históricamente.")
         for item in corner_results:
             st.markdown(f"**{fixture_label(item['fixture'])}**")
             if item.get("error"):
@@ -301,6 +406,23 @@ else:
 
     if not goal_results and not corner_results:
         st.info("Pulsa «Escanear todos los partidos en vivo» para generar el primer informe.")
+    elif not goal_results:
+        st.info("No se encontraron señales que superen el filtro con estadísticas principales completas. Se omiten los partidos sin datos suficientes.")
+
+signal_rows = st.session_state.get("signal_rows", [])
+if signal_rows:
+    buffer = io.StringIO()
+    writer = csv.DictWriter(buffer, fieldnames=list(signal_rows[0].keys()))
+    writer.writeheader()
+    writer.writerows(signal_rows)
+    st.download_button(
+        "⬇️ Descargar registro de señales (CSV)",
+        data=buffer.getvalue().encode("utf-8-sig"),
+        file_name="registro_senales_escanner.csv",
+        mime="text/csv",
+        help="El registro vive en la sesión actual. Descárgalo para conservarlo y verificar después el resultado final."
+    )
+    st.caption("El registro guarda la estimación y el contexto observado. El resultado final queda vacío hasta que se verifique; no se inventan aciertos ni fallos.")
 
 st.divider()
 st.subheader("Estado de los mercados")
