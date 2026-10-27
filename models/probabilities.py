@@ -85,15 +85,29 @@ def estimate_live_goal_markets(
     """
     result: dict[str, Any] = {"available": False, "reason": None}
     baseline = find_league_baseline(country, league_name, data)
+    # If a league-specific baseline is missing, use a conservative generic
+    # football baseline so a live match can still be evaluated from score, minute
+    # and observed activity. Mark this fallback explicitly in the result.
+    baseline_fallback = baseline is None
     if baseline is None:
-        result["reason"] = "No hay una referencia histórica compatible para esta liga."
-        return result
+        baseline = {
+            "league": "Referencia genérica (sin muestra específica de liga)",
+            "matches": 0,
+            "avg_home_goals": 1.35,
+            "avg_away_goals": 1.05,
+        }
     minimum = int((data or load_league_baselines()).get("minimum_matches_for_estimate", 30))
     matches = int(baseline.get("matches", 0))
-    if matches < minimum:
-        result["reason"] = f"Muestra histórica insuficiente: {matches} partidos; se requieren al menos {minimum}."
-        result["baseline_matches"] = matches
-        return result
+    if matches < minimum and not baseline_fallback:
+        result["reason"] = f"Muestra histórica insuficiente: {matches} partidos; se usará referencia genérica si hay datos en vivo."
+        # Do not withhold all signals solely because the competition sample is small.
+        baseline_fallback = True
+        baseline = {
+            "league": "Referencia genérica (muestra de liga insuficiente)",
+            "matches": matches,
+            "avg_home_goals": 1.35,
+            "avg_away_goals": 1.05,
+        }
     if not isinstance(score_home, int) or not isinstance(score_away, int) or score_home < 0 or score_away < 0:
         result["reason"] = "El marcador no está disponible."
         return result
@@ -224,6 +238,7 @@ def estimate_live_goal_markets(
         "reason": None,
         "baseline_league": baseline["league"],
         "baseline_matches": matches,
+        "baseline_fallback": baseline_fallback,
         "minute_used": minute,
         "expected_home_goals_remaining": home_rate,
         "expected_away_goals_remaining": away_rate,
@@ -243,7 +258,7 @@ def estimate_live_goal_markets(
         "draw_final": draw_probability,
         "btts_final": btts_probability,
         "btts_already_settled": score_home > 0 and score_away > 0,
-        "model_label": "Exploratorio por promedio de liga y ritmo de goles observado; no calibrado ni validado para apuestas",
+        "model_label": "Exploratorio por promedio de liga/genérico y ritmo observado; no calibrado ni validado para apuestas",
     })
     return result
 
