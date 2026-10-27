@@ -35,6 +35,18 @@ Los nombres exactos de botones pueden variar según la interfaz actual del prove
 - El plan de API puede variar; verifica el límite vigente en tu panel de API-Football.
 - No se ejecutan apuestas automáticamente.
 
+## Registro y evaluación retrospectiva de señales
+
+En la pestaña **Estado de los mercados**, descarga el CSV de señales de la sesión y consérvalo. Cuando ya se conozca el resultado del evento, completa estas columnas en cada fila que quieras evaluar:
+
+- `estimated_probability_exploratory`: probabilidad que guardó el escáner, entre 0 y 1.
+- `outcome`: **1 si se cumplió el mercado concreto de esa fila** y **0 si no se cumplió**. No escribas aquí el marcador final. Ejemplo: para “Ambos equipos marcan”, usa 1 si ambos anotaron y 0 si no.
+- `outcome_verified`: escribe `true` solo después de comprobar el resultado real.
+
+Después, carga el CSV completado en el evaluador retrospectivo. Las filas no verificadas, inválidas o sin resultado binario se excluyen. El Brier score mide el error de las probabilidades (0 es perfecto; menor es mejor). La tasa de acierto por sí sola no demuestra que las probabilidades estén calibradas. Evalúa cada tipo de mercado por separado y reúne una muestra suficiente antes de sacar conclusiones.
+
+La evaluación es manual y experimental: no consulta resultados finales automáticamente, no ajusta todavía los modelos y no demuestra rentabilidad ni valor esperado (EV).
+
 ## Próximas etapas
 1. Probar conexión real y respuestas de API-Football.
 2. Mejorar filtros de datos y control de cuotas.
