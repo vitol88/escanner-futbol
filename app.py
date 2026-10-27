@@ -844,52 +844,122 @@ else:
     tab_goals, tab_corners, tab_overview = st.tabs(["⚽ Goles y señales", "🚩 Córners", "📊 Estado y registro"])
 
     with tab_goals:
-        st.markdown("### Señales automáticas de goles")
-        st.caption("El escáner combina las referencias disponibles de liga y el contexto en vivo. El historial reciente se consulta automáticamente durante el escaneo; no necesitas cargar archivos históricos.")
+        st.markdown("### ⚽ Goles · lectura del partido en vivo")
+        st.caption("El bot combina promedios de localía, marcador, minuto y estadísticas disponibles en vivo. Presenta una sola recomendación principal por partido, no una lista de mercados.")
         goal_results = st.session_state.get("goal_scan_results", [])
         if goal_results:
-            st.subheader("Tips preliminares del escáner")
-            st.caption("Probabilidades exploratorias; se muestran candidatos desde el 60 %, pero no están calibradas ni garantizan resultados.")
-            # Show the automatic home/away goal averages alongside goal-market analysis.
             corner_history_by_id = {
                 (item.get("fixture", {}).get("fixture") or {}).get("id"): item.get("automatic_history") or {}
                 for item in st.session_state.get("corner_scan_results", [])
             }
-            search_matches = st.text_input("🔎 Buscar equipo o liga", placeholder="Ej. Roma, Premier League…", key="search_goal_matches").strip().casefold()
-            tips_found = 0
+            search_matches = st.text_input("🔎 Buscar equipo o liga", placeholder="Ej. Argentinos Juniors, Premier League…", key="search_goal_matches").strip().casefold()
+            cards_shown = 0
             for fixture, estimate, tips, context in goal_results:
                 fixture_id = (fixture.get("fixture") or {}).get("id")
-                history = corner_history_by_id.get(fixture_id, {})
-                if history.get("available"):
-                    st.markdown(fixture_hero_html(fixture), unsafe_allow_html=True)
-                    st.markdown("**📊 Promedios de goles**")
-                    goal_history_rows = [
-                        {"Indicador": "Goles a favor del local en casa", "Promedio": history.get("home_goals_for") if history.get("home_goals_for") is not None else "N/D", "Muestra": history.get("home_goal_sample", 0)},
-                        {"Indicador": "Goles concedidos por el local en casa", "Promedio": history.get("home_goals_against") if history.get("home_goals_against") is not None else "N/D", "Muestra": history.get("home_goal_sample", 0)},
-                        {"Indicador": "Goles a favor del visitante fuera", "Promedio": history.get("away_goals_for") if history.get("away_goals_for") is not None else "N/D", "Muestra": history.get("away_goal_sample", 0)},
-                        {"Indicador": "Goles concedidos por el visitante fuera", "Promedio": history.get("away_goals_against") if history.get("away_goals_against") is not None else "N/D", "Muestra": history.get("away_goal_sample", 0)},
-                    ]
-                    goal_table_html = '<table class="history-table"><thead><tr><th>Indicador</th><th>Promedio</th><th>Muestra</th></tr></thead><tbody>'
-                    for goal_row in goal_history_rows:
-                        avg = goal_row["Promedio"]
-                        avg_text = f"{avg:.2f}".rstrip("0").rstrip(".") if isinstance(avg, (int, float)) else str(avg)
-                        goal_table_html += f"<tr><td>{goal_row['Indicador']}</td><td>{avg_text}</td><td>{goal_row['Muestra']}</td></tr>"
-                    goal_table_html += "</tbody></table>"
-                    st.markdown(goal_table_html, unsafe_allow_html=True)
-                    st.caption("Promedios históricos automáticos de localía; la muestra puede variar según los datos disponibles de la API.")
-                if not estimate.get("available") or not tips:
-                    continue
                 if search_matches and search_matches not in fixture_label(fixture).casefold():
                     continue
-                tips_found += len(tips)
-                with st.expander(f"⚽ {fixture_label(fixture)} · {len(tips)} mercados", expanded=False):
-                    st.markdown(fixture_hero_html(fixture), unsafe_allow_html=True)
-                    rows = [{"Mercado": name, "Probabilidad exploratoria": round(prob * 100, 1)} for name, prob in sorted(tips, key=lambda pair: pair[1], reverse=True)]
-                    st.dataframe(rows, hide_index=True, use_container_width=True)
-                    st.caption(f"Referencia de liga: {estimate['baseline_league']} ({estimate['baseline_matches']} partidos). Contexto en vivo: {context['context_status']}.")
-                    st.caption("Modelo exploratorio; requiere validación retrospectiva antes de tratarlo como señal fiable.")
-            if tips_found == 0:
-                st.info("No hay oportunidades que superen el filtro en esta ronda.")
+                history = corner_history_by_id.get(fixture_id, {})
+                if not estimate.get("available"):
+                    continue
+                home = (fixture.get("teams") or {}).get("home") or {}
+                away = (fixture.get("teams") or {}).get("away") or {}
+                home_name = home.get("name", "Local")
+                away_name = away.get("name", "Visitante")
+                goals = fixture.get("goals") or {}
+                home_score = goals.get("home")
+                away_score = goals.get("away")
+                minute = ((fixture.get("fixture") or {}).get("status") or {}).get("elapsed")
+                st.markdown(fixture_hero_html(fixture), unsafe_allow_html=True)
+                st.markdown("**📊 Promedios de goles por localía**")
+                goal_history_rows = [
+                    {"Indicador": f"{home_name} · goles a favor en casa", "Promedio": history.get("home_goals_for"), "Muestra": history.get("home_goal_sample", 0)},
+                    {"Indicador": f"{home_name} · goles recibidos en casa", "Promedio": history.get("home_goals_against"), "Muestra": history.get("home_goal_sample", 0)},
+                    {"Indicador": f"{away_name} · goles a favor fuera", "Promedio": history.get("away_goals_for"), "Muestra": history.get("away_goal_sample", 0)},
+                    {"Indicador": f"{away_name} · goles recibidos fuera", "Promedio": history.get("away_goals_against"), "Muestra": history.get("away_goal_sample", 0)},
+                ]
+                goal_table_html = '<table class="history-table"><thead><tr><th>Equipo / indicador</th><th>Promedio</th><th>Muestra</th></tr></thead><tbody>'
+                for row in goal_history_rows:
+                    avg = row["Promedio"]
+                    avg_text = f"{avg:.2f}".rstrip("0").rstrip(".") if isinstance(avg, (int, float)) else "N/D"
+                    goal_table_html += f"<tr><td>{html.escape(str(row['Indicador']))}</td><td>{avg_text}</td><td>{row['Muestra']}</td></tr>"
+                goal_table_html += "</tbody></table>"
+                st.markdown(goal_table_html, unsafe_allow_html=True)
+
+                # Choose one main tip: favor a team-goal signal when live pressure supports it.
+                candidates = list(tips or [])
+                live_stats = st.session_state.stats_cache.get(str(fixture_id), [])
+                home_shots = safe_stat(live_stats, "Total Shots", 0)
+                away_shots = safe_stat(live_stats, "Total Shots", 1)
+                home_on = safe_stat(live_stats, "Shots on Goal", 0)
+                away_on = safe_stat(live_stats, "Shots on Goal", 1)
+                home_poss = safe_stat(live_stats, "Ball Possession", 0)
+                away_poss = safe_stat(live_stats, "Ball Possession", 1)
+                home_corners = safe_stat(live_stats, "Corner Kicks", 0)
+                away_corners = safe_stat(live_stats, "Corner Kicks", 1)
+                if isinstance(home_poss, str):
+                    try: home_poss = float(home_poss.replace("%", "").strip())
+                    except ValueError: home_poss = None
+                if isinstance(away_poss, str):
+                    try: away_poss = float(away_poss.replace("%", "").strip())
+                    except ValueError: away_poss = None
+                live_values = [v for v in (home_shots, away_shots, home_on, away_on, home_poss, away_poss, home_corners, away_corners) if isinstance(v, (int, float))]
+                pressure_home = (float(home_on or 0) * 2.0 + float(home_shots or 0) * 0.35 + float(home_corners or 0) * 0.7 + (max(0, float(home_poss) - 50) * 0.06 if isinstance(home_poss, (int, float)) else 0))
+                pressure_away = (float(away_on or 0) * 2.0 + float(away_shots or 0) * 0.35 + float(away_corners or 0) * 0.7 + (max(0, float(away_poss) - 50) * 0.06 if isinstance(away_poss, (int, float)) else 0))
+                pressure_gap = pressure_home - pressure_away
+                scored_home = isinstance(home_score, int) and home_score > 0
+                scored_away = isinstance(away_score, int) and away_score > 0
+                tip_label = None
+                tip_probability = None
+                rationale = []
+                if isinstance(home_score, int) and isinstance(away_score, int):
+                    total_goals = home_score + away_score
+                    if total_goals == 0 and isinstance(minute, int) and minute < 88:
+                        if pressure_gap >= 1.5 and any(isinstance(v, (int, float)) and v > 0 for v in (home_on, home_shots, home_corners)):
+                            tip_label = f"{home_name} marcará al menos 1 gol (más de 0.5 goles del local)"
+                            tip_probability = estimate.get("home_final_goals_at_least", {}).get("1", {}).get("probability")
+                            rationale.append(f"presión ofensiva favorece a {home_name}")
+                        elif pressure_gap <= -1.5 and any(isinstance(v, (int, float)) and v > 0 for v in (away_on, away_shots, away_corners)):
+                            tip_label = f"{away_name} marcará al menos 1 gol (más de 0.5 goles del visitante)"
+                            tip_probability = estimate.get("away_final_goals_at_least", {}).get("1", {}).get("probability")
+                            rationale.append(f"presión ofensiva favorece a {away_name}")
+                        elif candidates:
+                            tip_label, tip_probability = max(candidates, key=lambda x: x[1])
+                    elif total_goals == 0 and isinstance(minute, int) and minute < 88 and candidates:
+                        tip_label, tip_probability = max(candidates, key=lambda x: x[1])
+                    elif total_goals > 0 and isinstance(minute, int) and minute < 88:
+                        # With a goal already scored, prefer another-goal or a team-to-score market over full-time unders.
+                        future_candidates = [x for x in candidates if ("goles o más" in x[0] or "terminará con" in x[0] or "No habrá más goles" in x[0])]
+                        if future_candidates:
+                            tip_label, tip_probability = max(future_candidates, key=lambda x: x[1])
+                if tip_label is None and candidates:
+                    tip_label, tip_probability = max(candidates, key=lambda x: x[1])
+
+                st.markdown("**📡 Lectura en vivo**")
+                live_bits = []
+                if isinstance(home_poss, (int, float)) and isinstance(away_poss, (int, float)):
+                    live_bits.append(f"Posesión: {home_name} {home_poss:g}% · {away_name} {away_poss:g}%")
+                if isinstance(home_shots, (int, float)) and isinstance(away_shots, (int, float)):
+                    live_bits.append(f"Tiros: {home_name} {home_shots:g} · {away_name} {away_shots:g}")
+                if isinstance(home_on, (int, float)) and isinstance(away_on, (int, float)):
+                    live_bits.append(f"Tiros a puerta: {home_name} {home_on:g} · {away_name} {away_on:g}")
+                if isinstance(home_corners, (int, float)) and isinstance(away_corners, (int, float)):
+                    live_bits.append(f"Córners: {home_name} {home_corners:g} · {away_name} {away_corners:g}")
+                st.write(" · ".join(live_bits) if live_bits else "La API no entregó estadísticas detalladas suficientes para comparar la presión ofensiva.")
+                if tip_label:
+                    cards_shown += 1
+                    probability_text = f" · probabilidad exploratoria {float(tip_probability)*100:.1f}%" if isinstance(tip_probability, (int, float)) else ""
+                    st.markdown(
+                        f'<div class="tip-card"><div class="tip-card-label">⚽ TIP PRINCIPAL · LECTURA EN VIVO</div><div class="tip-card-title">{html.escape(str(tip_label))}</div><div class="tip-card-meta">Marcador {home_score}–{away_score} · minuto {minute if minute is not None else "N/D"}{probability_text}</div></div>',
+                        unsafe_allow_html=True,
+                    )
+                    if rationale:
+                        st.caption("Motivo: " + "; ".join(rationale) + ".")
+                else:
+                    st.info("Sin tip principal en este momento: faltan señales suficientes para respaldar una recomendación.")
+                st.caption(f"Referencia usada por el modelo: {estimate.get('baseline_league', 'genérica')} · muestra de liga: {estimate.get('baseline_matches', 0)} partidos · contexto: {context.get('context_status', 'no disponible')}.")
+                st.caption("Tip exploratorio, no garantía de gol ni señal de valor esperado positivo. Si faltan estadísticas en vivo, el bot lo indica en vez de inventarlas.")
+            if cards_shown == 0:
+                st.info("No hay partidos con una señal principal en esta ronda. Los partidos sin estadísticas o con señal débil se omiten.")
         else:
             st.info("Pulsa «Escanear todos los partidos en vivo» para calcular las señales.")
 
