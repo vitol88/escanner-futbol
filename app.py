@@ -8,6 +8,7 @@ import requests
 import streamlit as st
 
 from models.live_context import qualifies_as_corner_candidate, summarize_live_context
+from models.backtest import evaluate_binary_predictions
 from models.probabilities import (
     corner_pace_per_90,
     estimate_live_goal_markets,
@@ -466,6 +467,7 @@ else:
                     "shots_on_total": context.get("shots_on_total"),
                     "red_cards_total": context.get("red_cards_total"),
                     "final_score": "",
+                    "outcome": "",
                     "outcome_verified": "",
                 })
         st.session_state.signal_rows = signal_rows
@@ -662,6 +664,33 @@ else:
                 st.markdown(f"**{market}**")
                 st.caption(status_text)
         st.caption("Las probabilidades no están validadas. No hay cuotas verificadas de RushBet ni EV calculado todavía; no se ejecutan apuestas automáticamente.")
+        st.markdown("### Validación retrospectiva")
+        st.caption("Carga un CSV de señales completado manualmente con el resultado real. Para cada señal, escribe outcome=1 si el mercado se cumplió o outcome=0 si no se cumplió, y outcome_verified=true. No se puntúan filas sin verificar.")
+        backtest_file = st.file_uploader(
+            "Cargar CSV de señales con resultados verificados",
+            type=["csv"],
+            key="backtest_csv_upload",
+        )
+        if backtest_file is not None:
+            try:
+                uploaded_rows = list(csv.DictReader(io.StringIO(backtest_file.getvalue().decode("utf-8-sig"))))
+                metrics = evaluate_binary_predictions(uploaded_rows)
+                metric_cols = st.columns(4)
+                metric_cols[0].metric("Muestra verificada", metrics["sample_size"])
+                metric_cols[1].metric("Tasa de acierto", f"{metrics['hit_rate']:.1%}" if metrics["hit_rate"] is not None else "N/D")
+                metric_cols[2].metric("Brier score", f"{metrics['brier_score']:.3f}" if metrics["brier_score"] is not None else "N/D")
+                metric_cols[3].metric("Filas excluidas", metrics["excluded"])
+                if metrics["sample_size"]:
+                    st.caption(
+                        f"Probabilidad media pronosticada: {metrics['mean_probability']:.1%} · "
+                        f"frecuencia observada de acierto: {metrics['observed_rate']:.1%}. "
+                        "Brier score: cuanto más bajo, mejor (0 es perfecto); interprétalo con una muestra suficiente."
+                    )
+                else:
+                    st.info("Todavía no hay filas con probabilidad válida y resultado binario marcado como verificado.")
+            except (UnicodeDecodeError, csv.Error, ValueError) as exc:
+                st.error(f"No se pudo leer el CSV para la evaluación: {exc}")
+
         signal_rows = st.session_state.get("signal_rows", [])
         log_cols = st.columns(2)
         log_cols[0].metric("Señales registradas", len(signal_rows))
