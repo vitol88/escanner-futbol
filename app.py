@@ -5,6 +5,12 @@ from typing import Any
 import requests
 import streamlit as st
 
+from models.probabilities import (
+    corner_pace_per_90,
+    estimate_live_goal_markets,
+    load_league_baselines,
+)
+
 API_BASE = "https://v3.football.api-sports.io"
 TIMEOUT_SECONDS = 15
 
@@ -30,6 +36,8 @@ st.markdown("""
 
 st.title("⚽ Escáner Fútbol")
 st.caption("Panel móvil de fútbol en vivo · versión inicial de desarrollo")
+
+MODEL_DATA = load_league_baselines()
 
 with st.sidebar:
     st.header("Configuración")
@@ -209,15 +217,64 @@ else:
             c1.metric("Córners local", home_c if home_c is not None else "—")
             c2.metric("Córners visitante", away_c if away_c is not None else "—")
             c3.metric("Total córners", (home_c or 0) + (away_c or 0) if isinstance(home_c, (int, float)) and isinstance(away_c, (int, float)) else "—")
-            st.info("La señal probabilística y el cálculo de EV se habilitarán después de validar el modelo y disponer de cuotas fiables.")
+            st.info("Los conteos son datos observados en vivo; no equivalen a una recomendación de apuesta.")
+            elapsed = ((fixture.get("fixture") or {}).get("status") or {}).get("elapsed")
+            if isinstance(home_c, (int, float)) and isinstance(away_c, (int, float)):
+                pace = corner_pace_per_90(home_c + away_c, elapsed if isinstance(elapsed, int) else None)
+                if pace is not None:
+                    st.metric("Ritmo de córners extrapolado (por 90 min)", round(pace, 1))
+                    st.caption("Referencia descriptiva basada en el ritmo actual; no es una probabilidad ni una señal validada.")
         else:
-            st.warning("Datos insuficientes para una señal estricta. Faltan: " + (", ".join(missing) if missing else "estadísticas válidas") + ".")
+            st.warning("Datos insuficientes para evaluar córners. Faltan: " + (", ".join(missing) if missing else "estadísticas válidas") + ".")
+
+        if not error:
+            league_data = fixture.get("league") or {}
+            goals_data = fixture.get("goals") or {}
+            elapsed_value = ((fixture.get("fixture") or {}).get("status") or {}).get("elapsed")
+            score_h = goals_data.get("home")
+            score_a = goals_data.get("away")
+            estimate = estimate_live_goal_markets(
+                country=league_data.get("country"),
+                league_name=league_data.get("name"),
+                score_home=score_h if isinstance(score_h, int) else None,
+                score_away=score_a if isinstance(score_a, int) else None,
+                elapsed_minute=elapsed_value if isinstance(elapsed_value, int) else None,
+                data=MODEL_DATA,
+            )
+            st.markdown("**Mercados de goles · estimación exploratoria**")
+            if estimate.get("available"):
+                st.caption(
+                    f"Referencia histórica: {estimate['baseline_league']} · "
+                    f"{estimate['baseline_matches']} partidos · minuto {estimate['minute_used']}. "
+                    f"Modelo provisional por promedio de liga; no calibrado ni validado para apuestas."
+                )
+                g1, g2 = st.columns(2)
+                g1.metric("Más de 0.5 goles finales", f"{estimate['over_total_goals']['0.5'] * 100:.1f}%")
+                g2.metric("Más de 1.5 goles finales", f"{estimate['over_total_goals']['1.5'] * 100:.1f}%")
+                g3, g4 = st.columns(2)
+                g3.metric("Más de 2.5 goles finales", f"{estimate['over_total_goals']['2.5'] * 100:.1f}%")
+                g4.metric("Más de 3.5 goles finales", f"{estimate['over_total_goals']['3.5'] * 100:.1f}%")
+                g5, g6 = st.columns(2)
+                g5.metric("Empate final", f"{estimate['draw_final'] * 100:.1f}%")
+                g6.metric("Ambos equipos marcan", f"{estimate['btts_final'] * 100:.1f}%")
+                st.caption(
+                    f"Goles restantes esperados por el modelo: local {estimate['expected_home_goals_remaining']:.2f}, "
+                    f"visitante {estimate['expected_away_goals_remaining']:.2f}."
+                )
+            else:
+                st.caption("Sin probabilidad calculada: " + str(estimate.get("reason") or "faltan datos fiables"))
 
 st.divider()
 st.subheader("Estado de los mercados")
+market_status = [
+    ("Córners", "Se muestran córners observados y ritmo por 90 minutos cuando hay estadísticas completas. No hay historial de córners suficiente para calibrar probabilidades."),
+    ("Goles", "Estimaciones exploratorias por medias históricas de liga en competiciones con al menos 30 partidos de referencia."),
+    ("Empate", "Probabilidad exploratoria de empate final a partir de un modelo Poisson simplificado; todavía requiere validación retrospectiva."),
+    ("Ambos equipos marcan", "Probabilidad exploratoria condicionada al marcador y los goles restantes; todavía requiere validación retrospectiva."),
+]
 market_cols = st.columns(2)
-for col, market in zip(market_cols * 2, ["Córners", "Empate", "Goles", "Ambos equipos marcan"]):
+for col, (market, status_text) in zip(market_cols * 2, market_status):
     with col:
         st.markdown(f"**{market}**")
-        st.caption("Motor de señales pendiente de calibración")
-st.caption("Esta versión es un prototipo técnico. No ejecuta apuestas, no confirma cuotas de RushBet y no presenta estimaciones heurísticas como probabilidades validadas.")
+        st.caption(status_text)
+st.caption("La base histórica de goles usada en esta rama procede del archivo compartido actualizado el 26/10/2026. Las cifras son exploratorias, no señales validadas. No hay cuotas verificadas de RushBet ni EV calculado todavía; no se ejecutan apuestas automáticamente.")
