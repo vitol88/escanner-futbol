@@ -222,12 +222,12 @@ else:
     metric_cols[1].metric("Ligas activas", len(chosen_leagues))
     metric_cols[2].metric("Tips de goles", current_tips_count)
     metric_cols[3].metric("Partidos revisados córners", len(corner_results_now))
-    st.caption("Las métricas resumen la última consulta y el último escaneo guardado en esta sesión. Las estadísticas detalladas de córners se consultan en una muestra para cuidar el límite de la API.")
+    st.caption("Las métricas resumen la última consulta y el último escaneo guardado en esta sesión. El escáner intenta obtener estadísticas en vivo para todos los partidos filtrados y reutiliza las respuestas en caché para reducir llamadas.")
     max_corner_scan = st.select_slider(
         "Partidos para comprobar estadísticas de córners",
         options=[1, 3, 5, 10],
         value=5,
-        help="Este límite solo afecta las consultas detalladas de córners; los mercados de goles se evalúan para todos los partidos filtrados."
+        help="Se conserva como selector visual de prioridad; para enriquecer goles y córners, el escáner intenta consultar estadísticas de todos los partidos filtrados y reutiliza la caché."
     )
     if st.button("⚡ Escanear todos los partidos en vivo", type="primary"):
         st.session_state.goal_scan_results = []
@@ -300,7 +300,9 @@ else:
                 -int((((item.get("fixture") or {}).get("status") or {}).get("elapsed")) or 0),
             ),
         )
-        corner_fixtures = prioritized[:max_corner_scan]
+        # Goal estimates now need live context too, so inspect every filtered fixture.
+        # Responses are cached by fixture ID and reused across reruns in this session.
+        corner_fixtures = prioritized
         corner_progress = st.progress(0)
         for idx, fixture in enumerate(corner_fixtures):
             fixture_id = (fixture.get("fixture") or {}).get("id")
