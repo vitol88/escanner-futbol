@@ -101,7 +101,7 @@ def build_automatic_history(
                 gf.append(float(own_goals)); ga.append(float(opp_goals))
             old_id = (old.get("fixture") or {}).get("id")
             stats_key = f"historical-stats:{old_id}"
-            if old_id and stats_key not in cache and budget[0] > 0:
+            if old_id and stats_key not in cache and budget[0] > 0 and not cache.get("_automatic_history_rate_limited"):
                 try:
                     cache[stats_key] = api_get("fixtures/statistics", {"fixture": old_id}).get("response") or []
                     cache["_automatic_history_stats_calls"] = cache.get("_automatic_history_stats_calls", 0) + 1
