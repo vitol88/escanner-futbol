@@ -470,7 +470,8 @@ else:
                             )
                         },
                     )
-                    st.caption(f"Referencia: {estimate['baseline_league']}, {estimate['baseline_matches']} partidos históricos. Contexto en vivo: {context['context_status']}; córners {context.get('corners_total') if context.get('corners_total') is not None else 'N/D'}, tiros {context.get('shots_total') if context.get('shots_total') is not None else 'N/D'}, a puerta {context.get('shots_on_total') if context.get('shots_on_total') is not None else 'N/D'}, rojas {context.get('red_cards_total') if context.get('red_cards_total') is not None else 'N/D'}. Estos datos filtran disponibilidad, no ajustan aún la probabilidad.")
+                    st.caption(f"Referencia histórica: {estimate['baseline_league']} ({estimate['baseline_matches']} partidos). Contexto en vivo: {context['context_status']}; córners {context.get('corners_total') if context.get('corners_total') is not None else 'N/D'}, tiros {context.get('shots_total') if context.get('shots_total') is not None else 'N/D'}, a puerta {context.get('shots_on_total') if context.get('shots_on_total') is not None else 'N/D'}, rojas {context.get('red_cards_total') if context.get('red_cards_total') is not None else 'N/D'}.")
+                    st.caption(f"Ajuste del modelo: ×{estimate.get('live_activity_adjustment', 1.0):.3f} · {estimate.get('live_stats_status', 'sin ajuste')}. Es un ajuste exploratorio limitado, todavía no validado retrospectivamente.")
             if tips_found == 0:
                 st.info("No hay oportunidades preliminares para mostrar en esta ronda; se omiten los partidos sin una estimación útil.")
             unavailable = sum(1 for item in goal_results if not item[1].get("available"))
