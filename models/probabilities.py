@@ -75,6 +75,8 @@ def estimate_live_goal_markets(
     elapsed_minute: int | None,
     data: dict[str, Any] | None = None,
     live_stats: dict[str, Any] | None = None,
+    recent_goals: int = 0,
+    minutes_since_previous_scan: int | None = None,
 ) -> dict[str, Any]:
     """Return provisional remaining-goal, draw, and BTTS probabilities.
 
@@ -121,6 +123,13 @@ def estimate_live_goal_markets(
         )
         home_rate *= score_pace_factor
         away_rate *= score_pace_factor
+    # Recent goals between scans are a short-term tempo cue. Only use the signal
+    # when the previous scan is recent (<=10 match minutes); cap its influence.
+    recent_goal_factor = 1.0
+    if isinstance(recent_goals, int) and recent_goals > 0 and isinstance(minutes_since_previous_scan, int) and 0 < minutes_since_previous_scan <= 10:
+        recent_goal_factor = min(1.35, 1.0 + 0.12 * recent_goals)
+        home_rate *= recent_goal_factor
+        away_rate *= recent_goal_factor
     # Conservative live-activity adjustment. It only applies when observed stats are
     # available; missing stats never become zero and cannot create a false signal.
     live_stats = live_stats or {}
@@ -209,6 +218,8 @@ def estimate_live_goal_markets(
         "expected_total_goals_remaining": total_rate,
         "live_activity_adjustment": round(activity_factor, 3),
         "score_pace_adjustment": round(score_pace_factor, 3),
+        "recent_goal_adjustment": round(recent_goal_factor, 3),
+        "recent_goals_observed": recent_goals if isinstance(recent_goals, int) else 0,
         "live_stats_used": bool(activity_components or (reds is not None and reds > 0)),
         "live_stats_status": "ajuste moderado por actividad en vivo" if activity_components or (reds is not None and reds > 0) else "sin ajuste: estadísticas insuficientes",
         "probability_no_more_goals": poisson_pmf(total_rate, 0),
