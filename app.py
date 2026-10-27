@@ -11,6 +11,7 @@ from models.live_context import qualifies_as_corner_candidate, summarize_live_co
 from models.backtest import evaluate_binary_predictions
 from models.late_goal_history import estimate_late_goals_from_history
 from models.corner_history import estimate_remaining_corners
+from models.automatic_history import build_automatic_history
 from models.probabilities import (
     corner_pace_per_90,
     estimate_live_goal_markets,
@@ -457,6 +458,27 @@ else:
                 if "HTTP 429" in str(exc):
                     break
             corner_progress.progress((idx + 1) / max(1, len(corner_fixtures)))
+        # Automatic historical context, cached by team and fixture. Limit historical
+        # statistics calls per scan so this does not silently consume the whole API quota.
+        history_calls_before = st.session_state.api_request_count
+        history_cache = st.session_state.setdefault("automatic_history_cache", {})
+        for corner_item in corner_results:
+            if corner_item.get("error"):
+                continue
+            try:
+                used_history_stats = int(history_cache.get("_automatic_history_stats_calls", 0))
+                corner_item["automatic_history"] = build_automatic_history(
+                    corner_item["fixture"],
+                    api_get=api_get,
+                    cache=history_cache,
+                    stats_budget=max(0, 8 - used_history_stats),
+                )
+            except Exception as history_exc:
+                corner_item["automatic_history"] = {
+                    "available": False,
+                    "note": f"Historial automático no disponible: {history_exc}",
+                }
+        st.session_state.last_scan_history_api_calls = st.session_state.api_request_count - history_calls_before
         st.session_state.corner_scan_results = corner_results
 
         # Attach live context to the corresponding goal scan. Missing statistics remain missing.
