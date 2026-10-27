@@ -245,7 +245,13 @@ else:
                     except Exception as stats_exc:
                         st.session_state.stats_cache[stats_cache_key] = []
                         if "HTTP 429" in str(stats_exc):
-                            st.warning("Se alcanzó el límite de consultas de la API durante la carga de estadísticas. El escaneo continuará con los datos disponibles.")
+                            st.warning("Se alcanzó el límite de consultas de la API durante la carga de estadísticas. El escaneo continuará con los datos disponibles y no repetirá las solicitudes fallidas en esta ronda.")
+                            # Mark the remaining fixtures as unavailable for this round,
+                            # preventing the corners pass from retrying after HTTP 429.
+                            for remaining_fixture in filtered[stats_idx + 1:]:
+                                remaining_id = (remaining_fixture.get("fixture") or {}).get("id")
+                                if remaining_id is not None:
+                                    st.session_state.stats_cache[str(remaining_id)] = []
                             break
             stats_fetch_progress.progress((stats_idx + 1) / max(1, len(filtered)))
         stats_fetch_progress.empty()
