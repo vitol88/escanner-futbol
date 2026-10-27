@@ -49,7 +49,7 @@ st.markdown("""
   [data-testid="stExpander"] { background: #15191F; border: 1px solid #3A3426; border-radius: 12px; }
   hr { border-color: #38342B; }
   .brand-header { display:flex; align-items:center; gap:14px; padding:14px 16px; margin:0 0 14px 0; background:linear-gradient(120deg,#15191F,#0B0D10); border:1px solid #393326; border-radius:16px; }
-  .brand-mark { width:48px; height:48px; display:flex; align-items:center; justify-content:center; background:#FACC15; border-radius:13px; font-size:26px; }
+  .brand-mark { width:52px; height:52px; flex:0 0 52px; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 30% 25%,#FFE566,#D9A900); border:1px solid #FFE566; border-radius:15px; font-size:25px; box-shadow:0 0 22px rgba(250,204,21,.18); }\n  .loading-brand { display:flex; align-items:center; gap:12px; padding:14px; margin:8px 0; border:1px solid #393326; border-radius:14px; background:linear-gradient(120deg,#171B21,#101216); }\n  .loading-orbit { width:36px; height:36px; border:3px solid #393326; border-top-color:#FACC15; border-right-color:#FACC15; border-radius:50%; animation:lab-spin .8s linear infinite; flex:0 0 36px; }\n  @keyframes lab-spin { to {transform:rotate(360deg);} }\n  .loading-title { color:#FACC15; font-weight:800; letter-spacing:.5px; }\n  .loading-subtitle { color:#A1A1AA; font-size:12px; margin-top:3px; }
   .brand-title { font-size:22px; line-height:1.15; letter-spacing:1.5px; font-weight:900; color:#F4F4F5; }
   .brand-title span { color:#FACC15; }
   .brand-subtitle { color:#A1A1AA; font-size:10px; letter-spacing:1px; margin-top:5px; }
@@ -180,7 +180,7 @@ with right:
 
 if refresh:
     try:
-        with st.spinner("Consultando partidos en vivo..."):
+        with st.spinner("FOOTBALL LAB · Consultando partidos en vivo..."):
             data = api_get("fixtures", {"live": "all"})
             st.session_state.live_fixtures = data.get("response", [])
             st.session_state.last_refresh = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -232,7 +232,7 @@ else:
     if st.button("⚡ Escanear todos los partidos en vivo", type="primary"):
         st.session_state.goal_scan_results = []
         st.session_state.corner_scan_results = []
-        progress = st.progress(0)
+        st.markdown("""<div class="loading-brand"><div class="loading-orbit"></div><div><div class="loading-title">FOOTBALL LAB · ESCÁNER EN VIVO</div><div class="loading-subtitle">Evaluando mercados de goles y preparando revisión de córners…</div></div></div>""", unsafe_allow_html=True)\n        progress = st.progress(0)
         for idx, fixture in enumerate(filtered):
             league_data = fixture.get("league") or {}
             goals_data = fixture.get("goals") or {}
