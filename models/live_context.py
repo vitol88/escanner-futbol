@@ -26,3 +26,26 @@ def summarize_live_context(stats: list[dict[str, Any]], elapsed: int | None) -> 
     has_any_stats = any(v is not None for k, v in result.items() if k not in ("elapsed", "core_complete", "context_status"))
     result["context_status"] = "completo" if result["core_complete"] and result["possession_home"] is not None and result["possession_away"] is not None else "parcial" if has_any_stats else "sin datos"
     return result
+
+
+def qualifies_as_corner_candidate(
+    minute: int | None,
+    total_corners: int | float | None,
+    pace_per_90: int | float | None,
+    home_shots: int | float | None,
+    away_shots: int | float | None,
+) -> bool:
+    """Apply the experimental corner-candidate gate without imputing missing shots."""
+    numeric_values = (total_corners, pace_per_90, home_shots, away_shots)
+    if any(not isinstance(value, (int, float)) for value in numeric_values):
+        return False
+    if not isinstance(minute, int) or isinstance(minute, bool):
+        return False
+    if any(value < 0 for value in numeric_values):
+        return False
+    return (
+        15 <= minute <= 78
+        and total_corners >= 5
+        and pace_per_90 >= 10
+        and home_shots + away_shots >= 8
+    )
