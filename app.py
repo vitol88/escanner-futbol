@@ -546,6 +546,23 @@ else:
                 st.markdown(f"**{market}**")
                 st.caption(status_text)
         st.caption("Las probabilidades no están validadas. No hay cuotas verificadas de RushBet ni EV calculado todavía; no se ejecutan apuestas automáticamente.")
+        signal_rows = st.session_state.get("signal_rows", [])
+        log_cols = st.columns(2)
+        log_cols[0].metric("Señales registradas", len(signal_rows))
+        log_cols[1].metric("Resultados por verificar", sum(1 for row in signal_rows if not row.get("outcome_verified")))
+        if signal_rows:
+            buffer = io.StringIO()
+            writer = csv.DictWriter(buffer, fieldnames=list(signal_rows[0].keys()))
+            writer.writeheader()
+            writer.writerows(signal_rows)
+            st.download_button(
+                "⬇️ Descargar registro de señales (CSV)",
+                data=buffer.getvalue().encode("utf-8-sig"),
+                file_name="registro_senales_escanner.csv",
+                mime="text/csv",
+                help="Descarga las señales de esta sesión para conservarlas y verificar los resultados después."
+            )
+            st.caption("El registro pertenece a la sesión actual. Los resultados se mantienen sin verificar hasta disponer de una comprobación real.")
 
     if not goal_results and not corner_results:
         st.info("Pulsa «Escanear todos los partidos en vivo» para generar el primer informe.")
@@ -553,18 +570,4 @@ else:
         st.info("En esta ronda no hubo señales de goles que superaran el umbral experimental del 65%. Esto no significa que todos los partidos carezcan de datos ni que no existan candidatos de córners: la revisión detallada de córners se limita a la muestra indicada arriba para proteger tu cuota de API.")
         st.caption("El escáner sí evaluó los partidos filtrados para mercados de goles, pero el modelo actual usa promedios de liga y aún no integra clasificación, fuerza de cada equipo ni historial de córners en sus probabilidades.")
 
-signal_rows = st.session_state.get("signal_rows", [])
-if signal_rows:
-    buffer = io.StringIO()
-    writer = csv.DictWriter(buffer, fieldnames=list(signal_rows[0].keys()))
-    writer.writeheader()
-    writer.writerows(signal_rows)
-    st.download_button(
-        "⬇️ Descargar registro de señales (CSV)",
-        data=buffer.getvalue().encode("utf-8-sig"),
-        file_name="registro_senales_escanner.csv",
-        mime="text/csv",
-        help="El registro vive en la sesión actual. Descárgalo para conservarlo y verificar después el resultado final."
-    )
-    st.caption("El registro guarda la estimación y el contexto observado. El resultado final queda vacío hasta que se verifique; no se inventan aciertos ni fallos.")
 
