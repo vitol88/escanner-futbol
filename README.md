@@ -53,3 +53,21 @@ La evaluación es manual y experimental: no consulta resultados finales automát
 3. Desarrollar y validar los cuatro modelos de mercado.
 4. Añadir histórico, evaluación retrospectiva y alertas dentro del panel.
 5. Desplegar y verificar el enlace final.
+
+
+## Estimación histórica de goles en los minutos finales
+
+En la pestaña de goles se puede cargar un CSV con el historial de cada equipo al llegar a un minuto de corte. Formato requerido (una fila por equipo y partido terminado):
+
+`league,team,minute,score_for,score_against,goals_for_after,goals_against_after`
+
+- `league`: nombre de la competición tal como aparece en el escáner (por ejemplo, `Serie A`).
+- `team`: nombre del equipo.
+- `minute`: minuto de corte histórico (por ejemplo, `70`).
+- `score_for` y `score_against`: goles del equipo y rival en ese minuto.
+- `goals_for_after` y `goals_against_after`: goles de cada lado desde después del corte hasta el final.
+
+El panel estima frecuencias de al menos un gol adicional, al menos dos y probabilidad empírica de que ese equipo vuelva a marcar. Prioriza el marcador exacto si hay al menos 8 casos; si no, usa la muestra del equipo en esa liga y minuto, siempre que tenga al menos 8 registros. Muestra insuficiente significa `N/D`, no cero.
+
+**Limitación actual:** el escáner todavía no recopila automáticamente todo el historial de eventos de cada equipo. API-Football requiere consultar los eventos por partido, lo que puede consumir muchas llamadas; por eso esta primera versión recibe el historial mediante CSV y no realiza barridos históricos ocultos que agoten el plan gratuito. Las frecuencias no están calibradas y no garantizan resultados.
+
