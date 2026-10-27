@@ -159,11 +159,18 @@ def estimate_live_goal_markets(
         activity_factor = sum(activity_components) / len(activity_components)
         home_rate *= activity_factor
         away_rate *= activity_factor
-    # A red card can open the match, but its impact is uncertain; use a small
-    # symmetric increase rather than guessing which side will score.
-    if reds is not None and reds > 0:
-        home_rate *= 1.08
-        away_rate *= 1.08
+    # Team-specific red-card adjustment. Conservative until historical data is fitted.
+    red_home = valid_nonnegative("red_cards_home")
+    red_away = valid_nonnegative("red_cards_away")
+    if red_home is not None and red_home > 0:
+        home_rate *= 0.88
+        away_rate *= 1.12
+    if red_away is not None and red_away > 0:
+        away_rate *= 0.88
+        home_rate *= 1.12
+    if red_home is None and red_away is None and reds is not None and reds > 0:
+        home_rate *= 1.05
+        away_rate *= 1.05
     total_rate = home_rate + away_rate
 
     # Evaluate only future total-goal targets, relative to the current score.
@@ -172,6 +179,11 @@ def estimate_live_goal_markets(
     for additional_goals in (1, 2, 3):
         final_total_target = current_total + additional_goals
         over[str(final_total_target)] = poisson_at_least(total_rate, additional_goals)
+    under = {}
+    for line in (1.5, 2.5, 3.5, 4.5):
+        max_future_goals = math.floor(line) - current_total
+        probability = sum(poisson_pmf(total_rate, n) for n in range(max_future_goals + 1)) if max_future_goals >= 0 else 0.0
+        under[str(line)] = min(1.0, max(0.0, probability))
 
     draw_probability = 0.0
     # Independent Poisson approximation for future goals; truncate where tail mass is negligible.
@@ -225,6 +237,7 @@ def estimate_live_goal_markets(
         "probability_no_more_goals": poisson_pmf(total_rate, 0),
         "current_total_goals": current_total,
         "over_total_goals": over,
+        "under_total_goals": under,
         "home_final_goals_at_least": home_goal_thresholds,
         "away_final_goals_at_least": away_goal_thresholds,
         "draw_final": draw_probability,
