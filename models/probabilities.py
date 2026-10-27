@@ -127,6 +127,23 @@ def estimate_live_goal_markets(
     else:
         btts_probability = 1.0 - math.exp(-away_rate)
 
+    # Team-specific final goal thresholds. These are conditional probabilities
+    # for each side to finish with at least 1, 2, or 3 goals, using league-average
+    # remaining-goal rates. Thresholds already reached are marked as settled.
+    home_goal_thresholds = {}
+    away_goal_thresholds = {}
+    for target in (1, 2, 3):
+        home_needed = max(0, target - score_home)
+        away_needed = max(0, target - score_away)
+        home_goal_thresholds[str(target)] = {
+            "probability": poisson_at_least(home_rate, home_needed),
+            "already_settled": score_home >= target,
+        }
+        away_goal_thresholds[str(target)] = {
+            "probability": poisson_at_least(away_rate, away_needed),
+            "already_settled": score_away >= target,
+        }
+
     result.update({
         "available": True,
         "reason": None,
@@ -139,6 +156,8 @@ def estimate_live_goal_markets(
         "probability_no_more_goals": poisson_pmf(total_rate, 0),
         "current_total_goals": current_total,
         "over_total_goals": over,
+        "home_final_goals_at_least": home_goal_thresholds,
+        "away_final_goals_at_least": away_goal_thresholds,
         "draw_final": draw_probability,
         "btts_final": btts_probability,
         "btts_already_settled": score_home > 0 and score_away > 0,
