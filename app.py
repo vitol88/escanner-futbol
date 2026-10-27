@@ -313,20 +313,40 @@ else:
                 prev_home, prev_away = previous.get("home"), previous.get("away")
                 if isinstance(prev_home, int) and isinstance(prev_away, int) and isinstance(score_home_now, int) and isinstance(score_away_now, int):
                     recent_goals = max(0, score_home_now - prev_home) + max(0, score_away_now - prev_away)
-            estimate = estimate_live_goal_markets(
-                country=league_data.get("country"),
-                league_name=league_data.get("name"),
-                score_home=goals_data.get("home") if isinstance(goals_data.get("home"), int) else None,
-                score_away=goals_data.get("away") if isinstance(goals_data.get("away"), int) else None,
-                elapsed_minute=elapsed_value if isinstance(elapsed_value, int) else None,
-                recent_goals=recent_goals,
-                minutes_since_previous_scan=minute_gap,
-                data=MODEL_DATA,
-                live_stats=summarize_live_context(
-                    st.session_state.stats_cache.get(str((fixture.get("fixture") or {}).get("id")), []),
-                    elapsed_value if isinstance(elapsed_value, int) else None,
-                ),
+            live_context = summarize_live_context(
+                st.session_state.stats_cache.get(str((fixture.get("fixture") or {}).get("id")), []),
+                elapsed_value if isinstance(elapsed_value, int) else None,
             )
+            try:
+                estimate = estimate_live_goal_markets(
+                    country=league_data.get("country"),
+                    league_name=league_data.get("name"),
+                    score_home=score_home_now,
+                    score_away=score_away_now,
+                    elapsed_minute=elapsed_value if isinstance(elapsed_value, int) else None,
+                    recent_goals=recent_goals,
+                    minutes_since_previous_scan=minute_gap,
+                    data=MODEL_DATA,
+                    live_stats=live_context,
+                )
+            except TypeError as model_exc:
+                # Compatibility fallback if Cloud briefly serves an older model module
+                # than app.py. Keep the scan running and clearly disclose that recent-goal
+                # adjustment was unavailable instead of crashing the whole app.
+                if "recent_goals" not in str(model_exc) and "minutes_since_previous_scan" not in str(model_exc):
+                    raise
+                estimate = estimate_live_goal_markets(
+                    country=league_data.get("country"),
+                    league_name=league_data.get("name"),
+                    score_home=score_home_now,
+                    score_away=score_away_now,
+                    elapsed_minute=elapsed_value if isinstance(elapsed_value, int) else None,
+                    data=MODEL_DATA,
+                    live_stats=live_context,
+                )
+                estimate["recent_goal_adjustment"] = 1.0
+                estimate["recent_goals_observed"] = 0
+                estimate["compatibility_fallback"] = True
             tips = []
             if estimate.get("available"):
                 candidates = [
@@ -536,6 +556,8 @@ else:
                     )
                     st.caption(f"Referencia histórica: {estimate['baseline_league']} ({estimate['baseline_matches']} partidos). Contexto en vivo: {context['context_status']}; córners {context.get('corners_total') if context.get('corners_total') is not None else 'N/D'}, tiros {context.get('shots_total') if context.get('shots_total') is not None else 'N/D'}, a puerta {context.get('shots_on_total') if context.get('shots_on_total') is not None else 'N/D'}, rojas {context.get('red_cards_total') if context.get('red_cards_total') is not None else 'N/D'}.")
                     st.caption(f"Ajustes exploratorios: ritmo del marcador ×{estimate.get('score_pace_adjustment', 1.0):.3f} · goles entre escaneos ×{estimate.get('recent_goal_adjustment', 1.0):.3f} ({estimate.get('recent_goals_observed', 0)} detectados) · actividad en vivo ×{estimate.get('live_activity_adjustment', 1.0):.3f}. No están calibrados ni validados retrospectivamente.")
+                    if estimate.get("compatibility_fallback"):
+                        st.warning("Esta ejecución está usando compatibilidad temporal porque el módulo de probabilidades cargado no acepta aún los parámetros nuevos. Reinicia la aplicación para cargar la versión completa.")
                     st.info("Importante: «Empate final» y «No habrá más goles» son mercados distintos. Un 2-2 no significa que el partido vaya a terminar empatado; goles recientes y actividad alta pueden anticipar más acción. Estas estimaciones no son certezas.")
             if tips_found == 0:
                 st.info("No hay oportunidades preliminares para mostrar en esta ronda; se omiten los partidos sin una estimación útil.")
