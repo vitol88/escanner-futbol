@@ -190,13 +190,16 @@ else:
             tips = []
             if estimate.get("available"):
                 candidates = [
-                    ("Más de 0.5 goles finales", estimate["over_total_goals"]["0.5"]),
-                    ("Más de 1.5 goles finales", estimate["over_total_goals"]["1.5"]),
-                    ("Más de 2.5 goles finales", estimate["over_total_goals"]["2.5"]),
-                    ("Más de 3.5 goles finales", estimate["over_total_goals"]["3.5"]),
-                    ("Empate final", estimate["draw_final"]),
-                    ("Ambos equipos marcan", estimate["btts_final"]),
+                    (
+                        f"Total final: {int(target)} goles o más (+{int(target) - estimate['current_total_goals']} desde ahora)",
+                        probability,
+                    )
+                    for target, probability in estimate["over_total_goals"].items()
                 ]
+                candidates.append(("Empate final", estimate["draw_final"]))
+                # If both teams have already scored, BTTS is settled, not a future tip.
+                if not estimate.get("btts_already_settled"):
+                    candidates.append(("Ambos equipos marcan (faltan goles de ambos)", estimate["btts_final"]))
                 # Screening threshold only, not a validated betting signal or EV filter.
                 tips = [(name, probability) for name, probability in candidates if probability >= 0.65]
             st.session_state.goal_scan_results.append((fixture, estimate, tips))
@@ -237,7 +240,7 @@ else:
     goal_results = st.session_state.get("goal_scan_results", [])
     if goal_results:
         st.subheader("Tips preliminares del escáner")
-        st.caption("Se analizan todos los partidos filtrados para mercados de goles, empate y ambos marcan. El umbral del 65% es solo un filtro experimental; sin cuotas reales no se calcula valor esperado y no se deben tratar como apuestas validadas.")
+        st.caption("Se evalúan objetivos de goles adicionales desde el marcador actual (por ejemplo, con 8 goles, objetivo de 9+). El umbral del 65% es experimental; sin cuotas reales no se calcula valor esperado y no son apuestas validadas.")
         tips_found = 0
         for fixture, estimate, tips in goal_results:
             if not estimate.get("available"):
@@ -278,7 +281,7 @@ st.divider()
 st.subheader("Estado de los mercados")
 market_status = [
     ("Córners", "Se muestran córners observados y ritmo por 90 minutos cuando hay estadísticas completas. No hay historial de córners suficiente para calibrar probabilidades."),
-    ("Goles", "Estimaciones exploratorias por medias históricas de liga en competiciones con al menos 30 partidos de referencia."),
+    ("Goles", "Probabilidad exploratoria de alcanzar objetivos de goles adicionales al total actual, usando medias históricas de liga; no está calibrada."),
     ("Empate", "Probabilidad exploratoria de empate final a partir de un modelo Poisson simplificado; todavía requiere validación retrospectiva."),
     ("Ambos equipos marcan", "Probabilidad exploratoria condicionada al marcador y los goles restantes; todavía requiere validación retrospectiva."),
 ]
