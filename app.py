@@ -245,6 +245,10 @@ else:
                 score_away=goals_data.get("away") if isinstance(goals_data.get("away"), int) else None,
                 elapsed_minute=elapsed_value if isinstance(elapsed_value, int) else None,
                 data=MODEL_DATA,
+                live_stats=summarize_live_context(
+                    st.session_state.stats_cache.get(str((fixture.get("fixture") or {}).get("id")), []),
+                    elapsed_value if isinstance(elapsed_value, int) else None,
+                ),
             )
             tips = []
             if estimate.get("available"):
