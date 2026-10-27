@@ -110,6 +110,8 @@ def api_get(endpoint: str, params: dict[str, Any] | None = None) -> dict[str, An
             "Falta configurar API_FOOTBALL_KEY en Secrets. "
             "Consulta README.md para ver los pasos."
         )
+    # Count attempted requests for transparent session-level API usage.
+    st.session_state["api_request_count"] = st.session_state.get("api_request_count", 0) + 1
     response = requests.get(
         f"{API_BASE}/{endpoint}",
         headers={"x-apisports-key": key},
@@ -176,6 +178,12 @@ if "last_refresh" not in st.session_state:
     st.session_state.last_refresh = None
 if "stats_cache" not in st.session_state:
     st.session_state.stats_cache = {}
+if "api_request_count" not in st.session_state:
+    st.session_state.api_request_count = 0
+if "last_scan_api_calls" not in st.session_state:
+    st.session_state.last_scan_api_calls = 0
+if "last_scan_stats_matches" not in st.session_state:
+    st.session_state.last_scan_stats_matches = 0
 
 left, right = st.columns([2, 1])
 with left:
