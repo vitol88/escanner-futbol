@@ -115,6 +115,23 @@ class ProbabilityModelTests(unittest.TestCase):
         self.assertGreater(active["expected_total_goals_remaining"], baseline["expected_total_goals_remaining"])
         self.assertLessEqual(active["live_activity_adjustment"], 1.25)
 
+    def test_high_scoring_match_raises_remaining_goal_rate_modestly(self):
+        quiet = estimate_live_goal_markets(
+            country="England", league_name="EPL", score_home=0, score_away=0,
+            elapsed_minute=60, data=TEST_DATA
+        )
+        high_scoring = estimate_live_goal_markets(
+            country="England", league_name="EPL", score_home=2, score_away=2,
+            elapsed_minute=60, data=TEST_DATA
+        )
+        self.assertGreater(
+            high_scoring["expected_total_goals_remaining"],
+            quiet["expected_total_goals_remaining"],
+        )
+        self.assertLessEqual(high_scoring["score_pace_adjustment"], 1.35)
+        self.assertGreater(high_scoring["probability_no_more_goals"], 0.0)
+        self.assertLess(high_scoring["probability_no_more_goals"], 1.0)
+
     def test_missing_score_or_minute_withholds_estimate(self):
         cases = [
             {"score_home": None, "score_away": 0, "elapsed_minute": 30},
