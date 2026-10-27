@@ -79,7 +79,9 @@ def build_automatic_history(
     home_fixtures = [f for f in team_fixtures(home["id"]) if (f.get("fixture") or {}).get("status", {}).get("short") in {"FT", "AET", "PEN"}]
     away_fixtures = [f for f in team_fixtures(away["id"]) if (f.get("fixture") or {}).get("status", {}).get("short") in {"FT", "AET", "PEN"}]
 
-    budget = [max(0, int(stats_budget))]\n\n    def averages(matches: list[dict[str, Any]], team_id: int, venue: str) -> dict[str, Any]:
+    budget = [max(0, int(stats_budget))]
+
+    def averages(matches: list[dict[str, Any]], team_id: int, venue: str) -> dict[str, Any]:
         gf: list[float] = []
         ga: list[float] = []
         cf: list[float] = []
