@@ -1,8 +1,10 @@
 """Exploratory live goal-market probabilities.
 
 League-average inputs are intentionally labelled as preliminary. These functions do
-not model team strength, red cards, game state, extra time, or bookmaker margin.
-They are research outputs, not validated betting signals.
+not model team strength, detailed game state, extra time, or bookmaker margin. Live
+shots/corners apply only a small bounded adjustment, and red cards apply a small
+symmetric adjustment; neither effect has been calibrated. These are research outputs,
+not validated betting signals.
 """
 from __future__ import annotations
 
