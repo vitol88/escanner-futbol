@@ -196,6 +196,7 @@ else:
                     )
                     for target, probability in estimate["over_total_goals"].items()
                 ]
+                candidates.append(("No habrá más goles", estimate["probability_no_more_goals"]))
                 candidates.append(("Empate final", estimate["draw_final"]))
                 # If both teams have already scored, BTTS is settled, not a future tip.
                 if not estimate.get("btts_already_settled"):
@@ -219,6 +220,14 @@ else:
                 away_c = safe_stat(stats, "Corner Kicks", 1)
                 home_shots = safe_stat(stats, "Total Shots", 0)
                 away_shots = safe_stat(stats, "Total Shots", 1)
+                home_shots_on = safe_stat(stats, "Shots on Goal", 0)
+                away_shots_on = safe_stat(stats, "Shots on Goal", 1)
+                home_possession = safe_stat(stats, "Ball Possession", 0)
+                away_possession = safe_stat(stats, "Ball Possession", 1)
+                home_yellow = safe_stat(stats, "Yellow Cards", 0)
+                away_yellow = safe_stat(stats, "Yellow Cards", 1)
+                home_red = safe_stat(stats, "Red Cards", 0)
+                away_red = safe_stat(stats, "Red Cards", 1)
                 elapsed = ((fixture.get("fixture") or {}).get("status") or {}).get("elapsed")
                 pace = corner_pace_per_90(home_c + away_c, elapsed) if isinstance(home_c, (int, float)) and isinstance(away_c, (int, float)) and isinstance(elapsed, int) else None
                 corner_results.append({
@@ -227,6 +236,14 @@ else:
                     "away_corners": away_c,
                     "home_shots": home_shots,
                     "away_shots": away_shots,
+                    "home_shots_on": home_shots_on,
+                    "away_shots_on": away_shots_on,
+                    "home_possession": home_possession,
+                    "away_possession": away_possession,
+                    "home_yellow": home_yellow,
+                    "away_yellow": away_yellow,
+                    "home_red": home_red,
+                    "away_red": away_red,
                     "pace": pace,
                     "error": None,
                 })
@@ -257,14 +274,14 @@ else:
             st.caption(f"Referencia: {estimate['baseline_league']}, {estimate['baseline_matches']} partidos históricos. Modelo de promedio de liga, pendiente de validación.")
             st.divider()
         if tips_found == 0:
-            st.info("En esta ronda no hubo estimaciones que superaran el filtro experimental. No se fuerza una recomendación.")
+            st.info("No hay oportunidades preliminares para mostrar en esta ronda; se omiten los partidos sin una estimación útil.")
         unavailable = sum(1 for _, estimate, _ in goal_results if not estimate.get("available"))
         st.caption(f"Partidos evaluados: {len(goal_results)} · sin referencia suficiente para estimar: {unavailable}.")
 
     corner_results = st.session_state.get("corner_scan_results", [])
     if corner_results:
         st.subheader("Córners · revisión en vivo")
-        st.caption("Se consulta una muestra limitada para controlar llamadas a la API. Aún no se emiten tips de córners porque falta validar el modelo con históricos por minuto y línea de mercado.")
+        st.caption("Se consulta una muestra limitada para controlar llamadas a la API. Se revisan córners, tiros, posesión y tarjetas cuando la API los proporciona; por ahora son contexto descriptivo y no alteran probabilidades sin validación histórica.")
         for item in corner_results:
             st.markdown(f"**{fixture_label(item['fixture'])}**")
             if item.get("error"):
@@ -272,9 +289,13 @@ else:
             elif item.get("home_corners") is None or item.get("away_corners") is None:
                 st.caption("Sin córners completos para este partido; no se interpreta el dato ausente como cero.")
             else:
-                st.caption(f"Córners observados: local {item['home_corners']} · visitante {item['away_corners']} · total {item['home_corners'] + item['away_corners']}.")
+                st.caption(f"Córners: local {item['home_corners']} · visitante {item['away_corners']} · total {item['home_corners'] + item['away_corners']}.")
                 if item.get("pace") is not None:
-                    st.caption(f"Ritmo observado extrapolado: {item['pace']:.1f} córners/90 min (dato descriptivo, no tip).")
+                    st.caption(f"Ritmo de córners extrapolado: {item['pace']:.1f}/90 min (descriptivo, no predicción).")
+                st.caption(f"Tiros totales: local {item.get('home_shots')} · visitante {item.get('away_shots')} | a puerta: local {item.get('home_shots_on')} · visitante {item.get('away_shots_on')}.")
+                st.caption(f"Posesión: local {item.get('home_possession') or 'N/D'} · visitante {item.get('away_possession') or 'N/D'}.")
+                st.caption(f"Tarjetas amarillas: local {item.get('home_yellow') if item.get('home_yellow') is not None else 'N/D'} · visitante {item.get('away_yellow') if item.get('away_yellow') is not None else 'N/D'} | rojas: local {item.get('home_red') if item.get('home_red') is not None else 'N/D'} · visitante {item.get('away_red') if item.get('away_red') is not None else 'N/D'}.")
+                st.caption("Estas estadísticas describen el partido; aún no ajustan automáticamente las probabilidades porque el modelo debe calibrarse antes de usarlas como factores predictivos.")
             st.divider()
 
     if not goal_results and not corner_results:
