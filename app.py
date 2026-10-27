@@ -585,7 +585,6 @@ else:
                     st.markdown(goal_table_html, unsafe_allow_html=True)
                     st.caption("Promedios históricos automáticos de localía; la muestra puede variar según los datos disponibles de la API.")
                 if not estimate.get("available") or not tips:
-                if not estimate.get("available") or not tips:
                     continue
                 if search_matches and search_matches not in fixture_label(fixture).casefold():
                     continue
