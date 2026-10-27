@@ -1,6 +1,6 @@
 import unittest
 
-from models.live_context import summarize_live_context
+from models.live_context import qualifies_as_corner_candidate, summarize_live_context
 
 
 def team_stats(values):
@@ -46,6 +46,23 @@ class LiveContextTests(unittest.TestCase):
         self.assertTrue(result["core_complete"])
         self.assertEqual(result["corners_total"], 0)
         self.assertEqual(result["shots_total"], 0)
+
+    def test_corner_candidate_requires_both_teams_shots(self):
+        self.assertFalse(qualifies_as_corner_candidate(50, 7, 12, 8, None))
+        self.assertFalse(qualifies_as_corner_candidate(50, 7, 12, None, 8))
+        self.assertFalse(qualifies_as_corner_candidate(50, 7, 12, None, None))
+
+    def test_corner_candidate_accepts_complete_qualifying_stats(self):
+        self.assertTrue(qualifies_as_corner_candidate(50, 7, 12, 5, 3))
+
+    def test_corner_candidate_rejects_values_below_thresholds(self):
+        self.assertFalse(qualifies_as_corner_candidate(14, 7, 12, 5, 3))
+        self.assertFalse(qualifies_as_corner_candidate(50, 4, 12, 5, 3))
+        self.assertFalse(qualifies_as_corner_candidate(50, 7, 9.9, 5, 3))
+        self.assertFalse(qualifies_as_corner_candidate(50, 7, 12, 3, 3))
+
+    def test_corner_candidate_rejects_invalid_negative_stats(self):
+        self.assertFalse(qualifies_as_corner_candidate(50, 7, 12, -1, 9))
 
 
 if __name__ == "__main__":
