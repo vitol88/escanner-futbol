@@ -19,11 +19,21 @@ class ScannerUnitTests(unittest.TestCase):
         self.assertIn("B", label)
         self.assertIn("-–1", label)
 
-    def test_safe_stat_finds_value(self):
+    def test_safe_stat_finds_value_for_requested_team(self):
         stats = [
-            {"statistics": [{"type": "Corner Kicks", "value": 4}]}
+            {"statistics": [{"type": "Corner Kicks", "value": 4}]},
+            {"statistics": [{"type": "Corner Kicks", "value": 7}]},
         ]
-        self.assertEqual(safe_stat(stats, "Corner Kicks"), 4)
+        self.assertEqual(safe_stat(stats, "Corner Kicks", team_index=0), 4)
+        self.assertEqual(safe_stat(stats, "Corner Kicks", team_index=1), 7)
+
+    def test_safe_stat_does_not_fall_back_to_other_team(self):
+        stats = [
+            {"statistics": [{"type": "Total Shots", "value": None}]},
+            {"statistics": [{"type": "Total Shots", "value": 7}]},
+        ]
+        self.assertIsNone(safe_stat(stats, "Total Shots", team_index=0))
+        self.assertEqual(safe_stat(stats, "Total Shots", team_index=1), 7)
 
     def test_missing_core_stats_is_not_enough(self):
         stats = [
@@ -51,5 +61,5 @@ class ScannerUnitTests(unittest.TestCase):
         self.assertEqual(missing, [])
 
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     unittest.main()
