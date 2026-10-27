@@ -232,7 +232,8 @@ else:
     if st.button("⚡ Escanear todos los partidos en vivo", type="primary"):
         st.session_state.goal_scan_results = []
         st.session_state.corner_scan_results = []
-        st.markdown("""<div class="loading-brand"><div class="loading-orbit"></div><div><div class="loading-title">FOOTBALL LAB · ESCÁNER EN VIVO</div><div class="loading-subtitle">Evaluando mercados de goles y preparando revisión de córners…</div></div></div>""", unsafe_allow_html=True)\n        progress = st.progress(0)
+        st.markdown("""<div class="loading-brand"><div class="loading-orbit"></div><div><div class="loading-title">FOOTBALL LAB · ESCÁNER EN VIVO</div><div class="loading-subtitle">Evaluando mercados de goles y preparando revisión de córners…</div></div></div>""", unsafe_allow_html=True)
+        progress = st.progress(0)
         for idx, fixture in enumerate(filtered):
             league_data = fixture.get("league") or {}
             goals_data = fixture.get("goals") or {}
