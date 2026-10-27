@@ -519,6 +519,22 @@ else:
             unavailable_items = [item for item in goal_results if not item[1].get("available")]
             unavailable = len(unavailable_items)
             no_tip_count = sum(1 for item in goal_results if item[1].get("available") and not item[2])
+            if unavailable_items:
+                reason_counts = {}
+                for item in unavailable_items:
+                    reason = item[1].get("reason") or "Motivo no especificado"
+                    reason_counts[reason] = reason_counts.get(reason, 0) + 1
+                with st.expander(f"📊 Resumen de causas de estimaciones no disponibles ({unavailable})"):
+                    st.dataframe(
+                        [{"Causa": reason, "Partidos": count} for reason, count in sorted(reason_counts.items(), key=lambda pair: pair[1], reverse=True)],
+                        hide_index=True,
+                        use_container_width=True,
+                    )
+            if no_tip_count:
+                st.caption(
+                    f"{no_tip_count} partidos sí tuvieron estimación, pero ningún mercado superó el 65%; "
+                    "esto es diferente de datos incompletos o de una liga sin referencia histórica."
+                )
             st.caption(
                 f"Partidos evaluados: {len(goal_results)} · sin estimación disponible: {unavailable} "
                 f"· con estimación pero sin mercados que superen el filtro: {no_tip_count}."
