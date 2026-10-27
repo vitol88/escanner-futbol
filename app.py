@@ -5,6 +5,12 @@ from typing import Any
 import requests
 import streamlit as st
 
+from models.probabilities import (
+    corner_pace_per_90,
+    estimate_live_goal_markets,
+    load_league_baselines,
+)
+
 API_BASE = "https://v3.football.api-sports.io"
 TIMEOUT_SECONDS = 15
 
@@ -30,6 +36,8 @@ st.markdown("""
 
 st.title("⚽ Escáner Fútbol")
 st.caption("Panel móvil de fútbol en vivo · versión inicial de desarrollo")
+
+MODEL_DATA = load_league_baselines()
 
 with st.sidebar:
     st.header("Configuración")
@@ -73,11 +81,21 @@ def api_get(endpoint: str, params: dict[str, Any] | None = None) -> dict[str, An
         raise RuntimeError(f"API-Football reportó un error: {payload['errors']}")
     return payload
 
-def safe_stat(stats: list[dict[str, Any]], stat_name: str):
-    for team_stats in stats or []:
-        for item in team_stats.get("statistics") or []:
-            if item.get("type") == stat_name:
-                return item.get("value")
+def safe_stat(
+    stats: list[dict[str, Any]],
+    stat_name: str,
+    team_index: int = 0,
+):
+    """Return a statistic for one team only (0=home, 1=away).
+
+    Never search other teams as a fallback: missing data must remain missing.
+    """
+    if team_index < 0 or team_index >= len(stats or []):
+        return None
+    team_stats = (stats or [])[team_index]
+    for item in team_stats.get("statistics") or []:
+        if item.get("type") == stat_name:
+            return item.get("value")
     return None
 
 def fixture_label(fixture: dict[str, Any]) -> str:
@@ -93,20 +111,12 @@ def fixture_label(fixture: dict[str, Any]) -> str:
     return f"{home} {score} {away} · {minute_text} · {league}"
 
 def has_core_stats(stats: list[dict[str, Any]]) -> tuple[bool, list[str]]:
-    home_corners = safe_stat(stats, "Corner Kicks")
-    away_corners = None
-    if len(stats or []) > 1:
-        for item in (stats[1].get("statistics") or []):
-            if item.get("type") == "Corner Kicks":
-                away_corners = item.get("value")
-                break
-    home_shots = safe_stat(stats, "Total Shots")
-    away_shots = None
-    if len(stats or []) > 1:
-        for item in (stats[1].get("statistics") or []):
-            if item.get("type") == "Total Shots":
-                away_shots = item.get("value")
-                break
+    # API-Football returns one statistics object per team, home first and away second.
+    # Read each team explicitly so one team's values can never fill the other's gap.
+    home_corners = safe_stat(stats, "Corner Kicks", team_index=0)
+    away_corners = safe_stat(stats, "Corner Kicks", team_index=1)
+    home_shots = safe_stat(stats, "Total Shots", team_index=0)
+    away_shots = safe_stat(stats, "Total Shots", team_index=1)
     missing = []
     if home_corners is None or away_corners is None:
         missing.append("córners")
@@ -154,18 +164,47 @@ else:
         if (f.get("league") or {}).get("name", "Liga") in chosen_leagues
     ]
     st.metric("Partidos recibidos", len(fixtures))
-    st.caption("El listado de partidos usa una consulta. Las estadísticas detalladas requieren consultas adicionales, así que el análisis se limita para cuidar tu cuota.")
-    max_scan = st.select_slider(
-        "Máximo de partidos para revisar estadísticas en esta ronda",
-        options=[1, 2, 3, 4, 5],
-        value=3,
-        help="Límite intencional para no consumir tu plan gratuito en un solo escaneo."
+    st.caption("El escáner evalúa primero los mercados que se pueden analizar con el marcador y el minuto. Las estadísticas detalladas de córners se consultan aparte para controlar el consumo de la API.")
+    max_corner_scan = st.select_slider(
+        "Partidos para comprobar estadísticas de córners",
+        options=[1, 3, 5, 10],
+        value=5,
+        help="Este límite solo afecta las consultas detalladas de córners; los mercados de goles se evalúan para todos los partidos filtrados."
     )
-    if st.button("Analizar partidos seleccionados"):
-        selected = filtered[:max_scan]
-        results = []
+    if st.button("⚡ Escanear todos los partidos en vivo", type="primary"):
+        st.session_state.goal_scan_results = []
+        st.session_state.corner_scan_results = []
         progress = st.progress(0)
-        for idx, fixture in enumerate(selected):
+        for idx, fixture in enumerate(filtered):
+            league_data = fixture.get("league") or {}
+            goals_data = fixture.get("goals") or {}
+            elapsed_value = ((fixture.get("fixture") or {}).get("status") or {}).get("elapsed")
+            estimate = estimate_live_goal_markets(
+                country=league_data.get("country"),
+                league_name=league_data.get("name"),
+                score_home=goals_data.get("home") if isinstance(goals_data.get("home"), int) else None,
+                score_away=goals_data.get("away") if isinstance(goals_data.get("away"), int) else None,
+                elapsed_minute=elapsed_value if isinstance(elapsed_value, int) else None,
+                data=MODEL_DATA,
+            )
+            tips = []
+            if estimate.get("available"):
+                candidates = [
+                    ("Más de 0.5 goles finales", estimate["over_total_goals"]["0.5"]),
+                    ("Más de 1.5 goles finales", estimate["over_total_goals"]["1.5"]),
+                    ("Más de 2.5 goles finales", estimate["over_total_goals"]["2.5"]),
+                    ("Más de 3.5 goles finales", estimate["over_total_goals"]["3.5"]),
+                    ("Empate final", estimate["draw_final"]),
+                    ("Ambos equipos marcan", estimate["btts_final"]),
+                ]
+                # Screening threshold only, not a validated betting signal or EV filter.
+                tips = [(name, probability) for name, probability in candidates if probability >= 0.65]
+            st.session_state.goal_scan_results.append((fixture, estimate, tips))
+            progress.progress((idx + 1) / max(1, len(filtered)))
+        corner_results = []
+        corner_fixtures = filtered[:max_corner_scan]
+        corner_progress = st.progress(0)
+        for idx, fixture in enumerate(corner_fixtures):
             fixture_id = (fixture.get("fixture") or {}).get("id")
             try:
                 cache_key = str(fixture_id)
@@ -173,49 +212,79 @@ else:
                     stats_payload = api_get("fixtures/statistics", {"fixture": fixture_id})
                     st.session_state.stats_cache[cache_key] = stats_payload.get("response", [])
                 stats = st.session_state.stats_cache[cache_key]
-                enough, missing = has_core_stats(stats)
-                results.append((fixture, enough, missing, stats, None))
+                home_c = safe_stat(stats, "Corner Kicks", 0)
+                away_c = safe_stat(stats, "Corner Kicks", 1)
+                home_shots = safe_stat(stats, "Total Shots", 0)
+                away_shots = safe_stat(stats, "Total Shots", 1)
+                elapsed = ((fixture.get("fixture") or {}).get("status") or {}).get("elapsed")
+                pace = corner_pace_per_90(home_c + away_c, elapsed) if isinstance(home_c, (int, float)) and isinstance(away_c, (int, float)) and isinstance(elapsed, int) else None
+                corner_results.append({
+                    "fixture": fixture,
+                    "home_corners": home_c,
+                    "away_corners": away_c,
+                    "home_shots": home_shots,
+                    "away_shots": away_shots,
+                    "pace": pace,
+                    "error": None,
+                })
             except Exception as exc:
-                results.append((fixture, False, [], [], str(exc)))
+                corner_results.append({"fixture": fixture, "error": str(exc)})
                 if "HTTP 429" in str(exc):
                     break
-            progress.progress((idx + 1) / max(1, len(selected)))
-        st.session_state.scan_results = results
+            corner_progress.progress((idx + 1) / max(1, len(corner_fixtures)))
+        st.session_state.corner_scan_results = corner_results
 
-    for fixture in filtered:
-        st.markdown(f"**{fixture_label(fixture)}**")
-        st.divider()
+    goal_results = st.session_state.get("goal_scan_results", [])
+    if goal_results:
+        st.subheader("Tips preliminares del escáner")
+        st.caption("Se analizan todos los partidos filtrados para mercados de goles, empate y ambos marcan. El umbral del 65% es solo un filtro experimental; sin cuotas reales no se calcula valor esperado y no se deben tratar como apuestas validadas.")
+        tips_found = 0
+        for fixture, estimate, tips in goal_results:
+            if not estimate.get("available"):
+                continue
+            if not tips:
+                continue
+            tips_found += len(tips)
+            st.markdown(f"**{fixture_label(fixture)}**")
+            for market, probability in sorted(tips, key=lambda item: item[1], reverse=True):
+                st.success(f"SEÑAL PRELIMINAR · {market} · probabilidad exploratoria {probability * 100:.1f}%")
+            st.caption(f"Referencia: {estimate['baseline_league']}, {estimate['baseline_matches']} partidos históricos. Modelo de promedio de liga, pendiente de validación.")
+            st.divider()
+        if tips_found == 0:
+            st.info("En esta ronda no hubo estimaciones que superaran el filtro experimental. No se fuerza una recomendación.")
+        unavailable = sum(1 for _, estimate, _ in goal_results if not estimate.get("available"))
+        st.caption(f"Partidos evaluados: {len(goal_results)} · sin referencia suficiente para estimar: {unavailable}.")
 
-    for fixture, enough, missing, stats, error in st.session_state.get("scan_results", []):
-        st.markdown(f"### {fixture_label(fixture)}")
-        if error:
-            st.warning(f"No se pudo analizar: {error}")
-        elif enough:
-            home_c = None
-            away_c = None
-            for i, team_stats in enumerate(stats or []):
-                val = None
-                for item in team_stats.get("statistics") or []:
-                    if item.get("type") == "Corner Kicks":
-                        val = item.get("value")
-                if i == 0:
-                    home_c = val
-                elif i == 1:
-                    away_c = val
-            st.success("Datos mínimos disponibles para evaluar el mercado de córners.")
-            c1, c2, c3 = st.columns(3)
-            c1.metric("Córners local", home_c if home_c is not None else "—")
-            c2.metric("Córners visitante", away_c if away_c is not None else "—")
-            c3.metric("Total córners", (home_c or 0) + (away_c or 0) if isinstance(home_c, (int, float)) and isinstance(away_c, (int, float)) else "—")
-            st.info("La señal probabilística y el cálculo de EV se habilitarán después de validar el modelo y disponer de cuotas fiables.")
-        else:
-            st.warning("Datos insuficientes para una señal estricta. Faltan: " + (", ".join(missing) if missing else "estadísticas válidas") + ".")
+    corner_results = st.session_state.get("corner_scan_results", [])
+    if corner_results:
+        st.subheader("Córners · revisión en vivo")
+        st.caption("Se consulta una muestra limitada para controlar llamadas a la API. Aún no se emiten tips de córners porque falta validar el modelo con históricos por minuto y línea de mercado.")
+        for item in corner_results:
+            st.markdown(f"**{fixture_label(item['fixture'])}**")
+            if item.get("error"):
+                st.caption("Estadísticas de córners no disponibles en la API para este partido.")
+            elif item.get("home_corners") is None or item.get("away_corners") is None:
+                st.caption("Sin córners completos para este partido; no se interpreta el dato ausente como cero.")
+            else:
+                st.caption(f"Córners observados: local {item['home_corners']} · visitante {item['away_corners']} · total {item['home_corners'] + item['away_corners']}.")
+                if item.get("pace") is not None:
+                    st.caption(f"Ritmo observado extrapolado: {item['pace']:.1f} córners/90 min (dato descriptivo, no tip).")
+            st.divider()
+
+    if not goal_results and not corner_results:
+        st.info("Pulsa «Escanear todos los partidos en vivo» para generar el primer informe.")
 
 st.divider()
 st.subheader("Estado de los mercados")
+market_status = [
+    ("Córners", "Se muestran córners observados y ritmo por 90 minutos cuando hay estadísticas completas. No hay historial de córners suficiente para calibrar probabilidades."),
+    ("Goles", "Estimaciones exploratorias por medias históricas de liga en competiciones con al menos 30 partidos de referencia."),
+    ("Empate", "Probabilidad exploratoria de empate final a partir de un modelo Poisson simplificado; todavía requiere validación retrospectiva."),
+    ("Ambos equipos marcan", "Probabilidad exploratoria condicionada al marcador y los goles restantes; todavía requiere validación retrospectiva."),
+]
 market_cols = st.columns(2)
-for col, market in zip(market_cols * 2, ["Córners", "Empate", "Goles", "Ambos equipos marcan"]):
+for col, (market, status_text) in zip(market_cols * 2, market_status):
     with col:
         st.markdown(f"**{market}**")
-        st.caption("Motor de señales pendiente de calibración")
-st.caption("Esta versión es un prototipo técnico. No ejecuta apuestas, no confirma cuotas de RushBet y no presenta estimaciones heurísticas como probabilidades validadas.")
+        st.caption(status_text)
+st.caption("La base histórica de goles usada en esta rama procede del archivo compartido actualizado el 26/10/2026. Las cifras son exploratorias, no señales validadas. No hay cuotas verificadas de RushBet ni EV calculado todavía; no se ejecutan apuestas automáticamente.")
