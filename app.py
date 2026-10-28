@@ -188,6 +188,16 @@ st.markdown("""
   [class*="st-key-top_status_controls"] iframe body { margin:0 !important; padding:0 !important; }
     /* Tarjeta compacta de acción principal del escáner */
   [class*="st-key-scan_cta_card"] { margin-top:10px !important; margin-bottom:0 !important; }
+  [class*="st-key-analysis_scan_cta"] { margin:.35rem 0 .65rem !important; }
+  [class*="st-key-analysis_scan_cta"] [data-testid="stButton"] > button {
+     width:auto !important; min-height:2.5rem !important; padding:.5rem 1rem !important;
+     border-radius:12px !important; border:1px solid #FACC15 !important;
+     background:linear-gradient(135deg,#FFE36A,#FACC15) !important; color:#171717 !important;
+     font-size:.92rem !important; font-weight:750 !important; box-shadow:0 3px 12px #FACC1533 !important;
+  }
+  [class*="st-key-analysis_scan_cta"] [data-testid="stButton"] > button:hover {
+     background:linear-gradient(135deg,#FFF0A3,#FFD629) !important; border-color:#FFF0A3 !important;
+  }
   /* Acercar el panel En vivo ahora al escáner principal */
   [class*="st-key-live_now_section"] { margin-top:-64px !important; padding-top:0 !important; }
   [class*="st-key-live_now_section"] > div { padding-top:0 !important; }
@@ -864,6 +874,7 @@ with st.container(key="scan_cta_card"):
     if manual_scan:
         st.markdown('<div class="scan-running-status"><span class="scan-code-icon">⟳</span><div><strong>ESCANEANDO…</strong><div class="scan-running-subtitle">Analizando partidos y mercados</div></div><span class="scan-sweep"></span></div>', unsafe_allow_html=True)
 
+internal_scan_requested = False
 auto_tick = None
 if st.session_state.auto_refresh_enabled:
     auto_tick = st_autorefresh(interval=60_000, key="live_fixture_refresh_60s")
@@ -1326,6 +1337,11 @@ else:
                                     elif tool_name == "market":
                                         market_key = selected_tool.get("market")
                                         if market_key == "goals":
+                                            with st.container(key=f"analysis_scan_cta_goals_{match_id}"):
+                                                if st.button("⟳  Actualizar análisis de goles", key=f"analysis_scan_goals_{match_id}"):
+                                                    manual_scan = True
+                                                    internal_scan_requested = True
+                                                    st.markdown('<div class="scan-running-status"><span class="scan-code-icon">⟳</span><div><strong>ESCANEANDO…</strong><div class="scan-running-subtitle">Actualizando señales de goles y datos en vivo</div></div><span class="scan-sweep"></span></div>', unsafe_allow_html=True)
                                             st.markdown('<div class="match-analysis-kicker">Mercado seleccionado · goles</div><div class="match-analysis-title">Goles y señales</div>', unsafe_allow_html=True)
                                             goal_item = next((item for item in st.session_state.get("goal_scan_results", []) if str((item[0].get("fixture") or {}).get("id")) == str(match_id)), None)
                                             corner_item = next((item for item in st.session_state.get("corner_scan_results", []) if str(((item.get("fixture") or {}).get("fixture") or {}).get("id")) == str(match_id)), None)
@@ -1579,6 +1595,11 @@ else:
                                             else:
                                                 st.info("Primero pulsa «Escanear todos los partidos en vivo». Después, vuelve a abrir Goles y señales para ver promedios por localía, lectura en vivo y tip principal.")
                                         elif market_key == "corners":
+                                            with st.container(key=f"analysis_scan_cta_corners_{match_id}"):
+                                                if st.button("⟳  Actualizar análisis de córners", key=f"analysis_scan_corners_{match_id}"):
+                                                    manual_scan = True
+                                                    internal_scan_requested = True
+                                                    st.markdown('<div class="scan-running-status"><span class="scan-code-icon">⟳</span><div><strong>ESCANEANDO…</strong><div class="scan-running-subtitle">Actualizando proyección y datos en vivo</div></div><span class="scan-sweep"></span></div>', unsafe_allow_html=True)
                                             st.markdown('<div class="match-analysis-kicker">Mercado seleccionado · córners</div><div class="match-analysis-title">Ritmo y proyección de córners</div>', unsafe_allow_html=True)
                                             # Reutilizar primero las estadísticas que ya consultó el escáner en vivo.
                                             live_corner_stats = st.session_state.stats_cache.get(str(match_id))
@@ -1747,6 +1768,37 @@ else:
 
             else:
                 st.info("No hay partidos activos en las ligas seleccionadas.")
+
+    # Al regresar desde un análisis, recuperar el scroll del encuentro seleccionado.
+    _return_fixture_id = st.session_state.pop("return_to_fixture_id", None)
+    if _return_fixture_id:
+        st.components.v1.html(
+            f"""
+            <script>
+            (() => {{
+              const targetId = "st-key-live_match_{_return_fixture_id}";
+              let attempts = 0;
+              const restore = () => {{
+                try {{
+                  const doc = window.parent.document;
+                  const node = doc.querySelector('[class*="' + targetId + '"]');
+                  if (node) {{
+                    node.scrollIntoView({{behavior:"instant", block:"center", inline:"nearest"}});
+                    node.style.transition = "box-shadow .35s ease";
+                    node.style.boxShadow = "0 0 0 2px #FACC15";
+                    setTimeout(() => {{ try {{ node.style.boxShadow = ""; }} catch(e) {{}} }}, 1800);
+                    return;
+                  }}
+                }} catch(e) {{}}
+                if (++attempts < 12) setTimeout(restore, 180);
+              }};
+              restore();
+            }})();
+            </script>
+            """,
+            height=1,
+            scrolling=False,
+        )
 
     # Se retira el resumen de sesión de la pantalla principal.
     stats_limit = 20
@@ -2037,6 +2089,10 @@ else:
                 }
             goal_results_with_context.append((fixture, estimate, tips, context))
         st.session_state.goal_scan_results = goal_results_with_context
+
+        # Si el escaneo se inició desde la vista individual, volver a renderizarla con resultados nuevos.
+        if internal_scan_requested:
+            st.rerun()
 
         # Las cuotas se actualizan en bloque durante el refresco automático, no por partido.
 
