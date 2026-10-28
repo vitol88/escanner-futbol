@@ -1424,7 +1424,6 @@ else:
                                                     goals = match.get("goals") or {}
                                                     patterns = numerology_context(goals.get("home"), goals.get("away"), home_c, away_c, safe_stat(st.session_state.stats_cache.get(str(match_id), []), "Yellow Cards", 0), safe_stat(st.session_state.stats_cache.get(str(match_id), []), "Yellow Cards", 1))
                                                     if patterns:
-                                                        st.caption("Contexto numérico solo para alto riesgo; no genera una señal por sí solo: " + "; ".join(patterns) + ".")
                                                     if not live_rows:
                                                         st.caption("No hay cuotas de córners devueltas por la API para este partido; no se inventan cuotas ni se sustituye por una cuota estimada.")
                                             elif corner_item:
