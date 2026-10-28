@@ -173,8 +173,28 @@ def build_deep_goal_context(
     home_recent = recent(home, "home")
     away_recent = recent(away, "away")
 
-    def form(matches: list[dict[str, Any]]) -> dict[str, Any]:
+    def form(matches: list[dict[str, Any]], team_id: int) -> dict[str, Any]:
         results = [_result_for(item["_gf"], item["_ga"]) for item in matches]
+        match_details = []
+        for item in matches:
+            teams = item.get("teams") or {}
+            goals = item.get("goals") or {}
+            home_team = teams.get("home") or {}
+            away_team = teams.get("away") or {}
+            fixture_data = item.get("fixture") or {}
+            match_details.append({
+                "date": str(fixture_data.get("date") or "")[:10],
+                "opponent": _team_name(item, team_id) if False else str(
+                    (away_team if home_team.get("id") == team_id else home_team).get("name") or "Rival"
+                ),
+                "home_name": str(home_team.get("name") or "Local"),
+                "away_name": str(away_team.get("name") or "Visitante"),
+                "home_goals": goals.get("home"),
+                "away_goals": goals.get("away"),
+                "result": _result_for(item["_gf"], item["_ga"]),
+                "goals_for": item["_gf"],
+                "goals_against": item["_ga"],
+            })
         return {
             "matches": len(matches),
             "record": f'{results.count("V")}V {results.count("E")}E {results.count("D")}D' if results else "N/D",
@@ -182,10 +202,11 @@ def build_deep_goal_context(
             "goals_against_avg": round(sum(x["_ga"] for x in matches) / len(matches), 2) if matches else None,
             "btts_rate": round(100 * sum(x["_gf"] > 0 and x["_ga"] > 0 for x in matches) / len(matches)) if matches else None,
             "over_2_5_rate": round(100 * sum(x["_gf"] + x["_ga"] >= 3 for x in matches) / len(matches)) if matches else None,
+            "recent_matches": match_details,
         }
 
-    result["home_form"] = form(home_recent)
-    result["away_form"] = form(away_recent)
+    result["home_form"] = form(home_recent, home["id"])
+    result["away_form"] = form(away_recent, away["id"])
 
     h2h_matches = get_cached(
         f"h2h:{home['id']}:{away['id']}:{league_id or 'all'}",
