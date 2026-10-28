@@ -608,7 +608,7 @@ with st.container(key="sound_controls_row"):
     with test_col:
         st.components.v1.html("""
 <div style="display:flex;align-items:center;justify-content:flex-start;min-height:44px">
-  <button id="scanner-test-sound" type="button" style="padding:9px 12px;border-radius:10px;border:1px solid #FACC15;background:#242014;color:#FACC15;font:600 13px system-ui;white-space:nowrap;cursor:pointer">🔊 Probar “¡Gol!”</button>
+  <button id="scanner-test-sound" type="button" style="padding:9px 12px;border-radius:10px;border:1px solid #FACC15;background:#242014;color:#FACC15;font:600 13px system-ui;white-space:nowrap;cursor:pointer">🔊 Activar alertas y probar voz</button>
 </div>
 <script>
 (() => {
@@ -617,6 +617,7 @@ with st.container(key="sound_controls_row"):
  b.dataset.bound='1';
  b.addEventListener('click', () => {
    try {
+     localStorage.setItem('football-lab-audio-activated', 'true');
      if ('speechSynthesis' in window && 'SpeechSynthesisUtterance' in window) {
        window.speechSynthesis.cancel();
        const u = new SpeechSynthesisUtterance('¡Gol!');
@@ -624,12 +625,12 @@ with st.container(key="sound_controls_row"):
        window.speechSynthesis.speak(u);
      }
      const C=window.AudioContext||window.webkitAudioContext;
-     if(!C) { b.textContent='✓ Prueba de voz enviada'; return; }
+     if(!C) { b.textContent='✓ Alertas activadas'; return; }
      const c=new C(), o=c.createOscillator(), g=c.createGain();
      o.type='sine'; o.frequency.value=880; g.gain.value=0.08;
      o.connect(g); g.connect(c.destination);
      Promise.resolve(c.resume()).then(()=>{o.start();setTimeout(()=>{try{o.stop();}catch(e){} c.close();},220);});
-     b.textContent='✓ Prueba de voz enviada';
+     b.textContent='✓ Alertas activadas';
    } catch(e) { b.textContent='⚠️ Sonido no disponible'; }
  });
 })();
@@ -653,7 +654,9 @@ st.components.v1.html(
     <div id="scanner-notices" style="font-family:system-ui;color:#f4f4f5"></div>
     <script>
     const events = {events_json};
-    const muted = {muted_js};
+    let browserAudioActivated = false;
+    try {{ browserAudioActivated = localStorage.getItem('football-lab-audio-activated') === 'true'; }} catch (e) {{}}
+    const muted = {muted_js} || !browserAudioActivated;
     const root = document.getElementById('scanner-notices');
     const seenKey = 'football-lab-seen-events';
     let seen = [];
