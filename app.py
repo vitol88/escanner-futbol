@@ -204,7 +204,7 @@ st.markdown("""
   [data-testid="stHorizontalBlock"]:has([class*="st-key-main_stats_"]) button {
     box-sizing:border-box !important; min-width:0 !important; width:100% !important; max-width:100% !important;
     min-height:2rem !important; height:2rem !important; padding:0 !important;
-    font-size:clamp(.78rem,3vw,1rem) !important; font-weight:800 !important;
+    font-size:clamp(1rem,4.2vw,1.45rem) !important; font-weight:900 !important; text-shadow:0 0 8px #FACC1580 !important;
     line-height:1.05 !important; white-space:normal !important; overflow-wrap:anywhere !important;
     border:1px solid #8A6A16 !important; border-radius:7px !important;
     background:linear-gradient(145deg,#1A1B1F,#0B0D10) !important; color:#F6D365 !important;
@@ -772,7 +772,7 @@ else:
                                 with action_cols[0]:
                                     show_stats = st.button("▥", help="Estadísticas en vivo", key=f"main_stats_{match_id}", type="primary" if active_tool == "stats" else "secondary", use_container_width=True)
                                 with action_cols[1]:
-                                    show_goals = st.button("⚽⚡", help="Goles y señales", key=f"main_market_{match_id}_goals", type="primary" if active_market == "goals" else "secondary", use_container_width=True)
+                                    show_goals = st.button("⚽︎⚡", help="Goles y señales", key=f"main_market_{match_id}_goals", type="primary" if active_market == "goals" else "secondary", use_container_width=True)
                                 with action_cols[2]:
                                     show_corners = st.button("⚑", help="Córners", key=f"main_market_{match_id}_corners", type="primary" if active_market == "corners" else "secondary", use_container_width=True)
                                 with action_cols[3]:
