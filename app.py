@@ -1619,11 +1619,14 @@ else:
                                                         )
                                                     # Se omite el resumen H2H aquí para evitar duplicar el indicador de promedio.
                                                     target_minute = deep_context.get("current_goal_minute")
+                                                    target_minute_label = deep_context.get("current_goal_minute_label")
                                                     if target_minute is not None:
                                                         scorer = deep_context.get("current_goal_team")
+                                                        if not target_minute_label:
+                                                            target_minute_label = f"{target_minute}′"
                                                         scorer_text = f' · Anotado por <b>{html.escape(str(scorer))}</b>' if scorer else ""
                                                         st.markdown(
-                                                            f'<div class="goal-last-goal"><b>MINUTO DEL ÚLTIMO GOL</b><span>{html.escape(str(target_minute))}\'</span>{scorer_text}</div>',
+                                                            f'<div class="goal-last-goal"><b>MINUTO DEL ÚLTIMO GOL EN EL PARTIDO</b><span>{html.escape(str(target_minute_label))}</span>{scorer_text}</div>',
                                                             unsafe_allow_html=True,
                                                         )
                                                     comeback = deep_context.get("comeback") or {}
