@@ -2312,8 +2312,16 @@ else:
     if manual_scan or auto_scan_due:
         st.session_state.last_auto_market_scan_epoch = now_epoch
         scan_api_calls_start = st.session_state.api_request_count
-        # Force fresh statistics for this scan; cap detailed-stat calls to protect API quota.
-        st.session_state.stats_cache = {}
+        # Refresh only live-fixture statistics for a new scan. Preserve historical
+        # statistics (for example corner H2H rows) so they are not fetched repeatedly.
+        live_fixture_ids_for_refresh = {
+            str(((item.get("fixture") or {}).get("id") or ""))
+            for item in st.session_state.get("live_fixtures", [])
+            if (item.get("fixture") or {}).get("id") is not None
+        }
+        for cached_stats_key in list(st.session_state.stats_cache):
+            if str(cached_stats_key) in live_fixture_ids_for_refresh:
+                st.session_state.stats_cache.pop(cached_stats_key, None)
         st.session_state.goal_scan_results = []
         st.session_state.corner_scan_results = []
         # Fetch live statistics before estimating goals, so this same scan can
