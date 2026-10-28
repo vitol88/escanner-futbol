@@ -478,8 +478,11 @@ st.markdown("""
   .goal-deep-heading { display:block; clear:both; position:relative; z-index:1; color:#FACC15; font-size:.78rem; letter-spacing:1.1px; font-weight:900; margin:1.9rem 0 1.1rem; padding:0 0 .2rem; line-height:1.6; }
   .goal-form-card { box-sizing:border-box; border:1px solid #393326; border-radius:11px; padding:12px; margin-top:5px; background:linear-gradient(145deg,#191D24,#101216); min-height:170px; height:100%; }
   .goal-form-back { box-sizing:border-box; border:1px solid #FACC15; border-radius:11px; padding:11px; margin-top:5px; background:linear-gradient(145deg,#20232B,#12151A); min-height:170px; height:100%; }
-  @keyframes goal-card-flip-in { from { opacity:.35; transform:perspective(700px) rotateY(-75deg); } to { opacity:1; transform:perspective(700px) rotateY(0deg); } }
-  .goal-form-card, .goal-form-back { animation:goal-card-flip-in .42s ease-out both; transform-origin:center; backface-visibility:hidden; }
+  @keyframes goal-card-flip-in { 0% { opacity:.15; transform:perspective(900px) rotateY(-180deg) scale(.94); } 70% { opacity:1; transform:perspective(900px) rotateY(12deg) scale(1.01); } 100% { opacity:1; transform:perspective(900px) rotateY(0deg) scale(1); } }
+  .goal-form-card, .goal-form-back { animation:goal-card-flip-in .62s cubic-bezier(.2,.75,.25,1) both; transform-origin:center; transform-style:preserve-3d; backface-visibility:visible; }
+  [class*="st-key-goal_form_flip_btn_"] button { width:32px !important; min-width:32px !important; height:32px !important; min-height:32px !important; padding:0 !important; border-radius:50% !important; border:1px solid #FACC15 !important; background:radial-gradient(circle at 35% 25%,#FFF1A6 0%,#FACC15 45%,#B77908 100%) !important; color:#171717 !important; font-size:1rem !important; line-height:1 !important; box-shadow:0 0 0 2px #FACC1525,0 0 12px #FACC1545,inset 0 1px 2px #FFF8C5 !important; }
+  [class*="st-key-goal_form_flip_btn_"] button:hover { transform:rotate(-10deg) scale(1.08) !important; box-shadow:0 0 0 3px #FACC1535,0 0 17px #FACC1580 !important; }
+  @media (prefers-reduced-motion: reduce) { .goal-form-card, .goal-form-back { animation:none; } }
   @media (prefers-reduced-motion: reduce) { .goal-form-card, .goal-form-back { animation:none; } }
   .goal-form-back-title { color:#FACC15; font-size:.72rem; font-weight:900; margin-bottom:8px; line-height:1.35; }
   .goal-form-match { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:7px; align-items:center; padding:6px 0; border-top:1px solid #34302A; color:#E4E4E7; font-size:.68rem; line-height:1.35; }
@@ -1637,38 +1640,46 @@ else:
                                                         logo_html = f'<img class="goal-form-logo" src="{team_logo}" alt="">' if team_logo else ""
                                                         flip_key = f"goal_form_flipped_{match_id}_{team.get('id') or label}"
                                                         is_flipped = bool(st.session_state.get(flip_key, False))
-                                                        card_col, ball_col = col.columns([0.88, 0.12], gap="small")
-                                                        if is_flipped:
-                                                            recent_matches = form_data.get("recent_matches") or []
-                                                            match_rows = []
-                                                            for recent in recent_matches:
-                                                                result_code = str(recent.get("result") or "?").upper()
-                                                                result_class = {"V": "v", "E": "e", "D": "d"}.get(result_code, "e")
-                                                                date_label = html.escape(str(recent.get("date") or "Fecha N/D"))
-                                                                opponent = html.escape(str(recent.get("opponent") or "Rival"))
-                                                                hg, ag = recent.get("home_goals"), recent.get("away_goals")
-                                                                score_label = f"{hg}–{ag}" if isinstance(hg, int) and isinstance(ag, int) else f"{recent.get('goals_for', '–')}–{recent.get('goals_against', '–')}"
-                                                                match_rows.append(
-                                                                    f'<div class="goal-form-match"><span class="goal-form-match-opponent">{date_label} · {opponent}</span>'
-                                                                    f'<span class="goal-form-match-score">{html.escape(str(score_label))}</span>'
-                                                                    f'<span class="goal-form-result goal-form-result-{result_class}">{html.escape(result_code)}</span></div>'
+                                                        with col.container(border=True):
+                                                            head_col, ball_col = st.columns([0.86, 0.14], gap="small", vertical_alignment="center")
+                                                            if is_flipped:
+                                                                head_col.markdown(
+                                                                    f'<div class="goal-form-header">{logo_html}<div class="goal-form-team">ÚLTIMOS PARTIDOS · {html.escape(label)}</div></div>',
+                                                                    unsafe_allow_html=True,
                                                                 )
-                                                            matches_html = "".join(match_rows) if match_rows else '<div class="goal-form-match">No hay partidos recientes disponibles.</div>'
-                                                            card_col.markdown(
-                                                                f'<div class="goal-form-back"><div class="goal-form-back-title">ÚLTIMOS PARTIDOS · {html.escape(label)}</div>{matches_html}</div>',
-                                                                unsafe_allow_html=True,
-                                                            )
-                                                        else:
-                                                            card_col.markdown(
-                                                                f'<div class="goal-form-card"><div class="goal-form-header">{logo_html}<div class="goal-form-team">{html.escape(label)}</div></div>'
-                                                                f'<div class="goal-form-record">{html.escape(str(form_data.get("record", "N/D")))}</div>'
-                                                                f'<div class="goal-form-line">GF {form_data.get("goals_for_avg") if form_data.get("goals_for_avg") is not None else "N/D"} · GC {form_data.get("goals_against_avg") if form_data.get("goals_against_avg") is not None else "N/D"}</div>'
-                                                                f'<div class="goal-form-line">Ambos marcan {form_data.get("btts_rate") if form_data.get("btts_rate") is not None else "N/D"}% · +2.5 goles {form_data.get("over_2_5_rate") if form_data.get("over_2_5_rate") is not None else "N/D"}%</div></div>',
-                                                                unsafe_allow_html=True,
-                                                            )
-                                                        if ball_col.button("⚽", key=f"goal_form_flip_btn_{match_id}_{team.get('id') or label}", help="Ver últimos partidos" if not is_flipped else "Volver al resumen"):
-                                                            st.session_state[flip_key] = not is_flipped
-                                                            st.rerun()
+                                                            else:
+                                                                head_col.markdown(
+                                                                    f'<div class="goal-form-header">{logo_html}<div class="goal-form-team">{html.escape(label)}</div></div>',
+                                                                    unsafe_allow_html=True,
+                                                                )
+                                                            if ball_col.button("🏆", key=f"goal_form_flip_btn_{match_id}_{team.get('id') or label}", help="Ver últimos partidos" if not is_flipped else "Volver al resumen"):
+                                                                st.session_state[flip_key] = not is_flipped
+                                                                st.rerun()
+                                                            if is_flipped:
+                                                                recent_matches = (form_data.get("recent_matches") or [])[:3]
+                                                                if not recent_matches:
+                                                                    st.caption("No hay partidos recientes disponibles para esta condición.")
+                                                                for recent in recent_matches:
+                                                                    result_code = str(recent.get("result") or "?").upper()
+                                                                    result_class = {"V": "v", "E": "e", "D": "d"}.get(result_code, "e")
+                                                                    date_label = html.escape(str(recent.get("date") or "Fecha N/D"))
+                                                                    home_label = html.escape(str(recent.get("home_name") or "Local"))
+                                                                    away_label = html.escape(str(recent.get("away_name") or "Visitante"))
+                                                                    hg, ag = recent.get("home_goals"), recent.get("away_goals")
+                                                                    score_label = f"{hg}–{ag}" if isinstance(hg, int) and isinstance(ag, int) else "—"
+                                                                    st.markdown(
+                                                                        f'<div class="goal-form-match"><span class="goal-form-match-opponent">{date_label}<br>{home_label} · {away_label}</span>'
+                                                                        f'<span class="goal-form-match-score">{html.escape(score_label)}</span>'
+                                                                        f'<span class="goal-form-result goal-form-result-{result_class}">{html.escape(result_code)}</span></div>',
+                                                                        unsafe_allow_html=True,
+                                                                    )
+                                                            else:
+                                                                st.markdown(
+                                                                    f'<div class="goal-form-record">{html.escape(str(form_data.get("record", "N/D")))}</div>'
+                                                                    f'<div class="goal-form-line">GF {form_data.get("goals_for_avg") if form_data.get("goals_for_avg") is not None else "N/D"} · GC {form_data.get("goals_against_avg") if form_data.get("goals_against_avg") is not None else "N/D"}</div>'
+                                                                    f'<div class="goal-form-line">Ambos marcan {form_data.get("btts_rate") if form_data.get("btts_rate") is not None else "N/D"}% · +2.5 goles {form_data.get("over_2_5_rate") if form_data.get("over_2_5_rate") is not None else "N/D"}%</div>',
+                                                                    unsafe_allow_html=True,
+                                                                )
                                                     # Se omite el resumen H2H aquí para evitar duplicar el indicador de promedio.
                                                     target_minute = deep_context.get("current_goal_minute")
                                                     target_minute_label = deep_context.get("current_goal_minute_label")
