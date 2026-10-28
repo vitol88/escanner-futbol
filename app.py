@@ -61,8 +61,9 @@ st.markdown("""
   [class*="st-key-sound_enabled_toggle"] label { font-size:.92rem !important; font-weight:650 !important; }
   [class*="st-key-sound_enabled_toggle"] [role="switch"] { transform:scale(.88); transform-origin:center; }
   [class*="st-key-sound_enabled_toggle"] [role="switch"][aria-checked="true"] { background:#FACC15 !important; border-color:#FFE566 !important; }
-  [class*="st-key-sound_enabled_toggle"] [role="switch"][aria-checked="true"] div { background:#111419 !important; }
-  [class*="st-key-sound_enabled_toggle"] [role="switch"][aria-checked="false"] { background:#343A44 !important; border-color:#555B66 !important; }
+  [class*="st-key-sound_enabled_toggle"] [role="switch"][aria-checked="true"] > div { background:#111419 !important; }
+  [class*="st-key-sound_enabled_toggle"] [role="switch"][aria-checked="false"] { background:#FF4B4B !important; border-color:#FF4B4B !important; }
+  [class*="st-key-sound_enabled_toggle"] [role="switch"][aria-checked="false"] > div { background:#FFFFFF !important; }
   [data-testid="stTabs"] button[role="tab"] { color: #D4D4D8; font-weight: 650; }
   [data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
     color: #FACC15; border-bottom-color: #FACC15;
