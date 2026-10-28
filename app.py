@@ -507,6 +507,10 @@ st.markdown("""
     50% { opacity:.62; transform:scale(.94); box-shadow:0 0 0 5px rgba(250,204,21,0); }
   }
   .goal-last-goal span { animation:goal-minute-alarm 1.15s ease-in-out infinite; transform-origin:center; }
+  .corner-total-average { display:flex; align-items:center; flex-wrap:wrap; gap:7px; margin:16px 0 18px; padding:9px 12px; border:2px solid #FACC15; border-radius:12px; background:linear-gradient(135deg,rgba(250,204,21,.16),#191C22 52%,#101216); box-shadow:0 0 0 1px rgba(250,204,21,.22),0 0 16px rgba(250,204,21,.16); color:#F4F4F5; font-size:.84rem; line-height:1.5; width:fit-content; max-width:100%; clear:both; position:relative; }
+  .corner-total-average b { color:#FFE566; font-weight:950; letter-spacing:.35px; }
+  .corner-total-average span { display:inline-flex; align-items:center; justify-content:center; min-width:44px; padding:4px 9px; border:1px solid #FACC15; border-radius:7px; background:#FACC15; color:#111419; font-weight:950; font-size:.9rem; animation:goal-minute-alarm 1.15s ease-in-out infinite; transform-origin:center; }
+  @media (prefers-reduced-motion: reduce) { .corner-total-average span { animation:none; } }
   @media (prefers-reduced-motion: reduce) {
     .goal-last-goal span { animation:none; }
   }
@@ -2190,20 +2194,9 @@ else:
                                                     total_match_average = (competition_corner_average + h2h_avg) / 2
                                                     st.markdown(
                                                         f"""
-                                                        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;
-                                                                    margin:16px 0 18px;padding:7px 10px;
-                                                                    border:1px solid #51451D;border-radius:9px;
-                                                                    background:linear-gradient(135deg,#17191f,#20232b);
-                                                                    width:fit-content;max-width:100%;clear:both;position:relative;">
-                                                          <span style="font-size:11px;font-weight:700;color:#FACC15;letter-spacing:.3px;">
-                                                            PROMEDIO TOTAL PARA ESTE PARTIDO
-                                                          </span>
-                                                          <span style="display:inline-block;padding:4px 9px;
-                                                                       border:1px solid #FACC15;border-radius:7px;
-                                                                       background:#FACC15;color:#111827;
-                                                                       font-size:13px;font-weight:800;line-height:1.1;">
-                                                            {total_match_average:.2f}
-                                                          </span>
+                                                        <div class="corner-total-average">
+                                                          <b>PROMEDIO TOTAL DE CÓRNERS PARA ESTE PARTIDO</b>
+                                                          <span>{total_match_average:.2f}</span>
                                                         </div>
                                                         """,
                                                         unsafe_allow_html=True,
