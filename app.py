@@ -2136,16 +2136,24 @@ else:
         history_cache["_automatic_history_team_fixture_calls"] = 0
         if auto_scan_due and not manual_scan:
             history_cache["_automatic_history_team_fixture_calls"] = 10
+        # Priorizar el partido abierto por el usuario para que el presupuesto histórico
+        # no se consuma primero en otros partidos del escáner.
+        selected_detail_for_history = st.session_state.get("selected_match_detail") or {}
+        selected_history_fixture_id = str(selected_detail_for_history.get("fixture_id") or "")
+        corner_results.sort(
+            key=lambda item: 0 if str(((item.get("fixture") or {}).get("fixture") or {}).get("id") or "") == selected_history_fixture_id else 1
+        )
         for corner_item in corner_results:
             if corner_item.get("error"):
                 continue
             try:
                 used_history_stats = int(history_cache.get("_automatic_history_stats_calls", 0))
+                history_budget = 8 if auto_scan_due and not manual_scan else 20
                 corner_item["automatic_history"] = build_automatic_history(
                     corner_item["fixture"],
                     api_get=api_get,
                     cache=history_cache,
-                    stats_budget=max(0, (2 if auto_scan_due and not manual_scan else 8) - used_history_stats),
+                    stats_budget=max(0, history_budget - used_history_stats),
                 )
             except Exception as history_exc:
                 corner_item["automatic_history"] = {
