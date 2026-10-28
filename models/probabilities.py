@@ -185,6 +185,49 @@ def estimate_live_goal_markets(
     if red_home is None and red_away is None and reds is not None and reds > 0:
         home_rate *= 1.05
         away_rate *= 1.05
+    # Team-specific pressure: corners, shots on target and possession help distinguish
+    # an 8-2 corner split from a match with the same total but no territorial imbalance.
+    # These are deliberately small, capped exploratory multipliers (not calibrated).
+    def team_value(key: str) -> float | None:
+        return valid_nonnegative(key)
+
+    corners_home = team_value("corners_home")
+    corners_away = team_value("corners_away")
+    shots_home = team_value("shots_on_home")
+    shots_away = team_value("shots_on_away")
+    possession_home = team_value("possession_home")
+    possession_away = team_value("possession_away")
+
+    home_pressure = 0.0
+    away_pressure = 0.0
+    pressure_evidence = 0
+    if elapsed_minute >= 15:
+        if corners_home is not None and corners_away is not None:
+            # Normalize by minutes so 8 corners at 70' differs from 8 at 20'.
+            expected_each = max(0.6, elapsed_minute * 0.045)
+            home_pressure += max(-1.0, min(2.0, (corners_home - expected_each) / max(2.0, expected_each))) * 0.045
+            away_pressure += max(-1.0, min(2.0, (corners_away - expected_each) / max(2.0, expected_each))) * 0.045
+            pressure_evidence += 1
+        if shots_home is not None and shots_away is not None:
+            expected_sot_each = max(0.35, elapsed_minute * 0.032)
+            home_pressure += max(-1.0, min(2.0, (shots_home - expected_sot_each) / max(1.0, expected_sot_each))) * 0.075
+            away_pressure += max(-1.0, min(2.0, (shots_away - expected_sot_each) / max(1.0, expected_sot_each))) * 0.075
+            pressure_evidence += 1
+        if possession_home is not None and possession_away is not None:
+            home_pressure += max(-0.20, min(0.20, (possession_home - possession_away) / 100.0)) * 0.30
+            away_pressure += max(-0.20, min(0.20, (possession_away - possession_home) / 100.0)) * 0.30
+            pressure_evidence += 1
+    # A team trailing on the scoreboard may attack more; only use this when
+    # pressure evidence is present, and do not turn pressure into a certainty.
+    if pressure_evidence:
+        if score_home < score_away:
+            home_pressure += 0.035
+        elif score_away < score_home:
+            away_pressure += 0.035
+        home_pressure = max(-0.12, min(0.18, home_pressure))
+        away_pressure = max(-0.12, min(0.18, away_pressure))
+        home_rate *= 1.0 + home_pressure
+        away_rate *= 1.0 + away_pressure
     total_rate = home_rate + away_rate
 
     # Evaluate only future total-goal targets, relative to the current score.
