@@ -483,7 +483,7 @@ with st.container(key="control_row"):
         )
 battery_progress = st.empty()
 if refresh:
-    st.caption("🔄 Actualizando partidos en vivo…")
+    battery_progress.caption("🔄 Actualizando partidos en vivo…")
 
 with st.container(key="sound_controls_row"):
     sound_toggle_state = st.session_state.get("sound_enabled_toggle", not st.session_state.sound_muted)
@@ -580,7 +580,7 @@ st.components.v1.html(
     }}
     </script>
     """,
-    height=105,
+    height=1,
     scrolling=False,
 )
 
@@ -680,11 +680,11 @@ if should_refresh:
             "last_auto_scan": st.session_state.last_refresh,
         }
         if refresh:
-            st.caption("✓ Actualización completada")
+            battery_progress.caption("✓ Actualización completada")
     except Exception as exc:
         st.session_state.last_auto_refresh_error = str(exc)
         if refresh:
-            st.caption("⚠️ Actualización finalizada con error")
+            battery_progress.caption("⚠️ Actualización finalizada con error")
 
 if st.session_state.last_auto_refresh_error:
     st.warning(f"No se pudo actualizar el listado en vivo: {st.session_state.last_auto_refresh_error}")
