@@ -1191,8 +1191,6 @@ else:
                                             st.session_state.stats_cache[stats_key] = []
                                             st.session_state.setdefault("stats_errors", {})[stats_key] = str(stats_exc)
                                     st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "stats"}
-                                    st.session_state[f"live_match_{match_id}"] = True
-                                    st.session_state[f"live_league_{country}_{league_name}"] = True
                                     st.rerun()
                                 if show_h2h:
                                     if "h2h_cache" not in st.session_state:
@@ -1212,18 +1210,12 @@ else:
                                         except Exception as h2h_exc:
                                             st.session_state.h2h_cache[h2h_key] = {"error": str(h2h_exc)}
                                     st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "h2h"}
-                                    st.session_state[f"live_match_{match_id}"] = True
-                                    st.session_state[f"live_league_{country}_{league_name}"] = True
                                     st.rerun()
                                 if show_goals:
                                     st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "market", "market": "goals"}
-                                    st.session_state[f"live_match_{match_id}"] = True
-                                    st.session_state[f"live_league_{country}_{league_name}"] = True
                                     st.rerun()
                                 if show_corners:
                                     st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "market", "market": "corners"}
-                                    st.session_state[f"live_match_{match_id}"] = True
-                                    st.session_state[f"live_league_{country}_{league_name}"] = True
                                     st.rerun()
                                 selected_tool = st.session_state.get("main_fixture_tool") or {}
                                 if str(selected_tool.get("fixture_id")) == str(match_id):
