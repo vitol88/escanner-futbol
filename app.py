@@ -1268,22 +1268,142 @@ else:
                                             if corner_item and not corner_item.get("error"):
                                                 home_c, away_c = corner_item.get("home_corners"), corner_item.get("away_corners")
                                                 current_minute = (match_fixture.get("status") or {}).get("elapsed")
-                                                current_total = (home_c or 0) + (away_c or 0) if isinstance(home_c, (int,float)) and isinstance(away_c, (int,float)) else None
+                                                current_total = (home_c + away_c) if isinstance(home_c, (int, float)) and isinstance(away_c, (int, float)) else None
                                                 history = corner_item.get("automatic_history") or {}
                                                 metric_cols = st.columns(3)
                                                 metric_cols[0].metric("Córners local", home_c if home_c is not None else "N/D")
                                                 metric_cols[1].metric("Córners visitante", away_c if away_c is not None else "N/D")
                                                 metric_cols[2].metric("Total actual", current_total if current_total is not None else "N/D")
-                                                if history:
-                                                    hcols = st.columns(2)
-                                                    hcols[0].metric("Promedio local en casa", f"{history.get('home_corners_for'):.2f}" if isinstance(history.get('home_corners_for'), (int,float)) else "N/D")
-                                                    hcols[1].metric("Promedio visitante fuera", f"{history.get('away_corners_for'):.2f}" if isinstance(history.get('away_corners_for'), (int,float)) else "N/D")
+
+                                                st.markdown("### 📊 Promedios de córners por localía")
+                                                history_rows = [
+                                                    {"Indicador": "Córners a favor del local en casa", "Promedio": history.get("home_corners_for"), "Muestra": history.get("home_corner_sample", 0)},
+                                                    {"Indicador": "Córners concedidos por el local en casa", "Promedio": history.get("home_corners_against"), "Muestra": history.get("home_corner_sample", 0)},
+                                                    {"Indicador": "Córners a favor del visitante fuera", "Promedio": history.get("away_corners_for"), "Muestra": history.get("away_corner_sample", 0)},
+                                                    {"Indicador": "Córners concedidos por el visitante fuera", "Promedio": history.get("away_corners_against"), "Muestra": history.get("away_corner_sample", 0)},
+                                                ]
+                                                history_html = '<table class="history-table"><thead><tr><th>Indicador</th><th>Promedio</th><th>Muestra</th></tr></thead><tbody>'
+                                                for row in history_rows:
+                                                    avg = row["Promedio"]
+                                                    avg_text = f"{avg:.2f}".rstrip("0").rstrip(".") if isinstance(avg, (int, float)) else "N/D"
+                                                    sample_text = row["Muestra"] if row["Muestra"] else "0"
+                                                    history_html += f"<tr><td>{html.escape(row['Indicador'])}</td><td>{avg_text}</td><td>{sample_text}</td></tr>"
+                                                history_html += "</tbody></table>"
+                                                st.markdown(history_html, unsafe_allow_html=True)
+                                                st.caption(history.get("note", "Promedios históricos de partidos recientes; N/D significa que la API no entregó datos suficientes."))
+
+                                                st.markdown("### ⌁ Histórico de enfrentamientos directos")
+                                                home_team = (match.get("teams") or {}).get("home") or {}
+                                                away_team = (match.get("teams") or {}).get("away") or {}
+                                                h2h_key = f"{home_team.get('id')}-{away_team.get('id')}"
+                                                if "corner_h2h_cache" not in st.session_state:
+                                                    st.session_state.corner_h2h_cache = {}
+                                                if st.button("Consultar córners de los últimos enfrentamientos", key=f"corner_h2h_{match_id}"):
+                                                    if not home_team.get("id") or not away_team.get("id"):
+                                                        st.warning("No están disponibles los IDs de los dos equipos.")
+                                                    else:
+                                                        try:
+                                                            if h2h_key not in st.session_state.corner_h2h_cache:
+                                                                h2h_payload = api_get("fixtures/headtohead", {"h2h": h2h_key, "last": 5})
+                                                                past_matches = h2h_payload.get("response") or []
+                                                                past_rows = []
+                                                                for past in past_matches[:3]:
+                                                                    past_id = (past.get("fixture") or {}).get("id")
+                                                                    if not past_id:
+                                                                        continue
+                                                                    stats_key = f"corner-h2h-stats:{past_id}"
+                                                                    if stats_key not in st.session_state.stats_cache:
+                                                                        st.session_state.stats_cache[stats_key] = (api_get("fixtures/statistics", {"fixture": past_id}).get("response") or [])
+                                                                    past_stats = st.session_state.stats_cache.get(stats_key) or []
+                                                                    past_home_c = safe_stat(past_stats, "Corner Kicks", 0)
+                                                                    past_away_c = safe_stat(past_stats, "Corner Kicks", 1)
+                                                                    if past_home_c is None or past_away_c is None:
+                                                                        continue
+                                                                    past_fixture = past.get("fixture") or {}
+                                                                    past_teams = past.get("teams") or {}
+                                                                    past_goals = past.get("goals") or {}
+                                                                    past_rows.append({
+                                                                        "Fecha": (past_fixture.get("date") or "")[:10],
+                                                                        "Local": (past_teams.get("home") or {}).get("name", "N/D"),
+                                                                        "Marcador": f"{past_goals.get('home', '—')}–{past_goals.get('away', '—')}",
+                                                                        "Visitante": (past_teams.get("away") or {}).get("name", "N/D"),
+                                                                        "Córners": f"{past_home_c}–{past_away_c}",
+                                                                        "Total": past_home_c + past_away_c,
+                                                                    })
+                                                                st.session_state.corner_h2h_cache[h2h_key] = past_rows
+                                                        except Exception as h2h_exc:
+                                                            st.session_state.corner_h2h_cache[h2h_key] = {"error": str(h2h_exc)}
+                                                h2h_rows = st.session_state.corner_h2h_cache.get(h2h_key)
+                                                if isinstance(h2h_rows, dict) and h2h_rows.get("error"):
+                                                    st.caption("No se pudo cargar el H2H de córners: " + str(h2h_rows["error"]))
+                                                elif isinstance(h2h_rows, list):
+                                                    if h2h_rows:
+                                                        st.dataframe(h2h_rows, use_container_width=True, hide_index=True)
+                                                        h2h_avg = sum(row["Total"] for row in h2h_rows) / len(h2h_rows)
+                                                        st.caption(f"Promedio de córners en los {len(h2h_rows)} enfrentamientos con estadísticas disponibles: {h2h_avg:.2f}.")
+                                                    elif h2h_key in st.session_state.corner_h2h_cache:
+                                                        st.caption("La API no devolvió estadísticas de córners suficientes para los enfrentamientos recientes.")
+                                                else:
+                                                    st.caption("Consulta los últimos enfrentamientos para calcular su promedio real de córners. Se limita a cinco partidos y hasta tres consultas de estadísticas por pareja.")
+
                                                 pace = corner_item.get("pace")
-                                                st.markdown("**📡 Lectura en vivo**")
-                                                st.write(f"Minuto {current_minute if current_minute is not None else 'N/D'} · ritmo actual {pace:.2f} córners/90' " if isinstance(pace, (int,float)) else f"Minuto {current_minute if current_minute is not None else 'N/D'} · ritmo no disponible con los datos actuales.")
-                                                if isinstance(current_total, (int,float)) and isinstance(current_minute, int) and current_minute > 0:
-                                                    projected = current_total / current_minute * 90
-                                                    st.markdown(f'<div class="signal-card"><div class="signal-kicker">Tip principal · córners</div><div class="signal-title">Proyección orientativa a 90 minutos</div><div class="signal-pick">{projected:.1f} córners</div><div class="signal-meta">Actuales: {current_total} · No es una probabilidad validada ni una línea de cuota.</div></div>', unsafe_allow_html=True)
+                                                st.markdown("### 📡 Lectura en vivo")
+                                                st.write(f"Minuto {current_minute if current_minute is not None else 'N/D'} · ritmo actual {pace:.2f} córners/90'." if isinstance(pace, (int, float)) else f"Minuto {current_minute if current_minute is not None else 'N/D'} · ritmo no disponible con los datos actuales.")
+                                                if isinstance(current_total, (int, float)) and isinstance(current_minute, int) and current_minute > 0:
+                                                    live_projection = current_total * 90 / max(1, current_minute)
+                                                    hist_rate = None
+                                                    if isinstance(history.get("home_corners_for"), (int, float)) and isinstance(history.get("away_corners_for"), (int, float)):
+                                                        hist_rate = float(history["home_corners_for"]) + float(history["away_corners_for"])
+                                                    projected = 0.55 * hist_rate + 0.45 * live_projection if hist_rate is not None else live_projection
+                                                    remaining_expected = max(0.0, projected - current_total)
+                                                    st.markdown(f'<div class="signal-card"><div class="signal-kicker">Proyección exploratoria</div><div class="signal-title">Córners totales estimados al final</div><div class="signal-pick">{projected:.1f}</div><div class="signal-meta">Actuales: {current_total} · restantes estimados: {remaining_expected:.1f} · no es una probabilidad calibrada.</div></div>', unsafe_allow_html=True)
+
+                                                    live_rows = st.session_state.get("live_odds_by_fixture", {}).get(str(match_id), [])
+                                                    corner_options = []
+                                                    remaining_mean = max(0.05, remaining_expected * 0.70)
+                                                    import re
+                                                    for odds_row in live_rows:
+                                                        market_label = classify_market(odds_row)
+                                                        odd = odds_row.get("odd")
+                                                        if not market_label or "córner" not in market_label.casefold() or not isinstance(odd, (int, float)):
+                                                            continue
+                                                        line_match = re.search(r"(\d+(?:[.,]\d+)?)", market_label)
+                                                        if not line_match:
+                                                            continue
+                                                        line = float(line_match.group(1).replace(",", "."))
+                                                        if market_label.startswith("Más de "):
+                                                            needed = max(0, int(line - current_total + 0.5))
+                                                            probability = poisson_at_least(remaining_mean, needed)
+                                                        elif market_label.startswith("Menos de "):
+                                                            max_remaining = int(line - current_total)
+                                                            probability = sum(poisson_pmf(remaining_mean, n) for n in range(max_remaining + 1)) if max_remaining >= 0 else 0.0
+                                                        else:
+                                                            continue
+                                                        edge = probability - 1.0 / float(odd)
+                                                        if 0 < probability < 1 and edge >= 0.02:
+                                                            corner_options.append({"market": market_label, "odd": float(odd), "prob": probability, "edge": edge, "bookmaker": odds_row.get("bookmaker", "Casa no identificada")})
+                                                    main_options = [option for option in corner_options if 1.25 <= option["odd"] < 1.60]
+                                                    risk_options = [option for option in corner_options if option["odd"] >= 1.60]
+                                                    st.markdown("### ◈ Tip principal · córners")
+                                                    if main_options:
+                                                        chosen = max(main_options, key=lambda option: option["edge"])
+                                                        st.markdown(f'<div class="tip-card"><div class="tip-card-label">SEÑAL PRINCIPAL</div><div class="tip-card-title">{html.escape(chosen["market"])}</div><div class="tip-card-meta">Cuota {chosen["odd"]:.2f} · {html.escape(chosen["bookmaker"])} · probabilidad exploratoria {chosen["prob"]:.1%}</div></div>', unsafe_allow_html=True)
+                                                    else:
+                                                        st.info("Sin oportunidad principal confirmada: no hay mercado de córners con cuota real entre 1.25 y 1.59 y ventaja estimada suficiente.")
+                                                    st.markdown("### ⚡ Tip de alto riesgo · córners")
+                                                    if risk_options:
+                                                        chosen_risk = max(risk_options, key=lambda option: option["edge"])
+                                                        st.markdown(f'<div class="tip-card risk-tip-card"><div class="tip-card-label">ALTO RIESGO</div><div class="tip-card-title">{html.escape(chosen_risk["market"])}</div><div class="tip-card-meta">Cuota {chosen_risk["odd"]:.2f} · {html.escape(chosen_risk["bookmaker"])} · probabilidad exploratoria {chosen_risk["prob"]:.1%}</div></div>', unsafe_allow_html=True)
+                                                    else:
+                                                        st.info("Sin oportunidad de alto riesgo con cuota real de 1.60 o superior y respaldo estadístico.")
+                                                    goals = match.get("goals") or {}
+                                                    patterns = numerology_context(goals.get("home"), goals.get("away"), home_c, away_c, safe_stat(st.session_state.stats_cache.get(str(match_id), []), "Yellow Cards", 0), safe_stat(st.session_state.stats_cache.get(str(match_id), []), "Yellow Cards", 1))
+                                                    if patterns:
+                                                        st.caption("Contexto numérico solo para alto riesgo; no genera una señal por sí solo: " + "; ".join(patterns) + ".")
+                                                    if not live_rows:
+                                                        st.caption("No hay cuotas de córners devueltas por la API para este partido; no se inventan cuotas ni se sustituye por una cuota estimada.")
+                                            else:
+                                                st.caption("Sin datos suficientes para proyectar córners y evaluar cuotas en vivo.")
                                             elif corner_item:
                                                 st.warning(f"No se pudo cargar el análisis de córners: {corner_item.get('error')}")
                                             else:
