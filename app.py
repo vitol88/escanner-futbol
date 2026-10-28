@@ -440,6 +440,25 @@ st.markdown("""
     h1 {font-size: 1.7rem !important;}
     h2 {font-size: 1.3rem !important;}
   }
+  /* Override final para igualar exactamente la escala visual del botón Alertas */
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label,
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label *,
+  [class*="st-key-sound_control_card"] [data-testid="stToggle"] label,
+  [class*="st-key-sound_control_card"] [data-testid="stToggle"] label * {
+    color:#F4D778 !important;
+    -webkit-text-fill-color:#F4D778 !important;
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important;
+    font-size:11px !important;
+    font-weight:600 !important;
+    line-height:1.1 !important;
+    letter-spacing:0 !important;
+    text-size-adjust:100% !important;
+    -webkit-text-size-adjust:100% !important;
+  }
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label p,
+  [class*="st-key-sound_control_card"] [data-testid="stToggle"] label p {
+    margin:0 !important; padding:0 !important;
+  }
 </style>
 """, unsafe_allow_html=True)
 
