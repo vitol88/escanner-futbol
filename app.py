@@ -637,21 +637,8 @@ if should_refresh:
         if refresh:
             battery_progress.progress(100, text="⚠️ Actualización finalizada con error")
 
-if st.session_state.last_refresh:
-    st.caption(f"Última actualización: {st.session_state.last_refresh} · intervalo: 60 segundos")
 if st.session_state.last_auto_refresh_error:
     st.warning(f"No se pudo actualizar el listado en vivo: {st.session_state.last_auto_refresh_error}")
-
-left, right = st.columns([2, 1])
-with left:
-    st.subheader("Partidos en vivo")
-with right:
-    st.caption(
-    "Escáner automático activo: marcadores cada 60 s y estadísticas de córners en rotación (hasta 5 partidos por ciclo) para cuidar la cuota de API."
-)
-
-if st.session_state.last_refresh:
-    st.caption(f"Última consulta: {st.session_state.last_refresh}")
 
 fixtures = st.session_state.live_fixtures
 if not fixtures:
