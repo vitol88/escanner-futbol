@@ -1693,7 +1693,7 @@ else:
                         # Match an actual live total-goals line to the corresponding
                         # model estimate; never infer odds or prices from a probability.
                         import re
-                        line_match = re.search(r"(\\d+(?:[.,]\\d+)?)", market_label)
+                        line_match = re.search(r"(\d+(?:[.,]\d+)?)", market_label)
                         if line_match:
                             line = float(line_match.group(1).replace(",", "."))
                             if market_label.startswith("Más de "):
