@@ -1491,12 +1491,48 @@ else:
                                                     (f"{away_name} · goles a favor fuera", history.get("away_goals_for"), history.get("away_goal_sample", 0)),
                                                     (f"{away_name} · goles recibidos fuera", history.get("away_goals_against"), history.get("away_goal_sample", 0)),
                                                 ]
-                                                goal_table_html = '<div class="goal-history-wrap"><div class="goal-history-heading">▥ Promedios de goles por localía <span>Histórico</span></div><table class="goal-history-table"><thead><tr><th>Equipo / indicador</th><th>Prom.</th><th>N</th></tr></thead><tbody>'
+                                                goal_table_html = '<div class="goal-history-wrap"><div class="goal-history-heading">▥ Promedio de goles <span>Histórico</span></div><table class="goal-history-table"><thead><tr><th>Equipo / indicador</th><th>Prom.</th></tr></thead><tbody>'
                                                 for label, avg, sample in goal_history_rows:
                                                     avg_text = f"{avg:.2f}".rstrip("0").rstrip(".") if isinstance(avg, (int, float)) else "N/D"
-                                                    goal_table_html += f'<tr><td>{html.escape(str(label))}</td><td>{avg_text}</td><td>{sample if sample else "—"}</td></tr>'
+                                                    goal_table_html += f'<tr><td>{html.escape(str(label))}</td><td>{avg_text}</td></tr>'
                                                 goal_table_html += '</tbody></table></div>'
                                                 st.markdown(goal_table_html, unsafe_allow_html=True)
+
+                                                # Promedio esperado de goles del partido: combina ataque propio y goles concedidos por el rival.
+                                                home_goal_inputs = [
+                                                    history.get("home_goals_for"),
+                                                    history.get("away_goals_against"),
+                                                ]
+                                                away_goal_inputs = [
+                                                    history.get("away_goals_for"),
+                                                    history.get("home_goals_against"),
+                                                ]
+                                                home_goal_inputs = [float(value) for value in home_goal_inputs if isinstance(value, (int, float))]
+                                                away_goal_inputs = [float(value) for value in away_goal_inputs if isinstance(value, (int, float))]
+                                                projected_home_goals = sum(home_goal_inputs) / len(home_goal_inputs) if home_goal_inputs else None
+                                                projected_away_goals = sum(away_goal_inputs) / len(away_goal_inputs) if away_goal_inputs else None
+                                                if projected_home_goals is not None and projected_away_goals is not None:
+                                                    expected_match_goals = projected_home_goals + projected_away_goals
+                                                    st.markdown(
+                                                        f"""
+                                                        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+                                                                    margin:16px 0 18px;padding:7px 10px;
+                                                                    border:1px solid #51451D;border-radius:9px;
+                                                                    background:linear-gradient(135deg,#17191f,#20232b);
+                                                                    width:fit-content;max-width:100%;clear:both;position:relative;">
+                                                          <span style="font-size:11px;font-weight:700;color:#FACC15;letter-spacing:.3px;">
+                                                            PROMEDIO GOLES
+                                                          </span>
+                                                          <span style="display:inline-block;padding:4px 9px;
+                                                                       border:1px solid #FACC15;border-radius:7px;
+                                                                       background:#FACC15;color:#111827;
+                                                                       font-size:13px;font-weight:800;line-height:1.1;">
+                                                            {expected_match_goals:.2f}
+                                                          </span>
+                                                        </div>
+                                                        """,
+                                                        unsafe_allow_html=True,
+                                                    )
                                                 # Deep, cached context: league form, H2H and response after conceding.
                                                 deep_cache = st.session_state.setdefault("deep_goal_context_cache", {})
                                                 try:
