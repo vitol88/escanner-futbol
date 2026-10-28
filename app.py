@@ -3,6 +3,7 @@ import html
 import io
 import json
 import os
+from pathlib import Path
 from datetime import datetime
 from typing import Any
 
@@ -315,6 +316,20 @@ if "auto_scan_summary" not in st.session_state:
     st.session_state.auto_scan_summary = {}
 if "last_auto_market_scan_epoch" not in st.session_state:
     st.session_state.last_auto_market_scan_epoch = 0
+# Persist the audit trail on the host filesystem where supported. The path can be
+# redirected with SIGNAL_HISTORY_PATH; some cloud hosts use ephemeral storage.
+SIGNAL_HISTORY_PATH = Path(os.getenv("SIGNAL_HISTORY_PATH", "registro_senales_escanner.csv"))
+if "signal_rows" not in st.session_state:
+    try:
+        if SIGNAL_HISTORY_PATH.exists():
+            with SIGNAL_HISTORY_PATH.open("r", encoding="utf-8-sig", newline="") as history_file:
+                st.session_state.signal_rows = list(csv.DictReader(history_file))
+        else:
+            st.session_state.signal_rows = []
+    except (OSError, csv.Error, UnicodeDecodeError):
+        st.session_state.signal_rows = []
+if "signal_history_warning_shown" not in st.session_state:
+    st.session_state.signal_history_warning_shown = False
 
 controls = st.columns([1.4, 1, 1])
 with controls[0]:
@@ -812,19 +827,26 @@ else:
         st.session_state.goal_scan_results = goal_results_with_context
         st.session_state.previous_scan_scores = current_scores
 
-        # Session-local audit log: user can download it before leaving the app.
+        # Auditable signal log: avoid duplicate rows when Streamlit reruns the same scan.
         signal_rows = st.session_state.get("signal_rows", [])
+        existing_keys = {
+            (str(row.get("fixture_id")), str(row.get("market")), str(row.get("minute")),
+             str(row.get("score_home")), str(row.get("score_away")))
+            for row in signal_rows
+        }
         for fixture, estimate, tips, context in goal_results_with_context:
             for market, probability in tips:
-                signal_rows.append({
+                fixture_data = fixture.get("fixture") or {}
+                goals_data = fixture.get("goals") or {}
+                row = {
                     "recorded_at": datetime.now().isoformat(timespec="seconds"),
-                    "fixture_id": (fixture.get("fixture") or {}).get("id"),
+                    "fixture_id": fixture_data.get("id"),
                     "league": (fixture.get("league") or {}).get("name"),
                     "home": ((fixture.get("teams") or {}).get("home") or {}).get("name"),
                     "away": ((fixture.get("teams") or {}).get("away") or {}).get("name"),
                     "minute": context.get("elapsed"),
-                    "score_home": ((fixture.get("goals") or {}).get("home")),
-                    "score_away": ((fixture.get("goals") or {}).get("away")),
+                    "score_home": goals_data.get("home"),
+                    "score_away": goals_data.get("away"),
                     "market": market,
                     "estimated_probability_exploratory": round(float(probability), 4),
                     "context_status": context.get("context_status"),
@@ -835,8 +857,22 @@ else:
                     "final_score": "",
                     "outcome": "",
                     "outcome_verified": "",
-                })
+                }
+                row_key = (str(row["fixture_id"]), str(row["market"]), str(row["minute"]),
+                           str(row["score_home"]), str(row["score_away"]))
+                if row_key not in existing_keys:
+                    signal_rows.append(row)
+                    existing_keys.add(row_key)
         st.session_state.signal_rows = signal_rows
+        try:
+            if signal_rows:
+                SIGNAL_HISTORY_PATH.parent.mkdir(parents=True, exist_ok=True)
+                with SIGNAL_HISTORY_PATH.open("w", encoding="utf-8-sig", newline="") as history_file:
+                    writer = csv.DictWriter(history_file, fieldnames=list(signal_rows[0].keys()))
+                    writer.writeheader()
+                    writer.writerows(signal_rows)
+        except OSError as history_exc:
+            st.session_state.signal_history_write_error = str(history_exc)
         st.session_state.last_scan_api_calls = st.session_state.api_request_count - scan_api_calls_start
 
     tab_goals, tab_corners, tab_overview = st.tabs(["⚽ Goles y señales", "🚩 Córners", "📈 Rendimiento del modelo"])
@@ -1213,7 +1249,9 @@ else:
                 mime="text/csv",
                 help="Descarga las señales de esta sesión para conservarlas y verificar los resultados después."
             )
-            st.caption("El registro pertenece a la sesión actual. Los resultados se mantienen sin verificar hasta disponer de una comprobación real.")
+            st.caption(f"Registro guardado en el archivo local {SIGNAL_HISTORY_PATH}. En servicios de alojamiento con disco efímero, descarga el CSV para conservarlo fuera de la sesión.")
+            if st.session_state.get("signal_history_write_error"):
+                st.warning(f"No se pudo guardar el registro en disco: {st.session_state.signal_history_write_error}")
 
     if not goal_results and not corner_results:
         st.info("Pulsa «Escanear todos los partidos en vivo» para generar el primer informe.")
