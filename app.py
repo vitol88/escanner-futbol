@@ -1670,49 +1670,77 @@ else:
                 odds_by_fixture = st.session_state.get("live_odds_by_fixture", {})
                 match_odds = odds_by_fixture.get(str(fixture_id), [])
                 if match_odds:
-                    st.markdown("**💹 Cuotas reales disponibles en vivo**")
+                    # Odds are used internally to validate the requested bands; the UI shows
+                    # only the market tip, not the price or bookmaker.
                     main_options = []
                     risk_options = []
+                    draw_prob = estimate.get("draw_final") if isinstance(estimate, dict) else None
+                    btts_prob = estimate.get("btts_final") if isinstance(estimate, dict) else None
                     for odds_row in match_odds:
                         market_label = classify_market(odds_row)
                         if not market_label:
                             continue
-                        odd = odds_row["odd"]
-                        row_view = {
-                            "Mercado": market_label,
-                            "Cuota": f"{odd:.2f}",
-                            "Casa": odds_row["bookmaker"],
-                            "Prob. implícita": f"{(1 / odd) * 100:.1f}%",
+                        odd = odds_row.get("odd")
+                        if not isinstance(odd, (int, float)) or odd <= 1:
+                            continue
+
+                        # Use the matching exploratory model probability where available.
+                        if market_label == "Empate final":
+                            model_prob = draw_prob
+                        elif market_label == "Ambos equipos marcan: Sí":
+                            model_prob = btts_prob
+                        elif market_label == "Ambos equipos marcan: No":
+                            model_prob = (1.0 - btts_prob) if isinstance(btts_prob, (int, float)) else None
+                        else:
+                            model_prob = None
+
+                        option = {
+                            "market": market_label,
+                            "odd": float(odd),
+                            "model_prob": model_prob if isinstance(model_prob, (int, float)) else None,
+                            "bookmaker": odds_row.get("bookmaker", ""),
                         }
                         if 1.23 <= odd <= 1.40:
-                            main_options.append((odd, row_view))
-                        if odd >= 1.66 and market_label in {"Empate final", "Ambos equipos marcan: Sí", "Ambos equipos marcan: No"}:
-                            risk_options.append((odd, row_view))
+                            main_options.append(option)
+                        if odd >= 1.66 and market_label in {
+                            "Empate final", "Ambos equipos marcan: Sí", "Ambos equipos marcan: No"
+                        }:
+                            risk_options.append(option)
+
                     if main_options:
-                        # Prefer the highest price inside the requested lower-risk band.
-                        _, chosen_main = max(main_options, key=lambda item: item[0])
-                        st.markdown("**TIP PRINCIPAL · cuota objetivo 1.23–1.40**")
-                        st.dataframe([chosen_main], hide_index=True, use_container_width=True)
+                        # Prefer the best-supported candidate, not simply the highest odds.
+                        chosen_main = max(
+                            main_options,
+                            key=lambda item: item["model_prob"] if item["model_prob"] is not None else -1,
+                        )
+                        st.markdown("**⚽ TIP PRINCIPAL**")
+                        st.markdown(f'<div class="tip-card"><div class="tip-card-label">TIP PRINCIPAL</div><div class="tip-card-title">{html.escape(chosen_main["market"])}</div><div class="tip-card-meta">Mercado real encontrado en cuotas en vivo · rango objetivo validado</div></div>', unsafe_allow_html=True)
                     else:
-                        st.info("Sin mercado verificable dentro de 1.23–1.40 en las cuotas recibidas.")
+                        st.info("Sin tip principal: la API no devolvió un mercado verificable en el rango objetivo.")
                     if risk_options:
-                        # Risk tip allows draw/BTTS; score-pattern numerology is contextual only.
-                        _, chosen_risk = max(risk_options, key=lambda item: item[0])
-                        st.markdown("**TIP DE ALTO RIESGO · cuota 1.66+**")
-                        st.dataframe([chosen_risk], hide_index=True, use_container_width=True)
-                        st.caption("Contexto de patrón numérico: " + score_pattern_context(home_score, away_score) + ". Es solo un desempate descriptivo; no aumenta por sí mismo la probabilidad ni predice un 1–1.")
+                        # Numerology is contextual only. If two different risk markets are
+                        # credible, expose both instead of assuming a 1–1 scoreline.
+                        risk_options.sort(
+                            key=lambda item: item["model_prob"] if item["model_prob"] is not None else -1,
+                            reverse=True,
+                        )
+                        selected_risk = risk_options[:2]
+                        st.markdown("**🔥 TIP DE ALTO RIESGO**")
+                        for risk_item in selected_risk:
+                            st.markdown(f'<div class="tip-card"><div class="tip-card-label">ALTO RIESGO</div><div class="tip-card-title">{html.escape(risk_item["market"])}</div><div class="tip-card-meta">Mercado real encontrado en cuotas en vivo · rango de alto riesgo validado</div></div>', unsafe_allow_html=True)
+                        st.caption("Contexto numérico: " + score_pattern_context(home_score, away_score) + ". Se usa solo como referencia contextual; no predice un marcador exacto ni convierte el 1–1 en certeza.")
                     else:
-                        st.info("No hay cuota verificable de 1.66+ para empate o ambos marcan en los mercados recibidos.")
+                        st.info("Sin tip de alto riesgo: no se encontró una cuota real de 1.66+ para empate o ambos marcan.")
                 else:
                     odds_error = st.session_state.get("live_odds_error", "")
                     if odds_error:
-                        st.warning("No se pudieron actualizar las cuotas en vivo. No se inventan precios. " + str(odds_error))
+                        st.warning("No se pudieron actualizar las cuotas en vivo. No se inventan mercados. " + str(odds_error))
                     else:
-                        st.info("La API no devolvió cuotas en vivo para este partido. Puede no haber cobertura de bookmaker/mercado.")
+                        st.info("La API no devolvió cuotas en vivo para este partido. Puede no haber cobertura de casa o mercado.")
                 odds_stamp = st.session_state.get("live_odds_last_fetch")
                 if odds_stamp:
-                    st.caption(f"Última consulta de cuotas: {odds_stamp}. Las cuotas pueden cambiar o suspenderse.")
-                st.caption("Tip exploratorio, no garantía de gol ni señal de valor esperado positivo. La cuota real no basta por sí sola: el siguiente paso es validar cada mercado contra una probabilidad estimada y calibrada.")
+                    st.caption(f"Cuotas verificadas por última vez: {odds_stamp}. No se muestra el valor de la cuota y puede cambiar o suspenderse.")
+                st.caption("Las cuotas reales filtran los mercados disponibles; las probabilidades del modelo son exploratorias y aún no están calibradas. La numerología solo aporta contexto al tip de alto riesgo.")
                 action_cols = st.columns(4)
                 action_specs = [
                     ("⚽ Goles", "goals"),
