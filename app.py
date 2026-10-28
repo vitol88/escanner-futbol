@@ -477,6 +477,8 @@ st.markdown("""
   .goal-live-summary p { color:#D4D4D8; font-size:.88rem; line-height:1.45; margin:0; }
   .goal-deep-heading { display:block; clear:both; position:relative; z-index:1; color:#FACC15; font-size:.78rem; letter-spacing:1.1px; font-weight:900; margin:1.55rem 0 .8rem; padding-top:.25rem; line-height:1.5; }
   .goal-form-card { border:1px solid #393326; border-radius:11px; padding:10px; background:linear-gradient(145deg,#191D24,#101216); min-height:132px; }
+  .goal-form-header { display:flex; align-items:center; gap:8px; margin-bottom:4px; min-width:0; }
+  .goal-form-logo { width:34px; height:34px; object-fit:contain; flex:0 0 34px; }
   .goal-form-team { color:#E4E4E7; font-size:.78rem; font-weight:800; line-height:1.25; overflow-wrap:anywhere; }
   .goal-form-record { color:#FACC15; font-size:1.15rem; font-weight:900; margin:4px 0; }
   .goal-form-line { color:#BFC2CA; font-size:.68rem; line-height:1.45; }
@@ -1600,12 +1602,14 @@ else:
                                                 if deep_context.get("available"):
                                                     st.markdown('<div class="goal-deep-heading">⌁ CONTEXTO HISTÓRICO Y REACCIÓN AL GOL</div>', unsafe_allow_html=True)
                                                     form_cols = st.columns(2, gap="small")
-                                                    for col, label, form_data in (
-                                                        (form_cols[0], home_name, deep_context.get("home_form") or {}),
-                                                        (form_cols[1], away_name, deep_context.get("away_form") or {}),
+                                                    for col, team, label, form_data in (
+                                                        (form_cols[0], match_home, home_name, deep_context.get("home_form") or {}),
+                                                        (form_cols[1], match_away, away_name, deep_context.get("away_form") or {}),
                                                     ):
+                                                        team_logo = html.escape(str(team.get("logo") or ""), quote=True)
+                                                        logo_html = f'<img class="goal-form-logo" src="{team_logo}" alt="">' if team_logo else ""
                                                         col.markdown(
-                                                            f'<div class="goal-form-card"><div class="goal-form-team">{html.escape(label)}</div>'
+                                                            f'<div class="goal-form-card"><div class="goal-form-header">{logo_html}<div class="goal-form-team">{html.escape(label)}</div></div>'
                                                             f'<div class="goal-form-record">{html.escape(str(form_data.get("record", "N/D")))}</div>'
                                                             f'<div class="goal-form-line">GF {form_data.get("goals_for_avg") if form_data.get("goals_for_avg") is not None else "N/D"} · GC {form_data.get("goals_against_avg") if form_data.get("goals_against_avg") is not None else "N/D"}</div>'
                                                             f'<div class="goal-form-line">Ambos marcan {form_data.get("btts_rate") if form_data.get("btts_rate") is not None else "N/D"}% · +2.5 goles {form_data.get("over_2_5_rate") if form_data.get("over_2_5_rate") is not None else "N/D"}%</div></div>',
