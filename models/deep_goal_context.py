@@ -184,7 +184,7 @@ def build_deep_goal_context(
             fixture_data = item.get("fixture") or {}
             match_details.append({
                 "date": str(fixture_data.get("date") or "")[:10],
-                "opponent": _team_name(item, team_id) if False else str(
+                "opponent": str(
                     (away_team if home_team.get("id") == team_id else home_team).get("name") or "Rival"
                 ),
                 "home_name": str(home_team.get("name") or "Local"),
