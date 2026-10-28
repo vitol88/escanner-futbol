@@ -22,7 +22,7 @@ from models.probabilities import (
     poisson_at_least,
     poisson_pmf,
 )
-from models.live_odds import extract_live_odds, classify_market, score_pattern_context
+from models.live_odds import extract_live_odds, classify_market, score_pattern_context, numerology_context
 
 API_BASE = "https://v3.football.api-sports.io"
 TIMEOUT_SECONDS = 15
@@ -1803,9 +1803,18 @@ else:
                             risk_context_bits.append(f"córners relativamente equilibrados ({risk_home_corners:.0f}–{risk_away_corners:.0f})")
                     if isinstance(risk_home_yellow, (int, float)) and isinstance(risk_away_yellow, (int, float)):
                         risk_context_bits.append(f"tarjetas amarillas {risk_home_yellow:.0f}–{risk_away_yellow:.0f}")
+                    pattern_matches = numerology_context(
+                        home_score, away_score,
+                        risk_home_corners, risk_away_corners,
+                        risk_home_yellow, risk_away_yellow,
+                    )
+                    if pattern_matches:
+                        risk_context_bits.extend(pattern_matches)
+                    else:
+                        risk_context_bits.append("sin coincidencia numérica clara entre marcador y córners/tarjetas")
                     st.caption(
                         "Numerología/contexto del alto riesgo: " + "; ".join(risk_context_bits)
-                        + ". Solo es un desempate contextual, no predice un marcador exacto. No se inventan estadísticas faltantes."
+                        + ". Es solo una coincidencia descriptiva para contextualizar el tip de riesgo; no predice un marcador ni genera apuestas por sí sola. No se inventan estadísticas faltantes."
                     )
                 else:
                     st.markdown("**🔥 TIP DE ALTO RIESGO**")
