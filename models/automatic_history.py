@@ -59,16 +59,16 @@ def build_automatic_history(
         return result
 
     def team_fixtures(team_id: int) -> list[dict[str, Any]]:
-        key = f"team-fixtures-v2:{team_id}:{league_id}:{season}"
+        key = f"team-fixtures-v3:{team_id}:{league_id}:{season}"
         if key not in cache:
             # Cap team-fixture discovery calls for the whole scan; cached teams do not
             # consume the budget again. This avoids one hidden request per live fixture.
-            if int(cache.get("_automatic_history_team_fixture_calls", 0)) >= 12:
+            if int(cache.get("_automatic_history_team_fixture_calls", 0)) >= 20:
                 cache[key] = []
                 cache["error:" + key] = "Límite de consultas históricas por escaneo alcanzado."
                 return cache[key]
             # Ventana más amplia para encontrar suficientes partidos según la localía.
-            params = {"team": team_id, "last": 20, "league": league_id, "season": season}
+            params = {"team": team_id, "last": 30, "league": league_id, "season": season}
             try:
                 cache["_automatic_history_team_fixture_calls"] = int(cache.get("_automatic_history_team_fixture_calls", 0)) + 1
                 cache[key] = (api_get("fixtures", params).get("response") or [])
@@ -77,8 +77,17 @@ def build_automatic_history(
                 cache["error:" + key] = str(exc)
         return cache[key]
 
-    home_fixtures = [f for f in team_fixtures(home["id"]) if (f.get("fixture") or {}).get("status", {}).get("short") in {"FT", "AET", "PEN"}]
-    away_fixtures = [f for f in team_fixtures(away["id"]) if (f.get("fixture") or {}).get("status", {}).get("short") in {"FT", "AET", "PEN"}]
+    # Solo partidos finalizados de la misma competición y temporada del partido en vivo.
+    finished = {"FT", "AET", "PEN"}
+    def same_competition_finished(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        return [
+            item for item in items
+            if (item.get("fixture") or {}).get("status", {}).get("short") in finished
+            and (item.get("league") or {}).get("id") == league_id
+            and (item.get("league") or {}).get("season") == season
+        ]
+    home_fixtures = same_competition_finished(team_fixtures(home["id"]))
+    away_fixtures = same_competition_finished(team_fixtures(away["id"]))
 
     budget = [max(0, int(stats_budget))]
 
@@ -114,9 +123,21 @@ def build_automatic_history(
                         cache["_automatic_history_rate_limited"] = True
                         break
             stats = cache.get(stats_key, [])
-            index = 0 if is_home else 1
-            own_c = _stat(stats, index, "Corner Kicks")
-            opp_c = _stat(stats, 1-index, "Corner Kicks")
+            # API-Football normalmente ordena local/visitante, pero identificar por ID
+            # evita asociar córners al equipo equivocado si la respuesta cambia de orden.
+            own_stats_index = next(
+                (idx for idx, row in enumerate(stats or [])
+                 if (row.get("team") or {}).get("id") == team_id),
+                0 if is_home else 1,
+            )
+            opponent_id = ((old_teams.get("away") if is_home else old_teams.get("home")) or {}).get("id")
+            opponent_stats_index = next(
+                (idx for idx, row in enumerate(stats or [])
+                 if (row.get("team") or {}).get("id") == opponent_id),
+                1 - own_stats_index,
+            )
+            own_c = _stat(stats, own_stats_index, "Corner Kicks")
+            opp_c = _stat(stats, opponent_stats_index, "Corner Kicks")
             if own_c is not None and opp_c is not None:
                 cf.append(own_c); ca.append(opp_c)
             used += 1
@@ -133,6 +154,6 @@ def build_automatic_history(
         "away_corners_for": a["cf"], "away_corners_against": a["ca"],
         "home_corner_sample": h["corner_sample"], "away_corner_sample": a["corner_sample"],
         "home_goal_sample": h["goal_sample"], "away_goal_sample": a["goal_sample"],
-        "note": "Promedios automáticos de partidos recientes de esta liga/temporada; los córners solo se muestran cuando la API devuelve estadísticas históricas.",
+        "note": "Promedios calculados con partidos finalizados de la misma competición y temporada. La muestra cuenta únicamente partidos con estadísticas de córners disponibles.",
     })
     return result
