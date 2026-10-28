@@ -1643,6 +1643,12 @@ else:
                                                 with _corner_scan_cols[1]:
                                                     _corner_refresh_clicked = st.button("⟳ Actualizar scan", key=f"analysis_scan_corners_{match_id}")
                                                 if _corner_radar_clicked or _corner_refresh_clicked:
+                                                    # Dar prioridad al partido que el usuario tiene abierto antes de
+                                                    # construir el contexto histórico de los demás partidos en vivo.
+                                                    st.session_state["selected_match_detail"] = {
+                                                        "fixture_id": match_id,
+                                                        "market": "corners",
+                                                    }
                                                     manual_scan = True
                                                     internal_scan_requested = True
                                                     st.markdown('<div class="scan-running-status"><span class="scan-code-icon">⟳</span><div><strong>ESCANEANDO…</strong><div class="scan-running-subtitle">Actualizando proyección y datos en vivo</div></div><span class="scan-sweep"></span></div>', unsafe_allow_html=True)
@@ -1692,13 +1698,8 @@ else:
                                                 history_html += "</tbody></table>"
                                                 st.markdown(history_html, unsafe_allow_html=True)
                                                 st.caption(history.get("note", "Promedios históricos de partidos recientes; N/D significa que la API no entregó datos suficientes."))
-                                                # Diagnóstico visible temporalmente para verificar la versión publicada y la respuesta de la API.
-                                                st.markdown("#### Diagnóstico API-Football · historial de córners")
-                                                diagnostics = history.get("diagnostics") or {}
-                                                if diagnostics:
-                                                    st.json(diagnostics)
-                                                else:
-                                                    st.warning("El historial cargado no contiene diagnóstico. Si ves este mensaje tras actualizar, comparte una captura.")
+                                                # El diagnóstico se conserva internamente en history para depuración,
+                                                # pero no se muestra en la interfaz normal del usuario.
 
                                                 st.markdown("### ⌁ Histórico de córners")
                                                 home_team = (match.get("teams") or {}).get("home") or {}
@@ -2140,9 +2141,9 @@ else:
         history_calls_before = st.session_state.api_request_count
         history_cache = st.session_state.setdefault("automatic_history_cache", {})
         history_cache["_automatic_history_stats_calls"] = 0
+        # El límite de consultas de equipos empieza desde cero en cada escaneo.
+        # No reservar consultas a ciegas para partidos que el usuario no está viendo.
         history_cache["_automatic_history_team_fixture_calls"] = 0
-        if auto_scan_due and not manual_scan:
-            history_cache["_automatic_history_team_fixture_calls"] = 10
         # Priorizar el partido abierto por el usuario para que el presupuesto histórico
         # no se consuma primero en otros partidos del escáner.
         selected_detail_for_history = st.session_state.get("selected_match_detail") or {}
