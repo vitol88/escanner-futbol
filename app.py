@@ -608,7 +608,7 @@ with st.container(key="sound_controls_row"):
     with test_col:
         st.components.v1.html("""
 <div style="display:flex;align-items:center;justify-content:flex-start;min-height:44px">
-  <button id="scanner-test-sound" type="button" style="padding:9px 12px;border-radius:10px;border:1px solid #FACC15;background:#242014;color:#FACC15;font:600 13px system-ui;white-space:nowrap;cursor:pointer">🔊 Probar sonido</button>
+  <button id="scanner-test-sound" type="button" style="padding:9px 12px;border-radius:10px;border:1px solid #FACC15;background:#242014;color:#FACC15;font:600 13px system-ui;white-space:nowrap;cursor:pointer">🔊 Probar “¡Gol!”</button>
 </div>
 <script>
 (() => {
@@ -617,13 +617,19 @@ with st.container(key="sound_controls_row"):
  b.dataset.bound='1';
  b.addEventListener('click', () => {
    try {
+     if ('speechSynthesis' in window && 'SpeechSynthesisUtterance' in window) {
+       window.speechSynthesis.cancel();
+       const u = new SpeechSynthesisUtterance('¡Gol!');
+       u.lang = 'es-CO'; u.rate = 0.95;
+       window.speechSynthesis.speak(u);
+     }
      const C=window.AudioContext||window.webkitAudioContext;
-     if(!C) throw new Error('audio');
+     if(!C) { b.textContent='✓ Prueba de voz enviada'; return; }
      const c=new C(), o=c.createOscillator(), g=c.createGain();
      o.type='sine'; o.frequency.value=880; g.gain.value=0.08;
-     o.connect(g); g.connect(c.destination); o.start();
-     setTimeout(()=>{o.stop();c.close();},180);
-     b.textContent='✓ Sonido probado';
+     o.connect(g); g.connect(c.destination);
+     Promise.resolve(c.resume()).then(()=>{o.start();setTimeout(()=>{try{o.stop();}catch(e){} c.close();},220);});
+     b.textContent='✓ Prueba de voz enviada';
    } catch(e) { b.textContent='⚠️ Sonido no disponible'; }
  });
 })();
@@ -671,18 +677,29 @@ st.components.v1.html(
       }}
       if (!muted) {{
         try {{
+          const goalEvents = fresh.filter(e => String(e.title || '').toLowerCase().includes('gol'));
+          if (goalEvents.length && 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window) {{
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance('¡Gol!');
+            utterance.lang = 'es-CO';
+            utterance.rate = 0.95;
+            window.speechSynthesis.speak(utterance);
+          }}
           const AudioCtx = window.AudioContext || window.webkitAudioContext;
           if (AudioCtx) {{
             const ctx = new AudioCtx();
-            [880, 1175].forEach((freq, i) => {{
-              const osc = ctx.createOscillator(), gain = ctx.createGain(), t = ctx.currentTime + i * 0.14;
-              osc.type = 'sine'; osc.frequency.value = freq;
-              gain.gain.setValueAtTime(0.0001, t);
-              gain.gain.exponentialRampToValueAtTime(0.12, t + 0.025);
-              gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
-              osc.connect(gain); gain.connect(ctx.destination); osc.start(t); osc.stop(t + 0.2);
-            }});
-            setTimeout(() => ctx.close(), 700);
+            const playChime = () => {{
+              [880, 1175].forEach((freq, i) => {{
+                const osc = ctx.createOscillator(), gain = ctx.createGain(), t = ctx.currentTime + i * 0.14;
+                osc.type = 'sine'; osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.0001, t);
+                gain.gain.exponentialRampToValueAtTime(0.12, t + 0.025);
+                gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+                osc.connect(gain); gain.connect(ctx.destination); osc.start(t); osc.stop(t + 0.2);
+              }});
+              setTimeout(() => ctx.close(), 700);
+            }};
+            Promise.resolve(ctx.resume()).then(playChime).catch(() => {{ try {{ ctx.close(); }} catch (e) {{}} }});
           }}
         }} catch (e) {{}}
       }}
@@ -833,7 +850,7 @@ else:
     # Mostrar todos los partidos en vivo; se oculta el filtro de ligas para simplificar la pantalla.
     filtered = list(fixtures)
     with st.container(key="live_now_section"):
-        with st.expander(f"En vivo ahora ({len(filtered)})", expanded=False):
+        with st.expander(f"En vivo ahora ({len(filtered)})", expanded=False, key="live_now_expander", on_change="rerun"):
             if filtered:
                 grouped = {}
                 for match in filtered:
@@ -842,7 +859,7 @@ else:
                     league_name = league_data.get("name") or "Liga sin nombre"
                     grouped.setdefault((country, league_name), []).append(match)
                 for (country, league_name), league_matches in sorted(grouped.items()):
-                    with st.expander(f"{country} · {league_name} ({len(league_matches)})", expanded=False):
+                    with st.expander(f"{country} · {league_name} ({len(league_matches)})", expanded=False, key=f"live_league_{country}_{league_name}", on_change="rerun"):
                         # Cada partido tiene una sola tarjeta principal; evitamos duplicar el marcador
                         # en una cuadrícula y otra vez dentro del expander de análisis.
                         # Match tools are available from the main live scanner, before a full market scan.
@@ -866,7 +883,7 @@ else:
                             match_row_label = f"{home_md}**{match_home_name}**  **{score_label}**  **{match_away_name}**{away_md} · {match_minute if match_minute is not None else 'EN VIVO'}′"
                             if not match_id:
                                 continue
-                            with st.expander(match_row_label, expanded=False):
+                            with st.expander(match_row_label, expanded=False, key=f"live_match_{match_id}", on_change="rerun"):
                                 current_tool = st.session_state.get("main_fixture_tool") or {}
                                 active_market = current_tool.get("market") if str(current_tool.get("fixture_id")) == str(match_id) else None
                                 active_tool = current_tool.get("tool") if str(current_tool.get("fixture_id")) == str(match_id) else None
@@ -1409,18 +1426,18 @@ else:
                                                             corner_options.append({"market": market_label, "odd": float(odd), "prob": probability, "edge": edge, "bookmaker": odds_row.get("bookmaker", "Casa no identificada")})
                                                     main_options = [option for option in corner_options if 1.25 <= option["odd"] < 1.60]
                                                     risk_options = [option for option in corner_options if option["odd"] >= 1.60]
-                                                    st.markdown('<div class="tip-section-heading"><span class="tip-heading-icon">◈</span><span>TIP PRINCIPAL</span><span class="tip-heading-status">CÓRNERS · 1.25–1.59</span></div>', unsafe_allow_html=True)
+                                                    st.markdown('<div class="tip-section-heading"><span class="tip-heading-icon">◈</span><span>TIP PRINCIPAL</span></div>', unsafe_allow_html=True)
                                                     if main_options:
                                                         chosen = max(main_options, key=lambda option: option["edge"])
                                                         st.markdown(f'<div class="tip-card"><div class="tip-card-label">✦ SEÑAL PRINCIPAL · CUOTA {chosen["odd"]:.2f}</div><div class="tip-card-title">{html.escape(chosen["market"])}</div><div class="tip-card-meta">{html.escape(chosen["bookmaker"])} · probabilidad exploratoria {chosen["prob"]:.1%} · ventaja estimada {chosen["edge"]:.1%}</div></div>', unsafe_allow_html=True)
                                                     else:
-                                                        st.markdown('<div class="tip-card tip-card-empty"><div class="tip-card-label">✦ SEÑAL PRINCIPAL</div><div class="tip-card-title">Sin oportunidad confirmada por ahora</div><div class="tip-card-meta">Se necesita una cuota en vivo real entre 1.25 y 1.59 y respaldo estadístico suficiente.</div></div>', unsafe_allow_html=True)
-                                                    st.markdown('<div class="tip-section-heading risk-heading"><span class="tip-heading-icon">⌁</span><span>TIP DE ALTO RIESGO</span><span class="tip-heading-status">CÓRNERS · CUOTA ≥ 1.60</span></div>', unsafe_allow_html=True)
+                                                        st.markdown('<div class="tip-card tip-card-empty"><div class="tip-card-label">✦ SEÑAL PRINCIPAL</div><div class="tip-card-title">Sin oportunidad confirmada por ahora</div><div class="tip-card-meta">Se requiere respaldo estadístico suficiente.</div></div>', unsafe_allow_html=True)
+                                                    st.markdown('<div class="tip-section-heading risk-heading"><span class="tip-heading-icon">⌁</span><span>TIP DE ALTO RIESGO</span></div>', unsafe_allow_html=True)
                                                     if risk_options:
                                                         chosen_risk = max(risk_options, key=lambda option: option["edge"])
                                                         st.markdown(f'<div class="tip-card risk-tip-card"><div class="tip-card-label">⚡ SEÑAL DE ALTO RIESGO · CUOTA {chosen_risk["odd"]:.2f}</div><div class="tip-card-title">{html.escape(chosen_risk["market"])}</div><div class="tip-card-meta">{html.escape(chosen_risk["bookmaker"])} · probabilidad exploratoria {chosen_risk["prob"]:.1%} · ventaja estimada {chosen_risk["edge"]:.1%}</div></div>', unsafe_allow_html=True)
                                                     else:
-                                                        st.markdown('<div class="tip-card risk-tip-card tip-card-empty"><div class="tip-card-label">⚡ SEÑAL DE ALTO RIESGO</div><div class="tip-card-title">Sin oportunidad confirmada por ahora</div><div class="tip-card-meta">No se fuerza una selección sin cuota real de 1.60 o superior y respaldo estadístico.</div></div>', unsafe_allow_html=True)
+                                                        st.markdown('<div class="tip-card risk-tip-card tip-card-empty"><div class="tip-card-label">⚡ SEÑAL DE ALTO RIESGO</div><div class="tip-card-title">Sin oportunidad confirmada por ahora</div><div class="tip-card-meta">Se requiere respaldo estadístico suficiente.</div></div>', unsafe_allow_html=True)
                                                     goals = match.get("goals") or {}
                                                     patterns = numerology_context(goals.get("home"), goals.get("away"), home_c, away_c, safe_stat(st.session_state.stats_cache.get(str(match_id), []), "Yellow Cards", 0), safe_stat(st.session_state.stats_cache.get(str(match_id), []), "Yellow Cards", 1))
                                             elif corner_item:
@@ -2292,7 +2309,7 @@ else:
                             })
                         main_options = [option for option in corner_options if 1.25 <= option["odd"] < 1.60]
                         risk_options = [option for option in corner_options if option["odd"] >= 1.60]
-                        st.markdown('<div class="tip-section-heading"><span class="tip-heading-icon">◈</span><span>TIP PRINCIPAL · CÓRNERS</span><span class="tip-heading-status">CUOTA 1.25–1.59</span></div>', unsafe_allow_html=True)
+                        st.markdown('<div class="tip-section-heading"><span class="tip-heading-icon">◈</span><span>TIP PRINCIPAL · CÓRNERS</span></div>', unsafe_allow_html=True)
                         if main_options:
                             chosen = max(main_options, key=lambda option: option["edge"])
                             st.markdown(
@@ -2302,8 +2319,8 @@ else:
                                 unsafe_allow_html=True,
                             )
                         else:
-                            st.info("Sin tip principal de córners con cuota verificada entre 1.25 y 1.59 y ventaja estimada suficiente.")
-                        st.markdown('<div class="tip-section-heading risk-heading"><span class="tip-heading-icon">⌁</span><span>TIP DE ALTO RIESGO · CÓRNERS</span><span class="tip-heading-status">CUOTA ≥ 1.60</span></div>', unsafe_allow_html=True)
+                            st.info("Sin oportunidad confirmada por ahora.")
+                        st.markdown('<div class="tip-section-heading risk-heading"><span class="tip-heading-icon">⌁</span><span>TIP DE ALTO RIESGO · CÓRNERS</span></div>', unsafe_allow_html=True)
                         if risk_options:
                             chosen_risk = max(risk_options, key=lambda option: option["edge"])
                             st.markdown(
@@ -2313,7 +2330,7 @@ else:
                                 unsafe_allow_html=True,
                             )
                         else:
-                            st.info("Sin tip de alto riesgo de córners con cuota verificada de 1.60 o superior y ventaja estimada suficiente.")
+                            st.info("Sin oportunidad confirmada por ahora.")
                         corner_patterns = numerology_context(
                             (item.get("fixture", {}).get("goals") or {}).get("home"),
                             (item.get("fixture", {}).get("goals") or {}).get("away"),
