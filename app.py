@@ -476,7 +476,16 @@ st.markdown("""
   .goal-live-summary-title { color:#FACC15; font-weight:900; font-size:.78rem; letter-spacing:1.2px; margin-bottom:6px; }
   .goal-live-summary p { color:#D4D4D8; font-size:.88rem; line-height:1.45; margin:0; }
   .goal-deep-heading { display:block; clear:both; position:relative; z-index:1; color:#FACC15; font-size:.78rem; letter-spacing:1.1px; font-weight:900; margin:1.9rem 0 1.1rem; padding:0 0 .2rem; line-height:1.6; }
-  .goal-form-card { border:1px solid #393326; border-radius:11px; padding:12px; margin-top:5px; background:linear-gradient(145deg,#191D24,#101216); min-height:132px; }
+  .goal-form-card { box-sizing:border-box; border:1px solid #393326; border-radius:11px; padding:12px; margin-top:5px; background:linear-gradient(145deg,#191D24,#101216); min-height:170px; height:100%; }
+  .goal-form-back { box-sizing:border-box; border:1px solid #FACC15; border-radius:11px; padding:11px; margin-top:5px; background:linear-gradient(145deg,#20232B,#12151A); min-height:170px; height:100%; }
+  .goal-form-back-title { color:#FACC15; font-size:.72rem; font-weight:900; margin-bottom:8px; line-height:1.35; }
+  .goal-form-match { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:7px; align-items:center; padding:6px 0; border-top:1px solid #34302A; color:#E4E4E7; font-size:.68rem; line-height:1.35; }
+  .goal-form-match-opponent { overflow-wrap:anywhere; }
+  .goal-form-match-score { color:#F4F4F5; font-weight:900; white-space:nowrap; }
+  .goal-form-result { display:inline-flex; justify-content:center; min-width:22px; padding:2px 5px; border-radius:5px; font-size:.65rem; font-weight:900; }
+  .goal-form-result-v { color:#052E16; background:#86EFAC; }
+  .goal-form-result-e { color:#111827; background:#FDE68A; }
+  .goal-form-result-d { color:#450A0A; background:#FCA5A5; }
   .goal-form-header { display:flex; align-items:center; gap:8px; margin-bottom:4px; min-width:0; }
   .goal-form-logo { width:34px; height:34px; object-fit:contain; flex:0 0 34px; }
   .goal-form-team { color:#E4E4E7; font-size:.78rem; font-weight:800; line-height:1.25; overflow-wrap:anywhere; }
@@ -1623,13 +1632,40 @@ else:
                                                     ):
                                                         team_logo = html.escape(str(team.get("logo") or ""), quote=True)
                                                         logo_html = f'<img class="goal-form-logo" src="{team_logo}" alt="">' if team_logo else ""
-                                                        col.markdown(
-                                                            f'<div class="goal-form-card"><div class="goal-form-header">{logo_html}<div class="goal-form-team">{html.escape(label)}</div></div>'
-                                                            f'<div class="goal-form-record">{html.escape(str(form_data.get("record", "N/D")))}</div>'
-                                                            f'<div class="goal-form-line">GF {form_data.get("goals_for_avg") if form_data.get("goals_for_avg") is not None else "N/D"} · GC {form_data.get("goals_against_avg") if form_data.get("goals_against_avg") is not None else "N/D"}</div>'
-                                                            f'<div class="goal-form-line">Ambos marcan {form_data.get("btts_rate") if form_data.get("btts_rate") is not None else "N/D"}% · +2.5 goles {form_data.get("over_2_5_rate") if form_data.get("over_2_5_rate") is not None else "N/D"}%</div></div>',
-                                                            unsafe_allow_html=True,
-                                                        )
+                                                        flip_key = f"goal_form_flipped_{match_id}_{team.get('id') or label}"
+                                                        is_flipped = bool(st.session_state.get(flip_key, False))
+                                                        card_col, ball_col = col.columns([0.88, 0.12], gap="small")
+                                                        if is_flipped:
+                                                            recent_matches = form_data.get("recent_matches") or []
+                                                            match_rows = []
+                                                            for recent in recent_matches:
+                                                                result_code = str(recent.get("result") or "?").upper()
+                                                                result_class = {"V": "v", "E": "e", "D": "d"}.get(result_code, "e")
+                                                                date_label = html.escape(str(recent.get("date") or "Fecha N/D"))
+                                                                opponent = html.escape(str(recent.get("opponent") or "Rival"))
+                                                                hg, ag = recent.get("home_goals"), recent.get("away_goals")
+                                                                score_label = f"{hg}–{ag}" if isinstance(hg, int) and isinstance(ag, int) else f"{recent.get('goals_for', '–')}–{recent.get('goals_against', '–')}"
+                                                                match_rows.append(
+                                                                    f'<div class="goal-form-match"><span class="goal-form-match-opponent">{date_label} · {opponent}</span>'
+                                                                    f'<span class="goal-form-match-score">{html.escape(str(score_label))}</span>'
+                                                                    f'<span class="goal-form-result goal-form-result-{result_class}">{html.escape(result_code)}</span></div>'
+                                                                )
+                                                            matches_html = "".join(match_rows) if match_rows else '<div class="goal-form-match">No hay partidos recientes disponibles.</div>'
+                                                            card_col.markdown(
+                                                                f'<div class="goal-form-back"><div class="goal-form-back-title">ÚLTIMOS PARTIDOS · {html.escape(label)}</div>{matches_html}</div>',
+                                                                unsafe_allow_html=True,
+                                                            )
+                                                        else:
+                                                            card_col.markdown(
+                                                                f'<div class="goal-form-card"><div class="goal-form-header">{logo_html}<div class="goal-form-team">{html.escape(label)}</div></div>'
+                                                                f'<div class="goal-form-record">{html.escape(str(form_data.get("record", "N/D")))}</div>'
+                                                                f'<div class="goal-form-line">GF {form_data.get("goals_for_avg") if form_data.get("goals_for_avg") is not None else "N/D"} · GC {form_data.get("goals_against_avg") if form_data.get("goals_against_avg") is not None else "N/D"}</div>'
+                                                                f'<div class="goal-form-line">Ambos marcan {form_data.get("btts_rate") if form_data.get("btts_rate") is not None else "N/D"}% · +2.5 goles {form_data.get("over_2_5_rate") if form_data.get("over_2_5_rate") is not None else "N/D"}%</div></div>',
+                                                                unsafe_allow_html=True,
+                                                            )
+                                                        if ball_col.button("⚽", key=f"goal_form_flip_btn_{match_id}_{team.get('id') or label}", help="Ver últimos partidos" if not is_flipped else "Volver al resumen"):
+                                                            st.session_state[flip_key] = not is_flipped
+                                                            st.rerun()
                                                     # Se omite el resumen H2H aquí para evitar duplicar el indicador de promedio.
                                                     target_minute = deep_context.get("current_goal_minute")
                                                     target_minute_label = deep_context.get("current_goal_minute_label")
