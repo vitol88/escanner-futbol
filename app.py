@@ -56,6 +56,13 @@ st.markdown("""
   div.stButton > button[kind="primary"]:hover, div.stDownloadButton > button:hover {
     background: #FFE566; border-color: #FFE566; color: #111111;
   }
+  /* Interruptor compacto para las alertas sonoras */
+  [class*="st-key-sound_enabled_toggle"] { padding:5px 8px; border:1px solid #393326; border-radius:12px; background:#15191F; }
+  [class*="st-key-sound_enabled_toggle"] label { font-size:.92rem !important; font-weight:650 !important; }
+  [class*="st-key-sound_enabled_toggle"] [role="switch"] { transform:scale(.88); transform-origin:center; }
+  [class*="st-key-sound_enabled_toggle"] [role="switch"][aria-checked="true"] { background:#FACC15 !important; border-color:#FFE566 !important; }
+  [class*="st-key-sound_enabled_toggle"] [role="switch"][aria-checked="true"] div { background:#111419 !important; }
+  [class*="st-key-sound_enabled_toggle"] [role="switch"][aria-checked="false"] { background:#343A44 !important; border-color:#555B66 !important; }
   [data-testid="stTabs"] button[role="tab"] { color: #D4D4D8; font-weight: 650; }
   [data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
     color: #FACC15; border-bottom-color: #FACC15;
@@ -402,8 +409,13 @@ with controls[0]:
         help="Actualiza los marcadores cada 60 segundos mientras esta página esté abierta."
     )
 with controls[1]:
-    if st.button("🔕 Silenciar sonido" if not st.session_state.sound_muted else "🔔 Activar sonido"):
-        st.session_state.sound_muted = not st.session_state.sound_muted
+    sound_enabled = st.toggle(
+        "Activar sonido",
+        value=not st.session_state.sound_muted,
+        key="sound_enabled_toggle",
+        help="Activa o desactiva las alertas sonoras del escáner."
+    )
+    st.session_state.sound_muted = not sound_enabled
 with controls[2]:
     refresh = st.button("⚽ Actualizar escáner", type="primary", help="Actualiza el listado y ejecuta el escaneo disponible.")
 
