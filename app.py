@@ -95,18 +95,14 @@ st.markdown("""
   [data-testid="stToggle"] [role="switch"][aria-checked="false"] > div,
   button[role="switch"][aria-checked="false"] > div { background:#FFFFFF !important; }
   /* Tarjeta compacta de acción principal del escáner */
-  [class*="st-key-scan_cta_card"] { margin-top:18px; margin-bottom:20px; padding:18px 16px 14px; border:1px solid #393326; border-radius:22px; background:linear-gradient(135deg,#17191F,#0B0D10); }
-  .scan-cta-heading { display:flex; align-items:center; gap:14px; margin-bottom:14px; }
-  .scan-cta-mark { display:flex; align-items:center; justify-content:center; flex:0 0 64px; height:64px; border-radius:18px; background:#FACC15; font-size:32px; }
-  .scan-cta-title { color:#FACC15; font-weight:800; font-size:clamp(1rem,4vw,1.45rem); line-height:1.35; letter-spacing:.4px; }
-  .scan-cta-subtitle { color:#A1A1AA; font-size:.95rem; margin-top:4px; line-height:1.4; }
-  [class*="st-key-scan_cta_card"] [data-testid="stButton"] button { width:100%; min-height:50px; border-radius:14px; border:1px solid #FACC15; background:#FACC15; color:#111419; font-size:1.02rem; font-weight:750; }
-  [class*="st-key-scan_cta_card"] [data-testid="stButton"] button:hover { background:#FFE36A; border-color:#FFE36A; color:#111419; }
-  @media(max-width:640px) {
-    [class*="st-key-scan_cta_card"] { padding:14px 12px 12px; }
-    .scan-cta-mark { flex-basis:54px; height:54px; font-size:27px; }
-    .scan-cta-subtitle { font-size:.85rem; }
-  }
+  [class*="st-key-scan_cta_card"] { margin-top:14px; margin-bottom:18px; }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] button { width:100%; min-height:122px; white-space:pre-line; text-align:left; padding:20px 22px; border-radius:22px; border:1px solid #FACC15; background:linear-gradient(135deg,#17191F,#0B0D10); color:#FACC15; font-size:clamp(1rem,3.8vw,1.35rem); line-height:1.65; font-weight:800; box-shadow:0 0 0 1px rgba(250,204,21,.08); }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] button:hover { border-color:#FFE36A; background:linear-gradient(135deg,#242014,#111419); color:#FFE36A; }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] button:active { transform:scale(.99); }
+  .scan-running-status { display:flex; align-items:center; gap:9px; color:#FACC15; margin:8px 2px 0; font-size:.88rem; font-weight:700; }
+  .scan-code-icon { display:inline-block; font-size:1.5rem; animation:scan-code-pulse .55s ease-in-out infinite alternate; }
+  @keyframes scan-code-pulse { from { transform:translateX(-3px) scale(.92); opacity:.6; } to { transform:translateX(3px) scale(1.08); opacity:1; } }
+  @media(max-width:640px) { [class*="st-key-scan_cta_card"] [data-testid="stButton"] button { min-height:112px; padding:14px; font-size:1rem; } }
   /* Header de "En vivo ahora": pill amarilla con ondas y chevrón a la derecha */
   [class*="st-key-live_now_section"] [data-testid="stExpander"] { background:transparent !important; border:0 !important; border-radius:18px !important; }
   [class*="st-key-live_now_section"] [data-testid="stExpander"] summary { min-height:72px !important; display:flex !important; flex-direction:row-reverse !important; justify-content:space-between !important; align-items:center !important; gap:12px !important; padding:14px 18px 14px 22px !important; border:1px solid #34363D !important; border-radius:20px !important; background:#0B0D10 !important; }
@@ -480,7 +476,7 @@ with st.container(key="control_row"):
         )
 battery_progress = st.empty()
 if refresh:
-    battery_progress.progress(8, text="🔋 Preparando actualización…")
+    st.caption("🔄 Actualizando partidos en vivo…")
 
 with st.container(key="sound_controls_row"):
     sound_toggle_state = st.session_state.get("sound_enabled_toggle", not st.session_state.sound_muted)
@@ -519,11 +515,13 @@ with st.container(key="sound_controls_row"):
 """, height=52, scrolling=False)
 
 with st.container(key="scan_cta_card"):
-    st.markdown(
-        '<div class="scan-cta-heading"><div class="scan-cta-mark">⚽</div><div><div class="scan-cta-title">FOOTBALL LAB · ESCÁNER EN VIVO</div><div class="scan-cta-subtitle">Pulsa para detectar oportunidades en directo</div></div></div>',
-        unsafe_allow_html=True,
+    manual_scan = st.button(
+        "⚽  FOOTBALL LAB · ESCÁNER EN VIVO\nPulsa para detectar oportunidades en directo",
+        type="primary",
+        key="scan_all_live",
     )
-    manual_scan = st.button("⚡ Escanear ahora", type="primary", key="scan_all_live")
+    if manual_scan:
+        st.markdown('<div class="scan-running-status"><span class="scan-code-icon">⌁</span><span>ESCANEANDO · Analizando partidos y mercados…</span></div>', unsafe_allow_html=True)
 
 recent_events = st.session_state.notification_events[-3:]
 events_json = json.dumps(recent_events, ensure_ascii=False).replace("</", "<\\/")
@@ -596,10 +594,10 @@ if auto_tick is not None:
 if should_refresh:
     try:
         if refresh:
-            battery_progress.progress(18, text="🔋 Consultando partidos en vivo…")
+            pass
         data = api_get("fixtures", {"live": "all"})
         if refresh:
-            battery_progress.progress(38, text="🔋 Marcadores recibidos · revisando córners…")
+            pass
         new_fixtures = data.get("response", [])
         old_snapshot = st.session_state.score_snapshot
         current_snapshot = {}
@@ -642,10 +640,6 @@ if should_refresh:
             rotated = live_for_corners[offset:] + live_for_corners[:offset]
             for corner_idx, match in enumerate(rotated[:batch_size]):
                 if refresh:
-                    battery_progress.progress(
-                        38 + int(48 * corner_idx / max(1, batch_size)),
-                        text=f"🔋 Revisando córners {corner_idx + 1}/{batch_size}…"
-                    )
                 fixture_data = match.get("fixture") or {}
                 fixture_id = str(fixture_data.get("id"))
                 try:
@@ -684,11 +678,11 @@ if should_refresh:
             "last_auto_scan": st.session_state.last_refresh,
         }
         if refresh:
-            battery_progress.progress(100, text="🔋 Actualización completada")
+            st.caption("✓ Actualización completada")
     except Exception as exc:
         st.session_state.last_auto_refresh_error = str(exc)
         if refresh:
-            battery_progress.progress(100, text="⚠️ Actualización finalizada con error")
+            st.caption("⚠️ Actualización finalizada con error")
 
 if st.session_state.last_auto_refresh_error:
     st.warning(f"No se pudo actualizar el listado en vivo: {st.session_state.last_auto_refresh_error}")
@@ -910,11 +904,10 @@ else:
         st.session_state.stats_cache = {}
         st.session_state.goal_scan_results = []
         st.session_state.corner_scan_results = []
-        st.markdown("""<div class="loading-brand"><div class="brand-mark"><svg viewBox="0 0 64 64" width="38" height="38"><circle cx="27" cy="29" r="20" fill="#101216" stroke="#FACC15" stroke-width="2.5"/><path d="M27 17l9 6-3 10H21l-4-9z" fill="#FACC15"/><path d="M17 24l-8-2m27 1 8-5m-9 15 8 8M21 33l-3 11m15-1-1 6" stroke="#F4F4F5" stroke-width="2" fill="none"/><path d="M39 51V38h6v13m4 0V29h6v22m4 0V20h5v31" fill="#FACC15"/></svg></div><div class="loading-orbit"></div><div><div class="loading-title">FOOTBALL LAB · ESCÁNER EN VIVO</div><div class="loading-subtitle">Evaluando mercados de goles y preparando revisión de córners…</div></div></div>""", unsafe_allow_html=True)
         # Fetch live statistics before estimating goals, so this same scan can
         # actually use the activity context instead of only using a cache from a
         # previous run. One request per fixture; subsequent sections reuse the cache.
-        stats_fetch_progress = st.progress(0, text="Cargando estadísticas en vivo para el análisis de goles…")
+        stats_fetch_progress = st.empty()
         effective_stats_limit = min(stats_limit, 5) if auto_scan_due and not manual_scan else stats_limit
         stats_fixtures = filtered[:effective_stats_limit]
         stats_queries_attempted = 0
@@ -938,7 +931,6 @@ else:
                                 if remaining_id is not None:
                                     st.session_state.stats_cache[str(remaining_id)] = []
                             break
-            stats_fetch_progress.progress((stats_idx + 1) / max(1, len(stats_fixtures)))
         # Mark fixtures beyond the configured detail limit as unavailable for this
         # scan, so the corners pass does not issue hidden extra API requests.
         for skipped_fixture in filtered[len(stats_fixtures):]:
@@ -951,7 +943,7 @@ else:
         # Compare current scores with the previous completed scan without extra API calls.
         previous_scores = st.session_state.get("previous_scan_scores", {})
         current_scores = {}
-        progress = st.progress(0)
+        progress = st.empty()
         for idx, fixture in enumerate(filtered):
             league_data = fixture.get("league") or {}
             goals_data = fixture.get("goals") or {}
@@ -1048,7 +1040,6 @@ else:
                 # These are model probabilities, not validated betting edges.
                 tips = [(name, probability) for name, probability in candidates if probability >= 0.60]
             st.session_state.goal_scan_results.append((fixture, estimate, tips))
-            progress.progress((idx + 1) / max(1, len(filtered)))
         corner_results = []
         # Prioritize fixtures with preliminary goal candidates; all statistics already fetched above are reused.
         candidate_ids = {
@@ -1065,7 +1056,7 @@ else:
         )
         # Reuse cached statistics for all fixtures. No additional API calls are made here.
         corner_fixtures = prioritized
-        corner_progress = st.progress(0)
+        corner_progress = st.empty()
         for idx, fixture in enumerate(corner_fixtures):
             fixture_id = (fixture.get("fixture") or {}).get("id")
             if fixture_id is None:
@@ -1073,7 +1064,6 @@ else:
                     "fixture": fixture,
                     "error": "El partido no tiene un ID de fixture válido; se omite la consulta de estadísticas.",
                 })
-                corner_progress.progress((idx + 1) / max(1, len(corner_fixtures)))
                 continue
             try:
                 cache_key = str(fixture_id)
@@ -1116,7 +1106,6 @@ else:
                 corner_results.append({"fixture": fixture, "error": str(exc)})
                 if "HTTP 429" in str(exc):
                     break
-            corner_progress.progress((idx + 1) / max(1, len(corner_fixtures)))
         # Automatic historical context, cached by team and fixture. Limit historical
         # statistics calls per scan so this does not silently consume the whole API quota.
         history_calls_before = st.session_state.api_request_count
