@@ -1652,7 +1652,7 @@ else:
                                                                     f'<div class="goal-form-header">{logo_html}<div class="goal-form-team">{html.escape(label)}</div></div>',
                                                                     unsafe_allow_html=True,
                                                                 )
-                                                            if ball_col.button("🏆", key=f"goal_form_flip_btn_{match_id}_{team.get('id') or label}", help="Ver últimos partidos" if not is_flipped else "Volver al resumen"):
+                                                            if ball_col.button("⚽", key=f"goal_form_flip_btn_{match_id}_{team.get('id') or label}", help="Ver últimos partidos" if not is_flipped else "Volver al resumen"):
                                                                 st.session_state[flip_key] = not is_flipped
                                                                 st.rerun()
                                                             if is_flipped:
