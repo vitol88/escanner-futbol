@@ -1699,6 +1699,7 @@ else:
 
                                                 # Proyección total estimada a partir de los cuatro promedios de localía.
                                                 # Para cada equipo se promedian sus córners a favor y los concedidos por el rival.
+                                                competition_corner_average = None
                                                 home_inputs = [
                                                     history.get("home_corners_for"),
                                                     history.get("away_corners_against"),
@@ -1794,6 +1795,7 @@ else:
                                                         except Exception as h2h_exc:
                                                             st.session_state.corner_h2h_cache[h2h_key] = {"error": str(h2h_exc)}
                                                 h2h_rows = st.session_state.corner_h2h_cache.get(h2h_key)
+                                                h2h_avg = None
                                                 if isinstance(h2h_rows, dict) and h2h_rows.get("error"):
                                                     st.caption("No se pudo cargar el histórico de córners: " + str(h2h_rows["error"]))
                                                 elif isinstance(h2h_rows, list):
@@ -1845,6 +1847,29 @@ else:
                                                         st.caption("La API no devolvió enfrentamientos finalizados o estadísticas de córners suficientes para estos equipos.")
                                                 else:
                                                     st.caption("Consulta los últimos 10 enfrentamientos finalizados; si hay menos, se mostrarán los disponibles. Las estadísticas de córners dependen de los datos que entregue la API.")
+
+                                                if isinstance(competition_corner_average, (int, float)) and isinstance(h2h_avg, (int, float)):
+                                                    total_match_average = (competition_corner_average + h2h_avg) / 2
+                                                    st.markdown(
+                                                        f"""
+                                                        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+                                                                    margin:16px 0 18px;padding:7px 10px;
+                                                                    border:1px solid #51451D;border-radius:9px;
+                                                                    background:linear-gradient(135deg,#17191f,#20232b);
+                                                                    width:fit-content;max-width:100%;clear:both;position:relative;">
+                                                          <span style="font-size:11px;font-weight:700;color:#FACC15;letter-spacing:.3px;">
+                                                            PROMEDIO TOTAL PARA ESTE PARTIDO
+                                                          </span>
+                                                          <span style="display:inline-block;padding:4px 9px;
+                                                                       border:1px solid #FACC15;border-radius:7px;
+                                                                       background:#FACC15;color:#111827;
+                                                                       font-size:13px;font-weight:800;line-height:1.1;">
+                                                            {total_match_average:.2f}
+                                                          </span>
+                                                        </div>
+                                                        """,
+                                                        unsafe_allow_html=True,
+                                                    )
 
                                                 pace = corner_item.get("pace")
                                                 st.markdown("### 📡 Lectura en vivo")
