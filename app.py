@@ -744,15 +744,17 @@ else:
                                 active_tool = current_tool.get("tool") if str(current_tool.get("fixture_id")) == str(match_id) else None
                                 # Match hero uses the same crests, live minute and scoreboard as the approved mockups.
                                 st.markdown(fixture_hero_html(match), unsafe_allow_html=True)
+                                # Acciones en el mismo orden visual del diseño aprobado:
+                                # Estadísticas, Goles, Córners y H2H.
                                 action_cols = st.columns(4, gap="small")
                                 with action_cols[0]:
-                                    show_stats = st.button("📊\nEstadísticas en vivo", key=f"main_stats_{match_id}", type="primary" if active_tool == "stats" else "secondary", use_container_width=True)
+                                    show_stats = st.button("📊  Estadísticas en vivo", key=f"main_stats_{match_id}", type="primary" if active_tool == "stats" else "secondary", use_container_width=True)
                                 with action_cols[1]:
-                                    show_h2h = st.button("🤝\nH2H", key=f"main_h2h_{match_id}", type="primary" if active_tool == "h2h" else "secondary", use_container_width=True)
+                                    show_goals = st.button("⚽  Goles y señales", key=f"main_market_{match_id}_goals", type="primary" if active_market == "goals" else "secondary", use_container_width=True)
                                 with action_cols[2]:
-                                    show_goals = st.button("⚽\nGoles y señales", key=f"main_market_{match_id}_goals", type="primary" if active_market == "goals" else "secondary", use_container_width=True)
+                                    show_corners = st.button("🚩  Córners", key=f"main_market_{match_id}_corners", type="primary" if active_market == "corners" else "secondary", use_container_width=True)
                                 with action_cols[3]:
-                                    show_corners = st.button("🚩\nCórners", key=f"main_market_{match_id}_corners", type="primary" if active_market == "corners" else "secondary", use_container_width=True)
+                                    show_h2h = st.button("◴  H2H", key=f"main_h2h_{match_id}", type="primary" if active_tool == "h2h" else "secondary", use_container_width=True)
                                 if show_stats:
                                     stats_key = str(match_id)
                                     if stats_key not in st.session_state.stats_cache or stats_key in st.session_state.get("stats_errors", {}):
