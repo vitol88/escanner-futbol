@@ -486,6 +486,14 @@ st.markdown("""
   .goal-last-goal { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin:.8rem 0 1rem; padding:12px 14px; border:2px solid #FACC15; border-radius:12px; background:linear-gradient(135deg,rgba(250,204,21,.16),#191C22 52%,#101216); box-shadow:0 0 0 1px rgba(250,204,21,.22),0 0 16px rgba(250,204,21,.16); color:#F4F4F5; font-size:.84rem; line-height:1.5; }
   .goal-last-goal b { color:#FFE566; font-weight:950; letter-spacing:.35px; }
   .goal-last-goal span { display:inline-flex; align-items:center; justify-content:center; min-width:44px; padding:3px 8px; border:1px solid #FACC15; border-radius:7px; background:#FACC15; color:#111419; font-weight:950; font-size:.9rem; }
+  @keyframes goal-minute-alarm {
+    0%, 100% { opacity:1; transform:scale(1); box-shadow:0 0 0 0 rgba(250,204,21,.42); }
+    50% { opacity:.62; transform:scale(.94); box-shadow:0 0 0 5px rgba(250,204,21,0); }
+  }
+  .goal-last-goal span { animation:goal-minute-alarm 1.15s ease-in-out infinite; transform-origin:center; }
+  @media (prefers-reduced-motion: reduce) {
+    .goal-last-goal span { animation:none; }
+  }
   .goal-last-goal strong { color:#FFE566; }
   .goal-h2h-summary b { color:#FACC15; }
   .goal-comeback-card { box-sizing:border-box; display:flex; flex-direction:column; gap:6px; width:100%; min-height:126px; height:100%; border:1px solid #393326; border-radius:10px; padding:11px; background:linear-gradient(145deg,#191D24,#12151A); margin:.2rem 0 .45rem; overflow-wrap:anywhere; }
