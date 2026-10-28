@@ -1100,8 +1100,56 @@ else:
                                                     has_live_threat = any(isinstance(v, (int, float)) and v > 0 for v in (home_on, away_on))
                                                     if not has_live_threat:
                                                         meaningful_tips = [(label, p) for label, p in meaningful_tips if "marcará al menos 1 gol" not in str(label).casefold()]
+                                                # Rank surviving candidates using small, explicit historical-context adjustments.
+                                                # The displayed percentage remains the base exploratory model probability.
+                                                home_form = (deep_context.get("home_form") or {})
+                                                away_form = (deep_context.get("away_form") or {})
+                                                h2h_form = (deep_context.get("h2h") or {})
+                                                home_gf = home_form.get("goals_for_avg")
+                                                home_ga = home_form.get("goals_against_avg")
+                                                away_gf = away_form.get("goals_for_avg")
+                                                away_ga = away_form.get("goals_against_avg")
+                                                historical_total = sum(v for v in (home_gf, home_ga, away_gf, away_ga) if isinstance(v, (int, float))) / 2 if all(isinstance(v, (int, float)) for v in (home_gf, home_ga, away_gf, away_ga)) else None
+                                                h2h_total = h2h_form.get("avg_goals")
+                                                def context_score(candidate):
+                                                    label, base_probability = candidate
+                                                    label_norm = str(label).casefold()
+                                                    adjustment = 0.0
+                                                    if "menos de" in label_norm:
+                                                        if isinstance(historical_total, (int, float)) and historical_total <= 2.2:
+                                                            adjustment += 0.035
+                                                        elif isinstance(historical_total, (int, float)) and historical_total >= 3.0:
+                                                            adjustment -= 0.04
+                                                        if isinstance(h2h_total, (int, float)) and h2h_total >= 2.8:
+                                                            adjustment -= 0.025
+                                                    elif "goles o más" in label_norm:
+                                                        if isinstance(historical_total, (int, float)) and historical_total >= 2.8:
+                                                            adjustment += 0.035
+                                                        elif isinstance(historical_total, (int, float)) and historical_total <= 2.0:
+                                                            adjustment -= 0.025
+                                                        if isinstance(h2h_total, (int, float)) and h2h_total >= 2.8:
+                                                            adjustment += 0.025
+                                                    if "ambos equipos marcan" in label_norm:
+                                                        rates = [home_form.get("btts_rate"), away_form.get("btts_rate"), h2h_form.get("btts_rate")]
+                                                        rates = [v for v in rates if isinstance(v, (int, float))]
+                                                        if rates:
+                                                            adjustment += max(-0.04, min(0.04, ((sum(rates) / len(rates)) - 50) / 1000))
+                                                    if "terminará con" in label_norm or "marcará al menos 1 gol" in label_norm:
+                                                        team_form = home_form if home_name.casefold() in label_norm else away_form if away_name.casefold() in label_norm else {}
+                                                        scoring_avg = team_form.get("goals_for_avg")
+                                                        conceding_avg = away_ga if team_form is home_form else home_ga if team_form is away_form else None
+                                                        if isinstance(scoring_avg, (int, float)) and isinstance(conceding_avg, (int, float)):
+                                                            adjustment += max(-0.04, min(0.04, (scoring_avg + conceding_avg - 2.2) * 0.025))
+                                                        # If the team is currently behind, use the event-based comeback sample only as a small tiebreaker.
+                                                        trailing_id = match_home_id if isinstance(home_score, int) and isinstance(away_score, int) and home_score < away_score else match_away_id if isinstance(home_score, int) and isinstance(away_score, int) and away_score < home_score else None
+                                                        named_team_id = match_home_id if home_name.casefold() in label_norm else match_away_id if away_name.casefold() in label_norm else None
+                                                        comeback_data = (deep_context.get("comeback") or {}).get(named_team_id, {})
+                                                        if trailing_id == named_team_id and comeback_data.get("sample", 0) >= 2:
+                                                            rate = comeback_data.get("equalized", 0) / comeback_data["sample"]
+                                                            adjustment += max(-0.025, min(0.025, (rate - 0.25) * 0.08))
+                                                    return float(base_probability) + adjustment
                                                 if meaningful_tips:
-                                                    tip, prob = max(meaningful_tips, key=lambda x: x[1])
+                                                    tip, prob = max(meaningful_tips, key=context_score)
                                                     st.markdown(f'<div class="signal-card"><div class="signal-kicker">⚽ TIP PRINCIPAL · GOLES Y SEÑALES</div><div class="signal-title">{html.escape(str(tip))}</div><div class="signal-pick">{prob:.0%}</div><div class="signal-meta">Estimación exploratoria, no calibrada. La probabilidad por sí sola no confirma valor de apuesta.</div></div>', unsafe_allow_html=True)
                                                 else:
                                                     st.info("Sin tip principal por ahora: no hay un mercado suficientemente respaldado por el modelo y las señales en vivo. Es preferible esperar a forzar una apuesta.")
