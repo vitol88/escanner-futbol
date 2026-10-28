@@ -1575,6 +1575,35 @@ else:
                 pressure_gap = pressure_home - pressure_away
                 scored_home = isinstance(home_score, int) and home_score > 0
                 scored_away = isinstance(away_score, int) and away_score > 0
+                # Live probability refresh: show chance of at least one additional goal
+                # alongside the corner split and the pressure reading used by the model.
+                prob_next_goal = estimate.get("probability_next_goal")
+                metric_cols = st.columns(3)
+                metric_cols[0].metric(
+                    "Prob. de otro gol",
+                    f"{prob_next_goal * 100:.1f}%" if isinstance(prob_next_goal, (int, float)) else "N/D",
+                )
+                metric_cols[1].metric(
+                    f"Córners · {home_name}",
+                    str(home_corners) if home_corners is not None else "N/D",
+                )
+                metric_cols[2].metric(
+                    f"Córners · {away_name}",
+                    str(away_corners) if away_corners is not None else "N/D",
+                )
+                pressure_note = (
+                    f"Presión estadística: {home_name} {pressure_home:.1f} · "
+                    f"{away_name} {pressure_away:.1f}. "
+                    "Los córners pesan como una señal más; tiros a puerta y posesión ayudan a distinguir "
+                    "presión real de córners sin peligro."
+                    if live_values else
+                    "No hay estadísticas en vivo suficientes para ajustar la probabilidad por presión."
+                )
+                st.caption(pressure_note)
+                st.caption(
+                    "Estimación exploratoria, no probabilidad calibrada. Se actualiza al refrescar el escáner; "
+                    "un 8–2 en córners no significa por sí solo que vaya a llegar un gol."
+                )
                 tip_label = None
                 tip_probability = None
                 rationale = []
