@@ -56,7 +56,17 @@ st.markdown("""
   div.stButton > button[kind="primary"]:hover, div.stDownloadButton > button:hover {
     background: #FFE566; border-color: #FFE566; color: #111111;
   }
-  /* Interruptor compacto para las alertas sonoras */
+  /* Fila compacta de actualización automática y actualización manual */
+  [class*="st-key-sound_enabled_toggle"] { padding:5px 8px; border:1px solid #393326; border-radius:12px; background:#15191F; }
+  [class*="st-key-sound_enabled_toggle"] label { font-size:.92rem !important; font-weight:650 !important; }
+  [class*="st-key-sound_enabled_toggle"] [role="switch"] { transform:scale(.88); transform-origin:center; }
+  [class*="st-key-control_row"] button { min-height:2.45rem !important; padding:.35rem .65rem !important; border-radius:10px !important; font-size:.88rem !important; white-space:nowrap; }
+  @media(max-width:640px) {
+    [class*="st-key-control_row"] { gap:.45rem !important; }
+    [class*="st-key-control_row"] button { font-size:.78rem !important; padding:.3rem .4rem !important; }
+    [class*="st-key-control_row"] label { font-size:.78rem !important; }
+  }
+
   [class*="st-key-sound_enabled_toggle"] { padding:5px 8px; border:1px solid #393326; border-radius:12px; background:#15191F; }
   [class*="st-key-sound_enabled_toggle"] label { font-size:.92rem !important; font-weight:650 !important; }
   [class*="st-key-sound_enabled_toggle"] [role="switch"] { transform:scale(.88); transform-origin:center; }
@@ -410,11 +420,20 @@ if "signal_rows" not in st.session_state:
 if "signal_history_warning_shown" not in st.session_state:
     st.session_state.signal_history_warning_shown = False
 
-st.session_state.auto_refresh_enabled = st.toggle(
-    "Actualización automática (60 s)",
-    value=st.session_state.auto_refresh_enabled,
-    help="Actualiza los marcadores cada 60 segundos mientras esta página esté abierta."
-)
+control_row = st.columns([1.35, 1])
+with control_row[0]:
+    st.session_state.auto_refresh_enabled = st.toggle(
+        "Actualización automática (60 s)",
+        value=st.session_state.auto_refresh_enabled,
+        help="Actualiza los marcadores cada 60 segundos mientras esta página esté abierta."
+    )
+with control_row[1]:
+    refresh = st.button(
+        "↻ Actualizar scan",
+        type="primary",
+        help="Actualiza el listado de partidos y ejecuta el escaneo disponible."
+    )
+
 sound_toggle_state = st.session_state.get("sound_enabled_toggle", not st.session_state.sound_muted)
 sound_enabled = st.toggle(
     "🔊 Sonido activado" if sound_toggle_state else "🔇 Sonido desactivado",
@@ -499,7 +518,7 @@ st.components.v1.html(
     scrolling=False,
 )
 
-refresh = st.button("⚽ Actualizar escáner", type="primary", help="Actualiza el listado y ejecuta el escaneo disponible.")
+
 
 auto_tick = None
 if st.session_state.auto_refresh_enabled:
