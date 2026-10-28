@@ -723,22 +723,36 @@ if "signal_history_warning_shown" not in st.session_state:
 with st.container(key="top_status_controls"):
     status_cols = st.columns([1, 1, 1], gap="small")
     with status_cols[0]:
-      with st.container(key="auto_refresh_control_card"):
-        st.session_state.auto_refresh_enabled = st.toggle(
-            "⟳ Auto 60s",
-            value=st.session_state.auto_refresh_enabled,
-            help="Actualiza los marcadores cada 60 segundos mientras esta página esté abierta."
-        )
+        with st.container(key="auto_refresh_control_card"):
+            auto_cols = st.columns([0.34, 0.66], gap="small", vertical_alignment="center")
+            with auto_cols[0]:
+                st.session_state.auto_refresh_enabled = st.toggle(
+                    " ",
+                    value=st.session_state.auto_refresh_enabled,
+                    key="auto_refresh_enabled_toggle",
+                    help="Actualiza los marcadores cada 60 segundos mientras esta página esté abierta."
+                )
+            with auto_cols[1]:
+                st.markdown(
+                    '<div style="height:46px;display:flex;align-items:center;justify-content:flex-start;color:#F4D778;-webkit-text-fill-color:#F4D778;font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;font-size:11px;font-weight:600;line-height:1.1;letter-spacing:0;white-space:nowrap">⟳ Auto 60s</div>',
+                    unsafe_allow_html=True,
+                )
     with status_cols[1]:
-      with st.container(key="sound_control_card"):
-        sound_toggle_state = st.session_state.get("sound_enabled_toggle", not st.session_state.sound_muted)
-        sound_enabled = st.toggle(
-            "♫ Sonido" if sound_toggle_state else "♫ Sonido",
-            value=not st.session_state.sound_muted,
-            key="sound_enabled_toggle",
-            help="Activa o desactiva las alertas sonoras del escáner."
-        )
-        st.session_state.sound_muted = not sound_enabled
+        with st.container(key="sound_control_card"):
+            sound_cols = st.columns([0.34, 0.66], gap="small", vertical_alignment="center")
+            with sound_cols[0]:
+                sound_enabled = st.toggle(
+                    " ",
+                    value=not st.session_state.sound_muted,
+                    key="sound_enabled_toggle",
+                    help="Activa o desactiva las alertas sonoras del escáner."
+                )
+                st.session_state.sound_muted = not sound_enabled
+            with sound_cols[1]:
+                st.markdown(
+                    '<div style="height:46px;display:flex;align-items:center;justify-content:flex-start;color:#F4D778;-webkit-text-fill-color:#F4D778;font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;font-size:11px;font-weight:600;line-height:1.1;letter-spacing:0;white-space:nowrap">♫ Sonido</div>',
+                    unsafe_allow_html=True,
+                )
     with status_cols[2]:
         st.components.v1.html("""
 <style>html,body{margin:0!important;padding:0!important;width:100%!important;background:transparent!important;overflow:hidden!important;}</style>
