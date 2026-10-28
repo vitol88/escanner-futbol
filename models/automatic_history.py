@@ -59,7 +59,7 @@ def build_automatic_history(
         return result
 
     def team_fixtures(team_id: int) -> list[dict[str, Any]]:
-        key = f"team-fixtures:{team_id}:{league_id}:{season}"
+        key = f"team-fixtures-v2:{team_id}:{league_id}:{season}"
         if key not in cache:
             # Cap team-fixture discovery calls for the whole scan; cached teams do not
             # consume the budget again. This avoids one hidden request per live fixture.
