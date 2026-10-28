@@ -978,15 +978,93 @@ else:
                         "draw": "Empate",
                         "btts": "Ambos equipos marcan",
                     }
-                    st.markdown(f"**Vista seleccionada: {market_names.get(selected_detail.get('market'), 'Mercado')}**")
-                    if selected_detail.get("market") == "goals":
-                        st.write(f"Marcador actual: {home_score}–{away_score}. Goles esperados restantes según el modelo: {estimate.get('expected_total_goals_remaining', 0):.2f}.")
-                    elif selected_detail.get("market") == "draw":
-                        st.write(f"Probabilidad exploratoria de empate final: {estimate.get('draw_final', 0):.1%}.")
-                    elif selected_detail.get("market") == "btts":
-                        st.write(f"Probabilidad exploratoria de ambos equipos marcan: {estimate.get('btts_final', 0):.1%}.")
-                    elif selected_detail.get("market") == "corners":
-                        st.write("Abre la pestaña Córners para consultar el ritmo en vivo y la referencia histórica disponible para este encuentro.")
+                    selected_market = selected_detail.get("market")
+                    st.markdown(f"**Vista seleccionada: {market_names.get(selected_market, 'Mercado')}**")
+                    if selected_market == "goals":
+                        remaining = estimate.get("expected_total_goals_remaining")
+                        if estimate.get("available") and isinstance(remaining, (int, float)):
+                            st.write(f"Marcador actual: {home_score}–{away_score}. Media exploratoria de goles restantes: {remaining:.2f}.")
+                        else:
+                            st.info(estimate.get("reason") or "No hay datos suficientes para estimar goles restantes.")
+                    elif selected_market == "draw":
+                        probability = estimate.get("draw_final")
+                        if estimate.get("available") and isinstance(probability, (int, float)):
+                            st.write(f"Probabilidad exploratoria de empate final: {probability:.1%}.")
+                        else:
+                            st.info(estimate.get("reason") or "No hay datos suficientes para estimar empate.")
+                    elif selected_market == "btts":
+                        probability = estimate.get("btts_final")
+                        if estimate.get("available") and isinstance(probability, (int, float)):
+                            if estimate.get("btts_already_settled"):
+                                st.write("Ambos equipos ya marcaron: el mercado «ambos marcan» ya se cumplió.")
+                            else:
+                                st.write(f"Probabilidad exploratoria de que ambos equipos marquen al final: {probability:.1%}.")
+                        else:
+                            st.info(estimate.get("reason") or "No hay datos suficientes para estimar ambos marcan.")
+                    elif selected_market == "corners":
+                        st.write("Consulta la pestaña Córners para ver el ritmo en vivo y la referencia histórica disponible.")
+
+                    # Visualización esquemática del campo; no representa posiciones reales de jugadores.
+                    st.markdown(
+                        f"""
+                        <div style="background:linear-gradient(90deg,#16452f,#1b5839);border:1px solid #4d8b63;border-radius:12px;padding:12px;margin:10px 0">
+                          <div style="text-align:center;color:#d7f5df;font-weight:800;margin-bottom:8px">VISTA DEL PARTIDO · {html.escape(str(minute if minute is not None else 'N/D'))}'</div>
+                          <svg viewBox="0 0 320 150" role="img" aria-label="Campo de fútbol esquemático" style="width:100%;max-height:180px">
+                            <rect x="3" y="3" width="314" height="144" rx="4" fill="none" stroke="#b6e2c2" stroke-width="1.5"/>
+                            <line x1="160" y1="3" x2="160" y2="147" stroke="#b6e2c2" stroke-width="1.2"/>
+                            <circle cx="160" cy="75" r="24" fill="none" stroke="#b6e2c2" stroke-width="1.2"/>
+                            <circle cx="160" cy="75" r="2.5" fill="#b6e2c2"/>
+                            <rect x="3" y="40" width="38" height="70" fill="none" stroke="#b6e2c2" stroke-width="1.2"/>
+                            <rect x="279" y="40" width="38" height="70" fill="none" stroke="#b6e2c2" stroke-width="1.2"/>
+                            <circle cx="64" cy="75" r="5" fill="#FACC15"/><circle cx="256" cy="75" r="5" fill="#F4F4F5"/>
+                            <text x="64" y="64" text-anchor="middle" font-size="9" fill="#ffffff">LOCAL</text>
+                            <text x="256" y="64" text-anchor="middle" font-size="9" fill="#ffffff">VISITANTE</text>
+                          </svg>
+                          <div style="display:flex;justify-content:space-between;gap:8px;color:#f4f4f5;font-size:12px;font-weight:700">
+                            <span>{html.escape(str(home_name))} · {home_score}</span>
+                            <span>{away_score} · {html.escape(str(away_name))}</span>
+                          </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+
+                    # H2H solo bajo demanda y cacheado para respetar la cuota de API.
+                    home_id = ((fixture.get("teams") or {}).get("home") or {}).get("id")
+                    away_id = ((fixture.get("teams") or {}).get("away") or {}).get("id")
+                    h2h_key = f"{home_id}-{away_id}"
+                    if "h2h_cache" not in st.session_state:
+                        st.session_state.h2h_cache = {}
+                    if st.button("📚 Consultar últimos enfrentamientos directos", key=f"h2h_{fixture_id}"):
+                        if not home_id or not away_id:
+                            st.warning("La API no entregó los identificadores de ambos equipos.")
+                        elif h2h_key not in st.session_state.h2h_cache:
+                            try:
+                                h2h_payload = api_get("fixtures/headtohead", {"h2h": h2h_key, "last": 5})
+                                st.session_state.h2h_cache[h2h_key] = h2h_payload.get("response") or []
+                            except Exception as h2h_exc:
+                                st.session_state.h2h_cache[h2h_key] = {"error": str(h2h_exc)}
+                    h2h_data = st.session_state.get("h2h_cache", {}).get(h2h_key)
+                    if isinstance(h2h_data, dict) and h2h_data.get("error"):
+                        st.warning(f"No se pudieron consultar los enfrentamientos: {h2h_data['error']}")
+                    elif isinstance(h2h_data, list):
+                        if h2h_data:
+                            h2h_rows = []
+                            for past in h2h_data:
+                                past_fixture = past.get("fixture") or {}
+                                past_teams = past.get("teams") or {}
+                                past_goals = past.get("goals") or {}
+                                past_home = past_teams.get("home") or {}
+                                past_away = past_teams.get("away") or {}
+                                h2h_rows.append({
+                                    "Fecha": (past_fixture.get("date") or "")[:10],
+                                    "Local": past_home.get("name", "N/D"),
+                                    "Marcador": f"{past_goals.get('home', '—')} – {past_goals.get('away', '—')}",
+                                    "Visitante": past_away.get("name", "N/D"),
+                                })
+                            st.dataframe(h2h_rows, use_container_width=True, hide_index=True)
+                        else:
+                            st.info("La API no devolvió enfrentamientos directos anteriores para esta pareja.")
 
             if cards_shown == 0:
                 st.info("No hay partidos con una señal principal en esta ronda. Los partidos sin estadísticas o con señal débil se omiten.")
