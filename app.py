@@ -20,6 +20,7 @@ from models.probabilities import (
     estimate_live_goal_markets,
     load_league_baselines,
     poisson_at_least,
+    poisson_pmf,
 )
 from models.live_odds import extract_live_odds, classify_market, score_pattern_context
 
@@ -1697,13 +1698,34 @@ else:
                     elif market_label == "Ambos equipos marcan: No" and isinstance(btts_prob, (int, float)):
                         model_prob = 1.0 - btts_prob
                     elif market_label.startswith(("Más de ", "Menos de ")):
-                        # Match an actual live total-goals line to the corresponding
-                        # model estimate; never infer odds or prices from a probability.
+                        # Match real odds to a modelled goal or corner line. Corner
+                        # probability is a rough Poisson projection from the observed
+                        # live pace, so it remains exploratory and requires live stats.
                         import re
                         line_match = re.search(r"(\d+(?:[.,]\d+)?)", market_label)
                         if line_match:
                             line = float(line_match.group(1).replace(",", "."))
-                            if market_label.startswith("Más de "):
+                            is_corner_market = "córner" in market_label.casefold()
+                            if is_corner_market:
+                                corner_stats = st.session_state.stats_cache.get(str(fixture_id), [])
+                                current_home_corners = safe_stat(corner_stats, "Corner Kicks", 0)
+                                current_away_corners = safe_stat(corner_stats, "Corner Kicks", 1)
+                                corner_minute = (match_fixture.get("status") or {}).get("elapsed")
+                                if (isinstance(current_home_corners, (int, float))
+                                    and isinstance(current_away_corners, (int, float))
+                                    and isinstance(corner_minute, int) and 1 <= corner_minute < 90):
+                                    current_corners = float(current_home_corners) + float(current_away_corners)
+                                    remaining_mean = max(0.05, current_corners / corner_minute * (90 - corner_minute) * 0.70)
+                                    if market_label.startswith("Más de "):
+                                        needed = max(0, int(line - current_corners + 0.5))
+                                        model_prob = poisson_at_least(remaining_mean, needed)
+                                    else:
+                                        max_remaining = int(line - current_corners)
+                                        model_prob = (
+                                            sum(poisson_pmf(remaining_mean, n) for n in range(max_remaining + 1))
+                                            if max_remaining >= 0 else 0.0
+                                        )
+                            elif market_label.startswith("Más de "):
                                 target = str(int(line + 0.5))
                                 model_prob = estimate.get("over_total_goals", {}).get(target)
                             else:
