@@ -1831,7 +1831,10 @@ else:
                                                         unsafe_allow_html=True,
                                                     )
                                                     if isinstance(expected_match_goals, (int, float)):
-                                                        average_goals_today = (expected_match_goals + float(h2h_average_goals)) / 2
+                                                        raw_average_goals_today = (expected_match_goals + float(h2h_average_goals)) / 2
+                                                        # Aplicar margen conservador de 0.5 goles y redondear hacia abajo
+                                                        # a la línea de mercado más cercana (entero o .5).
+                                                        average_goals_today = max(0.0, (int((raw_average_goals_today - 0.5) * 2)) / 2)
                                                         goal_today_average_slot.markdown(
                                                             _goal_average_badge("PROMEDIO DE GOLES PARA HOY", average_goals_today),
                                                             unsafe_allow_html=True,
@@ -2191,7 +2194,9 @@ else:
                                                     st.caption("Consulta los últimos 10 enfrentamientos finalizados; si hay menos, se mostrarán los disponibles. Las estadísticas de córners dependen de los datos que entregue la API.")
 
                                                 if isinstance(competition_corner_average, (int, float)) and isinstance(h2h_avg, (int, float)):
-                                                    total_match_average = (competition_corner_average + h2h_avg) / 2
+                                                    raw_total_match_average = (competition_corner_average + h2h_avg) / 2
+                                                    # Aplicar margen conservador de 1 córner al promedio total.
+                                                    total_match_average = max(0.0, raw_total_match_average - 1.0)
                                                     st.markdown(
                                                         f"""
                                                         <div class="corner-total-average">
