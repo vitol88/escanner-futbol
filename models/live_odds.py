@@ -82,3 +82,34 @@ def score_pattern_context(score_home: int | None, score_away: int | None) -> str
     if abs(score_home - score_away) == 1:
         return "Diferencia de un gol: revisar empate y ambos marcan según el contexto"
     return "Diferencia amplia: no inferir empate solo por el patrón numérico"
+
+
+def numerology_context(
+    score_home: int | None,
+    score_away: int | None,
+    home_corners: int | float | None = None,
+    away_corners: int | float | None = None,
+    home_yellows: int | float | None = None,
+    away_yellows: int | float | None = None,
+) -> list[str]:
+    """Compare score digits with team corner/card counts as risk-only context.
+
+    A match is reported when both team counts are close to the corresponding
+    score (within one), e.g. score 4-2 and corners 4-3. This is descriptive
+    pattern matching, not a predictive model and must never create a tip alone.
+    """
+    if not isinstance(score_home, int) or not isinstance(score_away, int):
+        return []
+    patterns: list[str] = []
+    for label, home_count, away_count in (
+        ("córners", home_corners, away_corners),
+        ("tarjetas amarillas", home_yellows, away_yellows),
+    ):
+        if not isinstance(home_count, (int, float)) or not isinstance(away_count, (int, float)):
+            continue
+        if abs(float(home_count) - score_home) <= 1 and abs(float(away_count) - score_away) <= 1:
+            patterns.append(
+                f"patrón numérico en {label}: marcador {score_home}–{score_away}, "
+                f"registro {home_count:g}–{away_count:g}"
+            )
+    return patterns
