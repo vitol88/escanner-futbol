@@ -63,17 +63,27 @@ st.markdown("""
   [data-testid="stDataFrame"] { border: 1px solid #3A3426; border-radius: 10px; overflow: hidden; }
   [data-testid="stExpander"] { background: #15191F; border: 1px solid #3A3426; border-radius: 12px; }
   hr { border-color: #38342B; }
-  .brand-header { display:flex; align-items:center; gap:14px; padding:14px 16px; margin:0 0 14px 0; background:linear-gradient(120deg,#15191F,#0B0D10); border:1px solid #393326; border-radius:16px; }
-  .brand-mark { width:52px; height:52px; flex:0 0 52px; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 30% 25%,#FFE566,#D9A900); border:1px solid #FFE566; border-radius:15px; font-size:25px; box-shadow:0 0 22px rgba(250,204,21,.18); }
+  .brand-header { display:block; padding:22px 24px 20px; margin:0 0 18px 0; background:#0B0D10; border:1px solid #34363B; border-radius:28px; color:#F4F4F5; }
+  .brand-header-main { display:flex; align-items:center; gap:18px; min-width:0; }
+  .brand-mark { width:88px; height:88px; flex:0 0 88px; display:flex; align-items:center; justify-content:center; background:#FACC15; border:1px solid #FFE566; border-radius:25px; box-shadow:none; color:#0B0D10; }
+  .brand-mark svg { width:48px; height:48px; }
+  .brand-wordmark { min-width:0; }
+  .brand-title { font-size:clamp(1.7rem,4.5vw,2.8rem); line-height:1.12; letter-spacing:.5px; font-weight:500; color:#F4F4F5; white-space:nowrap; }
+  .brand-title span { color:#FACC15; }
+  .brand-subtitle { color:#A1A1AA; font-size:clamp(1rem,2.8vw,1.8rem); letter-spacing:.5px; margin-top:8px; white-space:nowrap; }
+  .brand-pill { margin-left:auto; white-space:nowrap; color:#22C55E; border:1px solid #103B25; background:#062719; border-radius:999px; padding:9px 16px; font-size:clamp(.8rem,2.5vw,1.2rem); font-weight:600; }
+  .brand-divider { height:1px; background:#3A3A40; margin:24px 0 20px; }
+  .brand-update { display:flex; align-items:center; gap:18px; min-width:0; }
+  .brand-clock { color:#FACC15; width:42px; height:42px; flex:0 0 42px; }
+  .brand-update-copy { min-width:0; flex:1; }
+  .brand-update-label { color:#A1A1AA; font-size:clamp(.9rem,2.6vw,1.7rem); letter-spacing:.5px; }
+  .brand-update-time { color:#F4F4F5; font-size:clamp(1.15rem,3.6vw,2.1rem); font-weight:550; margin-top:5px; overflow-wrap:anywhere; }
+  .brand-refresh { color:#FACC15; width:31px; height:31px; flex:0 0 31px; }
   .loading-brand { display:flex; align-items:center; gap:12px; padding:14px; margin:8px 0; border:1px solid #393326; border-radius:14px; background:linear-gradient(120deg,#171B21,#101216); }
   .loading-orbit { width:36px; height:36px; border:3px solid #393326; border-top-color:#FACC15; border-right-color:#FACC15; border-radius:50%; animation:lab-spin .8s linear infinite; flex:0 0 36px; }
   @keyframes lab-spin { to {transform:rotate(360deg);} }
   .loading-title { color:#FACC15; font-weight:800; letter-spacing:.5px; }
   .loading-subtitle { color:#A1A1AA; font-size:12px; margin-top:3px; }
-  .brand-title { font-size:22px; line-height:1.15; letter-spacing:1.5px; font-weight:900; color:#F4F4F5; }
-  .brand-title span { color:#FACC15; }
-  .brand-subtitle { color:#A1A1AA; font-size:10px; letter-spacing:1px; margin-top:5px; }
-  .brand-pill { margin-left:auto; white-space:nowrap; color:#FACC15; border:1px solid #554719; background:#242014; border-radius:999px; padding:6px 9px; font-size:10px; font-weight:800; }
   [data-testid="stExpander"] summary p { font-weight:700; }
   .signal-card { animation:matchFlipIn .38s cubic-bezier(.2,.75,.25,1) both; margin:.65rem 0 1rem; padding:1.15rem 1.2rem; border-radius:18px; border:1px solid #FACC15; background:radial-gradient(circle at 92% 8%,rgba(250,204,21,.18),transparent 34%),linear-gradient(135deg,#242014 0%,#171B21 58%,#111419 100%); box-shadow:0 8px 28px rgba(0,0,0,.24); }
   .signal-kicker { color:#FACC15; font-size:.76rem; font-weight:850; letter-spacing:1.4px; text-transform:uppercase; }
@@ -134,20 +144,47 @@ st.markdown("""
   div[data-testid="stMetricValue"] { color:#FACC15 !important; }
   @media (max-width: 640px) {
     .block-container {padding-left: .8rem; padding-right: .8rem;}
+    .brand-header {padding:18px 16px 17px; border-radius:25px;}
+    .brand-header-main {gap:12px;}
+    .brand-mark {width:70px;height:70px;flex-basis:70px;border-radius:22px;}
+    .brand-mark svg {width:42px;height:42px;}
+    .brand-title {font-size:clamp(1.35rem,6vw,2rem);letter-spacing:0;}
+    .brand-subtitle {font-size:clamp(.82rem,3.8vw,1.15rem);margin-top:6px;}
+    .brand-pill {padding:7px 10px;font-size:.76rem;}
+    .brand-divider {margin:20px 0 17px;}
+    .brand-update {gap:11px;}
+    .brand-clock {width:34px;height:34px;flex-basis:34px;}
+    .brand-update-label {font-size:.83rem;}
+    .brand-update-time {font-size:clamp(1rem,4.4vw,1.35rem);line-height:1.25;}
+    .brand-refresh {width:25px;height:25px;flex-basis:25px;}
     h1 {font-size: 1.7rem !important;}
     h2 {font-size: 1.3rem !important;}
   }
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("""
+header_now = datetime.now()
+month_es = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"][header_now.month - 1]
+header_time = f"{header_now.day:02d} {month_es} {header_now.year} · {header_now:%H:%M:%S}"
+st.markdown(f"""
 <div class="brand-header">
-  <div class="brand-mark"><svg viewBox="0 0 64 64" width="42" height="42" aria-label="Football Lab logo"><circle cx="27" cy="29" r="20" fill="#101216" stroke="#FACC15" stroke-width="2.5"/><path d="M27 17l9 6-3 10H21l-4-9z" fill="#FACC15"/><path d="M17 24l-8-2m27 1 8-5m-9 15 8 8M21 33l-3 11m15-1-1 6" stroke="#F4F4F5" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M39 51V38h6v13m4 0V29h6v22m4 0V20h5v31" fill="#FACC15" stroke="#FACC15" stroke-width="1"/><path d="M9 53Q28 61 53 53" fill="none" stroke="#FACC15" stroke-width="2.5" stroke-linecap="round"/></svg></div>
-  <div>
-    <div class="brand-title">FOOTBALL <span>LAB</span></div>
-    <div class="brand-subtitle">LIVE ANALYTICS</div>
+  <div class="brand-header-main">
+    <div class="brand-mark"><svg viewBox="0 0 64 64" aria-label="Football Lab trophy" fill="none" stroke="#0B0D10" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10h24v14c0 11-5 17-12 17S20 35 20 24V10Z"/><path d="M20 15H10v5c0 9 6 14 13 14M44 15h10v5c0 9-6 14-13 14M32 41v8M22 54h20M25 49h14"/></svg></div>
+    <div class="brand-wordmark">
+      <div class="brand-title">FOOTBALL <span>LAB</span></div>
+      <div class="brand-subtitle">LIVE ANALYTICS</div>
+    </div>
+    <div class="brand-pill">EN VIVO</div>
   </div>
-  <div class="brand-pill">● LIVE SCANNER</div>
+  <div class="brand-divider"></div>
+  <div class="brand-update">
+    <svg class="brand-clock" viewBox="0 0 48 48" fill="none" stroke="#FACC15" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="24" cy="24" r="18"/><path d="M24 12v13h11"/></svg>
+    <div class="brand-update-copy">
+      <div class="brand-update-label">ÚLTIMA ACTUALIZACIÓN</div>
+      <div class="brand-update-time">{header_time}</div>
+    </div>
+    <svg class="brand-refresh" viewBox="0 0 32 32" fill="none" stroke="#FACC15" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M26 10V4m0 0h-6m6 0-5 5a11 11 0 0 0-18 5"/><path d="M6 22v6m0 0h6m-6 0 5-5a11 11 0 0 0 18-5"/></svg>
+  </div>
 </div>
 """, unsafe_allow_html=True)
 # Cabecera limpia; los detalles del modelo aparecen en Rendimiento del modelo.
