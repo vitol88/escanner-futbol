@@ -1866,7 +1866,7 @@ else:
                     st.markdown(
                         f'<div class="tip-card"><div class="tip-card-label">TIP PRINCIPAL</div>'
                         f'<div class="tip-card-title">{html.escape(chosen_main["market"])}</div>'
-                        f'<div class="tip-card-meta">Cuota {chosen_main["odd"]:.2f} · {html.escape(chosen_main["bookmaker"])} · ventaja estimada {chosen_main["estimated_edge"]:.1%} · mercado en vivo verificado</div></div>',
+                        f'<div class="tip-card-meta">Señal basada en cuotas y estadísticas en vivo verificadas.</div></div>',
                         unsafe_allow_html=True,
                     )
                 else:
@@ -1880,14 +1880,10 @@ else:
                     selected_risk = risk_options[:2]
                     st.markdown('<div class="tip-section-heading risk-heading"><span class="tip-heading-icon">⌁</span><span>TIP DE ALTO RIESGO</span><span class="tip-heading-status">RIESGO ALTO</span></div>', unsafe_allow_html=True)
                     for risk_item in selected_risk:
-                        probability_note = (
-                            f' · prob. exploratoria {risk_item["model_prob"]:.1%} · ventaja estimada {risk_item["estimated_edge"]:.1%}'
-                            if isinstance(risk_item["model_prob"], (int, float)) else ""
-                        )
                         st.markdown(
                             f'<div class="tip-card"><div class="tip-card-label">ALTO RIESGO</div>'
                             f'<div class="tip-card-title">{html.escape(risk_item["market"])}</div>'
-                            f'<div class="tip-card-meta">Cuota {risk_item["odd"]:.2f} · {html.escape(risk_item["bookmaker"])}{probability_note}</div></div>',
+                            f'<div class="tip-card-meta">Señal de riesgo evaluada con cuotas y estadísticas en vivo.</div></div>',
                             unsafe_allow_html=True,
                         )
                     risk_stats = st.session_state.stats_cache.get(str(fixture_id), [])
