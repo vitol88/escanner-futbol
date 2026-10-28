@@ -646,75 +646,6 @@ with st.container(key="scan_cta_card"):
     if manual_scan:
         st.markdown('<div class="scan-running-status"><span class="scan-code-icon">⟳</span><div><strong>ESCANEANDO…</strong><div class="scan-running-subtitle">Analizando partidos y mercados</div></div><span class="scan-sweep"></span></div>', unsafe_allow_html=True)
 
-recent_events = st.session_state.notification_events[-3:]
-events_json = json.dumps(recent_events, ensure_ascii=False).replace("</", "<\\/")
-muted_js = "true" if st.session_state.sound_muted else "false"
-st.components.v1.html(
-    f"""
-    <div id="scanner-notices" style="font-family:system-ui;color:#f4f4f5"></div>
-    <script>
-    const events = {events_json};
-    let browserAudioActivated = false;
-    try {{ browserAudioActivated = localStorage.getItem('football-lab-audio-activated') === 'true'; }} catch (e) {{}}
-    const muted = {muted_js} || !browserAudioActivated;
-    const root = document.getElementById('scanner-notices');
-    const seenKey = 'football-lab-seen-events';
-    let seen = [];
-    try {{ seen = JSON.parse(localStorage.getItem(seenKey) || '[]'); }} catch (e) {{}}
-    const fresh = events.filter(e => !seen.includes(e.id));
-    if (fresh.length) {{
-      fresh.forEach(e => {{
-        const card = document.createElement('div');
-        card.style.cssText = 'margin:8px 0;padding:12px 14px;border-radius:12px;background:#242014;border:1px solid #FACC15;box-shadow:0 6px 20px #0008';
-        card.innerHTML = '<b style="color:#FACC15">' + e.title + '</b><div style="margin-top:4px">' + e.message + '</div>';
-        root.appendChild(card);
-        setTimeout(() => card.remove(), 9000);
-      }});
-      seen = [...seen, ...fresh.map(e => e.id)].slice(-30);
-      try {{ localStorage.setItem(seenKey, JSON.stringify(seen)); }} catch (e) {{}}
-      if ("Notification" in window && Notification.permission === "default") {{
-        try {{ Notification.requestPermission(); }} catch (e) {{}}
-      }}
-      if ("Notification" in window && Notification.permission === "granted") {{
-        fresh.forEach(e => {{ try {{ new Notification(e.title, {{ body: e.message, tag: e.id }}); }} catch (err) {{}} }});
-      }}
-      if (!muted) {{
-        try {{
-          const goalEvents = fresh.filter(e => String(e.title || '').toLowerCase().includes('gol'));
-          if (goalEvents.length && 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window) {{
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance('¡Gol!');
-            utterance.lang = 'es-CO';
-            utterance.rate = 0.95;
-            window.speechSynthesis.speak(utterance);
-          }}
-          const AudioCtx = window.AudioContext || window.webkitAudioContext;
-          if (AudioCtx) {{
-            const ctx = new AudioCtx();
-            const playChime = () => {{
-              [880, 1175].forEach((freq, i) => {{
-                const osc = ctx.createOscillator(), gain = ctx.createGain(), t = ctx.currentTime + i * 0.14;
-                osc.type = 'sine'; osc.frequency.value = freq;
-                gain.gain.setValueAtTime(0.0001, t);
-                gain.gain.exponentialRampToValueAtTime(0.12, t + 0.025);
-                gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
-                osc.connect(gain); gain.connect(ctx.destination); osc.start(t); osc.stop(t + 0.2);
-              }});
-              setTimeout(() => ctx.close(), 700);
-            }};
-            Promise.resolve(ctx.resume()).then(playChime).catch(() => {{ try {{ ctx.close(); }} catch (e) {{}} }});
-          }}
-        }} catch (e) {{}}
-      }}
-    }}
-    </script>
-    """,
-    height=1,
-    scrolling=False,
-)
-
-
-
 auto_tick = None
 if st.session_state.auto_refresh_enabled:
     auto_tick = st_autorefresh(interval=60_000, key="live_fixture_refresh_60s")
@@ -837,6 +768,75 @@ if should_refresh:
 if st.session_state.last_auto_refresh_error:
     st.warning(f"No se pudo actualizar el listado en vivo: {st.session_state.last_auto_refresh_error}")
 
+recent_events = st.session_state.notification_events[-3:]
+events_json = json.dumps(recent_events, ensure_ascii=False).replace("</", "<\\/")
+muted_js = "true" if st.session_state.sound_muted else "false"
+st.components.v1.html(
+    f"""
+    <div id="scanner-notices" style="font-family:system-ui;color:#f4f4f5"></div>
+    <script>
+    const events = {events_json};
+    let browserAudioActivated = false;
+    try {{ browserAudioActivated = localStorage.getItem('football-lab-audio-activated') === 'true'; }} catch (e) {{}}
+    const muted = {muted_js} || !browserAudioActivated;
+    const root = document.getElementById('scanner-notices');
+    const seenKey = 'football-lab-seen-events';
+    let seen = [];
+    try {{ seen = JSON.parse(localStorage.getItem(seenKey) || '[]'); }} catch (e) {{}}
+    const fresh = events.filter(e => !seen.includes(e.id));
+    if (fresh.length) {{
+      fresh.forEach(e => {{
+        const card = document.createElement('div');
+        card.style.cssText = 'margin:8px 0;padding:12px 14px;border-radius:12px;background:#242014;border:1px solid #FACC15;box-shadow:0 6px 20px #0008';
+        card.innerHTML = '<b style="color:#FACC15">' + e.title + '</b><div style="margin-top:4px">' + e.message + '</div>';
+        root.appendChild(card);
+        setTimeout(() => card.remove(), 9000);
+      }});
+      seen = [...seen, ...fresh.map(e => e.id)].slice(-30);
+      try {{ localStorage.setItem(seenKey, JSON.stringify(seen)); }} catch (e) {{}}
+      if ("Notification" in window && Notification.permission === "default") {{
+        try {{ Notification.requestPermission(); }} catch (e) {{}}
+      }}
+      if ("Notification" in window && Notification.permission === "granted") {{
+        fresh.forEach(e => {{ try {{ new Notification(e.title, {{ body: e.message, tag: e.id }}); }} catch (err) {{}} }});
+      }}
+      if (!muted) {{
+        try {{
+          const goalEvents = fresh.filter(e => String(e.title || '').toLowerCase().includes('gol'));
+          if (goalEvents.length && 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window) {{
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance('¡Gol!');
+            utterance.lang = 'es-CO';
+            utterance.rate = 0.95;
+            window.speechSynthesis.speak(utterance);
+          }}
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) {{
+            const ctx = new AudioCtx();
+            const playChime = () => {{
+              [880, 1175].forEach((freq, i) => {{
+                const osc = ctx.createOscillator(), gain = ctx.createGain(), t = ctx.currentTime + i * 0.14;
+                osc.type = 'sine'; osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.0001, t);
+                gain.gain.exponentialRampToValueAtTime(0.12, t + 0.025);
+                gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+                osc.connect(gain); gain.connect(ctx.destination); osc.start(t); osc.stop(t + 0.2);
+              }});
+              setTimeout(() => ctx.close(), 700);
+            }};
+            Promise.resolve(ctx.resume()).then(playChime).catch(() => {{ try {{ ctx.close(); }} catch (e) {{}} }});
+          }}
+        }} catch (e) {{}}
+      }}
+    }}
+    </script>
+    """,
+    height=1,
+    scrolling=False,
+)
+
+
+
 fixtures = st.session_state.live_fixtures
 if not fixtures:
     st.markdown("### Tu centro de análisis")
@@ -853,7 +853,7 @@ else:
     # Mostrar todos los partidos en vivo; se oculta el filtro de ligas para simplificar la pantalla.
     filtered = list(fixtures)
     with st.container(key="live_now_section"):
-        with st.expander(f"En vivo ahora ({len(filtered)})", expanded=False, key="live_now_expander", on_change="rerun"):
+        with st.expander(f"En vivo ahora ({len(filtered)})", expanded=st.session_state.get("live_now_expander", False), key="live_now_expander", on_change="rerun"):
             if filtered:
                 grouped = {}
                 for match in filtered:
@@ -862,7 +862,7 @@ else:
                     league_name = league_data.get("name") or "Liga sin nombre"
                     grouped.setdefault((country, league_name), []).append(match)
                 for (country, league_name), league_matches in sorted(grouped.items()):
-                    with st.expander(f"{country} · {league_name} ({len(league_matches)})", expanded=False, key=f"live_league_{country}_{league_name}", on_change="rerun"):
+                    with st.expander(f"{country} · {league_name} ({len(league_matches)})", expanded=st.session_state.get(f"live_league_{country}_{league_name}", False), key=f"live_league_{country}_{league_name}", on_change="rerun"):
                         # Cada partido tiene una sola tarjeta principal; evitamos duplicar el marcador
                         # en una cuadrícula y otra vez dentro del expander de análisis.
                         # Match tools are available from the main live scanner, before a full market scan.
@@ -886,7 +886,7 @@ else:
                             match_row_label = f"{home_md}**{match_home_name}**  **{score_label}**  **{match_away_name}**{away_md} · {match_minute if match_minute is not None else 'EN VIVO'}′"
                             if not match_id:
                                 continue
-                            with st.expander(match_row_label, expanded=False, key=f"live_match_{match_id}", on_change="rerun"):
+                            with st.expander(match_row_label, expanded=st.session_state.get(f"live_match_{match_id}", False), key=f"live_match_{match_id}", on_change="rerun"):
                                 current_tool = st.session_state.get("main_fixture_tool") or {}
                                 active_market = current_tool.get("market") if str(current_tool.get("fixture_id")) == str(match_id) else None
                                 active_tool = current_tool.get("tool") if str(current_tool.get("fixture_id")) == str(match_id) else None
