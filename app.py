@@ -956,6 +956,38 @@ else:
                     st.info("Sin tip principal en este momento: faltan señales suficientes para respaldar una recomendación.")
                 st.caption(f"Referencia usada por el modelo: {estimate.get('baseline_league', 'genérica')} · muestra de liga: {estimate.get('baseline_matches', 0)} partidos · contexto: {context.get('context_status', 'no disponible')}.")
                 st.caption("Tip exploratorio, no garantía de gol ni señal de valor esperado positivo. Si faltan estadísticas en vivo, el bot lo indica en vez de inventarlas.")
+                action_cols = st.columns(4)
+                action_specs = [
+                    ("⚽ Goles", "goals"),
+                    ("🚩 Córners", "corners"),
+                    ("🤝 Empate", "draw"),
+                    ("🥅 Ambos marcan", "btts"),
+                ]
+                for action_col, (action_label, action_key) in zip(action_cols, action_specs):
+                    with action_col:
+                        if st.button(action_label, key=f"match_action_{fixture_id}_{action_key}"):
+                            st.session_state["selected_match_detail"] = {
+                                "fixture_id": fixture_id,
+                                "market": action_key,
+                            }
+                selected_detail = st.session_state.get("selected_match_detail") or {}
+                if str(selected_detail.get("fixture_id")) == str(fixture_id):
+                    market_names = {
+                        "goals": "Goles",
+                        "corners": "Córners",
+                        "draw": "Empate",
+                        "btts": "Ambos equipos marcan",
+                    }
+                    st.markdown(f"**Vista seleccionada: {market_names.get(selected_detail.get('market'), 'Mercado')}**")
+                    if selected_detail.get("market") == "goals":
+                        st.write(f"Marcador actual: {home_score}–{away_score}. Goles esperados restantes según el modelo: {estimate.get('expected_total_goals_remaining', 0):.2f}.")
+                    elif selected_detail.get("market") == "draw":
+                        st.write(f"Probabilidad exploratoria de empate final: {estimate.get('draw_final', 0):.1%}.")
+                    elif selected_detail.get("market") == "btts":
+                        st.write(f"Probabilidad exploratoria de ambos equipos marcan: {estimate.get('btts_final', 0):.1%}.")
+                    elif selected_detail.get("market") == "corners":
+                        st.write("Abre la pestaña Córners para consultar el ritmo en vivo y la referencia histórica disponible para este encuentro.")
+
             if cards_shown == 0:
                 st.info("No hay partidos con una señal principal en esta ronda. Los partidos sin estadísticas o con señal débil se omiten.")
         else:
