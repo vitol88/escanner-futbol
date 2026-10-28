@@ -565,6 +565,89 @@ else:
             with st.expander(f"⚽ {country} · {league_name} ({len(league_matches)})", expanded=False):
                 cards_html = '<div class="live-match-grid">' + "".join(fixture_card_html(match) for match in league_matches) + "</div>"
                 st.markdown(cards_html, unsafe_allow_html=True)
+                # Match tools are available from the main live scanner, before a full market scan.
+                for match in league_matches:
+                    match_fixture = match.get("fixture") or {}
+                    match_id = match_fixture.get("id")
+                    match_teams = match.get("teams") or {}
+                    match_home = match_teams.get("home") or {}
+                    match_away = match_teams.get("away") or {}
+                    match_home_id, match_away_id = match_home.get("id"), match_away.get("id")
+                    match_label = f"{match_home.get('name', 'Local')} vs {match_away.get('name', 'Visitante')}"
+                    if not match_id:
+                        continue
+                    with st.expander(f"📊 Herramientas · {match_label}", expanded=False):
+                        tool_cols = st.columns(3)
+                        with tool_cols[0]:
+                            show_stats = st.button("📊 Estadísticas", key=f"main_stats_{match_id}")
+                        with tool_cols[1]:
+                            show_h2h = st.button("🤝 H2H", key=f"main_h2h_{match_id}")
+                        with tool_cols[2]:
+                            show_detail = st.button("🔎 Detalle", key=f"main_detail_{match_id}")
+                        if show_stats:
+                            stats_key = str(match_id)
+                            if stats_key not in st.session_state.stats_cache:
+                                try:
+                                    stats_payload = api_get("fixtures/statistics", {"fixture": match_id})
+                                    st.session_state.stats_cache[stats_key] = stats_payload.get("response") or []
+                                except Exception as stats_exc:
+                                    st.session_state.stats_cache[stats_key] = {"error": str(stats_exc)}
+                            st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "stats"}
+                        if show_h2h:
+                            if "h2h_cache" not in st.session_state:
+                                st.session_state.h2h_cache = {}
+                            h2h_key = f"{match_home_id}-{match_away_id}"
+                            if not match_home_id or not match_away_id:
+                                st.warning("La API no entregó los identificadores de ambos equipos.")
+                            elif h2h_key not in st.session_state.h2h_cache:
+                                try:
+                                    h2h_payload = api_get("fixtures/headtohead", {"h2h": h2h_key, "last": 5})
+                                    st.session_state.h2h_cache[h2h_key] = h2h_payload.get("response") or []
+                                except Exception as h2h_exc:
+                                    st.session_state.h2h_cache[h2h_key] = {"error": str(h2h_exc)}
+                            st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "h2h"}
+                        if show_detail:
+                            st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "detail"}
+                        selected_tool = st.session_state.get("main_fixture_tool") or {}
+                        if str(selected_tool.get("fixture_id")) == str(match_id):
+                            tool_name = selected_tool.get("tool")
+                            if tool_name == "stats":
+                                stat_data = st.session_state.stats_cache.get(str(match_id), [])
+                                if isinstance(stat_data, dict) and stat_data.get("error"):
+                                    st.warning(f"No se pudieron cargar las estadísticas: {stat_data['error']}")
+                                elif stat_data:
+                                    stat_rows = []
+                                    for team_idx, team_stats in enumerate(stat_data[:2]):
+                                        team_name = ((match_teams.get("home") if team_idx == 0 else match_teams.get("away")) or {}).get("name", "Equipo")
+                                        stat_map = {entry.get("type"): entry.get("value") for entry in (team_stats.get("statistics") or [])}
+                                        for stat_name in ("Ball Possession", "Total Shots", "Shots on Goal", "Corner Kicks", "Fouls", "Yellow Cards", "Red Cards", "Offsides", "Passes %"):
+                                            if stat_name in stat_map:
+                                                stat_rows.append({"Equipo": team_name, "Estadística": stat_name, "Valor": stat_map[stat_name] if stat_map[stat_name] is not None else "N/D"})
+                                    if stat_rows:
+                                        st.dataframe(stat_rows, use_container_width=True, hide_index=True)
+                                    else:
+                                        st.info("La API no entregó estadísticas detalladas para este partido.")
+                                else:
+                                    st.info("La API no entregó estadísticas para este partido.")
+                            elif tool_name == "h2h":
+                                h2h_key = f"{match_home_id}-{match_away_id}"
+                                h2h_data = st.session_state.get("h2h_cache", {}).get(h2h_key)
+                                if isinstance(h2h_data, dict) and h2h_data.get("error"):
+                                    st.warning(f"No se pudieron consultar los enfrentamientos: {h2h_data['error']}")
+                                elif isinstance(h2h_data, list) and h2h_data:
+                                    h2h_rows = []
+                                    for past in h2h_data:
+                                        pf, pt, pg = past.get("fixture") or {}, past.get("teams") or {}, past.get("goals") or {}
+                                        ph, pa = pt.get("home") or {}, pt.get("away") or {}
+                                        h2h_rows.append({"Fecha": (pf.get("date") or "")[:10], "Local": ph.get("name", "N/D"), "Marcador": f"{pg.get('home', '—')} – {pg.get('away', '—')}", "Visitante": pa.get("name", "N/D")})
+                                    st.dataframe(h2h_rows, use_container_width=True, hide_index=True)
+                                elif isinstance(h2h_data, list):
+                                    st.info("La API no devolvió enfrentamientos directos anteriores.")
+                            elif tool_name == "detail":
+                                st.markdown(f"**{match_label}**")
+                                st.write(f"Marcador en vivo: {(match.get('goals') or {}).get('home', '—')} – {(match.get('goals') or {}).get('away', '—')}")
+                                st.write(f"Minuto: {(match_fixture.get('status') or {}).get('elapsed') or 'N/D'}")
+                                st.caption("Para ver promedios por localía y tip principal, pulsa «Escanear todos los partidos en vivo».")
     else:
         st.info("No hay partidos activos en las ligas seleccionadas.")
 
