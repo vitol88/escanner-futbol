@@ -113,6 +113,20 @@ st.markdown("""
   .scan-code-icon { display:inline-block; flex:0 0 auto; font-size:2rem; transform-origin:center; animation:scanner-spiral-spin .8s linear infinite; text-shadow:0 0 12px rgba(250,204,21,.8); }
   .scan-running-subtitle { color:#A1A1AA; font-size:.82rem; font-weight:500; margin-top:3px; }
   .scan-sweep { position:absolute; left:0; right:0; bottom:0; height:2px; background:linear-gradient(90deg,transparent,#FACC15,transparent); animation:scanner-sweep 1.4s ease-in-out infinite; }
+  /* Animación de bienvenida al entrar en la plataforma */
+  .football-splash { position:fixed; inset:0; z-index:999999; display:flex; flex-direction:column; align-items:center; justify-content:center; overflow:hidden; background:radial-gradient(ellipse at center,#18251b 0%,#080b09 72%); color:#fff; pointer-events:none; animation:splash-dismiss 4.8s ease forwards; }
+  .splash-pitch { position:relative; width:min(82vw,520px); height:min(48vh,300px); border:2px solid rgba(255,255,255,.8); border-radius:4px; background:repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 10%,transparent 10% 20%),linear-gradient(180deg,#176b35,#0b4825); box-shadow:0 0 42px rgba(34,197,94,.18); }
+  .splash-pitch:before { content:""; position:absolute; inset:0 25%; border-left:2px solid rgba(255,255,255,.75); border-right:2px solid rgba(255,255,255,.75); }
+  .splash-pitch:after { content:""; position:absolute; width:28%; aspect-ratio:1; left:36%; top:36%; border:2px solid rgba(255,255,255,.75); border-radius:50%; }
+  .splash-goal { position:absolute; right:-2px; top:31%; width:14%; height:38%; border:4px solid #f8fafc; border-right:0; background:repeating-linear-gradient(0deg,transparent 0 13px,rgba(255,255,255,.45) 14px 15px),repeating-linear-gradient(90deg,transparent 0 13px,rgba(255,255,255,.45) 14px 15px); }
+  .splash-ball { position:absolute; left:9%; top:66%; z-index:2; font-size:clamp(2.2rem,7vw,3.8rem); filter:drop-shadow(0 8px 4px #0008); animation:splash-shot 2.1s cubic-bezier(.25,.7,.3,1) .35s forwards; }
+  .splash-brand { margin-top:28px; font-size:clamp(1.8rem,6vw,3.5rem); font-weight:900; letter-spacing:.12em; color:#FACC15; text-align:center; opacity:0; transform:translateY(14px) scale(.92); text-shadow:0 0 25px rgba(250,204,21,.45); animation:splash-brand-in .8s ease 2.25s forwards; }
+  .splash-tagline { margin-top:8px; color:#d4d4d8; font-size:.82rem; letter-spacing:.22em; opacity:0; animation:splash-brand-in .6s ease 2.8s forwards; }
+  @keyframes splash-shot { 0%{left:9%;top:66%;transform:rotate(0) scale(1)} 48%{left:55%;top:28%;transform:rotate(380deg) scale(.78)} 75%{left:83%;top:42%;transform:rotate(650deg) scale(.58)} 100%{left:91%;top:45%;transform:rotate(900deg) scale(.42);opacity:0} }
+  @keyframes splash-brand-in { to{opacity:1;transform:translateY(0) scale(1)} }
+  @keyframes splash-dismiss { 0%,82%{opacity:1;visibility:visible} 99%{opacity:0;visibility:visible} 100%{opacity:0;visibility:hidden} }
+  @media(prefers-reduced-motion:reduce) { .football-splash,.splash-ball,.splash-brand,.splash-tagline { animation-duration:.01ms !important; animation-delay:0s !important; } }
+
   @keyframes scanner-radar-spin { to { rotate:360deg; } }
   @keyframes scanner-ball-orbit { 0%,100% { transform:translate(-50%,-50%) scale(.9); } 50% { transform:translate(-50%,-50%) scale(1.1); } }
   @keyframes scanner-spiral-spin { to { transform:rotate(360deg); } }
@@ -343,6 +357,17 @@ st.markdown("""
     h2 {font-size: 1.3rem !important;}
   }
 </style>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<div class="football-splash" aria-label="Bienvenido a Football Lab">
+  <div class="splash-pitch">
+    <div class="splash-goal"></div>
+    <div class="splash-ball">⚽</div>
+  </div>
+  <div class="splash-brand">FOOTBALL LAB</div>
+  <div class="splash-tagline">DETECTA · COMPARA · ANALIZA</div>
+</div>
 """, unsafe_allow_html=True)
 
 header_now = datetime.now()
