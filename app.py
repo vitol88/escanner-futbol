@@ -68,16 +68,17 @@ st.markdown("""
   [class*="st-key-top_status_controls"] { margin-top:0 !important; margin-bottom:10px !important; overflow:visible !important; }
   [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { align-items:stretch !important; gap:.45rem !important; flex-wrap:nowrap !important; overflow:visible !important; }
   [class*="st-key-top_status_controls"] [data-testid="stColumn"] { min-width:0 !important; padding:0 !important; overflow:visible !important; }
-  [class*="st-key-top_status_controls"] [data-testid="stToggle"] { box-sizing:border-box !important; display:flex !important; align-items:center !important; justify-content:center !important; width:100% !important; min-height:48px !important; padding:7px 5px !important; border:1px solid #D4A72C !important; border-radius:11px !important; background:linear-gradient(145deg,#201D14,#111419) !important; overflow:visible !important; }
-  [class*="st-key-top_status_controls"] [data-testid="stToggle"] > label { display:flex !important; align-items:center !important; justify-content:center !important; gap:5px !important; width:100% !important; margin:0 !important; white-space:nowrap !important; overflow:visible !important; }
-  [class*="st-key-top_status_controls"] [data-testid="stToggle"] label p { color:#F4D778 !important; font-size:.76rem !important; line-height:1.1 !important; white-space:nowrap !important; margin:0 !important; }
-  [class*="st-key-top_status_controls"] [data-testid="stTooltipIcon"], [class*="st-key-top_status_controls"] [data-testid="stTooltipHoverTarget"] { display:none !important; }
-  [class*="st-key-top_status_controls"] [role="switch"] { flex:0 0 auto !important; transform:scale(.74) !important; transform-origin:center !important; }
+  [class*="st-key-auto_refresh_control_card"], [class*="st-key-sound_control_card"] { box-sizing:border-box !important; width:100% !important; min-height:48px !important; display:flex !important; align-items:center !important; justify-content:center !important; padding:4px 5px !important; border:1px solid #D4A72C !important; border-radius:11px !important; background:linear-gradient(145deg,#201D14,#111419) !important; overflow:visible !important; }
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"], [class*="st-key-sound_control_card"] [data-testid="stToggle"] { box-sizing:border-box !important; display:flex !important; align-items:center !important; justify-content:center !important; width:100% !important; min-height:38px !important; padding:2px 0 !important; border:0 !important; border-radius:0 !important; background:transparent !important; overflow:visible !important; }
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] > label, [class*="st-key-sound_control_card"] [data-testid="stToggle"] > label { display:flex !important; align-items:center !important; justify-content:center !important; gap:5px !important; width:100% !important; margin:0 !important; white-space:nowrap !important; overflow:visible !important; }
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label p, [class*="st-key-sound_control_card"] [data-testid="stToggle"] label p { color:#F4D778 !important; font-size:.76rem !important; line-height:1.1 !important; white-space:nowrap !important; margin:0 !important; }
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stTooltipIcon"], [class*="st-key-auto_refresh_control_card"] [data-testid="stTooltipHoverTarget"], [class*="st-key-sound_control_card"] [data-testid="stTooltipIcon"], [class*="st-key-sound_control_card"] [data-testid="stTooltipHoverTarget"] { display:none !important; }
+  [class*="st-key-auto_refresh_control_card"] [role="switch"], [class*="st-key-sound_control_card"] [role="switch"] { flex:0 0 auto !important; transform:scale(.74) !important; transform-origin:center !important; }
   [class*="st-key-top_status_controls"] iframe { display:block !important; width:100% !important; height:56px !important; min-height:56px !important; overflow:visible !important; }
   @media(max-width:640px) {
     [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { gap:.35rem !important; }
-    [class*="st-key-top_status_controls"] [data-testid="stToggle"] { min-height:48px !important; padding:6px 3px !important; }
-    [class*="st-key-top_status_controls"] [data-testid="stToggle"] label p { font-size:.69rem !important; letter-spacing:-.25px !important; }
+    [class*="st-key-auto_refresh_control_card"], [class*="st-key-sound_control_card"] { min-height:48px !important; padding:4px 2px !important; }
+    [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label p, [class*="st-key-sound_control_card"] [data-testid="stToggle"] label p { font-size:.69rem !important; letter-spacing:-.25px !important; }
     [class*="st-key-top_status_controls"] [role="switch"] { transform:scale(.68) !important; }
   }
   [class*="st-key-sound_enabled_toggle"] { padding:5px 8px; border:1px solid #393326; border-radius:12px; background:#15191F; }
@@ -644,12 +645,14 @@ if "signal_history_warning_shown" not in st.session_state:
 with st.container(key="top_status_controls"):
     status_cols = st.columns([1, 1, 1], gap="small")
     with status_cols[0]:
+      with st.container(key="auto_refresh_control_card"):
         st.session_state.auto_refresh_enabled = st.toggle(
             "⟳ Auto 60s",
             value=st.session_state.auto_refresh_enabled,
             help="Actualiza los marcadores cada 60 segundos mientras esta página esté abierta."
         )
     with status_cols[1]:
+      with st.container(key="sound_control_card"):
         sound_toggle_state = st.session_state.get("sound_enabled_toggle", not st.session_state.sound_muted)
         sound_enabled = st.toggle(
             "🔊 Sonido" if sound_toggle_state else "🔇 Sonido",
