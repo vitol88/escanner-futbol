@@ -58,23 +58,31 @@ def build_automatic_history(
         result["note"] = "Faltan IDs de equipos, liga o temporada para consultar el historial."
         return result
 
+    diagnostics: dict[str, Any] = {"league_id": league_id, "season": season, "teams": {}, "historical_stats": {"requested": 0, "nonempty_responses": 0, "responses_with_corners": 0, "empty_responses": 0, "errors": []}}
+
     def team_fixtures(team_id: int) -> list[dict[str, Any]]:
-        key = f"team-fixtures-v3:{team_id}:{league_id}:{season}"
+        key = f"team-fixtures-v4:{team_id}:{league_id}:{season}"
         if key not in cache:
             # Cap team-fixture discovery calls for the whole scan; cached teams do not
             # consume the budget again. This avoids one hidden request per live fixture.
             if int(cache.get("_automatic_history_team_fixture_calls", 0)) >= 20:
                 cache[key] = []
                 cache["error:" + key] = "Límite de consultas históricas por escaneo alcanzado."
+                diagnostics["teams"][str(team_id)] = {"returned": 0, "error": cache["error:" + key], "source": "budget"}
                 return cache[key]
             # Ventana más amplia para encontrar suficientes partidos según la localía.
             params = {"team": team_id, "last": 30, "league": league_id, "season": season}
             try:
                 cache["_automatic_history_team_fixture_calls"] = int(cache.get("_automatic_history_team_fixture_calls", 0)) + 1
-                cache[key] = (api_get("fixtures", params).get("response") or [])
+                payload = api_get("fixtures", params)
+                cache[key] = (payload.get("response") or [])
+                diagnostics["teams"][str(team_id)] = {"returned": len(cache[key]), "params": params, "error": None}
             except Exception as exc:
                 cache[key] = []
                 cache["error:" + key] = str(exc)
+                diagnostics["teams"][str(team_id)] = {"returned": 0, "params": params, "error": str(exc)}
+        if str(team_id) not in diagnostics["teams"]:
+            diagnostics["teams"][str(team_id)] = {"returned": len(cache[key]), "error": cache.get("error:" + key), "source": "cache"}
         return cache[key]
 
     # Solo partidos finalizados de la misma competición y temporada del partido en vivo.
@@ -86,8 +94,14 @@ def build_automatic_history(
             and (item.get("league") or {}).get("id") == league_id
             and (item.get("league") or {}).get("season") == season
         ]
-    home_fixtures = same_competition_finished(team_fixtures(home["id"]))
-    away_fixtures = same_competition_finished(team_fixtures(away["id"]))
+    home_raw = team_fixtures(home["id"])
+    away_raw = team_fixtures(away["id"])
+    home_fixtures = same_competition_finished(home_raw)
+    away_fixtures = same_competition_finished(away_raw)
+    diagnostics["home_fixture_rows"] = len(home_raw)
+    diagnostics["away_fixture_rows"] = len(away_raw)
+    diagnostics["home_finished_same_competition"] = len(home_fixtures)
+    diagnostics["away_finished_same_competition"] = len(away_fixtures)
 
     budget = [max(0, int(stats_budget))]
 
@@ -97,6 +111,10 @@ def build_automatic_history(
         cf: list[float] = []
         ca: list[float] = []
         used = 0
+        stats_attempted = 0
+        stats_nonempty = 0
+        stats_with_corners = 0
+        stats_errors: list[str] = []
         for old in matches:
             old_teams = old.get("teams") or {}
             is_home = (old_teams.get("home") or {}).get("id") == team_id
@@ -110,15 +128,22 @@ def build_automatic_history(
             if isinstance(own_goals, (int, float)) and isinstance(opp_goals, (int, float)):
                 gf.append(float(own_goals)); ga.append(float(opp_goals))
             old_id = (old.get("fixture") or {}).get("id")
-            stats_key = f"historical-stats:{old_id}"
+            stats_key = f"historical-stats-v2:{old_id}"
             if old_id and stats_key not in cache and budget[0] > 0 and not cache.get("_automatic_history_rate_limited"):
                 try:
-                    cache[stats_key] = api_get("fixtures/statistics", {"fixture": old_id}).get("response") or []
+                    stats_payload = api_get("fixtures/statistics", {"fixture": old_id})
+                    stats_response = stats_payload.get("response") or []
+                    stats_attempted += 1
+                    diagnostics["historical_stats"]["requested"] += 1
                     cache["_automatic_history_stats_calls"] = cache.get("_automatic_history_stats_calls", 0) + 1
                     budget[0] -= 1
+                    if stats_response:
+                        cache[stats_key] = stats_response
+                    else:
+                        diagnostics["historical_stats"]["empty_responses"] += 1
                 except Exception as exc:
-                    cache[stats_key] = []
-                    cache[f"error:{stats_key}"] = str(exc)
+                    stats_errors.append(str(exc))
+                    diagnostics["historical_stats"]["errors"].append({"fixture_id": old_id, "error": str(exc)})
                     if "HTTP 429" in str(exc):
                         cache["_automatic_history_rate_limited"] = True
                         break
@@ -140,8 +165,10 @@ def build_automatic_history(
             opp_c = _stat(stats, opponent_stats_index, "Corner Kicks")
             if own_c is not None and opp_c is not None:
                 cf.append(own_c); ca.append(opp_c)
+                stats_with_corners += 1
+                diagnostics["historical_stats"]["responses_with_corners"] += 1
             used += 1
-        return {"matches": used, "gf": _mean(gf), "ga": _mean(ga), "cf": _mean(cf), "ca": _mean(ca), "corner_sample": len(cf), "goal_sample": len(gf)}
+        return {"matches": used, "gf": _mean(gf), "ga": _mean(ga), "cf": _mean(cf), "ca": _mean(ca), "corner_sample": len(cf), "goal_sample": len(gf), "stats_attempted": stats_attempted, "stats_nonempty": stats_nonempty, "stats_with_corners": stats_with_corners, "stats_errors": stats_errors}
 
     h = averages(home_fixtures, home["id"], "home")
     a = averages(away_fixtures, away["id"], "away")
@@ -154,6 +181,7 @@ def build_automatic_history(
         "away_corners_for": a["cf"], "away_corners_against": a["ca"],
         "home_corner_sample": h["corner_sample"], "away_corner_sample": a["corner_sample"],
         "home_goal_sample": h["goal_sample"], "away_goal_sample": a["goal_sample"],
+        "diagnostics": {**diagnostics, "home_venue_matches_checked": h["matches"], "away_venue_matches_checked": a["matches"], "home_stats_attempted": h["stats_attempted"], "away_stats_attempted": a["stats_attempted"], "home_stats_nonempty": h["stats_nonempty"], "away_stats_nonempty": a["stats_nonempty"], "home_stats_with_corners": h["stats_with_corners"], "away_stats_with_corners": a["stats_with_corners"], "stats_budget_remaining": budget[0]},
         "note": "Promedios calculados con partidos finalizados de la misma competición y temporada. La muestra cuenta únicamente partidos con estadísticas de córners disponibles.",
     })
     return result
