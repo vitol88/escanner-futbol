@@ -1639,7 +1639,7 @@ else:
                                                 def _goal_average_badge(label, value):
                                                     return f"""
                                                     <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;
-                                                                margin:8px 0;padding:7px 10px;
+                                                                margin:8px 0 16px;padding:7px 10px;
                                                                 border:1px solid #51451D;border-radius:9px;
                                                                 background:linear-gradient(135deg,#17191f,#20232b);
                                                                 width:fit-content;max-width:100%;clear:both;position:relative;">
