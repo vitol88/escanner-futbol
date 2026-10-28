@@ -4,7 +4,8 @@ import io
 import json
 import os
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
+import time
 from typing import Any
 
 import requests
@@ -647,6 +648,24 @@ def get_api_key() -> str:
         secret = ""
     return str(secret or os.getenv("API_FOOTBALL_KEY", "")).strip()
 
+def _api_cache_ttl(endpoint: str, params: dict[str, Any] | None = None) -> int:
+    """TTL por endpoint: datos en vivo cortos, históricos más largos."""
+    if endpoint == "fixtures" and (params or {}).get("live") == "all":
+        return 25
+    if endpoint == "odds/live":
+        return 120
+    if endpoint == "fixtures/statistics":
+        fixture_id = str((params or {}).get("fixture") or "")
+        live_ids = {
+            str(((item.get("fixture") or {}).get("id") or ""))
+            for item in st.session_state.get("live_fixtures", [])
+        }
+        return 45 if fixture_id in live_ids else 21600
+    if endpoint == "fixtures/headtohead":
+        return 21600
+    return 600
+
+
 def api_get(endpoint: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
     key = get_api_key()
     if not key:
@@ -654,20 +673,36 @@ def api_get(endpoint: str, params: dict[str, Any] | None = None) -> dict[str, An
             "Falta configurar API_FOOTBALL_KEY en Secrets. "
             "Consulta README.md para ver los pasos."
         )
-    # Count attempted requests for transparent session-level API usage.
+
+    # Cache de respuestas por sesión: evita repetir llamadas iguales durante reruns,
+    # cambios de pestaña y secciones que comparten las mismas estadísticas.
+    normalized_params = params or {}
+    cache_key = f"{endpoint}:{json.dumps(normalized_params, sort_keys=True, default=str)}"
+    now_epoch = time.time()
+    api_cache = st.session_state.setdefault("api_response_cache", {})
+    cached = api_cache.get(cache_key)
+    ttl = _api_cache_ttl(endpoint, normalized_params)
+    if isinstance(cached, dict) and now_epoch - float(cached.get("fetched_at", 0)) < ttl:
+        return cached["payload"]
+
+    # Si la API ha confirmado que se agotó la cuota diaria, no enviar más llamadas
+    # hasta el siguiente reinicio UTC. Para un límite por minuto, esperar 60 segundos.
+    blocked_until = float(st.session_state.get("api_request_block_until_epoch", 0) or 0)
+    if now_epoch < blocked_until:
+        reason = st.session_state.get("api_request_block_reason") or "La API está temporalmente limitada."
+        raise RuntimeError(reason)
+
     st.session_state["api_request_count"] = st.session_state.get("api_request_count", 0) + 1
     response = requests.get(
         f"{API_BASE}/{endpoint}",
         headers={"x-apisports-key": key},
-        params=params or {},
+        params=normalized_params,
         timeout=TIMEOUT_SECONDS,
     )
     if response.status_code == 429:
-        # Preserve API-Football's own explanation so we can distinguish daily quota
-        # exhaustion from per-minute throttling on paid plans.
         try:
             error_payload = response.json()
-        except (ValueError, requests.exceptions.JSONDecodeError):
+        except ValueError:
             error_payload = {}
         api_errors = error_payload.get("errors") or {}
         if isinstance(api_errors, dict):
@@ -676,6 +711,26 @@ def api_get(endpoint: str, params: dict[str, Any] | None = None) -> dict[str, An
             detail = str(api_errors)
         else:
             detail = ""
+        daily_limit = "daily request limit" in detail.lower() or "requests per day" in detail.lower()
+        if daily_limit:
+            utc_now = datetime.now(timezone.utc)
+            next_reset = utc_now.replace(hour=0, minute=0, second=0, microsecond=0)
+            if next_reset <= utc_now:
+                from datetime import timedelta
+                next_reset += timedelta(days=1)
+            blocked_until = next_reset.timestamp()
+            block_reason = (
+                "API-Football confirmó que se agotó la cuota diaria. "
+                "Se pausaron las nuevas consultas hasta el reinicio diario de la API."
+            )
+        else:
+            blocked_until = now_epoch + 60
+            block_reason = (
+                "API-Football aplicó un límite temporal (HTTP 429). "
+                "Se pausaron las nuevas consultas durante 60 segundos."
+            )
+        st.session_state["api_request_block_until_epoch"] = blocked_until
+        st.session_state["api_request_block_reason"] = block_reason
         daily_remaining = response.headers.get("x-ratelimit-requests-remaining")
         minute_remaining = response.headers.get("X-RateLimit-Remaining")
         limit_info = []
@@ -685,15 +740,19 @@ def api_get(endpoint: str, params: dict[str, Any] | None = None) -> dict[str, An
             limit_info.append(f"solicitudes disponibles este minuto: {minute_remaining}")
         diagnostics = " · ".join(part for part in [detail, " | ".join(limit_info)] if part)
         suffix = f" Detalle de API-Football: {diagnostics}." if diagnostics else ""
-        raise RuntimeError(
-            "API-Football rechazó la consulta (HTTP 429)."
-            f"{suffix} Se pausó el escaneo para evitar más solicitudes rechazadas. "
-            "Comprueba el consumo y el límite por minuto de la suscripción."
-        )
+        raise RuntimeError(f"{block_reason}{suffix}")
+
     response.raise_for_status()
     payload = response.json()
     if payload.get("errors"):
         raise RuntimeError(f"API-Football reportó un error: {payload['errors']}")
+
+    api_cache[cache_key] = {"fetched_at": now_epoch, "payload": payload}
+    # Mantener el caché acotado para evitar que la sesión crezca indefinidamente.
+    if len(api_cache) > 500:
+        oldest_keys = sorted(api_cache, key=lambda item: api_cache[item].get("fetched_at", 0))
+        for old_key in oldest_keys[:len(api_cache) - 400]:
+            api_cache.pop(old_key, None)
     return payload
 
 def safe_stat(
