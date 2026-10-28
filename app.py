@@ -113,19 +113,22 @@ st.markdown("""
   .scan-code-icon { display:inline-block; flex:0 0 auto; font-size:2rem; transform-origin:center; animation:scanner-spiral-spin .8s linear infinite; text-shadow:0 0 12px rgba(250,204,21,.8); }
   .scan-running-subtitle { color:#A1A1AA; font-size:.82rem; font-weight:500; margin-top:3px; }
   .scan-sweep { position:absolute; left:0; right:0; bottom:0; height:2px; background:linear-gradient(90deg,transparent,#FACC15,transparent); animation:scanner-sweep 1.4s ease-in-out infinite; }
-  /* Animación de bienvenida al entrar en la plataforma */
-  .football-splash { position:fixed; inset:0; z-index:999999; display:flex; flex-direction:column; align-items:center; justify-content:center; overflow:hidden; background:radial-gradient(ellipse at center,#18251b 0%,#080b09 72%); color:#fff; pointer-events:none; animation:splash-dismiss 4.8s ease forwards; }
+  /* Bienvenida cinematográfica: remate, gol, marca dorada y salida elegante */
+  .football-splash { position:fixed; inset:0; z-index:999999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0; overflow:hidden; background:radial-gradient(ellipse at 50% 42%,#18251b 0%,#080b09 72%); color:#fff; pointer-events:none; transform-origin:center; animation:splash-dismiss 5.8s cubic-bezier(.65,0,.35,1) forwards; }
   .splash-pitch { position:relative; width:min(82vw,520px); height:min(48vh,300px); border:2px solid rgba(255,255,255,.8); border-radius:4px; background:repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 10%,transparent 10% 20%),linear-gradient(180deg,#176b35,#0b4825); box-shadow:0 0 42px rgba(34,197,94,.18); }
   .splash-pitch:before { content:""; position:absolute; inset:0 25%; border-left:2px solid rgba(255,255,255,.75); border-right:2px solid rgba(255,255,255,.75); }
   .splash-pitch:after { content:""; position:absolute; width:28%; aspect-ratio:1; left:36%; top:36%; border:2px solid rgba(255,255,255,.75); border-radius:50%; }
-  .splash-goal { position:absolute; right:-2px; top:31%; width:14%; height:38%; border:4px solid #f8fafc; border-right:0; background:repeating-linear-gradient(0deg,transparent 0 13px,rgba(255,255,255,.45) 14px 15px),repeating-linear-gradient(90deg,transparent 0 13px,rgba(255,255,255,.45) 14px 15px); }
-  .splash-ball { position:absolute; left:9%; top:66%; z-index:2; font-size:clamp(2.2rem,7vw,3.8rem); filter:drop-shadow(0 8px 4px #0008); animation:splash-shot 2.1s cubic-bezier(.25,.7,.3,1) .35s forwards; }
-  .splash-brand { margin-top:28px; font-size:clamp(1.8rem,6vw,3.5rem); font-weight:900; letter-spacing:.12em; color:#FACC15; text-align:center; opacity:0; transform:translateY(14px) scale(.92); text-shadow:0 0 25px rgba(250,204,21,.45); animation:splash-brand-in .8s ease 2.25s forwards; }
-  .splash-tagline { margin-top:8px; color:#d4d4d8; font-size:.82rem; letter-spacing:.22em; opacity:0; animation:splash-brand-in .6s ease 2.8s forwards; }
-  @keyframes splash-shot { 0%{left:9%;top:66%;transform:rotate(0) scale(1)} 48%{left:55%;top:28%;transform:rotate(380deg) scale(.78)} 75%{left:83%;top:42%;transform:rotate(650deg) scale(.58)} 100%{left:91%;top:45%;transform:rotate(900deg) scale(.42);opacity:0} }
-  @keyframes splash-brand-in { to{opacity:1;transform:translateY(0) scale(1)} }
-  @keyframes splash-dismiss { 0%,82%{opacity:1;visibility:visible} 99%{opacity:0;visibility:visible} 100%{opacity:0;visibility:hidden} }
-  @media(prefers-reduced-motion:reduce) { .football-splash,.splash-ball,.splash-brand,.splash-tagline { animation-duration:.01ms !important; animation-delay:0s !important; } }
+  .splash-goal { position:absolute; right:-2px; top:31%; width:14%; height:38%; border:4px solid #f8fafc; border-right:0; background:repeating-linear-gradient(0deg,transparent 0 13px,rgba(255,255,255,.45) 14px 15px),repeating-linear-gradient(90deg,transparent 0 13px,rgba(255,255,255,.45) 14px 15px); box-shadow:0 0 0 rgba(250,204,21,0); animation:splash-goal-hit .55s ease 1.85s both; }
+  .splash-ball { position:absolute; left:9%; top:66%; z-index:2; font-size:clamp(2.2rem,7vw,3.8rem); filter:drop-shadow(0 8px 4px #0008); animation:splash-shot 2.15s cubic-bezier(.2,.72,.25,1) .25s forwards; }
+  .splash-brand { margin-top:28px; font-size:clamp(1.8rem,6vw,3.5rem); font-weight:950; letter-spacing:.16em; text-align:center; opacity:0; transform:translateY(18px) scale(.86); background:linear-gradient(105deg,#8a5a10 0%,#f9df82 18%,#fff3b0 32%,#c58a19 48%,#fff0a0 62%,#a66c0c 80%,#ffe7a0 100%); background-size:220% auto; -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; text-shadow:0 0 28px rgba(250,204,21,.18); filter:drop-shadow(0 4px 18px rgba(250,204,21,.25)); animation:splash-brand-in .95s cubic-bezier(.16,1,.3,1) 2.05s both, splash-gold-shine 2.2s linear 2.8s infinite; }
+  .splash-tagline { margin-top:9px; color:#e5dfcb; font-size:.76rem; letter-spacing:.24em; opacity:0; transform:translateY(8px); animation:splash-tag-in .65s ease 2.45s both; }
+  @keyframes splash-shot { 0%{left:9%;top:66%;transform:rotate(0) scale(1);opacity:1} 38%{left:48%;top:28%;transform:rotate(330deg) scale(.82);opacity:1} 62%{left:77%;top:40%;transform:rotate(600deg) scale(.62);opacity:1} 76%{left:88%;top:44%;transform:rotate(780deg) scale(.48);opacity:1} 86%{left:94%;top:45%;transform:rotate(900deg) scale(.3);opacity:.95} 100%{left:96%;top:45%;transform:rotate(980deg) scale(.18);opacity:0} }
+  @keyframes splash-goal-hit { 0%,65%{box-shadow:0 0 0 rgba(250,204,21,0)} 72%{box-shadow:0 0 34px rgba(250,204,21,.95),0 0 70px rgba(250,204,21,.45)} 100%{box-shadow:0 0 12px rgba(250,204,21,.28)} }
+  @keyframes splash-brand-in { 0%{opacity:0;transform:translateY(18px) scale(.86);filter:blur(8px) drop-shadow(0 4px 18px rgba(250,204,21,.25))} 70%{opacity:1;transform:translateY(-2px) scale(1.035);filter:blur(0) drop-shadow(0 4px 24px rgba(250,204,21,.48))} 100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0) drop-shadow(0 4px 18px rgba(250,204,21,.25))} }
+  @keyframes splash-tag-in { to{opacity:1;transform:translateY(0)} }
+  @keyframes splash-gold-shine { to{background-position:-220% center} }
+  @keyframes splash-dismiss { 0%,79%{opacity:1;visibility:visible;transform:scale(1);filter:blur(0)} 88%{opacity:1;visibility:visible;transform:scale(1.015);filter:blur(0)} 100%{opacity:0;visibility:hidden;transform:scale(1.07);filter:blur(12px)} }
+  @media(prefers-reduced-motion:reduce) { .football-splash,.splash-ball,.splash-goal,.splash-brand,.splash-tagline { animation-duration:.01ms !important; animation-delay:0s !important; } }
 
   @keyframes scanner-radar-spin { to { rotate:360deg; } }
   @keyframes scanner-ball-orbit { 0%,100% { transform:translate(-50%,-50%) scale(.9); } 50% { transform:translate(-50%,-50%) scale(1.1); } }
@@ -359,16 +362,18 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("""
-<div class="football-splash" aria-label="Bienvenido a Football Lab">
-  <div class="splash-pitch">
-    <div class="splash-goal"></div>
-    <div class="splash-ball">⚽</div>
-  </div>
-  <div class="splash-brand">FOOTBALL LAB</div>
-  <div class="splash-tagline">DETECTA · COMPARA · ANALIZA</div>
-</div>
-""", unsafe_allow_html=True)
+if not st.session_state.get("football_splash_shown", False):
+    st.markdown("""
+    <div class="football-splash" aria-label="Bienvenido a Football Lab">
+      <div class="splash-pitch">
+        <div class="splash-goal"></div>
+        <div class="splash-ball">⚽</div>
+      </div>
+      <div class="splash-brand">FOOTBALL LAB</div>
+      <div class="splash-tagline">DETECTA · COMPARA · ANALIZA</div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.session_state["football_splash_shown"] = True
 
 header_now = datetime.now()
 month_es = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"][header_now.month - 1]
