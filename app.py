@@ -1174,9 +1174,75 @@ else:
                                                     return float(base_probability) + adjustment
                                                 if meaningful_tips:
                                                     tip, prob = max(meaningful_tips, key=context_score)
-                                                    st.markdown(f'<div class="signal-card"><div class="signal-kicker">⚽ TIP PRINCIPAL · GOLES Y SEÑALES</div><div class="signal-title">{html.escape(str(tip))}</div><div class="signal-pick">{prob:.0%}</div><div class="signal-meta">Estimación exploratoria, no calibrada. La probabilidad por sí sola no confirma valor de apuesta.</div></div>', unsafe_allow_html=True)
+                                                    st.markdown(f'<div class="signal-card"><div class="signal-kicker">⚽ LECTURA DEL MODELO · NO ES TIP DE CUOTA</div><div class="signal-title">{html.escape(str(tip))}</div><div class="signal-pick">{prob:.0%}</div><div class="signal-meta">Estimación exploratoria, no calibrada. El tip oficial debe tener cuota real verificada.</div></div>', unsafe_allow_html=True)
                                                 else:
-                                                    st.info("Sin tip principal por ahora: no hay un mercado suficientemente respaldado por el modelo y las señales en vivo. Es preferible esperar a forzar una apuesta.")
+                                                    st.info("Sin lectura principal del modelo por ahora; no se fuerza una apuesta.")
+
+                                                # Show main and risk tips in this match panel too, not only in the global tab.
+                                                live_odds_rows = st.session_state.get("live_odds_by_fixture", {}).get(str(match_id), [])
+                                                match_main_options, match_risk_options = [], []
+                                                current_estimate = next((row[1] for row in st.session_state.get("goal_scan_results", []) if str(((row[0].get("fixture") or {}).get("id"))) == str(match_id)), None)
+                                                current_estimate = current_estimate if isinstance(current_estimate, dict) else {}
+                                                for odds_row in live_odds_rows:
+                                                    market_label = classify_market(odds_row)
+                                                    odd = odds_row.get("odd")
+                                                    if not market_label or not isinstance(odd, (int, float)) or odd <= 1:
+                                                        continue
+                                                    model_prob = None
+                                                    if market_label == "Empate final":
+                                                        model_prob = current_estimate.get("draw_final")
+                                                    elif market_label == "Ambos equipos marcan: Sí":
+                                                        model_prob = current_estimate.get("btts_final")
+                                                    elif market_label == "Ambos equipos marcan: No" and isinstance(current_estimate.get("btts_final"), (int, float)):
+                                                        model_prob = 1.0 - current_estimate["btts_final"]
+                                                    elif market_label.startswith(("Más de ", "Menos de ")) and "goles" in market_label.casefold():
+                                                        import re
+                                                        line_match = re.search(r"(\\d+(?:[.,]\\d+)?)", market_label)
+                                                        if line_match:
+                                                            line = float(line_match.group(1).replace(",", "."))
+                                                            if market_label.startswith("Más de "):
+                                                                model_prob = current_estimate.get("over_total_goals", {}).get(str(int(line + 0.5)))
+                                                            else:
+                                                                model_prob = current_estimate.get("under_total_goals", {}).get(str(line))
+                                                    if not isinstance(model_prob, (int, float)) or not 0 < model_prob < 1:
+                                                        continue
+                                                    edge = float(model_prob) - 1.0 / float(odd)
+                                                    if edge < 0.02:
+                                                        continue
+                                                    option = {"market": market_label, "odd": float(odd), "prob": float(model_prob), "edge": edge, "bookmaker": odds_row.get("bookmaker", "Casa no identificada")}
+                                                    if 1.25 <= odd < 1.60:
+                                                        match_main_options.append(option)
+                                                    elif odd >= 1.60:
+                                                        match_risk_options.append(option)
+
+                                                st.markdown("**⚽ TIP PRINCIPAL · CUOTA 1.25–1.59**")
+                                                if match_main_options:
+                                                    selected_main = max(match_main_options, key=lambda x: x["prob"])
+                                                    st.success(f'{selected_main["market"]} · cuota {selected_main["odd"]:.2f} · {selected_main["bookmaker"]} · ventaja exploratoria {selected_main["edge"]:.1%}')
+                                                else:
+                                                    st.info("Sin cuota principal verificada con ventaja estimada en este partido.")
+
+                                                st.markdown("**🔥 TIP DE ALTO RIESGO · CUOTA 1.60+**")
+                                                if match_risk_options:
+                                                    selected_risk = max(match_risk_options, key=lambda x: x["prob"])
+                                                    st.warning(f'{selected_risk["market"]} · cuota {selected_risk["odd"]:.2f} · {selected_risk["bookmaker"]} · probabilidad exploratoria {selected_risk["prob"]:.1%}')
+                                                else:
+                                                    st.info("Sin cuota de alto riesgo verificada por ahora; no se inventa una cuota ni un mercado.")
+
+                                                # Numerology is strictly risk-only context, never a standalone prediction.
+                                                match_stats_for_patterns = st.session_state.stats_cache.get(str(match_id), [])
+                                                numerology_patterns = numerology_context(
+                                                    home_score, away_score,
+                                                    safe_stat(match_stats_for_patterns, "Corner Kicks", 0),
+                                                    safe_stat(match_stats_for_patterns, "Corner Kicks", 1),
+                                                    safe_stat(match_stats_for_patterns, "Yellow Cards", 0),
+                                                    safe_stat(match_stats_for_patterns, "Yellow Cards", 1),
+                                                )
+                                                st.caption(
+                                                    "Numerología experimental (solo alto riesgo): "
+                                                    + ("; ".join(numerology_patterns) if numerology_patterns else "sin coincidencia numérica clara con los datos disponibles")
+                                                    + ". Es una coincidencia descriptiva; no aumenta por sí sola la probabilidad de empate 1–1."
+                                                )
                                             else:
                                                 st.info("Primero pulsa «Escanear todos los partidos en vivo». Después, vuelve a abrir Goles y señales para ver promedios por localía, lectura en vivo y tip principal.")
                                         elif market_key == "corners":
@@ -1260,6 +1326,22 @@ else:
                 st.session_state.stats_cache[str(skipped_id)] = []
         stats_fetch_progress.empty()
         st.session_state.last_scan_stats_matches = stats_queries_attempted
+
+        # Fetch live odds once per scan for all returned fixtures (never one request per match).
+        # Refresh no more often than the scan itself; the API plan limits still apply.
+        odds_now = datetime.now().timestamp()
+        last_odds_epoch = float(st.session_state.get("live_odds_last_fetch_epoch", 0) or 0)
+        if get_api_key() and (manual_scan or odds_now - last_odds_epoch >= 300):
+            try:
+                odds_payload = api_get("odds/live")
+                st.session_state.live_odds_by_fixture = extract_live_odds(odds_payload)
+                st.session_state.live_odds_last_fetch = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                st.session_state.live_odds_last_fetch_epoch = odds_now
+                st.session_state.live_odds_error = ""
+            except Exception as odds_exc:
+                st.session_state.live_odds_error = str(odds_exc)
+        elif "live_odds_by_fixture" not in st.session_state:
+            st.session_state.live_odds_by_fixture = {}
 
         # Compare current scores with the previous completed scan without extra API calls.
         previous_scores = st.session_state.get("previous_scan_scores", {})
