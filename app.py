@@ -201,10 +201,10 @@ st.markdown("""
   [data-testid="stHorizontalBlock"]:has([class*="st-key-main_stats_"]) [class*="st-key-main_h2h_"] { min-width:0 !important; width:100% !important; max-width:100% !important; }
   [data-testid="stHorizontalBlock"]:has([class*="st-key-main_stats_"]) button {
     box-sizing:border-box !important; min-width:0 !important; width:100% !important; max-width:100% !important;
-    min-height:2.25rem !important; height:auto !important; padding:.28rem .04rem !important;
-    font-size:clamp(.48rem,1.65vw,.68rem) !important; font-weight:700 !important;
+    min-height:2rem !important; height:2rem !important; padding:0 !important;
+    font-size:1rem !important; font-weight:800 !important;
     line-height:1.05 !important; white-space:normal !important; overflow-wrap:anywhere !important;
-    border:1px solid #8A6A16 !important; border-radius:8px !important;
+    border:1px solid #8A6A16 !important; border-radius:7px !important;
     background:linear-gradient(145deg,#1A1B1F,#0B0D10) !important; color:#F6D365 !important;
     box-shadow:inset 0 0 0 1px #FACC1512,0 0 8px #FACC150A !important;
   }
@@ -768,13 +768,13 @@ else:
                                 # Estadísticas, Goles, Córners y H2H.
                                 action_cols = st.columns(4, gap="small")
                                 with action_cols[0]:
-                                    show_stats = st.button("📊 Estadísticas", key=f"main_stats_{match_id}", type="primary" if active_tool == "stats" else "secondary", use_container_width=True)
+                                    show_stats = st.button("▥", help="Estadísticas en vivo", key=f"main_stats_{match_id}", type="primary" if active_tool == "stats" else "secondary", use_container_width=True)
                                 with action_cols[1]:
-                                    show_goals = st.button("⚽ Goles y señales", key=f"main_market_{match_id}_goals", type="primary" if active_market == "goals" else "secondary", use_container_width=True)
+                                    show_goals = st.button("⚡", help="Goles y señales", key=f"main_market_{match_id}_goals", type="primary" if active_market == "goals" else "secondary", use_container_width=True)
                                 with action_cols[2]:
-                                    show_corners = st.button("🚩 Córners", key=f"main_market_{match_id}_corners", type="primary" if active_market == "corners" else "secondary", use_container_width=True)
+                                    show_corners = st.button("⚑", help="Córners", key=f"main_market_{match_id}_corners", type="primary" if active_market == "corners" else "secondary", use_container_width=True)
                                 with action_cols[3]:
-                                    show_h2h = st.button("◴ H2H", key=f"main_h2h_{match_id}", type="primary" if active_tool == "h2h" else "secondary", use_container_width=True)
+                                    show_h2h = st.button("⟲", help="Historial H2H", key=f"main_h2h_{match_id}", type="primary" if active_tool == "h2h" else "secondary", use_container_width=True)
                                 if show_stats:
                                     stats_key = str(match_id)
                                     if stats_key not in st.session_state.stats_cache or stats_key in st.session_state.get("stats_errors", {}):
