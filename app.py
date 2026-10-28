@@ -489,9 +489,9 @@ st.markdown("""
   .goal-form-match-opponent { overflow-wrap:anywhere; }
   .goal-form-match-score { color:#F4F4F5; font-weight:900; white-space:nowrap; }
   .goal-form-result { display:inline-flex; justify-content:center; min-width:22px; padding:2px 5px; border-radius:5px; font-size:.65rem; font-weight:900; }
-  .goal-form-result-v { color:#052E16; background:#86EFAC; }
-  .goal-form-result-e { color:#111827; background:#FDE68A; }
-  .goal-form-result-d { color:#450A0A; background:#FCA5A5; }
+  .goal-form-result-v { color:#FFFFFF; background:#16A34A; }
+  .goal-form-result-e { color:#FFFFFF; background:#6B7280; }
+  .goal-form-result-d { color:#FFFFFF; background:#DC2626; }
   .goal-form-header { display:flex; align-items:center; gap:8px; margin-bottom:4px; min-width:0; }
   .goal-form-logo { width:34px; height:34px; object-fit:contain; flex:0 0 34px; }
   .goal-form-team { color:#E4E4E7; font-size:.78rem; font-weight:800; line-height:1.25; overflow-wrap:anywhere; }
