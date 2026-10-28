@@ -85,9 +85,15 @@ st.markdown("""
   [class*="st-key-sound_enabled_toggle"] label { font-size:.92rem !important; font-weight:650 !important; }
   [class*="st-key-sound_enabled_toggle"] [role="switch"] { transform:scale(.88); transform-origin:center; }
   [data-testid="stStatusWidget"] { display:none !important; }
-  [class*="st-key-control_row"] { flex-wrap:nowrap !important; align-items:center !important; }
+  [class*="st-key-control_row"] { flex-wrap:nowrap !important; align-items:flex-start !important; justify-content:flex-start !important; }
+  [class*="st-key-control_row"] [data-testid="stButton"] { width:auto !important; flex:0 0 auto !important; }
+  [class*="st-key-control_row"] [data-testid="stButton"] button { width:auto !important; min-width:150px !important; }
   [class*="st-key-control_row"] button[kind="primary"] { background:#FACC15 !important; background-color:#FACC15 !important; color:#111419 !important; border:1px solid #FFE566 !important; box-shadow:none !important; }
   [class*="st-key-control_row"] button[kind="primary"]:hover { background:#FFE566 !important; color:#111419 !important; }
+  [class*="st-key-scan-progress"] [data-testid="stProgress"] { margin:2px 0 0 !important; height:7px !important; }
+  [class*="st-key-scan-progress"] [data-testid="stProgress"] > div { height:7px !important; border-radius:8px !important; background:#25231B !important; }
+  [class*="st-key-scan-progress"] [data-testid="stProgress"] > div > div { background:repeating-linear-gradient(90deg,#FACC15 0 5px,#8A6A0A 5px 7px) !important; border-radius:8px !important; }
+  [class*="st-key-scan-progress"] [data-testid="stCaptionContainer"] p { font-size:10px !important; line-height:1.1 !important; color:#A1A1AA !important; margin:2px 0 0 !important; }
   [class*="st-key-control_row"] button { min-height:2.45rem !important; padding:.35rem .65rem !important; border-radius:10px !important; font-size:.88rem !important; white-space:nowrap; }
   @media(max-width:640px) {
     [class*="st-key-control_row"] { gap:.45rem !important; }
@@ -788,13 +794,16 @@ with st.container(key="top_status_controls"):
 
 with st.container(key="control_row"):
     refresh = st.button(
-        "🔋 Actualizar scan",
+        "Actualizar scan",
         type="primary",
         help="Actualiza el listado de partidos y ejecuta el escaneo disponible."
     )
-battery_progress = st.empty()
-if refresh:
-    battery_progress.caption("🔄 Actualizando partidos en vivo…")
+with st.container(key="scan-progress"):
+    scan_progress = st.empty()
+    scan_progress_caption = st.empty()
+    if refresh:
+        scan_progress.progress(0)
+        scan_progress_caption.caption("Actualizando scan")
 
 with st.container(key="scan_cta_card"):
     manual_scan = st.button(
@@ -819,8 +828,13 @@ if auto_tick is not None:
 
 if should_refresh:
     try:
+        if refresh:
+            scan_progress.progress(12)
+            scan_progress_caption.caption("Actualizando scan")
         data = api_get("fixtures", {"live": "all"})
         new_fixtures = data.get("response", [])
+        if refresh:
+            scan_progress.progress(28)
         old_snapshot = st.session_state.score_snapshot
         current_snapshot = {}
         new_events = []
@@ -851,6 +865,8 @@ if should_refresh:
         # Consultar cuotas en bloque, de forma independiente al escaneo estadístico.
         # Una sola llamada cubre todos los fixtures disponibles; intervalo de 120 s
         # para vigilar cambios sin generar una llamada por partido.
+        if refresh:
+            scan_progress.progress(40)
         odds_now_epoch = int(datetime.now().timestamp())
         if odds_now_epoch - int(st.session_state.get("live_odds_last_fetch_epoch", 0)) >= 120:
             try:
@@ -878,6 +894,8 @@ if should_refresh:
             offset = st.session_state.corner_rotation_index % len(live_for_corners)
             rotated = live_for_corners[offset:] + live_for_corners[:offset]
             for corner_idx, match in enumerate(rotated[:batch_size]):
+                if refresh:
+                    scan_progress.progress(45 + int(45 * (corner_idx / max(1, batch_size))))
                 fixture_data = match.get("fixture") or {}
                 fixture_id = str(fixture_data.get("id"))
                 try:
@@ -918,11 +936,12 @@ if should_refresh:
             "last_auto_scan": st.session_state.last_refresh,
         }
         if refresh:
-            battery_progress.caption("✓ Actualización completada")
+            scan_progress.progress(100)
+            scan_progress_caption.caption("Actualización completada")
     except Exception as exc:
         st.session_state.last_auto_refresh_error = str(exc)
         if refresh:
-            battery_progress.caption("⚠️ Actualización finalizada con error")
+            scan_progress_caption.caption("No se pudo completar la actualización")
 
 if st.session_state.last_auto_refresh_error:
     st.warning(f"No se pudo actualizar el listado en vivo: {st.session_state.last_auto_refresh_error}")
