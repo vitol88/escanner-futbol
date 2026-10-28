@@ -415,8 +415,9 @@ st.session_state.auto_refresh_enabled = st.toggle(
     value=st.session_state.auto_refresh_enabled,
     help="Actualiza los marcadores cada 60 segundos mientras esta página esté abierta."
 )
+sound_toggle_state = st.session_state.get("sound_enabled_toggle", not st.session_state.sound_muted)
 sound_enabled = st.toggle(
-    "🔊 Sonido activado" if not st.session_state.sound_muted else "🔇 Sonido desactivado",
+    "🔊 Sonido activado" if sound_toggle_state else "🔇 Sonido desactivado",
     value=not st.session_state.sound_muted,
     key="sound_enabled_toggle",
     help="Activa o desactiva las alertas sonoras del escáner."
