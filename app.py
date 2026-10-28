@@ -257,8 +257,23 @@ st.markdown("""
   [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details > summary p { color:#FACC15 !important; font-size:clamp(1.2rem,3.8vw,1.8rem) !important; font-weight:750 !important; margin:0 !important; }
   /* Encabezado de liga: nombre y logo a la izquierda, contador al extremo derecho. */
   [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] details > div > [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"] [data-testid="stExpander"] > details > summary p {
-    display:flex !important; align-items:center !important; justify-content:space-between !important;
-    gap:8px !important; width:100% !important; box-sizing:border-box !important;
+    display:flex !important; align-items:center !important; gap:8px !important;
+    width:100% !important; box-sizing:border-box !important;
+  }
+  /* El contador es el último elemento en negrita: empujarlo al extremo derecho. */
+  [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] details > div > [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"] [data-testid="stExpander"] > details > summary p > strong:last-child {
+    margin-left:auto !important; padding-left:14px !important; white-space:nowrap !important;
+  }
+  /* Resalte discreto de toda la fila al pasar el cursor, no solo de la flecha. */
+  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] > details > summary {
+    transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease !important;
+  }
+  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] > details > summary:hover {
+    background:#171A20 !important; border-color:#7C681F !important;
+    box-shadow:inset 3px 0 0 #B89527,0 0 7px rgba(250,204,21,.07) !important;
+  }
+  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] > details > summary:hover p {
+    color:#FFE566 !important;
   }
   /* Filas de ligas y partidos alineadas al borde izquierdo, sin huecos de los contenedores Streamlit */
   [class*="st-key-live_now_section"] [data-testid="stExpander"] details[open] > div,
