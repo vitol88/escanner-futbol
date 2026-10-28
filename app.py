@@ -478,6 +478,9 @@ st.markdown("""
   .goal-deep-heading { display:block; clear:both; position:relative; z-index:1; color:#FACC15; font-size:.78rem; letter-spacing:1.1px; font-weight:900; margin:1.9rem 0 1.1rem; padding:0 0 .2rem; line-height:1.6; }
   .goal-form-card { box-sizing:border-box; border:1px solid #393326; border-radius:11px; padding:12px; margin-top:5px; background:linear-gradient(145deg,#191D24,#101216); min-height:170px; height:100%; }
   .goal-form-back { box-sizing:border-box; border:1px solid #FACC15; border-radius:11px; padding:11px; margin-top:5px; background:linear-gradient(145deg,#20232B,#12151A); min-height:170px; height:100%; }
+  @keyframes goal-card-flip-in { from { opacity:.35; transform:perspective(700px) rotateY(-75deg); } to { opacity:1; transform:perspective(700px) rotateY(0deg); } }
+  .goal-form-card, .goal-form-back { animation:goal-card-flip-in .42s ease-out both; transform-origin:center; backface-visibility:hidden; }
+  @media (prefers-reduced-motion: reduce) { .goal-form-card, .goal-form-back { animation:none; } }
   .goal-form-back-title { color:#FACC15; font-size:.72rem; font-weight:900; margin-bottom:8px; line-height:1.35; }
   .goal-form-match { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:7px; align-items:center; padding:6px 0; border-top:1px solid #34302A; color:#E4E4E7; font-size:.68rem; line-height:1.35; }
   .goal-form-match-opponent { overflow-wrap:anywhere; }
