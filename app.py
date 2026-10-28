@@ -1270,10 +1270,8 @@ else:
                                                 current_minute = (match_fixture.get("status") or {}).get("elapsed")
                                                 current_total = (home_c + away_c) if isinstance(home_c, (int, float)) and isinstance(away_c, (int, float)) else None
                                                 history = corner_item.get("automatic_history") or {}
-                                                metric_cols = st.columns(3)
-                                                metric_cols[0].metric("Córners local", home_c if home_c is not None else "N/D")
-                                                metric_cols[1].metric("Córners visitante", away_c if away_c is not None else "N/D")
-                                                metric_cols[2].metric("Total actual", current_total if current_total is not None else "N/D")
+                                                # Los córners actuales ya aparecen en la tarjeta superior del partido.
+                                                # Evitamos repetir local, visitante y total en tres tarjetas separadas.
 
                                                 st.markdown("### 📊 Promedios de córners por localía")
                                                 history_rows = [
@@ -1384,18 +1382,18 @@ else:
                                                             corner_options.append({"market": market_label, "odd": float(odd), "prob": probability, "edge": edge, "bookmaker": odds_row.get("bookmaker", "Casa no identificada")})
                                                     main_options = [option for option in corner_options if 1.25 <= option["odd"] < 1.60]
                                                     risk_options = [option for option in corner_options if option["odd"] >= 1.60]
-                                                    st.markdown("### ◈ Tip principal · córners")
+                                                    st.markdown('<div class="tip-section-heading"><span class="tip-heading-icon">◈</span><span>TIP PRINCIPAL</span><span class="tip-heading-status">CÓRNERS · 1.25–1.59</span></div>', unsafe_allow_html=True)
                                                     if main_options:
                                                         chosen = max(main_options, key=lambda option: option["edge"])
-                                                        st.markdown(f'<div class="tip-card"><div class="tip-card-label">SEÑAL PRINCIPAL</div><div class="tip-card-title">{html.escape(chosen["market"])}</div><div class="tip-card-meta">Cuota {chosen["odd"]:.2f} · {html.escape(chosen["bookmaker"])} · probabilidad exploratoria {chosen["prob"]:.1%}</div></div>', unsafe_allow_html=True)
+                                                        st.markdown(f'<div class="tip-card"><div class="tip-card-label">✦ SEÑAL PRINCIPAL · CUOTA {chosen["odd"]:.2f}</div><div class="tip-card-title">{html.escape(chosen["market"])}</div><div class="tip-card-meta">{html.escape(chosen["bookmaker"])} · probabilidad exploratoria {chosen["prob"]:.1%} · ventaja estimada {chosen["edge"]:.1%}</div></div>', unsafe_allow_html=True)
                                                     else:
-                                                        st.info("Sin oportunidad principal confirmada: no hay mercado de córners con cuota real entre 1.25 y 1.59 y ventaja estimada suficiente.")
-                                                    st.markdown("### ⚡ Tip de alto riesgo · córners")
+                                                        st.markdown('<div class="tip-card tip-card-empty"><div class="tip-card-label">✦ SEÑAL PRINCIPAL</div><div class="tip-card-title">Sin oportunidad confirmada por ahora</div><div class="tip-card-meta">Se necesita una cuota en vivo real entre 1.25 y 1.59 y respaldo estadístico suficiente.</div></div>', unsafe_allow_html=True)
+                                                    st.markdown('<div class="tip-section-heading risk-heading"><span class="tip-heading-icon">⌁</span><span>TIP DE ALTO RIESGO</span><span class="tip-heading-status">CÓRNERS · CUOTA ≥ 1.60</span></div>', unsafe_allow_html=True)
                                                     if risk_options:
                                                         chosen_risk = max(risk_options, key=lambda option: option["edge"])
-                                                        st.markdown(f'<div class="tip-card risk-tip-card"><div class="tip-card-label">ALTO RIESGO</div><div class="tip-card-title">{html.escape(chosen_risk["market"])}</div><div class="tip-card-meta">Cuota {chosen_risk["odd"]:.2f} · {html.escape(chosen_risk["bookmaker"])} · probabilidad exploratoria {chosen_risk["prob"]:.1%}</div></div>', unsafe_allow_html=True)
+                                                        st.markdown(f'<div class="tip-card risk-tip-card"><div class="tip-card-label">⚡ SEÑAL DE ALTO RIESGO · CUOTA {chosen_risk["odd"]:.2f}</div><div class="tip-card-title">{html.escape(chosen_risk["market"])}</div><div class="tip-card-meta">{html.escape(chosen_risk["bookmaker"])} · probabilidad exploratoria {chosen_risk["prob"]:.1%} · ventaja estimada {chosen_risk["edge"]:.1%}</div></div>', unsafe_allow_html=True)
                                                     else:
-                                                        st.info("Sin oportunidad de alto riesgo con cuota real de 1.60 o superior y respaldo estadístico.")
+                                                        st.markdown('<div class="tip-card risk-tip-card tip-card-empty"><div class="tip-card-label">⚡ SEÑAL DE ALTO RIESGO</div><div class="tip-card-title">Sin oportunidad confirmada por ahora</div><div class="tip-card-meta">No se fuerza una selección sin cuota real de 1.60 o superior y respaldo estadístico.</div></div>', unsafe_allow_html=True)
                                                     goals = match.get("goals") or {}
                                                     patterns = numerology_context(goals.get("home"), goals.get("away"), home_c, away_c, safe_stat(st.session_state.stats_cache.get(str(match_id), []), "Yellow Cards", 0), safe_stat(st.session_state.stats_cache.get(str(match_id), []), "Yellow Cards", 1))
                                                     if patterns:
