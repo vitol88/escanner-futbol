@@ -1307,8 +1307,27 @@ else:
                     country = league_data.get("country") or "Otros países"
                     league_name = league_data.get("name") or "Liga sin nombre"
                     grouped.setdefault((country, league_name), []).append(match)
+                _country_flags = {
+                    "Argentina": "🇦🇷", "Brazil": "🇧🇷", "Brasil": "🇧🇷",
+                    "Colombia": "🇨🇴", "Paraguay": "🇵🇾", "Guatemala": "🇬🇹",
+                    "England": "🏴", "Spain": "🇪🇸", "Italy": "🇮🇹",
+                    "Germany": "🇩🇪", "France": "🇫🇷", "Portugal": "🇵🇹",
+                    "Mexico": "🇲🇽", "United States": "🇺🇸", "USA": "🇺🇸",
+                    "Chile": "🇨🇱", "Uruguay": "🇺🇾", "Peru": "🇵🇪",
+                    "Ecuador": "🇪🇨", "Bolivia": "🇧🇴", "Venezuela": "🇻🇪",
+                    "Netherlands": "🇳🇱", "Turkey": "🇹🇷", "Saudi Arabia": "🇸🇦",
+                    "Japan": "🇯🇵", "South Korea": "🇰🇷", "World": "🌍",
+                }
                 for (country, league_name), league_matches in sorted(grouped.items()):
-                    with st.expander(f"{country} · {league_name} ({len(league_matches)})", expanded=st.session_state.get(f"live_league_{country}_{league_name}", False), key=f"live_league_{country}_{league_name}", on_change="rerun"):
+                    _league_meta = next(
+                        (item.get("league") or {} for item in league_matches if item.get("league")),
+                        {},
+                    )
+                    _league_logo = str(_league_meta.get("logo") or "").strip()
+                    _league_icon = f"![]({_league_logo}) " if _league_logo else f"{_country_flags.get(country, '🏳️')} "
+                    _league_count = len(league_matches)
+                    _league_expander_label = f"{_league_icon}**{country} · {league_name}**　　**({_league_count})**"
+                    with st.expander(_league_expander_label, expanded=st.session_state.get(f"live_league_{country}_{league_name}", False), key=f"live_league_{country}_{league_name}", on_change="rerun"):
                         # Cada partido tiene una sola tarjeta principal; evitamos duplicar el marcador
                         # en una cuadrícula y otra vez dentro del expander de análisis.
                         # Match tools are available from the main live scanner, before a full market scan.
