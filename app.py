@@ -192,12 +192,21 @@ st.markdown("""
     align-items:stretch !important; gap:6px !important; width:100% !important;
   }
   [data-testid="stHorizontalBlock"]:has([class*="st-key-main_stats_"]) > [data-testid="column"] {
-    min-width:0 !important; width:25% !important; flex:1 1 25% !important;
+    min-width:0 !important; width:25% !important; max-width:25% !important;
+    flex:0 0 25% !important; padding:0 2px !important;
   }
+  [data-testid="stHorizontalBlock"]:has([class*="st-key-main_stats_"]) [data-testid="stButton"],
+  [data-testid="stHorizontalBlock"]:has([class*="st-key-main_stats_"]) [class*="st-key-main_stats_"],
+  [data-testid="stHorizontalBlock"]:has([class*="st-key-main_stats_"]) [class*="st-key-main_market_"],
+  [data-testid="stHorizontalBlock"]:has([class*="st-key-main_stats_"]) [class*="st-key-main_h2h_"] { min-width:0 !important; width:100% !important; max-width:100% !important; }
   [data-testid="stHorizontalBlock"]:has([class*="st-key-main_stats_"]) button {
-    min-width:0 !important; width:100% !important; min-height:3.2rem !important;
-    padding:.35rem .06rem !important; font-size:clamp(.52rem,1.8vw,.72rem) !important;
-    line-height:1.12 !important; overflow-wrap:anywhere !important;
+    box-sizing:border-box !important; min-width:0 !important; width:100% !important; max-width:100% !important;
+    min-height:2.25rem !important; height:auto !important; padding:.28rem .04rem !important;
+    font-size:clamp(.48rem,1.65vw,.68rem) !important; font-weight:700 !important;
+    line-height:1.05 !important; white-space:normal !important; overflow-wrap:anywhere !important;
+    border:1px solid #8A6A16 !important; border-radius:8px !important;
+    background:linear-gradient(145deg,#1A1B1F,#0B0D10) !important; color:#F6D365 !important;
+    box-shadow:inset 0 0 0 1px #FACC1512,0 0 8px #FACC150A !important;
   }
   [class*="st-key-main_stats_"] button:hover, [class*="st-key-main_h2h_"] button:hover, [class*="st-key-main_market_"] button:hover { transform:translateY(-2px); border-color:#FACC15; background:linear-gradient(145deg,#3B3216,#211D12); color:#FFE566; box-shadow:0 5px 16px #0006,0 0 14px #FACC1517; }
   [class*="st-key-main_stats_"] button:active, [class*="st-key-main_h2h_"] button:active, [class*="st-key-main_market_"] button:active { transform:scale(.98) rotateX(3deg); background:#FACC15; color:#101216; }
@@ -761,7 +770,7 @@ else:
                                 with action_cols[0]:
                                     show_stats = st.button("📊 Estadísticas", key=f"main_stats_{match_id}", type="primary" if active_tool == "stats" else "secondary", use_container_width=True)
                                 with action_cols[1]:
-                                    show_goals = st.button("⚽ Goles", key=f"main_market_{match_id}_goals", type="primary" if active_market == "goals" else "secondary", use_container_width=True)
+                                    show_goals = st.button("⚽ Goles y señales", key=f"main_market_{match_id}_goals", type="primary" if active_market == "goals" else "secondary", use_container_width=True)
                                 with action_cols[2]:
                                     show_corners = st.button("🚩 Córners", key=f"main_market_{match_id}_corners", type="primary" if active_market == "corners" else "secondary", use_container_width=True)
                                 with action_cols[3]:
