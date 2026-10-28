@@ -1077,19 +1077,25 @@ if _analysis_page_active:
         /* Pantalla de análisis: ocultar controles generales y dejar solo el partido elegido. */
         [class*="st-key-control_row"], [class*="st-key-scan_cta_card"],
         [class*="st-key-scan-progress"], .brand-header {{ display:none !important; }}
-        [class*="st-key-live_now_section"] [data-testid="stExpander"]:not([class*="st-key-live_match_{_analysis_page_id}"]):not(:has([class*="st-key-live_match_{_analysis_page_id}"])) {{
+        [class*="st-key-live_now_expander"] > [data-testid="stExpander"] > details > summary {{
             display:none !important;
         }}
-        [class*="st-key-live_now_section"] [data-testid="stExpander"]:not([class*="st-key-live_match_{_analysis_page_id}"]) > details > summary {{
+        [class*="st-key-live_league_"]:not(:has([class*="st-key-live_match_{_analysis_page_id}"])) {{
             display:none !important;
         }}
-        [class*="st-key-live_now_section"] [class*="st-key-live_match_{_analysis_page_id}"] {{
-            width:100% !important; max-width:100% !important; margin:0 !important;
-        }}
-        [class*="st-key-live_now_section"] [class*="st-key-live_match_{_analysis_page_id}"] > details > summary {{
+        [class*="st-key-live_league_"]:has([class*="st-key-live_match_{_analysis_page_id}"]) > [data-testid="stExpander"] > details > summary {{
             display:none !important;
         }}
-        [class*="st-key-live_now_section"] [class*="st-key-live_match_{_analysis_page_id}"] > details > div {{
+        [class*="st-key-live_league_"] [class*="st-key-live_match_"]:not([class*="st-key-live_match_{_analysis_page_id}"]) {{
+            display:none !important;
+        }}
+        [class*="st-key-live_match_{_analysis_page_id}"] {{
+            display:block !important; width:100% !important; max-width:100% !important; margin:0 !important;
+        }}
+        [class*="st-key-live_match_{_analysis_page_id}"] > [data-testid="stExpander"] > details > summary {{
+            display:none !important;
+        }}
+        [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stExpander"] > details > div {{
             padding:0 !important; margin:0 !important;
         }}
         [class*="st-key-live_now_section"] [class*="st-key-live_match_{_analysis_page_id}"] [class*="st-key-main_stats_"],
