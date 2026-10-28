@@ -584,6 +584,12 @@ else:
                             show_h2h = st.button("🤝 H2H", key=f"main_h2h_{match_id}")
                         with tool_cols[2]:
                             show_detail = st.button("🔎 Detalle", key=f"main_detail_{match_id}")
+                        market_cols = st.columns(4)
+                        market_actions = [("⚽ Goles", "goals"), ("🚩 Córners", "corners"), ("🤝 Empate", "draw"), ("🥅 Ambos marcan", "btts")]
+                        for market_col, (market_label, market_key) in zip(market_cols, market_actions):
+                            with market_col:
+                                if st.button(market_label, key=f"main_market_{match_id}_{market_key}"):
+                                    st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "market", "market": market_key}
                         if show_stats:
                             stats_key = str(match_id)
                             if stats_key not in st.session_state.stats_cache:
@@ -591,7 +597,10 @@ else:
                                     stats_payload = api_get("fixtures/statistics", {"fixture": match_id})
                                     st.session_state.stats_cache[stats_key] = stats_payload.get("response") or []
                                 except Exception as stats_exc:
-                                    st.session_state.stats_cache[stats_key] = {"error": str(stats_exc)}
+                                    st.session_state.stats_cache[stats_key] = []
+                                    if "stats_errors" not in st.session_state:
+                                        st.session_state.stats_errors = {}
+                                    st.session_state.stats_errors[stats_key] = str(stats_exc)
                             st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "stats"}
                         if show_h2h:
                             if "h2h_cache" not in st.session_state:
@@ -613,8 +622,9 @@ else:
                             tool_name = selected_tool.get("tool")
                             if tool_name == "stats":
                                 stat_data = st.session_state.stats_cache.get(str(match_id), [])
-                                if isinstance(stat_data, dict) and stat_data.get("error"):
-                                    st.warning(f"No se pudieron cargar las estadísticas: {stat_data['error']}")
+                                stats_error = st.session_state.get("stats_errors", {}).get(str(match_id))
+                                if stats_error:
+                                    st.warning(f"No se pudieron cargar las estadísticas: {stats_error}")
                                 elif stat_data:
                                     stat_rows = []
                                     for team_idx, team_stats in enumerate(stat_data[:2]):
@@ -643,6 +653,11 @@ else:
                                     st.dataframe(h2h_rows, use_container_width=True, hide_index=True)
                                 elif isinstance(h2h_data, list):
                                     st.info("La API no devolvió enfrentamientos directos anteriores.")
+                            elif tool_name == "market":
+                                market_key = selected_tool.get("market")
+                                st.markdown(f"**Mercado seleccionado: { {'goals': 'Goles', 'corners': 'Córners', 'draw': 'Empate', 'btts': 'Ambos equipos marcan'}.get(market_key, 'Mercado') }**")
+                                st.write(f"Marcador actual: {(match.get('goals') or {}).get('home', '—')} – {(match.get('goals') or {}).get('away', '—')}")
+                                st.caption("Pulsa «Escanear todos los partidos en vivo» para calcular las probabilidades exploratorias y el tip principal. No se muestra una probabilidad antes de analizar los datos.")
                             elif tool_name == "detail":
                                 st.markdown(f"**{match_label}**")
                                 st.write(f"Marcador en vivo: {(match.get('goals') or {}).get('home', '—')} – {(match.get('goals') or {}).get('away', '—')}")
