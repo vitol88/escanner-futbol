@@ -451,10 +451,31 @@ muted_js = "true" if st.session_state.sound_muted else "false"
 st.components.v1.html(
     f"""
     <div id="scanner-notices" style="font-family:system-ui;color:#f4f4f5"></div>
+    <button id="scanner-test-sound" type="button" style="margin:6px 0;padding:8px 12px;border-radius:9px;border:1px solid #FACC15;background:#242014;color:#FACC15;font-weight:700;cursor:pointer">🔊 Probar sonido</button>
+    <div style="font:12px system-ui;color:#A1A1AA;margin-bottom:4px">El sonido puede requerir interacción del usuario y que esta página permanezca abierta.</div>
     <script>
     const events = {events_json};
     const muted = {muted_js};
     const root = document.getElementById('scanner-notices');
+    const testSoundButton = document.getElementById('scanner-test-sound');
+    function playScannerTone() {{
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      [880, 1175].forEach((freq, i) => {{
+        const osc = ctx.createOscillator(), gain = ctx.createGain(), t = ctx.currentTime + i * 0.14;
+        osc.type = 'sine'; osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(0.12, t + 0.025);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+        osc.connect(gain); gain.connect(ctx.destination); osc.start(t); osc.stop(t + 0.2);
+      }});
+      setTimeout(() => ctx.close(), 700);
+    }}
+    testSoundButton.addEventListener('click', () => {{
+      try {{ playScannerTone(); testSoundButton.textContent = '✓ Sonido probado'; }}
+      catch (e) {{ testSoundButton.textContent = 'No disponible en este navegador'; }}
+    }});
     const seenKey = 'football-lab-seen-events';
     let seen = [];
     try {{ seen = JSON.parse(localStorage.getItem(seenKey) || '[]'); }} catch (e) {{}}
