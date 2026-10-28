@@ -1240,30 +1240,52 @@ else:
                                         st.session_state.h2h_cache = {}
                                     _match_league = match.get("league") or {}
                                     league_id = _match_league.get("id")
-                                    # Versionamos la clave para no reutilizar resultados vacíos del filtro anterior.
-                                    h2h_key = f"h2h-v2-{match_home_id}-{match_away_id}-{league_id or 'all'}"
+                                    # v3: el historial respeta la localía del equipo que juega como local en el partido actual.
+                                    h2h_key = f"h2h-v3-home-{match_home_id}-{match_away_id}-{league_id or 'all'}"
                                     if not match_home_id or not match_away_id:
                                         st.warning("La API no entregó los identificadores de ambos equipos.")
                                     elif h2h_key not in st.session_state.h2h_cache:
                                         try:
-                                            # Consultar el historial directo sin restringir la petición a la temporada actual.
-                                            # El filtro por competición se aplica después sobre los resultados recibidos.
+                                            # Consultar suficientes enfrentamientos históricos y filtrar por localía antes de limitar a 10.
                                             h2h_payload = api_get("fixtures/headtohead", {"h2h": f"{match_home_id}-{match_away_id}", "last": 50})
                                             all_h2h_matches = h2h_payload.get("response") or []
                                             finished_h2h = [
                                                 past for past in all_h2h_matches
                                                 if ((past.get("fixture") or {}).get("status") or {}).get("short") in {"FT", "AET", "PEN"}
                                             ]
-                                            same_league_h2h = [
+                                            # Solo enfrentamientos en los que el equipo local del partido actual también fue local.
+                                            same_home_h2h = [
                                                 past for past in finished_h2h
+                                                if str((((past.get("teams") or {}).get("home") or {}).get("id"))) == str(match_home_id)
+                                            ]
+                                            # Preferir la misma competición; si hay menos de 10, completar con otras competiciones
+                                            # manteniendo siempre la condición de que el equipo actual sea local.
+                                            same_home_h2h.sort(
+                                                key=lambda past: ((past.get("fixture") or {}).get("date") or ""),
+                                                reverse=True,
+                                            )
+                                            same_league_home_h2h = [
+                                                past for past in same_home_h2h
                                                 if (past.get("league") or {}).get("id") == league_id
-                                            ] if league_id else finished_h2h
-                                            # Preferimos la misma competición; si la API no devuelve ninguno,
-                                            # mostramos el historial directo general en vez de una pantalla vacía.
-                                            if same_league_h2h:
-                                                st.session_state.h2h_cache[h2h_key] = {"matches": same_league_h2h[:10], "scope": "league"}
-                                            else:
-                                                st.session_state.h2h_cache[h2h_key] = {"matches": finished_h2h[:10], "scope": "all"}
+                                            ] if league_id else same_home_h2h
+                                            selected_h2h = same_league_home_h2h[:10]
+                                            if len(selected_h2h) < 10:
+                                                selected_ids = {
+                                                    (past.get("fixture") or {}).get("id")
+                                                    for past in selected_h2h
+                                                }
+                                                extras = [
+                                                    past for past in same_home_h2h
+                                                    if (past.get("fixture") or {}).get("id") not in selected_ids
+                                                ]
+                                                selected_h2h.extend(extras[:10 - len(selected_h2h)])
+                                            st.session_state.h2h_cache[h2h_key] = {
+                                                "matches": selected_h2h[:10],
+                                                "scope": "league" if selected_h2h and all(
+                                                    (past.get("league") or {}).get("id") == league_id
+                                                    for past in selected_h2h
+                                                ) else "home_all",
+                                            }
                                         except Exception as h2h_exc:
                                             st.session_state.h2h_cache[h2h_key] = {"error": str(h2h_exc)}
                                     st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "h2h"}
