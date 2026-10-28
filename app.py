@@ -1985,9 +1985,9 @@ else:
                     )
                     st.markdown('<div class="tip-section-heading"><span class="tip-heading-icon">◈</span><span>TIP PRINCIPAL</span><span class="tip-heading-status">EN VIVO</span></div>', unsafe_allow_html=True)
                     st.markdown(
-                        f'<div class="tip-card"><div class="tip-card-label">TIP PRINCIPAL</div>'
+                        f'<div class="tip-card"><div class="tip-card-label">TIP PRINCIPAL · CUOTA {chosen_main["odd"]:.2f}</div>'
                         f'<div class="tip-card-title">{html.escape(chosen_main["market"])}</div>'
-                        f'<div class="tip-card-meta">Señal basada en cuotas y estadísticas en vivo verificadas.</div></div>',
+                        f'<div class="tip-card-meta">{html.escape(chosen_main["bookmaker"])} · Probabilidad estimada {chosen_main["model_prob"]:.1%} · Implícita {chosen_main["implied_probability"]:.1%} · Ventaja estimada {chosen_main["estimated_edge"]:.1%}</div></div>',
                         unsafe_allow_html=True,
                     )
                 else:
@@ -2002,9 +2002,9 @@ else:
                     st.markdown('<div class="tip-section-heading risk-heading"><span class="tip-heading-icon">⌁</span><span>TIP DE ALTO RIESGO</span><span class="tip-heading-status">RIESGO ALTO</span></div>', unsafe_allow_html=True)
                     for risk_item in selected_risk:
                         st.markdown(
-                            f'<div class="tip-card"><div class="tip-card-label">ALTO RIESGO</div>'
+                            f'<div class="tip-card risk-tip-card"><div class="tip-card-label">ALTO RIESGO · CUOTA {risk_item["odd"]:.2f}</div>'
                             f'<div class="tip-card-title">{html.escape(risk_item["market"])}</div>'
-                            f'<div class="tip-card-meta">Señal de riesgo evaluada con cuotas y estadísticas en vivo.</div></div>',
+                            f'<div class="tip-card-meta">{html.escape(risk_item["bookmaker"])} · Probabilidad estimada {risk_item["model_prob"]:.1%} · Implícita {risk_item["implied_probability"]:.1%} · Ventaja estimada {risk_item["estimated_edge"]:.1%}</div></div>',
                             unsafe_allow_html=True,
                         )
                     risk_stats = st.session_state.stats_cache.get(str(fixture_id), [])
