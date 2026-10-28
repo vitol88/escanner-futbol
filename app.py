@@ -171,6 +171,20 @@ st.markdown("""
   .signal-title { color:#F4F4F5; font-size:1.12rem; font-weight:750; margin-top:.35rem; }
   .signal-pick { color:#FACC15; font-size:clamp(1.8rem,5vw,2.65rem); font-weight:900; line-height:1.15; margin:.45rem 0; }
   .signal-meta { color:#D4D4D8; font-size:.82rem; margin-top:.4rem; }
+  .tip-section-heading { display:flex; align-items:center; gap:9px; margin:1.1rem 0 .65rem; color:#F4F4F5; font-size:clamp(1.05rem,3.4vw,1.35rem); font-weight:850; letter-spacing:.35px; }
+  .tip-heading-icon { color:#FACC15; font-size:1.5rem; text-shadow:0 0 12px rgba(250,204,21,.35); }
+  .tip-heading-status { margin-left:auto; padding:4px 8px; border:1px solid rgba(250,204,21,.4); border-radius:999px; color:#FACC15; font-size:.62rem; font-weight:800; letter-spacing:1px; white-space:nowrap; }
+  .risk-heading .tip-heading-icon { color:#FFE566; }
+  .tip-card { animation:matchFlipIn .38s cubic-bezier(.2,.75,.25,1) both; margin:.55rem 0 1rem; padding:1.05rem 1.1rem; border-radius:18px; border:1.5px solid #FACC15; background:radial-gradient(circle at 92% 8%,rgba(250,204,21,.15),transparent 36%),linear-gradient(135deg,#242014 0%,#171B21 58%,#111419 100%); box-shadow:0 8px 26px rgba(0,0,0,.25),0 0 0 1px rgba(250,204,21,.06); }
+  .risk-tip-card { border-color:#FFE566; background:radial-gradient(circle at 92% 8%,rgba(255,229,102,.13),transparent 36%),linear-gradient(135deg,#252216 0%,#171B21 58%,#111419 100%); }
+  .tip-card-label { color:#FACC15; font-size:.72rem; font-weight:900; letter-spacing:1.5px; text-transform:uppercase; }
+  .risk-tip-card .tip-card-label { color:#FFE566; }
+  .tip-card-title { color:#FFFFFF; font-size:clamp(1.15rem,3.8vw,1.5rem); font-weight:850; line-height:1.3; margin:.45rem 0 .55rem; overflow-wrap:anywhere; }
+  .tip-card-meta { color:#FACC15; font-size:.84rem; font-weight:650; line-height:1.5; }
+  .risk-tip-card .tip-card-meta { color:#FFE566; }
+  .tip-card-empty .tip-card-title { color:#F4F4F5; font-size:1.05rem; }
+  .tip-card-empty .tip-card-meta { color:#D4D4D8; font-weight:500; }
+  @media(max-width:640px) { .tip-card { padding:.95rem; } .tip-card-meta { font-size:.78rem; } .tip-heading-status { font-size:.55rem; padding:4px 6px; } }
   .live-match-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); gap:10px; margin:.5rem 0 1.1rem; }
   .live-match-card { background:linear-gradient(135deg,#171B21,#101216); border:1px solid #343A44; border-radius:13px; padding:10px 12px; }
   .live-match-league { color:#A1A1AA; font-size:.72rem; margin-bottom:8px; font-weight:700; }
@@ -1172,11 +1186,6 @@ else:
                                                             rate = comeback_data.get("equalized", 0) / comeback_data["sample"]
                                                             adjustment += max(-0.025, min(0.025, (rate - 0.25) * 0.08))
                                                     return float(base_probability) + adjustment
-                                                if meaningful_tips:
-                                                    tip, prob = max(meaningful_tips, key=context_score)
-                                                    st.markdown(f'<div class="signal-card"><div class="signal-kicker">⚽ LECTURA DEL MODELO · NO ES TIP DE CUOTA</div><div class="signal-title">{html.escape(str(tip))}</div><div class="signal-pick">{prob:.0%}</div><div class="signal-meta">Estimación exploratoria, no calibrada. El tip oficial debe tener cuota real verificada.</div></div>', unsafe_allow_html=True)
-                                                else:
-                                                    st.info("Sin lectura principal del modelo por ahora; no se fuerza una apuesta.")
 
                                                 # Show main and risk tips in this match panel too, not only in the global tab.
                                                 live_odds_rows = st.session_state.get("live_odds_by_fixture", {}).get(str(match_id), [])
@@ -1215,19 +1224,29 @@ else:
                                                     elif odd >= 1.60:
                                                         match_risk_options.append(option)
 
-                                                st.markdown("**⚽ TIP PRINCIPAL · CUOTA 1.25–1.59**")
+                                                st.markdown('<div class="tip-section-heading"><span class="tip-heading-icon">◈</span><span>TIP PRINCIPAL</span><span class="tip-heading-status">EN VIVO</span></div>', unsafe_allow_html=True)
                                                 if match_main_options:
                                                     selected_main = max(match_main_options, key=lambda x: x["prob"])
-                                                    st.success(f'{selected_main["market"]} · cuota {selected_main["odd"]:.2f} · {selected_main["bookmaker"]} · ventaja exploratoria {selected_main["edge"]:.1%}')
+                                                    st.markdown(
+                                                        f'<div class="tip-card"><div class="tip-card-label">✦ SEÑAL PRINCIPAL</div>'
+                                                        f'<div class="tip-card-title">{html.escape(selected_main["market"])}</div>'
+                                                        f'<div class="tip-card-meta">{html.escape(selected_main["bookmaker"])} · mercado en vivo verificado</div></div>',
+                                                        unsafe_allow_html=True,
+                                                    )
                                                 else:
-                                                    st.info("Sin cuota principal verificada con ventaja estimada en este partido.")
+                                                    st.markdown('<div class="tip-card tip-card-empty"><div class="tip-card-label">✦ SEÑAL PRINCIPAL</div><div class="tip-card-title">Sin oportunidad confirmada por ahora</div><div class="tip-card-meta">Esperando una cuota disponible con respaldo estadístico.</div></div>', unsafe_allow_html=True)
 
-                                                st.markdown("**🔥 TIP DE ALTO RIESGO · CUOTA 1.60+**")
+                                                st.markdown('<div class="tip-section-heading risk-heading"><span class="tip-heading-icon">⌁</span><span>TIP DE ALTO RIESGO</span><span class="tip-heading-status">RIESGO ALTO</span></div>', unsafe_allow_html=True)
                                                 if match_risk_options:
                                                     selected_risk = max(match_risk_options, key=lambda x: x["prob"])
-                                                    st.warning(f'{selected_risk["market"]} · cuota {selected_risk["odd"]:.2f} · {selected_risk["bookmaker"]} · probabilidad exploratoria {selected_risk["prob"]:.1%}')
+                                                    st.markdown(
+                                                        f'<div class="tip-card risk-tip-card"><div class="tip-card-label">⚡ SEÑAL DE ALTO RIESGO</div>'
+                                                        f'<div class="tip-card-title">{html.escape(selected_risk["market"])}</div>'
+                                                        f'<div class="tip-card-meta">{html.escape(selected_risk["bookmaker"])} · mercado en vivo verificado</div></div>',
+                                                        unsafe_allow_html=True,
+                                                    )
                                                 else:
-                                                    st.info("Sin cuota de alto riesgo verificada por ahora; no se inventa una cuota ni un mercado.")
+                                                    st.markdown('<div class="tip-card risk-tip-card tip-card-empty"><div class="tip-card-label">⚡ SEÑAL DE ALTO RIESGO</div><div class="tip-card-title">Sin oportunidad confirmada por ahora</div><div class="tip-card-meta">No se fuerza una selección ni se inventa un mercado.</div></div>', unsafe_allow_html=True)
 
                                                 # Numerology is strictly risk-only context, never a standalone prediction.
                                                 match_stats_for_patterns = st.session_state.stats_cache.get(str(match_id), [])
@@ -1237,11 +1256,6 @@ else:
                                                     safe_stat(match_stats_for_patterns, "Corner Kicks", 1),
                                                     safe_stat(match_stats_for_patterns, "Yellow Cards", 0),
                                                     safe_stat(match_stats_for_patterns, "Yellow Cards", 1),
-                                                )
-                                                st.caption(
-                                                    "Numerología experimental (solo alto riesgo): "
-                                                    + ("; ".join(numerology_patterns) if numerology_patterns else "sin coincidencia numérica clara con los datos disponibles")
-                                                    + ". Es una coincidencia descriptiva; no aumenta por sí sola la probabilidad de empate 1–1."
                                                 )
                                             else:
                                                 st.info("Primero pulsa «Escanear todos los partidos en vivo». Después, vuelve a abrir Goles y señales para ver promedios por localía, lectura en vivo y tip principal.")
@@ -1848,7 +1862,7 @@ else:
                         main_options,
                         key=lambda item: item["model_prob"] if item["model_prob"] is not None else -1,
                     )
-                    st.markdown("**⚽ TIP PRINCIPAL · CUOTA OBJETIVO 1.25–1.59**")
+                    st.markdown('<div class="tip-section-heading"><span class="tip-heading-icon">◈</span><span>TIP PRINCIPAL</span><span class="tip-heading-status">EN VIVO</span></div>', unsafe_allow_html=True)
                     st.markdown(
                         f'<div class="tip-card"><div class="tip-card-label">TIP PRINCIPAL</div>'
                         f'<div class="tip-card-title">{html.escape(chosen_main["market"])}</div>'
@@ -1864,7 +1878,7 @@ else:
                         reverse=True,
                     )
                     selected_risk = risk_options[:2]
-                    st.markdown("**🔥 TIP DE ALTO RIESGO · CUOTA 1.60+**")
+                    st.markdown('<div class="tip-section-heading risk-heading"><span class="tip-heading-icon">⌁</span><span>TIP DE ALTO RIESGO</span><span class="tip-heading-status">RIESGO ALTO</span></div>', unsafe_allow_html=True)
                     for risk_item in selected_risk:
                         probability_note = (
                             f' · prob. exploratoria {risk_item["model_prob"]:.1%} · ventaja estimada {risk_item["estimated_edge"]:.1%}'
@@ -1904,7 +1918,7 @@ else:
                         + ". Es solo una coincidencia descriptiva para contextualizar el tip de riesgo; no predice un marcador ni genera apuestas por sí sola. No se inventan estadísticas faltantes."
                     )
                 else:
-                    st.markdown("**🔥 TIP DE ALTO RIESGO**")
+                    st.markdown('<div class="tip-section-heading risk-heading"><span class="tip-heading-icon">⌁</span><span>TIP DE ALTO RIESGO</span><span class="tip-heading-status">RIESGO ALTO</span></div>', unsafe_allow_html=True)
                     st.info("Sin oportunidad de alto riesgo por ahora.")
 
                 if not match_odds:
