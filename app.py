@@ -1265,16 +1265,23 @@ else:
                                             st.markdown('<div class="match-analysis-kicker">Mercado seleccionado · córners</div><div class="match-analysis-title">Ritmo y proyección de córners</div>', unsafe_allow_html=True)
                                             # Reutilizar primero las estadísticas que ya consultó el escáner en vivo.
                                             live_corner_stats = st.session_state.stats_cache.get(str(match_id))
-                                            if live_corner_stats is None:
+                                            known_stats_error = str(match_id) in st.session_state.get("stats_errors", {})
+                                            if live_corner_stats is None or (not live_corner_stats and not known_stats_error):
                                                 try:
                                                     live_corner_stats = (api_get("fixtures/statistics", {"fixture": match_id}).get("response") or [])
                                                     st.session_state.stats_cache[str(match_id)] = live_corner_stats
+                                                    selected_home_corners = safe_stat(live_corner_stats, "Corner Kicks", 0)
+                                                    selected_away_corners = safe_stat(live_corner_stats, "Corner Kicks", 1)
+                                                    if selected_home_corners is None or selected_away_corners is None:
+                                                        st.session_state.setdefault("stats_errors", {})[str(match_id)] = "La API no entregó córners para ambos equipos."
+                                                    else:
+                                                        st.session_state.setdefault("stats_errors", {}).pop(str(match_id), None)
                                                 except Exception as live_corner_exc:
                                                     live_corner_stats = []
                                                     st.session_state.stats_cache[str(match_id)] = []
                                                     st.session_state.setdefault("stats_errors", {})[str(match_id)] = str(live_corner_exc)
-                                            selected_home_corners = safe_stat(live_corner_stats, "Corner Kicks", 0)
-                                            selected_away_corners = safe_stat(live_corner_stats, "Corner Kicks", 1)
+                                            selected_home_corners = safe_stat(live_corner_stats or [], "Corner Kicks", 0)
+                                            selected_away_corners = safe_stat(live_corner_stats or [], "Corner Kicks", 1)
                                             st.markdown(fixture_hero_html(match, mode="corners", home_corners=selected_home_corners, away_corners=selected_away_corners), unsafe_allow_html=True)
                                             corner_item = next((item for item in st.session_state.get("corner_scan_results", []) if str(((item.get("fixture") or {}).get("fixture") or {}).get("id")) == str(match_id)), None)
                                             if corner_item and not corner_item.get("error"):
