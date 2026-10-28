@@ -186,6 +186,19 @@ st.markdown("""
   .fixture-hero-fallback { font-size:30px; line-height:38px; }
 
   [class*="st-key-main_stats_"] button, [class*="st-key-main_h2h_"] button, [class*="st-key-main_market_"] button { min-height:3.4rem; white-space:normal; line-height:1.15; padding:.45rem .3rem; border-radius:12px; border:1px solid #49402A; background:linear-gradient(145deg,#20252D,#111419); color:#E5E7EB; box-shadow:inset 0 1px 0 #ffffff0b; transition:transform .18s ease, background .22s ease, border-color .22s ease, box-shadow .22s ease; }
+  /* Keep the four match actions on one horizontal row, including narrow mobile screens. */
+  [data-testid="stHorizontalBlock"]:has([class*="st-key-main_stats_"]) {
+    display:flex !important; flex-direction:row !important; flex-wrap:nowrap !important;
+    align-items:stretch !important; gap:6px !important; width:100% !important;
+  }
+  [data-testid="stHorizontalBlock"]:has([class*="st-key-main_stats_"]) > [data-testid="column"] {
+    min-width:0 !important; width:25% !important; flex:1 1 25% !important;
+  }
+  [data-testid="stHorizontalBlock"]:has([class*="st-key-main_stats_"]) button {
+    min-width:0 !important; width:100% !important; min-height:3.2rem !important;
+    padding:.45rem .12rem !important; font-size:clamp(.58rem,2.2vw,.82rem) !important;
+    line-height:1.12 !important; overflow-wrap:anywhere !important;
+  }
   [class*="st-key-main_stats_"] button:hover, [class*="st-key-main_h2h_"] button:hover, [class*="st-key-main_market_"] button:hover { transform:translateY(-2px); border-color:#FACC15; background:linear-gradient(145deg,#3B3216,#211D12); color:#FFE566; box-shadow:0 5px 16px #0006,0 0 14px #FACC1517; }
   [class*="st-key-main_stats_"] button:active, [class*="st-key-main_h2h_"] button:active, [class*="st-key-main_market_"] button:active { transform:scale(.98) rotateX(3deg); background:#FACC15; color:#101216; }
   [class*="st-key-main_stats_"] button[kind="secondary"], [class*="st-key-main_h2h_"] button[kind="secondary"], [class*="st-key-main_market_"] button[kind="secondary"] { background:linear-gradient(145deg,#20252D,#111419) !important; color:#E5E7EB !important; border-color:#49402A !important; }
