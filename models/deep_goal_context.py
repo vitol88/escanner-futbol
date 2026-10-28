@@ -153,7 +153,7 @@ def build_deep_goal_context(
         params = {"team": team_id, "last": 20}
         # API-Football supports league/season filters; if these are absent use all recent matches.
         params.update({"league": league_id, "season": season})
-        matches = get_cached(f"form:{team_id}:{league_id}:{season}", "fixtures", params)
+        matches = get_cached(f"form20:{team_id}:{league_id}:{season}", "fixtures", params)
         selected = []
         for old in matches:
             status = ((old.get("fixture") or {}).get("status") or {}).get("short")
