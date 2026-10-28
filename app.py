@@ -496,25 +496,6 @@ st.components.v1.html(
     const events = {events_json};
     const muted = {muted_js};
     const root = document.getElementById('scanner-notices');
-    const testSoundButton = document.getElementById('scanner-test-sound');
-    function playScannerTone() {{
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-      [880, 1175].forEach((freq, i) => {{
-        const osc = ctx.createOscillator(), gain = ctx.createGain(), t = ctx.currentTime + i * 0.14;
-        osc.type = 'sine'; osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.0001, t);
-        gain.gain.exponentialRampToValueAtTime(0.12, t + 0.025);
-        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
-        osc.connect(gain); gain.connect(ctx.destination); osc.start(t); osc.stop(t + 0.2);
-      }});
-      setTimeout(() => ctx.close(), 700);
-    }}
-    testSoundButton.addEventListener('click', () => {{
-      try {{ playScannerTone(); testSoundButton.textContent = '✓ Sonido probado'; }}
-      catch (e) {{ testSoundButton.textContent = 'No disponible en este navegador'; }}
-    }});
     const seenKey = 'football-lab-seen-events';
     let seen = [];
     try {{ seen = JSON.parse(localStorage.getItem(seenKey) || '[]'); }} catch (e) {{}}
