@@ -272,6 +272,20 @@ st.markdown("""
   .history-table th { background:#FACC15; color:#151515; text-align:left; padding:.72rem .65rem; font-weight:850; }
   .history-table td { background:#15191F; color:#F4F4F5; padding:.68rem .65rem; border-top:1px solid #34302A; }
   .history-table tr:nth-child(even) td { background:#1B2027; }
+
+  .goal-live-summary { border:1px solid #3C3524; border-left:3px solid #FACC15; border-radius:12px; padding:12px 13px; margin:.65rem 0 .8rem; background:linear-gradient(135deg,#191C22,#101216); }
+  .goal-live-summary-title { color:#FACC15; font-weight:900; font-size:.78rem; letter-spacing:1.2px; margin-bottom:6px; }
+  .goal-live-summary p { color:#D4D4D8; font-size:.88rem; line-height:1.45; margin:0; }
+  .goal-history-wrap { border:1px solid #4A4024; border-radius:12px; overflow:hidden; margin:.6rem 0 1rem; background:#111419; }
+  .goal-history-heading { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:9px 10px; color:#FACC15; font-size:.82rem; font-weight:850; background:#191B20; }
+  .goal-history-heading span { color:#A1A1AA; font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.6px; }
+  .goal-history-table { width:100%; border-collapse:collapse; font-size:.76rem; table-layout:fixed; }
+  .goal-history-table th { background:#FACC15; color:#111; padding:7px 8px; text-align:left; font-weight:900; }
+  .goal-history-table td { padding:8px; border-top:1px solid #30343B; background:#15191F; color:#E4E4E7; overflow-wrap:anywhere; line-height:1.25; }
+  .goal-history-table tr:nth-child(even) td { background:#1B2027; }
+  .goal-history-table th:nth-child(2), .goal-history-table th:nth-child(3), .goal-history-table td:nth-child(2), .goal-history-table td:nth-child(3) { text-align:center; width:19%; }
+  @media (max-width:420px) { .goal-history-table {font-size:.68rem;} .goal-history-table th,.goal-history-table td {padding:7px 5px;} .goal-history-table th:nth-child(2),.goal-history-table th:nth-child(3),.goal-history-table td:nth-child(2),.goal-history-table td:nth-child(3) {width:15%;} .goal-live-summary p {font-size:.82rem;} }
+
   .history-table td:nth-child(2), .history-table td:nth-child(3), .history-table th:nth-child(2), .history-table th:nth-child(3) { text-align:center; }
   @media (max-width: 640px) { .history-table {font-size:.76rem;} .history-table th,.history-table td {padding:.55rem .4rem;} }
   [data-testid="stExpander"] summary:hover { color:#FACC15; }
@@ -949,19 +963,87 @@ else:
                                             if goal_item:
                                                 _, estimate, tips, *rest = goal_item
                                                 history = (corner_item or {}).get("automatic_history") or {}
-                                                if history:
-                                                    avg_cols = st.columns(2)
-                                                    avg_cols[0].metric("Promedio local en casa", f"{history.get('home_goals_for'):.2f}" if isinstance(history.get("home_goals_for"), (int,float)) else "N/D")
-                                                    avg_cols[1].metric("Promedio visitante fuera", f"{history.get('away_goals_for'):.2f}" if isinstance(history.get("away_goals_for"), (int,float)) else "N/D")
-                                                st.markdown("**📡 Lectura en vivo**")
+                                                live_stats = st.session_state.stats_cache.get(str(match_id), [])
                                                 current_goals = match.get("goals") or {}
                                                 current_minute = (match_fixture.get("status") or {}).get("elapsed")
-                                                st.write(f"Marcador {current_goals.get('home', '—')}–{current_goals.get('away', '—')} · minuto {current_minute if current_minute is not None else 'N/D'}")
-                                                if tips:
-                                                    tip, prob = max(tips, key=lambda x: x[1])
-                                                    st.markdown(f'<div class="signal-card"><div class="signal-kicker">Tip principal</div><div class="signal-title">{html.escape(str(tip))}</div><div class="signal-pick">{prob:.0%}</div><div class="signal-meta">Estimación exploratoria · no calibrada</div></div>', unsafe_allow_html=True)
+                                                home_score = current_goals.get("home")
+                                                away_score = current_goals.get("away")
+                                                home_name = str(match_home.get("name") or "Local")
+                                                away_name = str(match_away.get("name") or "Visitante")
+                                                home_shots = safe_stat(live_stats, "Total Shots", 0)
+                                                away_shots = safe_stat(live_stats, "Total Shots", 1)
+                                                home_on = safe_stat(live_stats, "Shots on Goal", 0)
+                                                away_on = safe_stat(live_stats, "Shots on Goal", 1)
+                                                home_poss = safe_stat(live_stats, "Ball Possession", 0)
+                                                away_poss = safe_stat(live_stats, "Ball Possession", 1)
+                                                home_corners = safe_stat(live_stats, "Corner Kicks", 0)
+                                                away_corners = safe_stat(live_stats, "Corner Kicks", 1)
+                                                def pct_value(value):
+                                                    if isinstance(value, str):
+                                                        try: return float(value.replace("%", "").strip())
+                                                        except ValueError: return None
+                                                    return float(value) if isinstance(value, (int, float)) else None
+                                                home_poss_n, away_poss_n = pct_value(home_poss), pct_value(away_poss)
+                                                live_bits = []
+                                                if isinstance(home_score, int) and isinstance(away_score, int):
+                                                    live_bits.append(f"Marcador {home_score}–{away_score} al minuto {current_minute if current_minute is not None else 'N/D'}")
+                                                if isinstance(home_shots, (int, float)) and isinstance(away_shots, (int, float)):
+                                                    live_bits.append(f"tiros {home_name} {home_shots}–{away_shots} {away_name}")
+                                                if isinstance(home_on, (int, float)) and isinstance(away_on, (int, float)):
+                                                    live_bits.append(f"tiros a puerta {home_on}–{away_on}")
+                                                if home_poss_n is not None and away_poss_n is not None:
+                                                    leader = home_name if home_poss_n > away_poss_n else away_name if away_poss_n > home_poss_n else "ninguno"
+                                                    if leader != "ninguno": live_bits.append(f"{leader} controla la posesión ({max(home_poss_n, away_poss_n):.0f}%)")
+                                                if isinstance(home_corners, (int, float)) and isinstance(away_corners, (int, float)):
+                                                    live_bits.append(f"córners {home_corners}–{away_corners}")
+                                                if live_bits:
+                                                    summary = "; ".join(live_bits[:3])
+                                                    summary += "."
+                                                    if isinstance(home_on, (int, float)) and isinstance(away_on, (int, float)):
+                                                        if home_on + away_on == 0:
+                                                            summary += " Aún no hay tiros a puerta; falta evidencia ofensiva clara para respaldar una entrada agresiva."
+                                                        elif abs(home_on - away_on) >= 2:
+                                                            summary += f" La amenaza más clara hasta ahora favorece a {home_name if home_on > away_on else away_name}."
+                                                        else:
+                                                            summary += " La producción a puerta está relativamente equilibrada."
                                                 else:
-                                                    st.info("El análisis está disponible, pero ningún mercado de goles superó el umbral experimental para emitir un tip principal.")
+                                                    summary = "La API no entregó estadísticas detalladas suficientes para describir la presión ofensiva sin especular."
+                                                st.markdown('<div class="goal-live-summary"><div class="goal-live-summary-title">◉ LECTURA EN VIVO</div><p>' + html.escape(summary) + '</p></div>', unsafe_allow_html=True)
+                                                goal_history_rows = [
+                                                    (f"{home_name} · goles a favor en casa", history.get("home_goals_for"), history.get("home_goal_sample", 0)),
+                                                    (f"{home_name} · goles recibidos en casa", history.get("home_goals_against"), history.get("home_goal_sample", 0)),
+                                                    (f"{away_name} · goles a favor fuera", history.get("away_goals_for"), history.get("away_goal_sample", 0)),
+                                                    (f"{away_name} · goles recibidos fuera", history.get("away_goals_against"), history.get("away_goal_sample", 0)),
+                                                ]
+                                                goal_table_html = '<div class="goal-history-wrap"><div class="goal-history-heading">▥ Promedios de goles por localía <span>Histórico</span></div><table class="goal-history-table"><thead><tr><th>Equipo / indicador</th><th>Prom.</th><th>N</th></tr></thead><tbody>'
+                                                for label, avg, sample in goal_history_rows:
+                                                    avg_text = f"{avg:.2f}".rstrip("0").rstrip(".") if isinstance(avg, (int, float)) else "N/D"
+                                                    goal_table_html += f'<tr><td>{html.escape(str(label))}</td><td>{avg_text}</td><td>{sample if sample else "—"}</td></tr>'
+                                                goal_table_html += '</tbody></table></div>'
+                                                st.markdown(goal_table_html, unsafe_allow_html=True)
+                                                # Exclude overly obvious under lines (e.g. under 4.5 at 0-0) from the main recommendation.
+                                                current_total = (home_score or 0) + (away_score or 0) if isinstance(home_score, int) and isinstance(away_score, int) else None
+                                                meaningful_tips = []
+                                                for label, probability in (tips or []):
+                                                    lower_label = str(label).casefold()
+                                                    if current_total is not None and "menos de" in lower_label:
+                                                        import re
+                                                        line_match = re.search(r"menos de\\s+([0-9]+(?:\\.[0-9]+)?)", lower_label)
+                                                        if line_match and float(line_match.group(1)) - current_total >= 3:
+                                                            continue
+                                                    if "total final:" in lower_label and "+0 desde ahora" in lower_label:
+                                                        continue
+                                                    meaningful_tips.append((label, probability))
+                                                # For a 0-0 match, require live attacking evidence before proposing a team-to-score tip.
+                                                if current_total == 0 and isinstance(current_minute, int):
+                                                    has_live_threat = any(isinstance(v, (int, float)) and v > 0 for v in (home_on, away_on))
+                                                    if not has_live_threat:
+                                                        meaningful_tips = [(label, p) for label, p in meaningful_tips if "marcará al menos 1 gol" not in str(label).casefold()]
+                                                if meaningful_tips:
+                                                    tip, prob = max(meaningful_tips, key=lambda x: x[1])
+                                                    st.markdown(f'<div class="signal-card"><div class="signal-kicker">⚽ TIP PRINCIPAL · GOLES Y SEÑALES</div><div class="signal-title">{html.escape(str(tip))}</div><div class="signal-pick">{prob:.0%}</div><div class="signal-meta">Estimación exploratoria, no calibrada. La probabilidad por sí sola no confirma valor de apuesta.</div></div>', unsafe_allow_html=True)
+                                                else:
+                                                    st.info("Sin tip principal por ahora: no hay un mercado suficientemente respaldado por el modelo y las señales en vivo. Es preferible esperar a forzar una apuesta.")
                                             else:
                                                 st.info("Primero pulsa «Escanear todos los partidos en vivo». Después, vuelve a abrir Goles y señales para ver promedios por localía, lectura en vivo y tip principal.")
                                         elif market_key == "corners":
