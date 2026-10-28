@@ -48,17 +48,20 @@ class ProbabilityModelTests(unittest.TestCase):
         self.assertEqual(find_league_baseline("Italy", "Serie A", data)["country"], "Italy")
         self.assertEqual(find_league_baseline("Brazil", "Serie A", data)["country"], "Brazil")
 
-    def test_missing_baseline_is_not_reported_as_probability(self):
+    def test_missing_baseline_uses_explicit_generic_fallback(self):
         result = estimate_live_goal_markets(country="Sweden", league_name="Superettan",
             score_home=0, score_away=0, elapsed_minute=30, data=TEST_DATA)
-        self.assertFalse(result["available"])
-        self.assertIsNone(result.get("draw_final"))
+        self.assertTrue(result["available"])
+        self.assertTrue(result["baseline_fallback"])
+        self.assertIn("genérica", result["baseline_league"])
+        self.assertIsNotNone(result.get("draw_final"))
 
-    def test_low_sample_is_withheld(self):
+    def test_low_sample_uses_explicit_generic_fallback(self):
         small = {"minimum_matches_for_estimate": 30, "leagues": [dict(TEST_DATA["leagues"][0], matches=10)]}
         result = estimate_live_goal_markets(country="England", league_name="Premier League",
             score_home=0, score_away=0, elapsed_minute=30, data=small)
-        self.assertFalse(result["available"])
+        self.assertTrue(result["available"])
+        self.assertTrue(result["baseline_fallback"])
         self.assertIn("Muestra histórica insuficiente", result["reason"])
 
     def test_model_probabilities_are_bounded(self):
