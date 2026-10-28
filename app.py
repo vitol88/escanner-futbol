@@ -232,8 +232,8 @@ st.markdown("""
   [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details[open] > summary::after { content:"◖))  ⌃"; }
   [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details > summary p { color:#FACC15 !important; font-size:clamp(1.2rem,3.8vw,1.8rem) !important; font-weight:750 !important; margin:0 !important; }
   /* Filas internas de ligas: más delgadas, compactas y con menos separación */
-  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] { width:88% !important; margin:0 auto 8px !important; }
-  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] summary { min-height:48px !important; padding:7px 12px !important; border:1px solid #34363D !important; border-radius:14px !important; background:#0B0D10 !important; }
+  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] { width:88% !important; margin:0 auto 0 !important; padding:0 !important; }
+  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] summary { min-height:40px !important; padding:5px 12px !important; border:1px solid #34363D !important; border-radius:10px !important; background:#0B0D10 !important; }
   [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] summary::after { content:none !important; display:none !important; }
   [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] summary [data-testid="stExpanderToggleIcon"] { display:flex !important; color:#FACC15 !important; }
   [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] summary p { color:#E5E7EB !important; font-size:clamp(.9rem,3vw,1.05rem) !important; font-weight:650 !important; margin:0 !important; line-height:1.25 !important; }
@@ -242,8 +242,8 @@ st.markdown("""
     [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] { width:96% !important; }
     [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details > summary { min-height:62px !important; padding:9px 10px 9px 14px !important; }
     [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details > summary::after { min-width:78px; height:40px; font-size:19px; padding:0 9px; }
-    [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] { width:90% !important; margin-bottom:6px !important; }
-    [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] summary { min-height:44px !important; padding:6px 10px !important; }
+    [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] { width:90% !important; margin:0 auto !important; padding:0 !important; }
+    [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] summary { min-height:36px !important; padding:4px 10px !important; border-radius:9px !important; }
   }
   /* Live section header and compact team crests in fixture rows */
   [data-testid="stExpander"] summary img { width:20px !important; height:20px !important; object-fit:contain !important; vertical-align:middle !important; margin:0 3px !important; }
