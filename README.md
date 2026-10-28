@@ -75,13 +75,13 @@ Esta versión aún no incorpora un archivo histórico minuto a minuto ni un hist
 - El campo esquemático y las probabilidades son informativos. Los modelos siguen siendo exploratorios y no han demostrado calibración ni rentabilidad.
 
 
-### Herramientas en cada partido en vivo
+### Diseño y acciones por partido en vivo
 
-En la lista principal, abre el desplegable **Herramientas** de cada encuentro para usar los botones:
+La vista **En vivo** agrupa los partidos en listas desplegables por país y competición. Al abrir un encuentro, muestra los escudos disponibles, marcador y minuto, junto con cuatro acciones principales:
 
-- **Estadísticas:** solicita bajo demanda posesión, tiros, tiros a puerta, córners, faltas, tarjetas, fueras de juego y porcentaje de pases, según lo que entregue la API.
-- **H2H:** consulta los últimos cinco enfrentamientos directos y muestra fecha, equipos y marcador. Se cachea por pareja de equipos durante la sesión.
-- **Detalle:** muestra marcador y minuto.
-- **Goles, Córners, Empate y Ambos marcan:** seleccionan el mercado y recuerdan que debes ejecutar el escaneo para obtener la lectura analítica correspondiente.
+- **Estadísticas en vivo:** solicita bajo demanda posesión, tiros, tiros a puerta, córners, pases, faltas, tarjetas, fueras de juego y atajadas, según los datos que entregue la API.
+- **H2H:** muestra hasta cinco enfrentamientos finalizados disponibles de la competición actual, con fecha, escudos, equipos y marcador. La consulta se guarda en caché durante la sesión.
+- **Goles y señales:** muestra el análisis calculado para ese encuentro, incluidos promedios local/visitante, lectura en vivo y tip principal cuando existan datos suficientes.
+- **Córners:** muestra córners actuales por equipo, promedios históricos por sede, ritmo en vivo y una proyección orientativa cuando los datos estén disponibles.
 
-Estas consultas bajo demanda pueden consumir solicitudes del plan gratuito de API-Football. Si la API no proporciona estadísticas o H2H, la aplicación debe mostrarlo explícitamente en vez de rellenarlo con datos inventados.
+El botón seleccionado queda resaltado en amarillo y el panel de análisis aparece con una transición visual. Los botones consultan el partido seleccionado; los datos faltantes se muestran como no disponibles y no se sustituyen por valores inventados. Estas consultas bajo demanda pueden consumir solicitudes del plan gratuito de API-Football.
