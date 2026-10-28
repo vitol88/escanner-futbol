@@ -718,6 +718,23 @@ if should_refresh:
         st.session_state.last_refresh = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         st.session_state.last_auto_refresh_error = ""
 
+        # Consultar cuotas en bloque, de forma independiente al escaneo estadístico.
+        # Una sola llamada cubre todos los fixtures disponibles; intervalo de 120 s
+        # para vigilar cambios sin generar una llamada por partido.
+        odds_now_epoch = int(datetime.now().timestamp())
+        if odds_now_epoch - int(st.session_state.get("live_odds_last_fetch_epoch", 0)) >= 120:
+            try:
+                live_odds_payload = api_get("odds/live")
+                st.session_state.live_odds_by_fixture = extract_live_odds(live_odds_payload)
+                st.session_state.live_odds_error = ""
+                st.session_state.live_odds_last_fetch = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                st.session_state.live_odds_last_fetch_epoch = odds_now_epoch
+            except Exception as odds_exc:
+                st.session_state.live_odds_error = str(odds_exc)
+                st.session_state.setdefault("live_odds_by_fixture", {})
+                # Evitar repetir la consulta fallida en cada rerun del mismo minuto.
+                st.session_state.live_odds_last_fetch_epoch = odds_now_epoch
+
         # Rotate through at most 5 fixtures per minute for corner stats. This keeps
         # the Pro daily quota safe; it deliberately does not query every match every minute.
         live_for_corners = [
@@ -1460,17 +1477,7 @@ else:
             goal_results_with_context.append((fixture, estimate, tips, context))
         st.session_state.goal_scan_results = goal_results_with_context
 
-        # One bulk in-play odds request per completed scan (not one request per fixture).
-        # API-Football's /odds/live may omit fixtures/markets when no bookmaker publishes them.
-        try:
-            live_odds_payload = api_get("odds/live")
-            st.session_state.live_odds_by_fixture = extract_live_odds(live_odds_payload)
-            st.session_state.live_odds_error = ""
-            st.session_state.live_odds_last_fetch = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        except Exception as odds_exc:
-            st.session_state.live_odds_error = str(odds_exc)
-            # Keep the last successful odds snapshot, but disclose its timestamp in the UI.
-            st.session_state.setdefault("live_odds_by_fixture", {})
+        # Las cuotas se actualizan en bloque durante el refresco automático, no por partido.
 
         st.session_state.previous_scan_scores = current_scores
 
@@ -1729,7 +1736,7 @@ else:
                         unsafe_allow_html=True,
                     )
                 else:
-                    st.info("Sin tip principal con cuota entre 1.25 y 1.59: no se encontró un mercado en vivo verificable en ese rango.")
+                    st.info("Sin oportunidades por ahora.")
 
                 if risk_options:
                     risk_options.sort(
@@ -1769,7 +1776,7 @@ else:
                     )
                 else:
                     st.markdown("**🔥 TIP DE ALTO RIESGO**")
-                    st.info("Sin tip de alto riesgo por ahora: no se encontró una cuota real de 1.60 o superior en los mercados reconocidos. La casilla se mantiene para indicar que no hay oportunidad confirmada.")
+                    st.info("Sin oportunidad de alto riesgo por ahora.")
 
                 if not match_odds:
                     odds_error = st.session_state.get("live_odds_error", "")
@@ -1779,7 +1786,7 @@ else:
                         st.caption("La API no devolvió cuotas en vivo para este partido. Puede faltar cobertura de la casa o del mercado.")
                 odds_stamp = st.session_state.get("live_odds_last_fetch")
                 if odds_stamp:
-                    st.caption(f"Cuotas verificadas por última vez: {odds_stamp}. No se muestra el valor de la cuota y puede cambiar o suspenderse.")
+                    st.caption(f"Cuotas verificadas por última vez: {odds_stamp}. Las cuotas pueden cambiar o suspenderse.")
                 st.caption("Las cuotas reales filtran los mercados disponibles; las probabilidades del modelo son exploratorias y aún no están calibradas. La numerología solo aporta contexto al tip de alto riesgo.")
                 action_cols = st.columns(4)
                 action_specs = [
