@@ -1696,6 +1696,43 @@ else:
                                                     history_html += f"<tr><td>{html.escape(row['Indicador'])}</td><td>{avg_text}</td></tr>"
                                                 history_html += "</tbody></table>"
                                                 st.markdown(history_html, unsafe_allow_html=True)
+
+                                                # Proyección total estimada a partir de los cuatro promedios de localía.
+                                                # Para cada equipo se promedian sus córners a favor y los concedidos por el rival.
+                                                home_inputs = [
+                                                    history.get("home_corners_for"),
+                                                    history.get("away_corners_against"),
+                                                ]
+                                                away_inputs = [
+                                                    history.get("away_corners_for"),
+                                                    history.get("home_corners_against"),
+                                                ]
+                                                home_inputs = [float(value) for value in home_inputs if isinstance(value, (int, float))]
+                                                away_inputs = [float(value) for value in away_inputs if isinstance(value, (int, float))]
+                                                projected_home_corners = sum(home_inputs) / len(home_inputs) if home_inputs else None
+                                                projected_away_corners = sum(away_inputs) / len(away_inputs) if away_inputs else None
+                                                if projected_home_corners is not None and projected_away_corners is not None:
+                                                    competition_corner_average = projected_home_corners + projected_away_corners
+                                                    st.markdown(
+                                                        f"""
+                                                        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+                                                                    margin:16px 0 18px;padding:7px 10px;
+                                                                    border:1px solid #51451D;border-radius:9px;
+                                                                    background:linear-gradient(135deg,#17191f,#20232b);
+                                                                    width:fit-content;max-width:100%;clear:both;position:relative;">
+                                                          <span style="font-size:11px;font-weight:700;color:#FACC15;letter-spacing:.3px;">
+                                                            PROMEDIO DE CÓRNERS
+                                                          </span>
+                                                          <span style="display:inline-block;padding:4px 9px;
+                                                                       border:1px solid #FACC15;border-radius:7px;
+                                                                       background:#FACC15;color:#111827;
+                                                                       font-size:13px;font-weight:800;line-height:1.1;">
+                                                            {competition_corner_average:.2f}
+                                                          </span>
+                                                        </div>
+                                                        """,
+                                                        unsafe_allow_html=True,
+                                                    )
                                                 # El diagnóstico se conserva internamente en history para depuración,
                                                 # pero no se muestra en la interfaz normal del usuario.
 
