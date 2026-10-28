@@ -24,7 +24,7 @@ API_BASE = "https://v3.football.api-sports.io"
 TIMEOUT_SECONDS = 15
 
 st.set_page_config(
-    page_title="Escáner Fútbol",
+    page_title="FOOTBALL LAB · Live Analytics",
     page_icon="⚽",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -93,6 +93,9 @@ st.markdown("""
   .fixture-hero-fallback { font-size:30px; line-height:38px; }
   @media (max-width: 420px) { .fixture-hero-team {font-size:.72rem;} .fixture-hero-team img {width:31px;height:31px;} .fixture-hero-score {font-size:1.25rem;padding:6px 9px;} }
 
+  .scan-action {display:flex;align-items:center;gap:10px;padding:10px 13px;margin:.3rem 0 .6rem;border:1px solid #51451E;border-radius:13px;background:linear-gradient(120deg,#171B21,#101216);color:#FACC15;font-weight:800;}
+  .scan-ball {display:inline-block;font-size:1.3rem;animation:ball-bob 1.2s ease-in-out infinite;}
+  @keyframes ball-bob {0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-3px) rotate(18deg)}}
   .history-table { width:100%; border-collapse:separate; border-spacing:0; border:1px solid #4A4024; border-radius:12px; overflow:hidden; font-size:.9rem; margin:.5rem 0 1rem; }
   .history-table th { background:#FACC15; color:#151515; text-align:left; padding:.72rem .65rem; font-weight:850; }
   .history-table td { background:#15191F; color:#F4F4F5; padding:.68rem .65rem; border-top:1px solid #34302A; }
@@ -115,12 +118,12 @@ st.markdown("""
   <div class="brand-mark"><svg viewBox="0 0 64 64" width="42" height="42" aria-label="Football Lab logo"><circle cx="27" cy="29" r="20" fill="#101216" stroke="#FACC15" stroke-width="2.5"/><path d="M27 17l9 6-3 10H21l-4-9z" fill="#FACC15"/><path d="M17 24l-8-2m27 1 8-5m-9 15 8 8M21 33l-3 11m15-1-1 6" stroke="#F4F4F5" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M39 51V38h6v13m4 0V29h6v22m4 0V20h5v31" fill="#FACC15" stroke="#FACC15" stroke-width="1"/><path d="M9 53Q28 61 53 53" fill="none" stroke="#FACC15" stroke-width="2.5" stroke-linecap="round"/></svg></div>
   <div>
     <div class="brand-title">FOOTBALL <span>LAB</span></div>
-    <div class="brand-subtitle">LIVE ANALYTICS TERMINAL · GOLES · CÓRNERS · EMPATE</div>
+    <div class="brand-subtitle">LIVE ANALYTICS</div>
   </div>
   <div class="brand-pill">● LIVE SCANNER</div>
 </div>
 """, unsafe_allow_html=True)
-st.caption("Terminal de análisis deportivo · probabilidades exploratorias, no garantías de resultado")
+# Cabecera limpia; los detalles del modelo aparecen en Rendimiento del modelo.
 
 MODEL_DATA = load_league_baselines()
 
@@ -324,7 +327,7 @@ with controls[1]:
     if st.button("🔕 Silenciar sonido" if not st.session_state.sound_muted else "🔔 Activar sonido"):
         st.session_state.sound_muted = not st.session_state.sound_muted
 with controls[2]:
-    refresh = st.button("↻ Actualizar ahora", type="primary")
+    refresh = st.button("⚽ Actualizar escáner", type="primary", help="Actualiza el listado y ejecuta el escaneo disponible.")
 
 auto_tick = None
 if st.session_state.auto_refresh_enabled:
@@ -451,6 +454,12 @@ st.components.v1.html(
       }});
       seen = [...seen, ...fresh.map(e => e.id)].slice(-30);
       try {{ localStorage.setItem(seenKey, JSON.stringify(seen)); }} catch (e) {{}}
+      if ("Notification" in window && Notification.permission === "default") {{
+        try {{ Notification.requestPermission(); }} catch (e) {{}}
+      }}
+      if ("Notification" in window && Notification.permission === "granted") {{
+        fresh.forEach(e => {{ try {{ new Notification(e.title, {{ body: e.message, tag: e.id }}); }} catch (err) {{}} }});
+      }}
       if (!muted) {{
         try {{
           const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -508,35 +517,24 @@ else:
         f for f in fixtures
         if (f.get("league") or {}).get("name", "Liga") in chosen_leagues
     ]
-    st.markdown("### Marcadores en vivo")
+    st.markdown(f"### En vivo ahora ({len(filtered)})")
     if filtered:
-        match_cards_html = '<div class="live-match-grid">' + "".join(fixture_card_html(match) for match in filtered) + "</div>"
-        st.markdown(match_cards_html, unsafe_allow_html=True)
+        grouped = {}
+        for match in filtered:
+            league_data = match.get("league") or {}
+            country = league_data.get("country") or "Otros países"
+            league_name = league_data.get("name") or "Liga sin nombre"
+            grouped.setdefault((country, league_name), []).append(match)
+        for (country, league_name), league_matches in sorted(grouped.items()):
+            with st.expander(f"⚽ {country} · {league_name} ({len(league_matches)})", expanded=False):
+                cards_html = '<div class="live-match-grid">' + "".join(fixture_card_html(match) for match in league_matches) + "</div>"
+                st.markdown(cards_html, unsafe_allow_html=True)
     else:
-        st.info("No hay partidos para las ligas seleccionadas.")
+        st.info("No hay partidos activos en las ligas seleccionadas.")
 
-    goal_results_now = st.session_state.get("goal_scan_results", [])
-    corner_results_now = st.session_state.get("corner_scan_results", [])
-    current_tips_count = sum(len(item[2]) for item in goal_results_now)
-    st.markdown("### Resumen de sesión")
-    metric_cols = st.columns(5)
-    metric_cols[0].metric("Partidos en vivo", len(fixtures))
-    metric_cols[1].metric("Ligas activas", len(chosen_leagues))
-    metric_cols[2].metric("Tips de goles", current_tips_count)
-    metric_cols[3].metric("Partidos córners", len(corner_results_now))
-    metric_cols[4].metric("Solicitudes API (sesión)", st.session_state.api_request_count)
-    st.caption(
-        f"Último escaneo: {st.session_state.last_scan_api_calls} solicitudes API y "
-        f"{st.session_state.last_scan_stats_matches} consultas de estadísticas intentadas. "
-        "El contador incluye solicitudes intentadas en esta sesión."
-    )
-    stats_limit = st.slider(
-        "Máximo de partidos a consultar con estadísticas detalladas por escaneo",
-        min_value=5, max_value=50, value=20, step=5,
-        help="Todos los partidos filtrados se evalúan con la información disponible. Este límite controla las consultas adicionales a fixtures/statistics para proteger tu cuota de API."
-    )
-    st.caption("El listado en vivo usa una solicitud. Cada partido al que se consultan estadísticas detalladas puede consumir otra; los demás se evalúan sin ese contexto en vivo.")
-    manual_scan = st.button("⚡ Escanear todos los partidos en vivo", type="primary")
+    # Se retira el resumen de sesión de la pantalla principal.
+    stats_limit = 20
+    manual_scan = st.button("⚽ Escanear todos los partidos en vivo", type="primary", key="scan_all_live")
     now_epoch = int(datetime.now().timestamp())
     auto_scan_due = (
         st.session_state.auto_refresh_enabled
@@ -841,7 +839,7 @@ else:
         st.session_state.signal_rows = signal_rows
         st.session_state.last_scan_api_calls = st.session_state.api_request_count - scan_api_calls_start
 
-    tab_goals, tab_corners, tab_overview = st.tabs(["⚽ Goles y señales", "🚩 Córners", "📊 Estado y registro"])
+    tab_goals, tab_corners, tab_overview = st.tabs(["⚽ Goles y señales", "🚩 Córners", "📈 Rendimiento del modelo"])
 
     with tab_goals:
         st.markdown("### ⚽ Goles · lectura del partido en vivo")
@@ -1048,7 +1046,8 @@ else:
             st.info("Pulsa «Escanear todos los partidos en vivo» para obtener el análisis automático.")
 
     with tab_overview:
-        st.subheader("Estado de los mercados")
+        st.subheader("Rendimiento del modelo")
+        st.caption("Historial de señales, verificación retrospectiva y evaluación de calidad del pronóstico.")
         market_status = [
             ("Córners", "Consulta automática de promedios recientes local/visitante y combinación exploratoria con el ritmo en vivo; pendiente de validación."),
             ("Goles", "Probabilidades exploratorias basadas en medias históricas de liga; aún no calibradas."),
