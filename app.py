@@ -93,12 +93,10 @@ st.markdown("""
   .fixture-hero-league { color:#A1A1AA; font-size:.7rem; text-align:center; margin-top:10px; }
   .fixture-hero-fallback { font-size:30px; line-height:38px; }
 
-  .match-action-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin:.4rem 0 .65rem; }
-  .match-action-grid [data-testid="stButton"] button { min-height:3.4rem; white-space:normal; line-height:1.15; padding:.45rem .3rem; border:1px solid #49402A; background:linear-gradient(145deg,#20252D,#111419); color:#E5E7EB; box-shadow:inset 0 1px 0 #ffffff0b; transition:transform .18s ease, background .22s ease, border-color .22s ease, box-shadow .22s ease; }
-  .match-action-grid [data-testid="stButton"] button:hover { transform:translateY(-2px); border-color:#FACC15; background:linear-gradient(145deg,#3B3216,#211D12); color:#FFE566; box-shadow:0 5px 16px #0006,0 0 14px #FACC1517; }
-  .match-action-grid [data-testid="stButton"] button:active { transform:scale(.98) rotateX(3deg); background:#FACC15; color:#101216; }
-  .match-action-grid [class*="st-key-main_stats_"] button, .match-action-grid [class*="st-key-main_h2h_"] button, .match-action-grid [class*="st-key-main_market_"] button { min-height:3.4rem; }
-  .match-action-grid [class*="st-key-main_stats_"] button[kind="primary"], .match-action-grid [class*="st-key-main_h2h_"] button[kind="primary"], .match-action-grid [class*="st-key-main_market_"] button[kind="primary"] { background:#FACC15; color:#101216; border-color:#FFE566; }
+  [class*="st-key-main_stats_"] button, [class*="st-key-main_h2h_"] button, [class*="st-key-main_market_"] button { min-height:3.4rem; white-space:normal; line-height:1.15; padding:.45rem .3rem; border-radius:12px; border:1px solid #49402A; background:linear-gradient(145deg,#20252D,#111419); color:#E5E7EB; box-shadow:inset 0 1px 0 #ffffff0b; transition:transform .18s ease, background .22s ease, border-color .22s ease, box-shadow .22s ease; }
+  [class*="st-key-main_stats_"] button:hover, [class*="st-key-main_h2h_"] button:hover, [class*="st-key-main_market_"] button:hover { transform:translateY(-2px); border-color:#FACC15; background:linear-gradient(145deg,#3B3216,#211D12); color:#FFE566; box-shadow:0 5px 16px #0006,0 0 14px #FACC1517; }
+  [class*="st-key-main_stats_"] button:active, [class*="st-key-main_h2h_"] button:active, [class*="st-key-main_market_"] button:active { transform:scale(.98) rotateX(3deg); background:#FACC15; color:#101216; }
+  [class*="st-key-main_stats_"] button[kind="primary"], [class*="st-key-main_h2h_"] button[kind="primary"], [class*="st-key-main_market_"] button[kind="primary"] { background:#FACC15; color:#101216; border-color:#FFE566; box-shadow:0 0 0 1px #FACC1544,0 5px 18px #FACC1520; }
   .match-analysis-panel { animation:matchFlipIn .38s cubic-bezier(.2,.75,.25,1) both; border:1px solid #5B4A19; border-radius:15px; padding:14px; margin:.65rem 0 1rem; background:radial-gradient(circle at 100% 0,rgba(250,204,21,.15),transparent 38%),linear-gradient(140deg,#242014,#171B21 55%,#101216); box-shadow:0 9px 28px #0005; transform-origin:top center; }
   .match-analysis-kicker { color:#FACC15; font-size:.72rem; font-weight:900; letter-spacing:1.2px; text-transform:uppercase; }
   .match-analysis-title { color:#F4F4F5; font-size:1.08rem; font-weight:850; margin:.25rem 0 .65rem; }
@@ -599,7 +597,6 @@ else:
                         active_tool = current_tool.get("tool") if str(current_tool.get("fixture_id")) == str(match_id) else None
                         # Match hero uses the same crests, live minute and scoreboard as the approved mockups.
                         st.markdown(fixture_hero_html(match), unsafe_allow_html=True)
-                        st.markdown('<div class="match-action-grid">', unsafe_allow_html=True)
                         action_cols = st.columns(4, gap="small")
                         with action_cols[0]:
                             show_stats = st.button("📊\\nEstadísticas en vivo", key=f"main_stats_{match_id}", type="primary" if active_tool == "stats" else "secondary", use_container_width=True)
@@ -649,7 +646,7 @@ else:
                         selected_tool = st.session_state.get("main_fixture_tool") or {}
                         if str(selected_tool.get("fixture_id")) == str(match_id):
                             tool_name = selected_tool.get("tool")
-                            st.markdown('<div class="match-analysis-panel">', unsafe_allow_html=True)
+                            st.markdown('<div class="match-analysis-kicker">PARTIDO SELECCIONADO</div>', unsafe_allow_html=True)
                             if tool_name == "stats":
                                 st.markdown('<div class="match-analysis-kicker">En vivo · estadísticas</div><div class="match-analysis-title">Comparativa del partido</div>', unsafe_allow_html=True)
                                 stat_data = st.session_state.stats_cache.get(str(match_id), [])
@@ -742,7 +739,6 @@ else:
                                         st.warning(f"No se pudo cargar el análisis de córners: {corner_item.get('error')}")
                                     else:
                                         st.info("Primero pulsa «Escanear todos los partidos en vivo» para calcular promedios históricos, ritmo en vivo y tip principal de córners.")
-                            st.markdown('</div>', unsafe_allow_html=True)
 
     else:
         st.info("No hay partidos activos en las ligas seleccionadas.")
