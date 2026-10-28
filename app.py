@@ -599,13 +599,13 @@ else:
                         st.markdown(fixture_hero_html(match), unsafe_allow_html=True)
                         action_cols = st.columns(4, gap="small")
                         with action_cols[0]:
-                            show_stats = st.button("📊\\nEstadísticas en vivo", key=f"main_stats_{match_id}", type="primary" if active_tool == "stats" else "secondary", use_container_width=True)
+                            show_stats = st.button("📊\nEstadísticas en vivo", key=f"main_stats_{match_id}", type="primary" if active_tool == "stats" else "secondary", use_container_width=True)
                         with action_cols[1]:
-                            show_h2h = st.button("🤝\\nH2H", key=f"main_h2h_{match_id}", type="primary" if active_tool == "h2h" else "secondary", use_container_width=True)
+                            show_h2h = st.button("🤝\nH2H", key=f"main_h2h_{match_id}", type="primary" if active_tool == "h2h" else "secondary", use_container_width=True)
                         with action_cols[2]:
-                            show_goals = st.button("⚽\\nGoles y señales", key=f"main_market_{match_id}_goals", type="primary" if active_market == "goals" else "secondary", use_container_width=True)
+                            show_goals = st.button("⚽\nGoles y señales", key=f"main_market_{match_id}_goals", type="primary" if active_market == "goals" else "secondary", use_container_width=True)
                         with action_cols[3]:
-                            show_corners = st.button("🚩\\nCórners", key=f"main_market_{match_id}_corners", type="primary" if active_market == "corners" else "secondary", use_container_width=True)
+                            show_corners = st.button("🚩\nCórners", key=f"main_market_{match_id}_corners", type="primary" if active_market == "corners" else "secondary", use_container_width=True)
                         if show_stats:
                             stats_key = str(match_id)
                             if stats_key not in st.session_state.stats_cache or stats_key in st.session_state.get("stats_errors", {}):
@@ -626,8 +626,8 @@ else:
                                 st.warning("La API no entregó los identificadores de ambos equipos.")
                             elif h2h_key not in st.session_state.h2h_cache:
                                 try:
-                                    h2h_payload = api_get("fixtures/headtohead", {"h2h": f"{match_home_id}-{match_away_id}", "last": 20})
                                     league_id = (match.get("league") or {}).get("id")
+                                    h2h_payload = api_get("fixtures/headtohead", {"h2h": f"{match_home_id}-{match_away_id}", "last": 20, **({"league": league_id} if league_id else {})})
                                     h2h_matches = h2h_payload.get("response") or []
                                     if league_id:
                                         h2h_matches = [past for past in h2h_matches if (past.get("league") or {}).get("id") == league_id]
