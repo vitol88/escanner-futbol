@@ -1432,6 +1432,8 @@ else:
                                                     internal_scan_requested = True
                                                     st.markdown('<div class="scan-running-status"><span class="scan-code-icon">⟳</span><div><strong>ESCANEANDO…</strong><div class="scan-running-subtitle">Actualizando señales de goles y datos en vivo</div></div><span class="scan-sweep"></span></div>', unsafe_allow_html=True)
                                             st.markdown('<div class="match-analysis-kicker">Mercado seleccionado · goles</div><div class="match-analysis-title">Goles y señales</div>', unsafe_allow_html=True)
+                                            # Mostrar el marcador actual con escudos, igual que en la sección de córners.
+                                            st.markdown(fixture_hero_html(match, mode="goals"), unsafe_allow_html=True)
                                             goal_item = next((item for item in st.session_state.get("goal_scan_results", []) if str((item[0].get("fixture") or {}).get("id")) == str(match_id)), None)
                                             corner_item = next((item for item in st.session_state.get("corner_scan_results", []) if str(((item.get("fixture") or {}).get("fixture") or {}).get("id")) == str(match_id)), None)
                                             if goal_item:
