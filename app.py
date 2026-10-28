@@ -96,13 +96,20 @@ st.markdown("""
   button[role="switch"][aria-checked="false"] > div { background:#FFFFFF !important; }
   /* Tarjeta compacta de acción principal del escáner */
   [class*="st-key-scan_cta_card"] { margin-top:14px; margin-bottom:18px; }
-  [class*="st-key-scan_cta_card"] [data-testid="stButton"] button { width:100%; min-height:122px; white-space:pre-line; text-align:left; padding:20px 22px; border-radius:22px; border:1px solid #FACC15; background:linear-gradient(135deg,#17191F,#0B0D10); color:#FACC15; font-size:clamp(1rem,3.8vw,1.35rem); line-height:1.65; font-weight:800; box-shadow:0 0 0 1px rgba(250,204,21,.08); }
-  [class*="st-key-scan_cta_card"] [data-testid="stButton"] button:hover { border-color:#FFE36A; background:linear-gradient(135deg,#242014,#111419); color:#FFE36A; }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] button { position:relative; overflow:hidden; width:100%; min-height:142px; white-space:pre-line; text-align:left; padding:24px 18px 24px 118px; border-radius:22px; border:1px solid #FACC15; background:radial-gradient(ellipse at 8% 50%,rgba(250,204,21,.17),transparent 43%),linear-gradient(135deg,#17191F,#080A0D); color:#FACC15; font-size:clamp(1rem,3.8vw,1.35rem); line-height:1.7; font-weight:800; box-shadow:inset 0 0 20px rgba(250,204,21,.05),0 0 0 1px rgba(250,204,21,.08); }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before { content:""; position:absolute; left:20px; top:50%; width:72px; height:72px; transform:translateY(-50%); border-radius:50%; border:2px solid #FACC15; background:repeating-radial-gradient(circle,transparent 0 9px,rgba(250,204,21,.55) 10px 11px,transparent 12px 18px),conic-gradient(from 0deg,rgba(250,204,21,.55),transparent 35%,rgba(250,204,21,.1) 65%,transparent); box-shadow:0 0 18px rgba(250,204,21,.3),inset 0 0 14px rgba(250,204,21,.18); animation:scanner-radar-spin 4s linear infinite; }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::after { content:""; position:absolute; left:48px; top:calc(50% - 10px); width:16px; height:16px; border-radius:4px; background:#FACC15; box-shadow:0 0 16px #FACC15; animation:scanner-core-pulse 1.2s ease-in-out infinite alternate; }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] button:hover { border-color:#FFE36A; background:radial-gradient(ellipse at 8% 50%,rgba(250,204,21,.25),transparent 43%),linear-gradient(135deg,#242014,#111419); color:#FFE36A; }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] button:active { transform:scale(.99); }
-  .scan-running-status { display:flex; align-items:center; gap:9px; color:#FACC15; margin:8px 2px 0; font-size:.88rem; font-weight:700; }
-  .scan-code-icon { display:inline-block; font-size:1.5rem; animation:scan-code-pulse .55s ease-in-out infinite alternate; }
-  @keyframes scan-code-pulse { from { transform:translateX(-3px) scale(.92); opacity:.6; } to { transform:translateX(3px) scale(1.08); opacity:1; } }
-  @media(max-width:640px) { [class*="st-key-scan_cta_card"] [data-testid="stButton"] button { min-height:112px; padding:14px; font-size:1rem; } }
+  .scan-running-status { position:relative; display:flex; align-items:center; gap:12px; overflow:hidden; color:#FACC15; margin:8px 2px 0; padding:12px 14px; border:1px solid rgba(250,204,21,.35); border-radius:14px; background:linear-gradient(110deg,#17191F,#0B0D10); font-size:.92rem; font-weight:700; }
+  .scan-code-icon { display:inline-block; flex:0 0 auto; font-size:2rem; transform-origin:center; animation:scanner-spiral-spin .8s linear infinite; text-shadow:0 0 12px rgba(250,204,21,.8); }
+  .scan-running-subtitle { color:#A1A1AA; font-size:.82rem; font-weight:500; margin-top:3px; }
+  .scan-sweep { position:absolute; left:0; right:0; bottom:0; height:2px; background:linear-gradient(90deg,transparent,#FACC15,transparent); animation:scanner-sweep 1.4s ease-in-out infinite; }
+  @keyframes scanner-radar-spin { to { rotate:360deg; } }
+  @keyframes scanner-core-pulse { from { opacity:.55; transform:scale(.8); } to { opacity:1; transform:scale(1.15); } }
+  @keyframes scanner-spiral-spin { to { transform:rotate(360deg); } }
+  @keyframes scanner-sweep { 0% { transform:translateX(-100%); } 100% { transform:translateX(100%); } }
+  @media(max-width:640px) { [class*="st-key-scan_cta_card"] [data-testid="stButton"] button { min-height:130px; padding:18px 12px 18px 104px; font-size:1rem; } [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before { left:15px; width:66px; height:66px; } [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::after { left:40px; } }
   /* Header de "En vivo ahora": pill amarilla con ondas y chevrón a la derecha */
   [class*="st-key-live_now_section"] [data-testid="stExpander"] { background:transparent !important; border:0 !important; border-radius:18px !important; }
   [class*="st-key-live_now_section"] [data-testid="stExpander"] summary { min-height:72px !important; display:flex !important; flex-direction:row-reverse !important; justify-content:space-between !important; align-items:center !important; gap:12px !important; padding:14px 18px 14px 22px !important; border:1px solid #34363D !important; border-radius:20px !important; background:#0B0D10 !important; }
@@ -516,12 +523,12 @@ with st.container(key="sound_controls_row"):
 
 with st.container(key="scan_cta_card"):
     manual_scan = st.button(
-        "⚽  FOOTBALL LAB · ESCÁNER EN VIVO\nPulsa para detectar oportunidades en directo",
+        "FOOTBALL LAB  ·  ESCÁNER EN VIVO\n◎  Pulsa para escanear oportunidades",
         type="primary",
         key="scan_all_live",
     )
     if manual_scan:
-        st.markdown('<div class="scan-running-status"><span class="scan-code-icon">⌁</span><span>ESCANEANDO · Analizando partidos y mercados…</span></div>', unsafe_allow_html=True)
+        st.markdown('<div class="scan-running-status"><span class="scan-code-icon">⟳</span><div><strong>ESCANEANDO…</strong><div class="scan-running-subtitle">Analizando partidos y mercados</div></div><span class="scan-sweep"></span></div>', unsafe_allow_html=True)
 
 recent_events = st.session_state.notification_events[-3:]
 events_json = json.dumps(recent_events, ensure_ascii=False).replace("</", "<\\/")
