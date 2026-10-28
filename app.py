@@ -708,28 +708,19 @@ st.markdown("""
   }
 
 
-  /* Selección manual del partido: acento turquesa premium que contrasta con el negro/dorado */
-  .fl-match-select-row { display:flex; justify-content:flex-end; margin:0 0 7px; }
-  [class*="st-key-live_match_select_"] [data-testid="stButton"] > button {
-    width:auto !important; min-height:31px !important; height:31px !important; padding:3px 11px !important;
-    border-radius:999px !important; border:1px solid #28D7C5 !important;
-    background:linear-gradient(135deg,#103632,#102322) !important; color:#8DF7EA !important;
-    font-size:.73rem !important; font-weight:750 !important; letter-spacing:.15px !important;
-    box-shadow:0 0 10px rgba(40,215,197,.08) !important;
+  /* Hover sutil premium en cada tarjeta de partido: dorado cálido, coherente con Football Lab */
+  [class*="st-key-live_match_"] {
+    border:1px solid transparent !important;
+    border-radius:18px !important;
+    transition:background .2s ease,border-color .2s ease,box-shadow .2s ease !important;
   }
-  [class*="st-key-live_match_select_"] [data-testid="stButton"] > button:hover {
-    border-color:#9CFFF4 !important; background:linear-gradient(135deg,#16544D,#103632) !important;
-    box-shadow:0 0 15px rgba(40,215,197,.22) !important; transform:translateY(-1px) !important;
+  [class*="st-key-live_match_"]:hover {
+    border-color:rgba(250,204,21,.78) !important;
+    background:linear-gradient(135deg,rgba(250,204,21,.075),rgba(250,204,21,.018) 70%,transparent) !important;
+    box-shadow:inset 3px 0 0 rgba(250,204,21,.78),0 0 14px rgba(250,204,21,.075) !important;
   }
-  [class*="st-key-live_match_select_"] [data-testid="stButton"] > button[kind="primary"] {
-    background:linear-gradient(135deg,#28D7C5,#8DF7EA) !important; color:#071816 !important;
-    border-color:#B9FFF7 !important; box-shadow:0 0 16px rgba(40,215,197,.25) !important;
-  }
-  [class*="st-key-live_match_"].fl-match-selected,
-  [class*="st-key-live_match_"]:has([class*="st-key-live_match_select_"] button[kind="primary"]) {
-    border:2px solid #28D7C5 !important; border-radius:18px !important;
-    box-shadow:0 0 0 1px rgba(40,215,197,.20),0 0 18px rgba(40,215,197,.12) !important;
-    background:linear-gradient(145deg,rgba(40,215,197,.055),transparent 65%) !important;
+  @media(prefers-reduced-motion:reduce) {
+    [class*="st-key-live_match_"] { transition:none !important; }
   }
 
 </style>
@@ -1427,7 +1418,6 @@ if _analysis_page_active:
             st.session_state["live_now_expander"] = True
             st.session_state["main_fixture_tool"] = {}
             st.session_state["return_to_fixture_id"] = _analysis_page_id
-            st.session_state["highlight_fixture_id"] = _analysis_page_id
             st.rerun()
     st.markdown(
         '<div class="match-analysis-panel"><div class="match-analysis-kicker">FOOTBALL LAB · ANÁLISIS INDIVIDUAL</div><div class="match-analysis-title">Vista ampliada del partido</div><div class="signal-meta">Consulta el análisis seleccionado y vuelve a los partidos cuando termines.</div></div>',
@@ -1435,21 +1425,6 @@ if _analysis_page_active:
     )
 
 fixtures = st.session_state.live_fixtures
-_highlight_fixture_id = str(st.session_state.get("highlight_fixture_id") or "")
-if _highlight_fixture_id:
-    st.markdown(
-        f"""
-        <style>
-        [class*="st-key-live_match_{_highlight_fixture_id}"] {{
-            border:2px solid #FACC15 !important;
-            border-radius:18px !important;
-            box-shadow:0 0 0 1px rgba(250,204,21,.35),0 0 18px rgba(250,204,21,.14) !important;
-            background:linear-gradient(145deg,rgba(250,204,21,.045),transparent 65%) !important;
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
 if not fixtures:
     st.markdown("### Tu centro de análisis")
     st.info("Pulsa «Actualizar partidos» para cargar los encuentros en vivo. Después podrás escanear goles, córners, empate y ambos equipos marcan.")
@@ -1517,19 +1492,6 @@ else:
                             # Los partidos no son expanders individuales: al abrir una liga aparecen todos los marcadores grandes.
                             # La única flecha para contraer/expandir es la de la liga.
                             with st.container(key=f"live_match_{match_id}"):
-                                # Selección visual del partido sin navegar ni abrir/cerrar la tarjeta.
-                                _selected_match_id = str(st.session_state.get("selected_live_fixture_id") or "")
-                                _is_selected_match = _selected_match_id == str(match_id)
-                                with st.container(key=f"live_match_select_{match_id}"):
-                                    _select_label = "✓ PARTIDO SELECCIONADO" if _is_selected_match else "＋ Seleccionar partido"
-                                    if st.button(
-                                        _select_label,
-                                        key=f"select_live_match_{match_id}",
-                                        type="primary" if _is_selected_match else "secondary",
-                                        help="Resaltar este partido en la lista",
-                                    ):
-                                        st.session_state["selected_live_fixture_id"] = str(match_id)
-                                        st.rerun()
                                 # Marcador detallado primero: reloj a la izquierda y una fila por equipo.
                                 _clock_text = f"{match_minute}′" if match_minute is not None else str(((match_fixture.get("status") or {}).get("short") or "EN VIVO"))
                                 _home_score = match_goals.get("home") if match_goals.get("home") is not None else "—"
