@@ -475,14 +475,16 @@ st.markdown("""
   .goal-live-summary { border:1px solid #3C3524; border-left:3px solid #FACC15; border-radius:12px; padding:12px 13px; margin:.65rem 0 .8rem; background:linear-gradient(135deg,#191C22,#101216); }
   .goal-live-summary-title { color:#FACC15; font-weight:900; font-size:.78rem; letter-spacing:1.2px; margin-bottom:6px; }
   .goal-live-summary p { color:#D4D4D8; font-size:.88rem; line-height:1.45; margin:0; }
-  .goal-deep-heading { display:block; clear:both; position:relative; z-index:1; color:#FACC15; font-size:.78rem; letter-spacing:1.1px; font-weight:900; margin:1.55rem 0 .8rem; padding-top:.25rem; line-height:1.5; }
-  .goal-form-card { border:1px solid #393326; border-radius:11px; padding:10px; background:linear-gradient(145deg,#191D24,#101216); min-height:132px; }
+  .goal-deep-heading { display:block; clear:both; position:relative; z-index:1; color:#FACC15; font-size:.78rem; letter-spacing:1.1px; font-weight:900; margin:1.9rem 0 1.1rem; padding:0 0 .2rem; line-height:1.6; }
+  .goal-form-card { border:1px solid #393326; border-radius:11px; padding:12px; margin-top:5px; background:linear-gradient(145deg,#191D24,#101216); min-height:132px; }
   .goal-form-header { display:flex; align-items:center; gap:8px; margin-bottom:4px; min-width:0; }
   .goal-form-logo { width:34px; height:34px; object-fit:contain; flex:0 0 34px; }
   .goal-form-team { color:#E4E4E7; font-size:.78rem; font-weight:800; line-height:1.25; overflow-wrap:anywhere; }
   .goal-form-record { color:#FACC15; font-size:1.15rem; font-weight:900; margin:4px 0; }
   .goal-form-line { color:#BFC2CA; font-size:.68rem; line-height:1.45; }
   .goal-h2h-summary { margin:.5rem 0; border:1px solid #393326; border-radius:10px; padding:9px 11px; color:#D4D4D8; background:#15191F; font-size:.78rem; line-height:1.5; }
+  .goal-last-goal { display:flex; align-items:center; flex-wrap:wrap; gap:7px; margin:.65rem 0 .8rem; padding:9px 11px; border:1px solid #51451D; border-radius:10px; background:linear-gradient(135deg,#191C22,#101216); color:#E4E4E7; font-size:.78rem; line-height:1.45; }
+  .goal-last-goal b { color:#FACC15; }
   .goal-h2h-summary b { color:#FACC15; }
   .goal-comeback-card { display:flex; flex-direction:column; gap:5px; border:1px solid #393326; border-radius:10px; padding:9px; background:#12151A; margin:.2rem 0 .45rem; }
   .goal-comeback-card b { color:#FACC15; font-size:.75rem; }
@@ -1615,14 +1617,15 @@ else:
                                                             f'<div class="goal-form-line">Ambos marcan {form_data.get("btts_rate") if form_data.get("btts_rate") is not None else "N/D"}% · +2.5 goles {form_data.get("over_2_5_rate") if form_data.get("over_2_5_rate") is not None else "N/D"}%</div></div>',
                                                             unsafe_allow_html=True,
                                                         )
-                                                    h2h_data = deep_context.get("h2h") or {}
-                                                    h2h_summary = (
-                                                        f'{h2h_data.get("matches", 0)} partidos · promedio {h2h_average_goals if h2h_average_goals is not None else "N/D"} goles · ambos marcan {h2h_data.get("btts_rate") if h2h_data.get("btts_rate") is not None else "N/D"}% · +2.5 {h2h_data.get("over_2_5_rate") if h2h_data.get("over_2_5_rate") is not None else "N/D"}%'
-                                                    )
-                                                    st.markdown(f'<div class="goal-h2h-summary"><b>H2H · enfrentamientos directos</b><br>{html.escape(h2h_summary)}</div>', unsafe_allow_html=True)
+                                                    # Se omite el resumen H2H aquí para evitar duplicar el indicador de promedio.
                                                     target_minute = deep_context.get("current_goal_minute")
                                                     if target_minute is not None:
-                                                        st.caption(f"Último gol detectado en el minuto {target_minute}" + (f" · anotado por {deep_context.get('current_goal_team')}" if deep_context.get("current_goal_team") else "") + ".")
+                                                        scorer = deep_context.get("current_goal_team")
+                                                        scorer_text = f' · Anotado por <b>{html.escape(str(scorer))}</b>' if scorer else ""
+                                                        st.markdown(
+                                                            f'<div class="goal-last-goal"><b>MINUTO DEL ÚLTIMO GOL</b><span>{html.escape(str(target_minute))}\'</span>{scorer_text}</div>',
+                                                            unsafe_allow_html=True,
+                                                        )
                                                     comeback = deep_context.get("comeback") or {}
                                                     comeback_cols = st.columns(2, gap="small")
                                                     for col, team in zip(comeback_cols, (match_home, match_away)):
@@ -1636,7 +1639,12 @@ else:
                                                                 unsafe_allow_html=True,
                                                             )
                                                         else:
-                                                            col.caption(f"{team.get('name') or 'Equipo'}: muestra insuficiente de eventos para estimar reacción tras recibir gol.")
+                                                            col.markdown(
+                                                                f'<div class="goal-comeback-card"><b>{html.escape(str(team.get("name") or "Equipo"))} · reacción</b>'
+                                                                f'<span>Muestra insuficiente de eventos para estimar reacción tras recibir gol.</span>'
+                                                                f'<small>No hay suficientes eventos comparables para calcular este indicador.</small></div>',
+                                                                unsafe_allow_html=True,
+                                                            )
                                                 else:
                                                     st.caption("El contexto profundo de forma/H2H no está disponible con las consultas actuales; el bot no lo tratará como dato conocido.")
 
