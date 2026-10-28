@@ -57,6 +57,14 @@ st.markdown("""
     background: #FFE566; border-color: #FFE566; color: #111111;
   }
   /* Fila compacta de actualización automática y actualización manual */
+  [class*="st-key-sound_controls_row"] > div [data-testid="stHorizontalBlock"] { align-items:center !important; gap:.5rem !important; }
+  [class*="st-key-sound_controls_row"] [data-testid="stColumn"] { min-width:0 !important; }
+  [class*="st-key-sound_controls_row"] [class*="st-key-sound_enabled_toggle"] { padding:5px 7px; border:1px solid #393326; border-radius:12px; background:#15191F; }
+  [class*="st-key-sound_controls_row"] label { font-size:.84rem !important; white-space:nowrap !important; }
+  @media(max-width:640px) {
+    [class*="st-key-sound_controls_row"] label { font-size:.72rem !important; }
+    [class*="st-key-sound_controls_row"] button { font-size:.72rem !important; padding:7px 8px !important; }
+  }
   [class*="st-key-sound_enabled_toggle"] { padding:5px 8px; border:1px solid #393326; border-radius:12px; background:#15191F; }
   [class*="st-key-sound_enabled_toggle"] label { font-size:.92rem !important; font-weight:650 !important; }
   [class*="st-key-sound_enabled_toggle"] [role="switch"] { transform:scale(.88); transform-origin:center; }
@@ -442,14 +450,41 @@ battery_progress = st.empty()
 if refresh:
     battery_progress.progress(8, text="🔋 Preparando actualización…")
 
-sound_toggle_state = st.session_state.get("sound_enabled_toggle", not st.session_state.sound_muted)
-sound_enabled = st.toggle(
-    "🔊 Sonido activado" if sound_toggle_state else "🔇 Sonido desactivado",
-    value=not st.session_state.sound_muted,
-    key="sound_enabled_toggle",
-    help="Activa o desactiva las alertas sonoras del escáner."
-)
-st.session_state.sound_muted = not sound_enabled
+with st.container(key="sound_controls_row"):
+    sound_toggle_state = st.session_state.get("sound_enabled_toggle", not st.session_state.sound_muted)
+    sound_col, test_col = st.columns([1.25, 1], gap="small")
+    with sound_col:
+        sound_enabled = st.toggle(
+            "🔊 Sonido activado" if sound_toggle_state else "🔇 Sonido desactivado",
+            value=not st.session_state.sound_muted,
+            key="sound_enabled_toggle",
+            help="Activa o desactiva las alertas sonoras del escáner."
+        )
+        st.session_state.sound_muted = not sound_enabled
+    with test_col:
+        st.components.v1.html("""
+<div style="display:flex;align-items:center;justify-content:flex-start;min-height:44px">
+  <button id="scanner-test-sound" type="button" style="padding:9px 12px;border-radius:10px;border:1px solid #FACC15;background:#242014;color:#FACC15;font:600 13px system-ui;white-space:nowrap;cursor:pointer">🔊 Probar sonido</button>
+</div>
+<script>
+(() => {
+ const b=document.getElementById('scanner-test-sound');
+ if(!b || b.dataset.bound) return;
+ b.dataset.bound='1';
+ b.addEventListener('click', () => {
+   try {
+     const C=window.AudioContext||window.webkitAudioContext;
+     if(!C) throw new Error('audio');
+     const c=new C(), o=c.createOscillator(), g=c.createGain();
+     o.type='sine'; o.frequency.value=880; g.gain.value=0.08;
+     o.connect(g); g.connect(c.destination); o.start();
+     setTimeout(()=>{o.stop();c.close();},180);
+     b.textContent='✓ Sonido probado';
+   } catch(e) { b.textContent='⚠️ Sonido no disponible'; }
+ });
+})();
+</script>
+""", height=52, scrolling=False)
 
 recent_events = st.session_state.notification_events[-3:]
 events_json = json.dumps(recent_events, ensure_ascii=False).replace("</", "<\\/")
@@ -458,7 +493,6 @@ st.components.v1.html(
     f"""
     <div id="scanner-notices" style="font-family:system-ui;color:#f4f4f5"></div>
     <button id="scanner-test-sound" type="button" style="margin:3px 0 5px;padding:6px 10px;border-radius:9px;border:1px solid #FACC15;background:#242014;color:#FACC15;font-weight:700;cursor:pointer">🔊 Probar sonido</button>
-    <div style="font:12px system-ui;color:#A1A1AA;margin-bottom:4px">El sonido puede requerir interacción del usuario y que esta página permanezca abierta.</div>
     <script>
     const events = {events_json};
     const muted = {muted_js};
