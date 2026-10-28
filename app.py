@@ -1065,6 +1065,51 @@ st.components.v1.html(
 
 
 
+# Vista dedicada del análisis seleccionado: conserva el encuentro y permite regresar a la lista.
+_current_tool_page = st.session_state.get("main_fixture_tool") or {}
+_analysis_page_id = str(_current_tool_page.get("fixture_id") or "")
+_analysis_page_tool = _current_tool_page.get("tool")
+_analysis_page_active = bool(_analysis_page_id and _analysis_page_tool)
+if _analysis_page_active:
+    st.markdown(
+        f"""
+        <style>
+        /* Pantalla de análisis: ocultar controles generales y dejar solo el partido elegido. */
+        [class*="st-key-control_row"], [class*="st-key-scan_cta_card"],
+        [class*="st-key-scan-progress"], .brand-header {{ display:none !important; }}
+        [class*="st-key-live_now_section"] [data-testid="stExpander"]:not([class*="st-key-live_match_{_analysis_page_id}"]):not(:has([class*="st-key-live_match_{_analysis_page_id}"])) {{
+            display:none !important;
+        }}
+        [class*="st-key-live_now_section"] [data-testid="stExpander"]:not([class*="st-key-live_match_{_analysis_page_id}"]) > details > summary {{
+            display:none !important;
+        }}
+        [class*="st-key-live_now_section"] [class*="st-key-live_match_{_analysis_page_id}"] {{
+            width:100% !important; max-width:100% !important; margin:0 !important;
+        }}
+        [class*="st-key-live_now_section"] [class*="st-key-live_match_{_analysis_page_id}"] > details > summary {{
+            display:none !important;
+        }}
+        [class*="st-key-live_now_section"] [class*="st-key-live_match_{_analysis_page_id}"] > details > div {{
+            padding:0 !important; margin:0 !important;
+        }}
+        [class*="st-key-live_now_section"] [class*="st-key-live_match_{_analysis_page_id}"] [class*="st-key-main_stats_"],
+        [class*="st-key-live_now_section"] [class*="st-key-live_match_{_analysis_page_id}"] [class*="st-key-main_market_"],
+        [class*="st-key-live_now_section"] [class*="st-key-live_match_{_analysis_page_id}"] [class*="st-key-main_h2h_"] {{
+            display:none !important;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+    with st.container(key="analysis_page_nav"):
+        if st.button("← Volver a partidos", key="analysis_page_back", use_container_width=True):
+            st.session_state["main_fixture_tool"] = {}
+            st.rerun()
+    st.markdown(
+        '<div class="match-analysis-panel"><div class="match-analysis-kicker">FOOTBALL LAB · ANÁLISIS INDIVIDUAL</div><div class="match-analysis-title">Vista ampliada del partido</div><div class="signal-meta">Consulta el análisis seleccionado y vuelve a los partidos cuando termines.</div></div>',
+        unsafe_allow_html=True,
+    )
+
 fixtures = st.session_state.live_fixtures
 if not fixtures:
     st.markdown("### Tu centro de análisis")
@@ -1140,6 +1185,8 @@ else:
                                             st.session_state.stats_cache[stats_key] = []
                                             st.session_state.setdefault("stats_errors", {})[stats_key] = str(stats_exc)
                                     st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "stats"}
+                                    st.session_state[f"live_match_{match_id}"] = True
+                                    st.session_state[f"live_league_{country}_{league_name}"] = True
                                     st.rerun()
                                 if show_h2h:
                                     if "h2h_cache" not in st.session_state:
@@ -1159,12 +1206,18 @@ else:
                                         except Exception as h2h_exc:
                                             st.session_state.h2h_cache[h2h_key] = {"error": str(h2h_exc)}
                                     st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "h2h"}
+                                    st.session_state[f"live_match_{match_id}"] = True
+                                    st.session_state[f"live_league_{country}_{league_name}"] = True
                                     st.rerun()
                                 if show_goals:
                                     st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "market", "market": "goals"}
+                                    st.session_state[f"live_match_{match_id}"] = True
+                                    st.session_state[f"live_league_{country}_{league_name}"] = True
                                     st.rerun()
                                 if show_corners:
                                     st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "market", "market": "corners"}
+                                    st.session_state[f"live_match_{match_id}"] = True
+                                    st.session_state[f"live_league_{country}_{league_name}"] = True
                                     st.rerun()
                                 selected_tool = st.session_state.get("main_fixture_tool") or {}
                                 if str(selected_tool.get("fixture_id")) == str(match_id):
