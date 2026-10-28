@@ -424,19 +424,20 @@ if "signal_rows" not in st.session_state:
 if "signal_history_warning_shown" not in st.session_state:
     st.session_state.signal_history_warning_shown = False
 
-control_row = st.columns([1.65, 1], gap="small")
-with control_row[0]:
-    st.session_state.auto_refresh_enabled = st.toggle(
-        "Actualización automática (60 s)",
-        value=st.session_state.auto_refresh_enabled,
-        help="Actualiza los marcadores cada 60 segundos mientras esta página esté abierta."
-    )
-with control_row[1]:
-    refresh = st.button(
-        "🔄 Actualizar scan",
-        type="primary",
-        help="Actualiza el listado de partidos y ejecuta el escaneo disponible."
-    )
+with st.container(key="control_row"):
+    control_row = st.columns([1.5, 1], gap="small")
+    with control_row[0]:
+        st.session_state.auto_refresh_enabled = st.toggle(
+            "Actualización automática (60 s)",
+            value=st.session_state.auto_refresh_enabled,
+            help="Actualiza los marcadores cada 60 segundos mientras esta página esté abierta."
+        )
+    with control_row[1]:
+        refresh = st.button(
+            "🔋 Actualizar scan",
+            type="primary",
+            help="Actualiza el listado de partidos y ejecuta el escaneo disponible."
+        )
 battery_progress = st.empty()
 if refresh:
     battery_progress.progress(8, text="🔋 Preparando actualización…")
