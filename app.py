@@ -657,7 +657,10 @@ st.markdown("""
     display:flex; min-height:82px; flex-direction:column; align-items:center; justify-content:center; gap:7px;
     border:1px solid #A88921; border-radius:13px; background:linear-gradient(145deg,#24200F,#111419);
   }
-  .fl-match-minute { color:#FFE566; font-size:1.12rem; line-height:1.1; font-weight:850; font-variant-numeric:tabular-nums; }
+  .fl-match-minute { display:flex; align-items:baseline; justify-content:center; gap:1px; color:#FFE566; font-size:1.12rem; line-height:1.1; font-weight:850; font-variant-numeric:tabular-nums; letter-spacing:.1px; }
+  .fl-match-minute-main { font-size:1.12rem; font-weight:900; }
+  .fl-match-clock-separator { color:#FACC15; opacity:.85; font-size:.98rem; font-weight:800; }
+  .fl-match-seconds { color:#FFF0A3; font-size:.92rem; font-weight:750; }
   .fl-match-live { color:#FFF; background:#E23D32; border-radius:5px; padding:3px 7px; font-size:.62rem; font-weight:850; letter-spacing:.7px; }
   .fl-match-teams { min-width:0; display:flex; flex-direction:column; gap:11px; }
   .fl-match-team { display:grid; grid-template-columns:29px 25px minmax(0,1fr); align-items:center; gap:8px; color:#F4F4F5; font-size:.94rem; font-weight:650; line-height:1.2; }
@@ -697,6 +700,9 @@ st.markdown("""
     .fl-match-scoreboard { grid-template-columns:82px minmax(0,1fr); gap:9px; padding:10px 8px; border-radius:14px; }
     .fl-match-clock { min-height:76px; }
     .fl-match-minute { font-size:1rem; }
+    .fl-match-minute-main { font-size:1rem; }
+    .fl-match-clock-separator { font-size:.88rem; }
+    .fl-match-seconds { font-size:.82rem; }
     .fl-match-team { grid-template-columns:25px 21px minmax(0,1fr); gap:5px; font-size:.78rem; }
     .fl-match-goals { font-size:1.2rem; }
     .fl-match-crest,.fl-match-crest-empty { width:21px; }
@@ -772,8 +778,29 @@ st.components.v1.html("""
       if (target) target.textContent = localStamp();
     } catch (e) {}
   }
+
+  // Reloj visual del partido: cuenta segundos localmente entre actualizaciones de la API.
+  // No realiza peticiones adicionales y se resincroniza cuando Streamlit vuelve a renderizar el marcador.
+  function tickMatchClocks() {
+    try {
+      const doc = window.parent.document;
+      doc.querySelectorAll(".fl-match-minute[data-base-minute]").forEach(el => {
+        const baseMinute = Number(el.dataset.baseMinute);
+        if (!Number.isFinite(baseMinute)) return;
+        if (!el.dataset.clockStartedAt) el.dataset.clockStartedAt = String(Date.now());
+        const elapsedSeconds = Math.max(0, Math.floor((Date.now() - Number(el.dataset.clockStartedAt)) / 1000));
+        const minute = baseMinute + Math.floor(elapsedSeconds / 60);
+        const second = elapsedSeconds % 60;
+        const pad = n => String(n).padStart(2, "0");
+        el.innerHTML = '<span class="fl-match-minute-main">' + minute + '</span><span class="fl-match-clock-separator">:</span><span class="fl-match-seconds">' + pad(second) + '</span>';
+        el.setAttribute("aria-label", minute + " minutos " + second + " segundos");
+      });
+    } catch (e) {}
+  }
   applyLocalTime();
-  setTimeout(applyLocalTime, 250);
+  tickMatchClocks();
+  setInterval(() => { applyLocalTime(); tickMatchClocks(); }, 1000);
+  setTimeout(() => { applyLocalTime(); tickMatchClocks(); }, 250);
 })();
 </script>
 """, height=0, width=0, scrolling=False)
@@ -1493,7 +1520,8 @@ else:
                             # La única flecha para contraer/expandir es la de la liga.
                             with st.container(key=f"live_match_{match_id}"):
                                 # Marcador detallado primero: reloj a la izquierda y una fila por equipo.
-                                _clock_text = f"{match_minute}′" if match_minute is not None else str(((match_fixture.get("status") or {}).get("short") or "EN VIVO"))
+                                _clock_text = f"{match_minute}:00" if match_minute is not None else str(((match_fixture.get("status") or {}).get("short") or "EN VIVO"))
+                                _clock_data_attr = f' data-base-minute="{int(match_minute)}"' if match_minute is not None else ""
                                 _home_score = match_goals.get("home") if match_goals.get("home") is not None else "—"
                                 _away_score = match_goals.get("away") if match_goals.get("away") is not None else "—"
                                 _home_crest = f'<img class="fl-match-crest" src="{html.escape(match_home_logo, quote=True)}" alt="">' if match_home_logo else '<span class="fl-match-crest-empty">⚽</span>'
@@ -1502,7 +1530,7 @@ else:
                                 _live_badge = '<span class="fl-match-live">EN VIVO</span>' if _status_short in {"1H", "HT", "2H", "ET", "BT", "P", "LIVE"} or match_minute is not None else ""
                                 st.markdown(
                                     f'<div class="fl-match-scoreboard">'
-                                    f'<div class="fl-match-clock"><div class="fl-match-minute">{html.escape(_clock_text)}</div>{_live_badge}</div>'
+                                    f'<div class="fl-match-clock"><div class="fl-match-minute"{_clock_data_attr}>{html.escape(_clock_text)}</div>{_live_badge}</div>'
                                     f'<div class="fl-match-teams">'
                                     f'<div class="fl-match-team"><span class="fl-match-goals">{html.escape(str(_home_score))}</span>{_home_crest}<span class="fl-match-team-name">{html.escape(match_home_name)}</span></div>'
                                     f'<div class="fl-match-team"><span class="fl-match-goals">{html.escape(str(_away_score))}</span>{_away_crest}<span class="fl-match-team-name">{html.escape(match_away_name)}</span></div>'
