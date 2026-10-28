@@ -1235,13 +1235,18 @@ else:
                                 if show_h2h:
                                     if "h2h_cache" not in st.session_state:
                                         st.session_state.h2h_cache = {}
-                                    h2h_key = f"{match_home_id}-{match_away_id}-{(match.get('league') or {}).get('id', 'all')}"
+                                    _match_league = match.get("league") or {}
+                                    _match_season = _match_league.get("season")
+                                    h2h_key = f"{match_home_id}-{match_away_id}-{_match_league.get('id', 'all')}-{_match_season or 'season-unknown'}"
                                     if not match_home_id or not match_away_id:
                                         st.warning("La API no entregó los identificadores de ambos equipos.")
+                                    elif not _match_season:
+                                        st.warning("La API no entregó la temporada de esta competición, necesaria para consultar el H2H.")
                                     elif h2h_key not in st.session_state.h2h_cache:
                                         try:
-                                            league_id = (match.get("league") or {}).get("id")
-                                            h2h_payload = api_get("fixtures/headtohead", {"h2h": f"{match_home_id}-{match_away_id}", "last": 20, **({"league": league_id} if league_id else {})})
+                                            league_id = _match_league.get("id")
+                                            # API-Football exige el parámetro season en fixtures/headtohead.
+                                            h2h_payload = api_get("fixtures/headtohead", {"h2h": f"{match_home_id}-{match_away_id}", "season": _match_season, "last": 20, **({"league": league_id} if league_id else {})})
                                             h2h_matches = h2h_payload.get("response") or []
                                             if league_id:
                                                 h2h_matches = [past for past in h2h_matches if (past.get("league") or {}).get("id") == league_id]
@@ -1326,7 +1331,9 @@ else:
                                         else:
                                             st.info("La API no entregó estadísticas para este partido.")
                                     elif tool_name == "h2h":
-                                        h2h_key = f"{match_home_id}-{match_away_id}-{(match.get('league') or {}).get('id', 'all')}"
+                                        _match_league = match.get("league") or {}
+                                        _match_season = _match_league.get("season")
+                                        h2h_key = f"{match_home_id}-{match_away_id}-{_match_league.get('id', 'all')}-{_match_season or 'season-unknown'}"
                                         h2h_data = st.session_state.get("h2h_cache", {}).get(h2h_key)
                                         st.markdown('<div class="match-analysis-kicker">Historial · misma competición</div><div class="match-analysis-title">Enfrentamientos directos</div>', unsafe_allow_html=True)
                                         if isinstance(h2h_data, dict) and h2h_data.get("error"):
