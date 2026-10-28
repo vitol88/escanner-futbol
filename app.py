@@ -190,13 +190,24 @@ st.markdown("""
   [class*="st-key-scan_cta_card"] { margin-top:10px !important; margin-bottom:0 !important; }
   [class*="st-key-analysis_scan_cta"] { margin:.35rem 0 .65rem !important; }
   [class*="st-key-analysis_scan_cta"] [data-testid="stButton"] > button {
-     width:auto !important; min-height:2.5rem !important; padding:.5rem 1rem !important;
+     width:100% !important; min-height:2.55rem !important; padding:.45rem .55rem !important;
      border-radius:12px !important; border:1px solid #FACC15 !important;
      background:linear-gradient(135deg,#FFE36A,#FACC15) !important; color:#171717 !important;
-     font-size:.92rem !important; font-weight:750 !important; box-shadow:0 3px 12px #FACC1533 !important;
+     font-size:.82rem !important; font-weight:750 !important; box-shadow:0 3px 12px #FACC1533 !important;
   }
   [class*="st-key-analysis_scan_cta"] [data-testid="stButton"] > button:hover {
      background:linear-gradient(135deg,#FFF0A3,#FFD629) !important; border-color:#FFF0A3 !important;
+  }
+  [class*="st-key-analysis_scan_radar"] [data-testid="stButton"] > button {
+     position:relative !important; overflow:hidden !important; padding-left:2.4rem !important;
+     background:linear-gradient(135deg,#1A1B20,#101115) !important; color:#FACC15 !important;
+     border-color:#7D6820 !important;
+  }
+  [class*="st-key-analysis_scan_radar"] [data-testid="stButton"] > button::before {
+     content:""; position:absolute; left:.55rem; top:50%; width:1.25rem; height:1.25rem;
+     transform:translateY(-50%); border:2px solid #FACC15; border-radius:50%;
+     background:repeating-radial-gradient(circle,transparent 0 3px,#FACC15 4px 5px,transparent 6px 8px);
+     animation:scanner-radar-spin 1.8s linear infinite;
   }
   /* Acercar el panel En vivo ahora al escáner principal */
   [class*="st-key-live_now_section"] { margin-top:-64px !important; padding-top:0 !important; }
@@ -1338,7 +1349,12 @@ else:
                                         market_key = selected_tool.get("market")
                                         if market_key == "goals":
                                             with st.container(key=f"analysis_scan_cta_goals_{match_id}"):
-                                                if st.button("⟳  Actualizar análisis de goles", key=f"analysis_scan_goals_{match_id}"):
+                                                _goal_scan_cols = st.columns(2, gap="small")
+                                                with _goal_scan_cols[0]:
+                                                    _goal_radar_clicked = st.button("⚽ Escanear en vivo", key=f"analysis_scan_radar_goals_{match_id}")
+                                                with _goal_scan_cols[1]:
+                                                    _goal_refresh_clicked = st.button("⟳ Actualizar scan", key=f"analysis_scan_goals_{match_id}")
+                                                if _goal_radar_clicked or _goal_refresh_clicked:
                                                     manual_scan = True
                                                     internal_scan_requested = True
                                                     st.markdown('<div class="scan-running-status"><span class="scan-code-icon">⟳</span><div><strong>ESCANEANDO…</strong><div class="scan-running-subtitle">Actualizando señales de goles y datos en vivo</div></div><span class="scan-sweep"></span></div>', unsafe_allow_html=True)
@@ -1596,7 +1612,12 @@ else:
                                                 st.info("Primero pulsa «Escanear todos los partidos en vivo». Después, vuelve a abrir Goles y señales para ver promedios por localía, lectura en vivo y tip principal.")
                                         elif market_key == "corners":
                                             with st.container(key=f"analysis_scan_cta_corners_{match_id}"):
-                                                if st.button("⟳  Actualizar análisis de córners", key=f"analysis_scan_corners_{match_id}"):
+                                                _corner_scan_cols = st.columns(2, gap="small")
+                                                with _corner_scan_cols[0]:
+                                                    _corner_radar_clicked = st.button("⚽ Escanear en vivo", key=f"analysis_scan_radar_corners_{match_id}")
+                                                with _corner_scan_cols[1]:
+                                                    _corner_refresh_clicked = st.button("⟳ Actualizar scan", key=f"analysis_scan_corners_{match_id}")
+                                                if _corner_radar_clicked or _corner_refresh_clicked:
                                                     manual_scan = True
                                                     internal_scan_requested = True
                                                     st.markdown('<div class="scan-running-status"><span class="scan-code-icon">⟳</span><div><strong>ESCANEANDO…</strong><div class="scan-running-subtitle">Actualizando proyección y datos en vivo</div></div><span class="scan-sweep"></span></div>', unsafe_allow_html=True)
