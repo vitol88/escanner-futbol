@@ -73,3 +73,15 @@ Esta versión aún no incorpora un archivo histórico minuto a minuto ni un hist
 - El botón «Probar sonido» ayuda a comprobar el audio después de una interacción del usuario. El navegador puede bloquear sonido automático y notificaciones si la página no está activa o no se concedieron permisos.
 - Las notificaciones push con la app cerrada en iPhone todavía requieren un servicio push, service worker, suscripción y claves de configuración; no se consideran implementadas por estas alertas dentro de Streamlit.
 - El campo esquemático y las probabilidades son informativos. Los modelos siguen siendo exploratorios y no han demostrado calibración ni rentabilidad.
+
+
+### Herramientas en cada partido en vivo
+
+En la lista principal, abre el desplegable **Herramientas** de cada encuentro para usar los botones:
+
+- **Estadísticas:** solicita bajo demanda posesión, tiros, tiros a puerta, córners, faltas, tarjetas, fueras de juego y porcentaje de pases, según lo que entregue la API.
+- **H2H:** consulta los últimos cinco enfrentamientos directos y muestra fecha, equipos y marcador. Se cachea por pareja de equipos durante la sesión.
+- **Detalle:** muestra marcador y minuto.
+- **Goles, Córners, Empate y Ambos marcan:** seleccionan el mercado y recuerdan que debes ejecutar el escaneo para obtener la lectura analítica correspondiente.
+
+Estas consultas bajo demanda pueden consumir solicitudes del plan gratuito de API-Football. Si la API no proporciona estadísticas o H2H, la aplicación debe mostrarlo explícitamente en vez de rellenarlo con datos inventados.
