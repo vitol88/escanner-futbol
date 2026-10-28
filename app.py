@@ -264,6 +264,19 @@ st.markdown("""
   [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] details > div > [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"] [data-testid="stExpander"] > details > summary p > strong:last-child {
     margin-left:auto !important; padding-left:14px !important; white-space:nowrap !important;
   }
+  /* FIX: seleccionar directamente cada expander de liga mediante su clave Streamlit. */
+  [class*="st-key-live_league_"] [data-testid="stExpander"] > details > summary {
+    width:100% !important; box-sizing:border-box !important;
+  }
+  [class*="st-key-live_league_"] [data-testid="stExpander"] > details > summary p {
+    display:flex !important; align-items:center !important; width:100% !important;
+    min-width:0 !important; box-sizing:border-box !important; gap:8px !important;
+  }
+  [class*="st-key-live_league_"] [data-testid="stExpander"] > details > summary p strong:last-of-type,
+  [class*="st-key-live_league_"] [data-testid="stExpander"] > details > summary p > span:last-child {
+    margin-left:auto !important; padding-left:16px !important; white-space:nowrap !important;
+    flex:0 0 auto !important;
+  }
   /* Resalte discreto de toda la fila al pasar el cursor, no solo de la flecha. */
   [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] > details > summary {
     transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease !important;
