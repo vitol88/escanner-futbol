@@ -1074,42 +1074,49 @@ if _analysis_page_active:
     st.markdown(
         f"""
         <style>
-        /* Pantalla de análisis: ocultar controles generales y dejar solo el partido elegido. */
+        /* Pantalla dedicada: dejar únicamente el botón de regreso y el contenido del análisis elegido. */
         [class*="st-key-control_row"], [class*="st-key-scan_cta_card"],
-        [class*="st-key-scan-progress"], .brand-header {{ display:none !important; }}
-        [class*="st-key-live_now_expander"] > [data-testid="stExpander"] > details > summary {{
-            display:none !important;
-        }}
-        [class*="st-key-live_league_"]:not(:has([class*="st-key-live_match_{_analysis_page_id}"])) {{
-            display:none !important;
-        }}
-        [class*="st-key-live_league_"]:has([class*="st-key-live_match_{_analysis_page_id}"]) > [data-testid="stExpander"] > details > summary {{
-            display:none !important;
-        }}
-        [class*="st-key-live_league_"] [class*="st-key-live_match_"]:not([class*="st-key-live_match_{_analysis_page_id}"]) {{
-            display:none !important;
-        }}
-        [class*="st-key-live_match_{_analysis_page_id}"] {{
-            display:block !important; width:100% !important; max-width:100% !important; margin:0 !important;
-        }}
-        [class*="st-key-live_match_{_analysis_page_id}"] > [data-testid="stExpander"] > details > summary {{
-            display:none !important;
-        }}
-        [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stExpander"] > details > div {{
-            padding:0 !important; margin:0 !important;
-        }}
-        [class*="st-key-live_now_section"] [class*="st-key-live_match_{_analysis_page_id}"] [class*="st-key-main_stats_"],
-        [class*="st-key-live_now_section"] [class*="st-key-live_match_{_analysis_page_id}"] [class*="st-key-main_market_"],
-        [class*="st-key-live_now_section"] [class*="st-key-live_match_{_analysis_page_id}"] [class*="st-key-main_h2h_"] {{
-            display:none !important;
-        }}
+        [class*="st-key-scan-progress"], .brand-header, .match-analysis-panel {{ display:none !important; }}
+        /* Ocultar cabecera general, cabeceras de ligas y la cabecera del partido seleccionado. */
+        [class*="st-key-live_now_expander"] summary,
+        [class*="st-key-live_league_"] summary,
+        [class*="st-key-live_match_{_analysis_page_id}"] summary {{ display:none !important; }}
+        [class*="st-key-live_league_"]:not(:has([class*="st-key-live_match_{_analysis_page_id}"])) {{ display:none !important; }}
+        [class*="st-key-live_league_"] [class*="st-key-live_match_"]:not([class*="st-key-live_match_{_analysis_page_id}"]) {{ display:none !important; }}
+        /* La lista de ligas y su contenedor no deben añadir marco, relleno ni huecos a la vista de análisis. */
+        [class*="st-key-live_now_section"] {{ margin:0 !important; padding:0 !important; }}
+        [class*="st-key-live_now_expander"] {{ border:0 !important; margin:0 !important; padding:0 !important; }}
+        [class*="st-key-live_league_"]:has([class*="st-key-live_match_{_analysis_page_id}"]) {{ border:0 !important; margin:0 !important; padding:0 !important; }}
+        [class*="st-key-live_match_{_analysis_page_id}"] {{ display:block !important; width:100% !important; max-width:100% !important; margin:0 !important; padding:0 !important; border:0 !important; }}
+        [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stExpander"] {{ border:0 !important; margin:0 !important; padding:0 !important; }}
+        [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stExpander"] > details > div {{ padding:0 !important; margin:0 !important; }}
+        /* Ocultar los cuatro botones de navegación del partido: queda solo el panel correspondiente al botón pulsado. */
+        [class*="st-key-main_stats_{_analysis_page_id}"],
+        [class*="st-key-main_market_{_analysis_page_id}_goals"],
+        [class*="st-key-main_market_{_analysis_page_id}_corners"],
+        [class*="st-key-main_h2h_{_analysis_page_id}"] {{ display:none !important; }}
+        /* El contenido del análisis debe ocupar todo el ancho y no heredar espaciados del listado. */
+        [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stVerticalBlock"] {{ gap:.35rem !important; row-gap:.35rem !important; }}
+        [class*="st-key-analysis_page_nav"] {{ margin-bottom:.5rem !important; }}
         </style>
         """,
         unsafe_allow_html=True,
     )
     with st.container(key="analysis_page_nav"):
-        if st.button("← Volver a partidos", key="analysis_page_back", use_container_width=True):
+        if st.button("← Volver al partido", key="analysis_page_back", use_container_width=True):
+            # Mantener abierta la liga y el encuentro que originaron esta vista.
+            st.session_state[f"live_match_{_analysis_page_id}"] = True
+            for _match in st.session_state.get("live_fixtures", []):
+                _fixture = _match.get("fixture") or {}
+                if str(_fixture.get("id")) == _analysis_page_id:
+                    _league = _match.get("league") or {}
+                    _country = _league.get("country") or "Otros países"
+                    _league_name = _league.get("name") or "Liga sin nombre"
+                    st.session_state[f"live_league_{_country}_{_league_name}"] = True
+                    break
+            st.session_state["live_now_expander"] = True
             st.session_state["main_fixture_tool"] = {}
+            st.session_state["return_to_fixture_id"] = _analysis_page_id
             st.rerun()
     st.markdown(
         '<div class="match-analysis-panel"><div class="match-analysis-kicker">FOOTBALL LAB · ANÁLISIS INDIVIDUAL</div><div class="match-analysis-title">Vista ampliada del partido</div><div class="signal-meta">Consulta el análisis seleccionado y vuelve a los partidos cuando termines.</div></div>',
