@@ -150,7 +150,7 @@ def build_deep_goal_context(
         team_id = team.get("id")
         if not team_id or not league_id or not season:
             return []
-        params = {"team": team_id, "last": 8}
+        params = {"team": team_id, "last": 20}
         # API-Football supports league/season filters; if these are absent use all recent matches.
         params.update({"league": league_id, "season": season})
         matches = get_cached(f"form:{team_id}:{league_id}:{season}", "fixtures", params)
@@ -168,7 +168,8 @@ def build_deep_goal_context(
             gf, ga = _team_goals(old, team_id)
             if isinstance(gf, int) and isinstance(ga, int):
                 selected.append({**old, "_gf": gf, "_ga": ga})
-        return selected[:5]
+        selected.sort(key=lambda item: str(((item.get("fixture") or {}).get("date") or "")), reverse=True)
+        return selected[:3]
 
     home_recent = recent(home, "home")
     away_recent = recent(away, "away")
