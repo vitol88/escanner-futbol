@@ -1402,8 +1402,6 @@ else:
                                                         st.caption("Contexto numérico solo para alto riesgo; no genera una señal por sí solo: " + "; ".join(patterns) + ".")
                                                     if not live_rows:
                                                         st.caption("No hay cuotas de córners devueltas por la API para este partido; no se inventan cuotas ni se sustituye por una cuota estimada.")
-                                            else:
-                                                st.caption("Sin datos suficientes para proyectar córners y evaluar cuotas en vivo.")
                                             elif corner_item:
                                                 st.warning(f"No se pudo cargar el análisis de córners: {corner_item.get('error')}")
                                             else:
