@@ -74,7 +74,7 @@ st.markdown("""
   [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label p, [class*="st-key-sound_control_card"] [data-testid="stToggle"] label p { color:#F4D778 !important; font-size:.76rem !important; line-height:1.1 !important; white-space:nowrap !important; margin:0 !important; }
   [class*="st-key-auto_refresh_control_card"] [data-testid="stTooltipIcon"], [class*="st-key-auto_refresh_control_card"] [data-testid="stTooltipHoverTarget"], [class*="st-key-sound_control_card"] [data-testid="stTooltipIcon"], [class*="st-key-sound_control_card"] [data-testid="stTooltipHoverTarget"] { display:none !important; }
   [class*="st-key-auto_refresh_control_card"] [role="switch"], [class*="st-key-sound_control_card"] [role="switch"] { flex:0 0 auto !important; transform:scale(.74) !important; transform-origin:center !important; }
-  [class*="st-key-top_status_controls"] iframe { display:block !important; width:100% !important; height:56px !important; min-height:56px !important; overflow:visible !important; }
+  [class*="st-key-top_status_controls"] iframe { display:block !important; box-sizing:border-box !important; width:100% !important; height:56px !important; min-height:56px !important; margin:0 !important; padding:0 !important; border:0 !important; overflow:visible !important; }
   @media(max-width:640px) {
     [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { gap:.35rem !important; }
     [class*="st-key-auto_refresh_control_card"], [class*="st-key-sound_control_card"] { min-height:48px !important; padding:4px 2px !important; }
@@ -110,7 +110,44 @@ st.markdown("""
   [class*="st-key-sound_enabled_toggle"] [role="switch"][aria-checked="false"] > div,
   [data-testid="stToggle"] [role="switch"][aria-checked="false"] > div,
   button[role="switch"][aria-checked="false"] > div { background:#FFFFFF !important; }
-  /* Tarjeta compacta de acción principal del escáner */
+  /* Ajuste final: tres tarjetas del mismo tamaño y controles dorados */
+  [class*="st-key-auto_refresh_control_card"], [class*="st-key-sound_control_card"] {
+    width:100% !important; height:48px !important; min-height:48px !important; max-height:48px !important;
+    margin:0 !important; padding:0 4px !important; border:1px solid #D4A72C !important;
+    border-radius:11px !important; background:linear-gradient(145deg,#201D14,#111419) !important;
+    box-sizing:border-box !important; overflow:hidden !important;
+  }
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"],
+  [class*="st-key-sound_control_card"] [data-testid="stToggle"] {
+    width:100% !important; height:46px !important; min-height:46px !important; max-height:46px !important;
+    margin:0 !important; padding:0 !important; border:0 !important; border-radius:0 !important;
+    background:transparent !important; box-sizing:border-box !important;
+  }
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label p,
+  [class*="st-key-sound_control_card"] [data-testid="stToggle"] label p {
+    color:#F4D778 !important; font-size:.72rem !important; font-weight:650 !important;
+  }
+  [class*="st-key-auto_refresh_control_card"] [role="switch"],
+  [class*="st-key-sound_control_card"] [role="switch"] {
+    background:#242014 !important; background-color:#242014 !important; border:1px solid #D4A72C !important;
+    box-shadow:none !important; transform:scale(.72) !important;
+  }
+  [class*="st-key-auto_refresh_control_card"] [role="switch"][aria-checked="true"],
+  [class*="st-key-sound_control_card"] [role="switch"][aria-checked="true"],
+  [class*="st-key-auto_refresh_control_card"] button[role="switch"][aria-checked="true"],
+  [class*="st-key-sound_control_card"] button[role="switch"][aria-checked="true"] {
+    background:#FACC15 !important; background-color:#FACC15 !important; border-color:#FFE566 !important;
+  }
+  [class*="st-key-auto_refresh_control_card"] [role="switch"][aria-checked="true"] > div,
+  [class*="st-key-sound_control_card"] [role="switch"][aria-checked="true"] > div { background:#111419 !important; }
+  [class*="st-key-auto_refresh_control_card"] [role="switch"][aria-checked="false"],
+  [class*="st-key-sound_control_card"] [role="switch"][aria-checked="false"] {
+    background:#242014 !important; background-color:#242014 !important; border-color:#D4A72C !important;
+  }
+  [class*="st-key-auto_refresh_control_card"] [role="switch"][aria-checked="false"] > div,
+  [class*="st-key-sound_control_card"] [role="switch"][aria-checked="false"] > div { background:#D4A72C !important; }
+  [class*="st-key-top_status_controls"] iframe body { margin:0 !important; padding:0 !important; }
+    /* Tarjeta compacta de acción principal del escáner */
   [class*="st-key-scan_cta_card"] { margin-top:14px; margin-bottom:18px; }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] button, [class*="st-key-scan_cta_card"] button[kind="primary"] { position:relative !important; overflow:hidden !important; width:100% !important; min-height:145px !important; white-space:pre-line !important; text-align:left !important; padding:18px 18px 18px 49% !important; border-radius:22px !important; border:2px solid #FACC15 !important; background-color:#090A0D !important; background-image:radial-gradient(ellipse at 20% 50%,rgba(250,204,21,.10),transparent 42%),linear-gradient(135deg,#090A0D,#111319) !important; color:#F4F4F5 !important; font-size:clamp(1rem,3.8vw,1.35rem) !important; line-height:1.55 !important; font-weight:800 !important; box-shadow:inset 0 0 24px rgba(250,204,21,.06),0 0 0 1px rgba(250,204,21,.08) !important; }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before { content:""; position:absolute; left:4%; top:50%; width:min(38%,170px); aspect-ratio:1; height:auto; transform:translateY(-50%); border-radius:50%; border:3px solid #FACC15; background-color:#090A0D; background-image:radial-gradient(circle at center,#FACC15 0 6%,#14151A 7% 14%,transparent 15%),repeating-radial-gradient(circle at center,transparent 0 10px,rgba(250,204,21,.55) 11px 13px,transparent 14px 20px),conic-gradient(from 0deg,transparent 0 12%,rgba(250,204,21,.95) 16%,transparent 28% 48%,rgba(250,204,21,.45) 53%,transparent 68%); box-shadow:0 0 20px rgba(250,204,21,.45),inset 0 0 18px rgba(250,204,21,.25); animation:scanner-radar-spin 3s linear infinite; }
@@ -655,7 +692,7 @@ with st.container(key="top_status_controls"):
       with st.container(key="sound_control_card"):
         sound_toggle_state = st.session_state.get("sound_enabled_toggle", not st.session_state.sound_muted)
         sound_enabled = st.toggle(
-            "🔊 Sonido" if sound_toggle_state else "🔇 Sonido",
+            "◖)) Sonido" if sound_toggle_state else "◖)) Sonido",
             value=not st.session_state.sound_muted,
             key="sound_enabled_toggle",
             help="Activa o desactiva las alertas sonoras del escáner."
