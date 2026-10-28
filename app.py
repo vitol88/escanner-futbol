@@ -60,6 +60,10 @@ st.markdown("""
   [class*="st-key-sound_enabled_toggle"] { padding:5px 8px; border:1px solid #393326; border-radius:12px; background:#15191F; }
   [class*="st-key-sound_enabled_toggle"] label { font-size:.92rem !important; font-weight:650 !important; }
   [class*="st-key-sound_enabled_toggle"] [role="switch"] { transform:scale(.88); transform-origin:center; }
+  [data-testid="stStatusWidget"] { display:none !important; }
+  [class*="st-key-control_row"] { flex-wrap:nowrap !important; align-items:center !important; }
+  [class*="st-key-control_row"] button[kind="primary"] { background:#FACC15 !important; background-color:#FACC15 !important; color:#111419 !important; border:1px solid #FFE566 !important; box-shadow:none !important; }
+  [class*="st-key-control_row"] button[kind="primary"]:hover { background:#FFE566 !important; color:#111419 !important; }
   [class*="st-key-control_row"] button { min-height:2.45rem !important; padding:.35rem .65rem !important; border-radius:10px !important; font-size:.88rem !important; white-space:nowrap; }
   @media(max-width:640px) {
     [class*="st-key-control_row"] { gap:.45rem !important; }
@@ -420,7 +424,7 @@ if "signal_rows" not in st.session_state:
 if "signal_history_warning_shown" not in st.session_state:
     st.session_state.signal_history_warning_shown = False
 
-control_row = st.columns([1.35, 1])
+control_row = st.columns([1.65, 1], gap="small")
 with control_row[0]:
     st.session_state.auto_refresh_enabled = st.toggle(
         "Actualización automática (60 s)",
@@ -429,10 +433,13 @@ with control_row[0]:
     )
 with control_row[1]:
     refresh = st.button(
-        "↻ Actualizar scan",
+        "🔄 Actualizar scan",
         type="primary",
         help="Actualiza el listado de partidos y ejecuta el escaneo disponible."
     )
+battery_progress = st.empty()
+if refresh:
+    battery_progress.progress(8, text="🔋 Preparando actualización…")
 
 sound_toggle_state = st.session_state.get("sound_enabled_toggle", not st.session_state.sound_muted)
 sound_enabled = st.toggle(
@@ -534,7 +541,11 @@ if auto_tick is not None:
 
 if should_refresh:
     try:
+        if refresh:
+            battery_progress.progress(18, text="🔋 Consultando partidos en vivo…")
         data = api_get("fixtures", {"live": "all"})
+        if refresh:
+            battery_progress.progress(38, text="🔋 Marcadores recibidos · revisando córners…")
         new_fixtures = data.get("response", [])
         old_snapshot = st.session_state.score_snapshot
         current_snapshot = {}
@@ -575,7 +586,12 @@ if should_refresh:
             batch_size = min(5, len(live_for_corners))
             offset = st.session_state.corner_rotation_index % len(live_for_corners)
             rotated = live_for_corners[offset:] + live_for_corners[:offset]
-            for match in rotated[:batch_size]:
+            for corner_idx, match in enumerate(rotated[:batch_size]):
+                if refresh:
+                    battery_progress.progress(
+                        38 + int(48 * corner_idx / max(1, batch_size)),
+                        text=f"🔋 Revisando córners {corner_idx + 1}/{batch_size}…"
+                    )
                 fixture_data = match.get("fixture") or {}
                 fixture_id = str(fixture_data.get("id"))
                 try:
@@ -613,8 +629,12 @@ if should_refresh:
             "corner_stats_checked": min(5, len(live_for_corners)),
             "last_auto_scan": st.session_state.last_refresh,
         }
+        if refresh:
+            battery_progress.progress(100, text="🔋 Actualización completada")
     except Exception as exc:
         st.session_state.last_auto_refresh_error = str(exc)
+        if refresh:
+            battery_progress.progress(100, text="⚠️ Actualización finalizada con error")
 
 if st.session_state.last_refresh:
     st.caption(f"Última actualización: {st.session_state.last_refresh} · intervalo: 60 segundos")
