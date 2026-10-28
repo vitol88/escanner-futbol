@@ -1689,15 +1689,13 @@ else:
                                                     {"Indicador": "Córners a favor del visitante fuera", "Promedio": history.get("away_corners_for"), "Muestra": history.get("away_corner_sample", 0)},
                                                     {"Indicador": "Córners concedidos por el visitante fuera", "Promedio": history.get("away_corners_against"), "Muestra": history.get("away_corner_sample", 0)},
                                                 ]
-                                                history_html = '<table class="history-table"><thead><tr><th>Indicador</th><th>Promedio</th><th>Muestra</th></tr></thead><tbody>'
+                                                history_html = '<table class="history-table"><thead><tr><th>Indicador</th><th>Promedio</th></tr></thead><tbody>'
                                                 for row in history_rows:
                                                     avg = row["Promedio"]
                                                     avg_text = f"{avg:.2f}".rstrip("0").rstrip(".") if isinstance(avg, (int, float)) else "N/D"
-                                                    sample_text = row["Muestra"] if row["Muestra"] else "0"
-                                                    history_html += f"<tr><td>{html.escape(row['Indicador'])}</td><td>{avg_text}</td><td>{sample_text}</td></tr>"
+                                                    history_html += f"<tr><td>{html.escape(row['Indicador'])}</td><td>{avg_text}</td></tr>"
                                                 history_html += "</tbody></table>"
                                                 st.markdown(history_html, unsafe_allow_html=True)
-                                                st.caption(history.get("note", "Promedios históricos de partidos recientes; N/D significa que la API no entregó datos suficientes."))
                                                 # El diagnóstico se conserva internamente en history para depuración,
                                                 # pero no se muestra en la interfaz normal del usuario.
 
