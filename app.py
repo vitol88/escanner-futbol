@@ -383,11 +383,6 @@ if show_splash_intro:
       <div class="splash-brand">FOOTBALL LAB</div>
       <div class="splash-tagline">DETECTA · COMPARA · ANALIZA</div>
     </div>
-    <div class="update-toast" role="status">
-      <div class="update-toast-icon">◷</div>
-      <div><div class="update-toast-title">ÚLTIMA ACTUALIZACIÓN</div><div class="update-toast-time">{header_time}</div></div>
-      <div class="update-toast-check">✓</div>
-    </div>
     """, unsafe_allow_html=True)
     st.session_state["football_splash_shown"] = True
 
@@ -414,6 +409,7 @@ st.markdown(f"""
     <svg class="brand-refresh" viewBox="0 0 32 32" fill="none" stroke="#FACC15" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M26 10V4m0 0h-6m6 0-5 5a11 11 0 0 0-18 5"/><path d="M6 22v6m0 0h6m-6 0 5-5a11 11 0 0 0 18-5"/></svg>
   </div>
 </div>
+{f'<div class="update-toast" role="status"><div class="update-toast-icon">◷</div><div><div class="update-toast-title">ÚLTIMA ACTUALIZACIÓN</div><div class="update-toast-time">{header_time}</div></div><div class="update-toast-check">✓</div></div>' if show_splash_intro else ''}
 """, unsafe_allow_html=True)
 # Cabecera limpia; los detalles del modelo aparecen en Rendimiento del modelo.
 
