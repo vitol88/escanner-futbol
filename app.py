@@ -64,18 +64,21 @@ st.markdown("""
   div.stButton > button[kind="primary"]:hover, div.stDownloadButton > button:hover {
     background: #FFE566; border-color: #FFE566; color: #111111;
   }
-  /* Tres controles principales compactos, en una sola fila bajo la marca */
-  [class*="st-key-top_status_controls"] { margin-top:-4px !important; margin-bottom:8px !important; }
-  [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { align-items:center !important; gap:.35rem !important; flex-wrap:nowrap !important; }
-  [class*="st-key-top_status_controls"] [data-testid="stColumn"] { min-width:0 !important; padding:0 2px !important; }
-  [class*="st-key-top_status_controls"] label { font-size:.74rem !important; white-space:nowrap !important; gap:4px !important; }
-  [class*="st-key-top_status_controls"] [data-testid="stToggle"] { padding:4px 5px !important; border:1px solid #393326 !important; border-radius:9px !important; background:#15191F !important; min-height:34px !important; }
-  [class*="st-key-top_status_controls"] [data-testid="stToggle"] [role="switch"] { transform:scale(.72); transform-origin:center !important; }
-  [class*="st-key-top_status_controls"] iframe { height:36px !important; }
+  /* Tres controles compactos, completos y con acabado dorado uniforme */
+  [class*="st-key-top_status_controls"] { margin-top:0 !important; margin-bottom:10px !important; overflow:visible !important; }
+  [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { align-items:stretch !important; gap:.45rem !important; flex-wrap:nowrap !important; overflow:visible !important; }
+  [class*="st-key-top_status_controls"] [data-testid="stColumn"] { min-width:0 !important; padding:0 !important; overflow:visible !important; }
+  [class*="st-key-top_status_controls"] [data-testid="stToggle"] { box-sizing:border-box !important; display:flex !important; align-items:center !important; justify-content:center !important; width:100% !important; min-height:48px !important; padding:7px 5px !important; border:1px solid #D4A72C !important; border-radius:11px !important; background:linear-gradient(145deg,#201D14,#111419) !important; overflow:visible !important; }
+  [class*="st-key-top_status_controls"] [data-testid="stToggle"] > label { display:flex !important; align-items:center !important; justify-content:center !important; gap:5px !important; width:100% !important; margin:0 !important; white-space:nowrap !important; overflow:visible !important; }
+  [class*="st-key-top_status_controls"] [data-testid="stToggle"] label p { color:#F4D778 !important; font-size:.76rem !important; line-height:1.1 !important; white-space:nowrap !important; margin:0 !important; }
+  [class*="st-key-top_status_controls"] [data-testid="stTooltipIcon"], [class*="st-key-top_status_controls"] [data-testid="stTooltipHoverTarget"] { display:none !important; }
+  [class*="st-key-top_status_controls"] [role="switch"] { flex:0 0 auto !important; transform:scale(.74) !important; transform-origin:center !important; }
+  [class*="st-key-top_status_controls"] iframe { display:block !important; width:100% !important; height:56px !important; min-height:56px !important; overflow:visible !important; }
   @media(max-width:640px) {
-    [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { gap:.22rem !important; }
-    [class*="st-key-top_status_controls"] label { font-size:.65rem !important; letter-spacing:-.2px !important; }
-    [class*="st-key-top_status_controls"] [data-testid="stToggle"] { padding:3px 2px !important; }
+    [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { gap:.35rem !important; }
+    [class*="st-key-top_status_controls"] [data-testid="stToggle"] { min-height:48px !important; padding:6px 3px !important; }
+    [class*="st-key-top_status_controls"] [data-testid="stToggle"] label p { font-size:.69rem !important; letter-spacing:-.25px !important; }
+    [class*="st-key-top_status_controls"] [role="switch"] { transform:scale(.68) !important; }
   }
   [class*="st-key-sound_enabled_toggle"] { padding:5px 8px; border:1px solid #393326; border-radius:12px; background:#15191F; }
   [class*="st-key-sound_enabled_toggle"] label { font-size:.92rem !important; font-weight:650 !important; }
@@ -642,7 +645,7 @@ with st.container(key="top_status_controls"):
     status_cols = st.columns([1, 1, 1], gap="small")
     with status_cols[0]:
         st.session_state.auto_refresh_enabled = st.toggle(
-            "⟳ Auto 60 s",
+            "⟳ Auto 60s",
             value=st.session_state.auto_refresh_enabled,
             help="Actualiza los marcadores cada 60 segundos mientras esta página esté abierta."
         )
@@ -685,7 +688,7 @@ with st.container(key="top_status_controls"):
  });
 })();
 </script>
-""", height=38, scrolling=False)
+""", height=56, scrolling=False)
 
 with st.container(key="control_row"):
     refresh = st.button(
