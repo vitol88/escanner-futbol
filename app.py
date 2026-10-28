@@ -1776,9 +1776,28 @@ else:
                                                         valid_totals = [row["Total"] for row in h2h_rows if isinstance(row.get("Total"), (int, float))]
                                                         if valid_totals:
                                                             h2h_avg = sum(valid_totals) / len(valid_totals)
-                                                            st.caption(f"Promedio de córners: {h2h_avg:.2f}, calculado con {len(valid_totals)} de {len(h2h_rows)} partidos con estadísticas disponibles.")
+                                                            st.markdown(
+                                                                f"""
+                                                                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+                                                                            margin:8px 0 14px;padding:9px 12px;
+                                                                            border:1px solid #51451D;border-radius:10px;
+                                                                            background:linear-gradient(135deg,#17191f,#20232b);
+                                                                            width:fit-content;max-width:100%;">
+                                                                  <span style="font-size:13px;font-weight:700;color:#FACC15;">
+                                                                    PROMEDIO DE CÓRNERS
+                                                                  </span>
+                                                                  <span style="display:inline-block;padding:5px 12px;
+                                                                               border:1px solid #FACC15;border-radius:8px;
+                                                                               background:#FACC15;color:#111827;
+                                                                               font-size:16px;font-weight:800;line-height:1.2;">
+                                                                    {h2h_avg:.2f}
+                                                                  </span>
+                                                                </div>
+                                                                """,
+                                                                unsafe_allow_html=True,
+                                                            )
                                                         else:
-                                                            st.caption(f"Se consultaron {len(h2h_rows)} partidos, pero la API no entregó estadísticas de córners para calcular el promedio.")
+                                                            st.caption("No hay estadísticas de córners disponibles para calcular el promedio.")
                                                     elif h2h_key in st.session_state.corner_h2h_cache:
                                                         st.caption("La API no devolvió enfrentamientos finalizados o estadísticas de córners suficientes para estos equipos.")
                                                 else:
