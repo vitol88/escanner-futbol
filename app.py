@@ -2195,15 +2195,14 @@ else:
 
                                                 if isinstance(competition_corner_average, (int, float)) and isinstance(h2h_avg, (int, float)):
                                                     raw_total_match_average = (competition_corner_average + h2h_avg) / 2
-                                                    # Aplicar margen conservador de 1 córner y presentar el resultado
-                                                    # como entero, salvo cuando la parte decimal sea exactamente .5:
-                                                    # 9.37 -> 9; 9.50 -> 9.5; 9.60 -> 10.
+                                                    # Aplicar margen conservador de 1 córner y redondear por umbrales:
+                                                    # 9.49 -> 9; 9.50 a 9.59 -> 9.5; desde 9.60 -> 10.
                                                     adjusted_corner_average = max(0.0, raw_total_match_average - 1.0)
                                                     corner_fraction = adjusted_corner_average - int(adjusted_corner_average)
-                                                    if abs(corner_fraction - 0.5) < 1e-9:
-                                                        total_match_average = int(adjusted_corner_average) + 0.5
-                                                    elif corner_fraction < 0.5:
+                                                    if corner_fraction < 0.5:
                                                         total_match_average = int(adjusted_corner_average)
+                                                    elif corner_fraction < 0.6:
+                                                        total_match_average = int(adjusted_corner_average) + 0.5
                                                     else:
                                                         total_match_average = int(adjusted_corner_average) + 1
                                                     st.markdown(
