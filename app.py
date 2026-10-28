@@ -187,7 +187,10 @@ st.markdown("""
   [class*="st-key-sound_control_card"] [role="switch"][aria-checked="false"] > div { background:#D4A72C !important; }
   [class*="st-key-top_status_controls"] iframe body { margin:0 !important; padding:0 !important; }
     /* Tarjeta compacta de acción principal del escáner */
-  [class*="st-key-scan_cta_card"] { margin-top:14px; margin-bottom:18px; }
+  [class*="st-key-scan_cta_card"] { margin-top:10px !important; margin-bottom:0 !important; }
+  /* Acercar el panel En vivo ahora al escáner principal */
+  [class*="st-key-live_now_section"] { margin-top:-64px !important; padding-top:0 !important; }
+  [class*="st-key-live_now_section"] > div { padding-top:0 !important; }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] button, [class*="st-key-scan_cta_card"] button[kind="primary"] { position:relative !important; overflow:hidden !important; width:100% !important; min-height:145px !important; white-space:pre-line !important; text-align:left !important; padding:18px 18px 18px 49% !important; border-radius:22px !important; border:2px solid #FACC15 !important; background-color:#090A0D !important; background-image:radial-gradient(ellipse at 20% 50%,rgba(250,204,21,.10),transparent 42%),linear-gradient(135deg,#090A0D,#111319) !important; color:#F4F4F5 !important; font-size:clamp(1rem,3.8vw,1.35rem) !important; line-height:1.55 !important; font-weight:800 !important; box-shadow:inset 0 0 24px rgba(250,204,21,.06),0 0 0 1px rgba(250,204,21,.08) !important; }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before { content:""; position:absolute; left:4%; top:50%; width:min(38%,170px); aspect-ratio:1; height:auto; transform:translateY(-50%); border-radius:50%; border:3px solid #FACC15; background-color:#090A0D; background-image:radial-gradient(circle at center,#FACC15 0 6%,#14151A 7% 14%,transparent 15%),repeating-radial-gradient(circle at center,transparent 0 10px,rgba(250,204,21,.55) 11px 13px,transparent 14px 20px),conic-gradient(from 0deg,transparent 0 12%,rgba(250,204,21,.95) 16%,transparent 28% 48%,rgba(250,204,21,.45) 53%,transparent 68%); box-shadow:0 0 20px rgba(250,204,21,.45),inset 0 0 18px rgba(250,204,21,.25); animation:scanner-radar-spin 3s linear infinite; }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::after { content:"⚽"; position:absolute; left:23%; top:50%; transform:translate(-50%,-50%); width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-size:clamp(1.8rem,6vw,2.7rem); filter:drop-shadow(0 0 10px rgba(250,204,21,.75)); animation:scanner-ball-orbit 2s ease-in-out infinite; }
@@ -221,19 +224,26 @@ st.markdown("""
   @media(max-width:640px) { [class*="st-key-scan_cta_card"] [data-testid="stButton"] button { min-height:145px; padding:16px 12px 16px 49%; font-size:.95rem; } [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before { left:3%; width:40%; } [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::after { left:23%; } }
   /* Header de "En vivo ahora": pill amarilla con ondas y chevrón a la derecha */
   [class*="st-key-live_now_section"] [data-testid="stExpander"] { background:transparent !important; border:0 !important; border-radius:18px !important; }
-  [class*="st-key-live_now_section"] [data-testid="stExpander"] summary { min-height:72px !important; display:flex !important; flex-direction:row-reverse !important; justify-content:space-between !important; align-items:center !important; gap:12px !important; padding:14px 18px 14px 22px !important; border:1px solid #34363D !important; border-radius:20px !important; background:#0B0D10 !important; }
-  [class*="st-key-live_now_section"] [data-testid="stExpander"] summary [data-testid="stExpanderToggleIcon"] { display:none !important; }
-  [class*="st-key-live_now_section"] [data-testid="stExpander"] summary::after { content:"◖))  ﹀"; display:flex; align-items:center; justify-content:center; min-width:118px; height:52px; padding:0 16px; border-radius:28px; background:#FACC15; color:#111419; font-size:24px; font-weight:700; letter-spacing:1px; box-sizing:border-box; }
-  [class*="st-key-live_now_section"] [data-testid="stExpander"] details[open] > summary::after { content:"◖))  ⌃"; }
-  [class*="st-key-live_now_section"] [data-testid="stExpander"] summary p { color:#FACC15 !important; font-size:clamp(1.25rem,4vw,2rem) !important; font-weight:750 !important; margin:0 !important; }
-  /* Los expanders internos de liga conservan solo la flecha estándar */
+  /* Cabecera principal: un poco más estrecha y visualmente más importante que las ligas */
+  [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] { width:94% !important; margin-left:auto !important; margin-right:auto !important; }
+  [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details > summary { min-height:68px !important; display:flex !important; flex-direction:row-reverse !important; justify-content:space-between !important; align-items:center !important; gap:12px !important; padding:12px 16px 12px 20px !important; border:1px solid #34363D !important; border-radius:20px !important; background:#0B0D10 !important; }
+  [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details > summary [data-testid="stExpanderToggleIcon"] { display:none !important; }
+  [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details > summary::after { content:"◖))  ﹀"; display:flex; align-items:center; justify-content:center; min-width:108px; height:48px; padding:0 14px; border-radius:28px; background:#FACC15; color:#111419; font-size:23px; font-weight:700; letter-spacing:1px; box-sizing:border-box; }
+  [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details[open] > summary::after { content:"◖))  ⌃"; }
+  [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details > summary p { color:#FACC15 !important; font-size:clamp(1.2rem,3.8vw,1.8rem) !important; font-weight:750 !important; margin:0 !important; }
+  /* Filas internas de ligas: más delgadas, compactas y con menos separación */
+  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] { width:88% !important; margin:0 auto 8px !important; }
+  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] summary { min-height:48px !important; padding:7px 12px !important; border:1px solid #34363D !important; border-radius:14px !important; background:#0B0D10 !important; }
   [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] summary::after { content:none !important; display:none !important; }
   [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] summary [data-testid="stExpanderToggleIcon"] { display:flex !important; color:#FACC15 !important; }
-  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] summary p { color:#E5E7EB !important; font-size:clamp(1rem,3.5vw,1.35rem) !important; font-weight:650 !important; }
-  [class*="st-key-live_now_section"] [data-testid="stExpander"] details[open] > div { padding-top:14px !important; }
+  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] summary p { color:#E5E7EB !important; font-size:clamp(.9rem,3vw,1.05rem) !important; font-weight:650 !important; margin:0 !important; line-height:1.25 !important; }
+  [class*="st-key-live_now_section"] [data-testid="stExpander"] details[open] > div { padding-top:5px !important; }
   @media(max-width:640px) {
-    [class*="st-key-live_now_section"] [data-testid="stExpander"] summary { min-height:62px !important; padding:10px 12px 10px 16px !important; }
-    [class*="st-key-live_now_section"] [data-testid="stExpander"] summary::after { min-width:86px; height:42px; font-size:20px; padding:0 10px; }
+    [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] { width:96% !important; }
+    [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details > summary { min-height:62px !important; padding:9px 10px 9px 14px !important; }
+    [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details > summary::after { min-width:78px; height:40px; font-size:19px; padding:0 9px; }
+    [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] { width:90% !important; margin-bottom:6px !important; }
+    [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] summary { min-height:44px !important; padding:6px 10px !important; }
   }
   /* Live section header and compact team crests in fixture rows */
   [data-testid="stExpander"] summary img { width:20px !important; height:20px !important; object-fit:contain !important; vertical-align:middle !important; margin:0 3px !important; }
