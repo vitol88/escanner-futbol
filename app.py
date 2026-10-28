@@ -1550,6 +1550,53 @@ else:
                                                     )
                                                 except Exception as deep_exc:
                                                     deep_context = {"available": False, "notes": [f"Contexto profundo no disponible: {deep_exc}"]}
+
+                                                # El promedio H2H del indicador debe usar el mismo historial de la sección H2H.
+                                                h2h_average_goals = (deep_context.get("h2h") or {}).get("avg_goals")
+                                                if not isinstance(h2h_average_goals, (int, float)):
+                                                    try:
+                                                        _goal_h2h_cache = st.session_state.setdefault("h2h_cache", {})
+                                                        _goal_h2h_league = match.get("league") or {}
+                                                        _goal_h2h_key = f"h2h-v3-home-{match_home_id}-{match_away_id}-{_goal_h2h_league.get('id') or 'all'}"
+                                                        _goal_h2h_data = _goal_h2h_cache.get(_goal_h2h_key)
+                                                        if not isinstance(_goal_h2h_data, dict) or "matches" not in _goal_h2h_data:
+                                                            _goal_h2h_payload = api_get("fixtures/headtohead", {"h2h": f"{match_home_id}-{match_away_id}", "last": 50})
+                                                            _goal_h2h_all = _goal_h2h_payload.get("response") or []
+                                                            _goal_h2h_finished = [
+                                                                past for past in _goal_h2h_all
+                                                                if ((past.get("fixture") or {}).get("status") or {}).get("short") in {"FT", "AET", "PEN"}
+                                                            ]
+                                                            _goal_h2h_home = [
+                                                                past for past in _goal_h2h_finished
+                                                                if str((((past.get("teams") or {}).get("home") or {}).get("id"))) == str(match_home_id)
+                                                            ]
+                                                            _goal_h2h_home.sort(key=lambda past: ((past.get("fixture") or {}).get("date") or ""), reverse=True)
+                                                            _goal_h2h_league_id = _goal_h2h_league.get("id")
+                                                            _goal_h2h_same_league = [
+                                                                past for past in _goal_h2h_home
+                                                                if (past.get("league") or {}).get("id") == _goal_h2h_league_id
+                                                            ] if _goal_h2h_league_id else _goal_h2h_home
+                                                            _goal_h2h_selected = _goal_h2h_same_league[:10]
+                                                            if len(_goal_h2h_selected) < 10:
+                                                                _goal_h2h_selected_ids = {(past.get("fixture") or {}).get("id") for past in _goal_h2h_selected}
+                                                                _goal_h2h_selected.extend([
+                                                                    past for past in _goal_h2h_home
+                                                                    if (past.get("fixture") or {}).get("id") not in _goal_h2h_selected_ids
+                                                                ][:10 - len(_goal_h2h_selected)])
+                                                            _goal_h2h_data = {"matches": _goal_h2h_selected[:10]}
+                                                            _goal_h2h_cache[_goal_h2h_key] = _goal_h2h_data
+                                                        _goal_h2h_matches = _goal_h2h_data.get("matches") or []
+                                                        _goal_h2h_totals = []
+                                                        for _past in _goal_h2h_matches:
+                                                            _goals = _past.get("goals") or {}
+                                                            _gh, _ga = _goals.get("home"), _goals.get("away")
+                                                            if isinstance(_gh, (int, float)) and isinstance(_ga, (int, float)):
+                                                                _goal_h2h_totals.append(_gh + _ga)
+                                                        if _goal_h2h_totals:
+                                                            h2h_average_goals = sum(_goal_h2h_totals) / len(_goal_h2h_totals)
+                                                    except Exception:
+                                                        pass
+
                                                 if deep_context.get("available"):
                                                     st.markdown('<div class="goal-deep-heading">⌁ CONTEXTO HISTÓRICO Y REACCIÓN AL GOL</div>', unsafe_allow_html=True)
                                                     form_cols = st.columns(2, gap="small")
@@ -1565,41 +1612,10 @@ else:
                                                             unsafe_allow_html=True,
                                                         )
                                                     h2h_data = deep_context.get("h2h") or {}
-                                                    h2h_average_goals = h2h_data.get("avg_goals")
                                                     h2h_summary = (
                                                         f'{h2h_data.get("matches", 0)} partidos · promedio {h2h_average_goals if h2h_average_goals is not None else "N/D"} goles · ambos marcan {h2h_data.get("btts_rate") if h2h_data.get("btts_rate") is not None else "N/D"}% · +2.5 {h2h_data.get("over_2_5_rate") if h2h_data.get("over_2_5_rate") is not None else "N/D"}%'
                                                     )
                                                     st.markdown(f'<div class="goal-h2h-summary"><b>H2H · enfrentamientos directos</b><br>{html.escape(h2h_summary)}</div>', unsafe_allow_html=True)
-
-                                                    def _goal_average_badge(label, value):
-                                                        return f"""
-                                                        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;
-                                                                    margin:8px 0;padding:7px 10px;
-                                                                    border:1px solid #51451D;border-radius:9px;
-                                                                    background:linear-gradient(135deg,#17191f,#20232b);
-                                                                    width:fit-content;max-width:100%;clear:both;position:relative;">
-                                                          <span style="font-size:11px;font-weight:700;color:#FACC15;letter-spacing:.3px;">
-                                                            {label}
-                                                          </span>
-                                                          <span style="display:inline-block;padding:4px 9px;
-                                                                       border:1px solid #FACC15;border-radius:7px;
-                                                                       background:#FACC15;color:#111827;
-                                                                       font-size:13px;font-weight:800;line-height:1.1;">
-                                                            {value:.2f}
-                                                          </span>
-                                                        </div>
-                                                        """
-                                                    if isinstance(h2h_average_goals, (int, float)):
-                                                        goal_h2h_average_slot.markdown(
-                                                            _goal_average_badge("PROMEDIO GOLES H2H", float(h2h_average_goals)),
-                                                            unsafe_allow_html=True,
-                                                        )
-                                                        if isinstance(expected_match_goals, (int, float)):
-                                                            average_goals_today = (expected_match_goals + float(h2h_average_goals)) / 2
-                                                            goal_today_average_slot.markdown(
-                                                                _goal_average_badge("PROMEDIO DE GOLES PARA HOY", average_goals_today),
-                                                                unsafe_allow_html=True,
-                                                            )
                                                     target_minute = deep_context.get("current_goal_minute")
                                                     if target_minute is not None:
                                                         st.caption(f"Último gol detectado en el minuto {target_minute}" + (f" · anotado por {deep_context.get('current_goal_team')}" if deep_context.get("current_goal_team") else "") + ".")
@@ -1619,6 +1635,36 @@ else:
                                                             col.caption(f"{team.get('name') or 'Equipo'}: muestra insuficiente de eventos para estimar reacción tras recibir gol.")
                                                 else:
                                                     st.caption("El contexto profundo de forma/H2H no está disponible con las consultas actuales; el bot no lo tratará como dato conocido.")
+
+                                                def _goal_average_badge(label, value):
+                                                    return f"""
+                                                    <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+                                                                margin:8px 0;padding:7px 10px;
+                                                                border:1px solid #51451D;border-radius:9px;
+                                                                background:linear-gradient(135deg,#17191f,#20232b);
+                                                                width:fit-content;max-width:100%;clear:both;position:relative;">
+                                                      <span style="font-size:11px;font-weight:700;color:#FACC15;letter-spacing:.3px;">
+                                                        {label}
+                                                      </span>
+                                                      <span style="display:inline-block;padding:4px 9px;
+                                                                   border:1px solid #FACC15;border-radius:7px;
+                                                                   background:#FACC15;color:#111827;
+                                                                   font-size:13px;font-weight:800;line-height:1.1;">
+                                                        {value:.2f}
+                                                      </span>
+                                                    </div>
+                                                    """
+                                                if isinstance(h2h_average_goals, (int, float)):
+                                                    goal_h2h_average_slot.markdown(
+                                                        _goal_average_badge("PROMEDIO GOLES H2H", float(h2h_average_goals)),
+                                                        unsafe_allow_html=True,
+                                                    )
+                                                    if isinstance(expected_match_goals, (int, float)):
+                                                        average_goals_today = (expected_match_goals + float(h2h_average_goals)) / 2
+                                                        goal_today_average_slot.markdown(
+                                                            _goal_average_badge("PROMEDIO DE GOLES PARA HOY", average_goals_today),
+                                                            unsafe_allow_html=True,
+                                                        )
                                                 # Exclude overly obvious under lines (e.g. under 4.5 at 0-0) from the main recommendation.
                                                 current_total = (home_score or 0) + (away_score or 0) if isinstance(home_score, int) and isinstance(away_score, int) else None
                                                 meaningful_tips = []
