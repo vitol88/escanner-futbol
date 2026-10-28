@@ -645,6 +645,68 @@ st.markdown("""
     }
   }
 
+
+  /* Marcador premium al abrir un partido */
+  .fl-match-scoreboard {
+    display:grid; grid-template-columns:104px minmax(0,1fr); gap:14px; align-items:center;
+    margin:5px 0 14px; padding:15px 13px; border:1px solid #D4A72C; border-radius:17px;
+    background:radial-gradient(ellipse at 10% 50%,rgba(250,204,21,.10),transparent 45%),linear-gradient(145deg,#171A20,#090A0D);
+    box-shadow:inset 0 0 18px rgba(250,204,21,.04),0 0 0 1px rgba(250,204,21,.06);
+  }
+  .fl-match-clock {
+    display:flex; min-height:82px; flex-direction:column; align-items:center; justify-content:center; gap:7px;
+    border:1px solid #A88921; border-radius:13px; background:linear-gradient(145deg,#24200F,#111419);
+  }
+  .fl-match-minute { color:#FFE566; font-size:1.12rem; line-height:1.1; font-weight:850; font-variant-numeric:tabular-nums; }
+  .fl-match-live { color:#FFF; background:#E23D32; border-radius:5px; padding:3px 7px; font-size:.62rem; font-weight:850; letter-spacing:.7px; }
+  .fl-match-teams { min-width:0; display:flex; flex-direction:column; gap:11px; }
+  .fl-match-team { display:grid; grid-template-columns:29px 25px minmax(0,1fr); align-items:center; gap:8px; color:#F4F4F5; font-size:.94rem; font-weight:650; line-height:1.2; }
+  .fl-match-goals { color:#FFE566; font-size:1.42rem; font-weight:900; font-variant-numeric:tabular-nums; text-align:center; }
+  .fl-match-crest { width:25px; height:25px; object-fit:contain; }
+  .fl-match-crest-empty { width:25px; text-align:center; color:#FACC15; }
+  .fl-match-team-name { overflow-wrap:anywhere; }
+  /* Botones compactos: solo iconos; el nombre aparece con el tooltip al pasar/tocar */
+  [class*="st-key-live_match_"] [data-testid="stHorizontalBlock"] { gap:.55rem !important; }
+  [class*="st-key-live_match_"] [data-testid="stButton"] > button {
+    position:relative !important; display:flex !important; align-items:center !important; justify-content:center !important;
+    width:100% !important; min-width:0 !important; height:64px !important; min-height:64px !important;
+    padding:4px !important; border-radius:14px !important; border:1px solid #80691F !important;
+    background:radial-gradient(ellipse at 50% 0%,rgba(250,204,21,.12),transparent 72%),linear-gradient(145deg,#20232A,#0D0F13) !important;
+    color:#FFE566 !important; font-size:1.42rem !important; font-weight:850 !important;
+    box-shadow:inset 0 0 12px rgba(250,204,21,.04),0 0 8px rgba(250,204,21,.05) !important;
+    transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease !important;
+    animation:fl-button-glow 2.8s ease-in-out infinite;
+  }
+  [class*="st-key-live_match_"] [data-testid="stButton"] > button p {
+    display:flex !important; justify-content:center !important; align-items:center !important;
+    font-size:inherit !important; line-height:1 !important; margin:0 !important;
+  }
+  [class*="st-key-live_match_"] [data-testid="stButton"] > button:hover {
+    transform:translateY(-2px) !important; border-color:#FFE566 !important;
+    box-shadow:0 0 18px rgba(250,204,21,.26),inset 0 0 15px rgba(250,204,21,.10) !important;
+    background:linear-gradient(145deg,#332B12,#17191F) !important;
+  }
+  [class*="st-key-live_match_"] [data-testid="stButton"] > button[kind="primary"] {
+    background:linear-gradient(145deg,#FFE566,#FACC15) !important; color:#111419 !important;
+    border-color:#FFF0A3 !important; box-shadow:0 0 20px rgba(250,204,21,.30) !important;
+    animation:fl-button-active 1.5s ease-in-out infinite;
+  }
+  @keyframes fl-button-glow { 0%,100% { box-shadow:inset 0 0 10px rgba(250,204,21,.035),0 0 4px rgba(250,204,21,.025); } 50% { box-shadow:inset 0 0 14px rgba(250,204,21,.08),0 0 11px rgba(250,204,21,.12); } }
+  @keyframes fl-button-active { 0%,100% { box-shadow:0 0 12px rgba(250,204,21,.20); } 50% { box-shadow:0 0 23px rgba(250,204,21,.42); } }
+  @media(max-width:420px) {
+    .fl-match-scoreboard { grid-template-columns:82px minmax(0,1fr); gap:9px; padding:10px 8px; border-radius:14px; }
+    .fl-match-clock { min-height:76px; }
+    .fl-match-minute { font-size:1rem; }
+    .fl-match-team { grid-template-columns:25px 21px minmax(0,1fr); gap:5px; font-size:.78rem; }
+    .fl-match-goals { font-size:1.2rem; }
+    .fl-match-crest,.fl-match-crest-empty { width:21px; }
+    [class*="st-key-live_match_"] [data-testid="stHorizontalBlock"] { gap:.35rem !important; }
+    [class*="st-key-live_match_"] [data-testid="stButton"] > button { height:58px !important; min-height:58px !important; font-size:1.22rem !important; border-radius:12px !important; }
+  }
+  @media(prefers-reduced-motion:reduce) {
+    [class*="st-key-live_match_"] [data-testid="stButton"] > button { animation:none !important; transition:none !important; }
+  }
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -1415,20 +1477,36 @@ else:
                             if not match_id:
                                 continue
                             with st.expander(match_row_label, expanded=st.session_state.get(f"live_match_{match_id}", False), key=f"live_match_{match_id}", on_change="rerun"):
+                                # Marcador detallado primero: reloj a la izquierda y una fila por equipo.
+                                _clock_text = f"{match_minute}′" if match_minute is not None else str(((match_fixture.get("status") or {}).get("short") or "EN VIVO"))
+                                _home_score = match_goals.get("home") if match_goals.get("home") is not None else "—"
+                                _away_score = match_goals.get("away") if match_goals.get("away") is not None else "—"
+                                _home_crest = f'<img class="fl-match-crest" src="{html.escape(match_home_logo, quote=True)}" alt="">' if match_home_logo else '<span class="fl-match-crest-empty">⚽</span>'
+                                _away_crest = f'<img class="fl-match-crest" src="{html.escape(match_away_logo, quote=True)}" alt="">' if match_away_logo else '<span class="fl-match-crest-empty">⚽</span>'
+                                _status_short = str((match_fixture.get("status") or {}).get("short") or "")
+                                _live_badge = '<span class="fl-match-live">EN VIVO</span>' if _status_short in {"1H", "HT", "2H", "ET", "BT", "P", "LIVE"} or match_minute is not None else ""
+                                st.markdown(
+                                    f'<div class="fl-match-scoreboard">'
+                                    f'<div class="fl-match-clock"><div class="fl-match-minute">{html.escape(_clock_text)}</div>{_live_badge}</div>'
+                                    f'<div class="fl-match-teams">'
+                                    f'<div class="fl-match-team"><span class="fl-match-goals">{html.escape(str(_home_score))}</span>{_home_crest}<span class="fl-match-team-name">{html.escape(match_home_name)}</span></div>'
+                                    f'<div class="fl-match-team"><span class="fl-match-goals">{html.escape(str(_away_score))}</span>{_away_crest}<span class="fl-match-team-name">{html.escape(match_away_name)}</span></div>'
+                                    f'</div></div>',
+                                    unsafe_allow_html=True,
+                                )
                                 current_tool = st.session_state.get("main_fixture_tool") or {}
                                 active_market = current_tool.get("market") if str(current_tool.get("fixture_id")) == str(match_id) else None
                                 active_tool = current_tool.get("tool") if str(current_tool.get("fixture_id")) == str(match_id) else None
-                                # Acciones en el mismo orden visual del diseño aprobado:
-                                # Estadísticas, Goles, Córners y H2H.
+                                # Iconos solamente; los títulos descriptivos se muestran en la ayuda al pasar el cursor.
                                 action_cols = st.columns(4, gap="small")
                                 with action_cols[0]:
-                                    show_stats = st.button("▥\nEstadísticas", help="Estadísticas en vivo", key=f"main_stats_{match_id}", type="primary" if active_tool == "stats" else "secondary", use_container_width=True)
+                                    show_stats = st.button("▥", help="Estadísticas en vivo", key=f"main_stats_{match_id}", type="primary" if active_tool == "stats" else "secondary", use_container_width=True)
                                 with action_cols[1]:
-                                    show_goals = st.button("⚽\nGoles y señales", help="Goles y señales", key=f"main_market_{match_id}_goals", type="primary" if active_market == "goals" else "secondary", use_container_width=True)
+                                    show_goals = st.button("⚽⚡", help="Goles y señales", key=f"main_market_{match_id}_goals", type="primary" if active_market == "goals" else "secondary", use_container_width=True)
                                 with action_cols[2]:
-                                    show_corners = st.button("⚑\nCórners", help="Córners", key=f"main_market_{match_id}_corners", type="primary" if active_market == "corners" else "secondary", use_container_width=True)
+                                    show_corners = st.button("⚑⚡", help="Córners y señales", key=f"main_market_{match_id}_corners", type="primary" if active_market == "corners" else "secondary", use_container_width=True)
                                 with action_cols[3]:
-                                    show_h2h = st.button("H2H\nHistorial", help="Historial H2H", key=f"main_h2h_{match_id}", type="primary" if active_tool == "h2h" else "secondary", use_container_width=True)
+                                    show_h2h = st.button("H₂H", help="Historial H2H", key=f"main_h2h_{match_id}", type="primary" if active_tool == "h2h" else "secondary", use_container_width=True)
                                 if show_stats:
                                     stats_key = str(match_id)
                                     if stats_key not in st.session_state.stats_cache or stats_key in st.session_state.get("stats_errors", {}):
