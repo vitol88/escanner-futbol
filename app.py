@@ -454,10 +454,12 @@ st.markdown("""
   .h2h-match-row { display:grid; grid-template-columns:82px minmax(0,1fr) 70px minmax(0,1fr); gap:8px; align-items:center; padding:9px 4px; border-bottom:1px solid #34302A; font-size:.8rem; }
   .h2h-team { display:flex; align-items:center; gap:6px; min-width:0; overflow-wrap:anywhere; }
   .h2h-team img { width:22px; height:22px; object-fit:contain; flex:0 0 22px; }
-  .h2h-match-row { animation:matchFlipIn .32s ease both; }
+  .h2h-match-row, .corner-h2h-row { animation:matchFlipIn .32s ease both; }
+  .corner-h2h-row { display:grid; grid-template-columns:82px minmax(0,1fr) 70px minmax(0,1fr) 88px; gap:8px; align-items:center; padding:9px 4px; border-bottom:1px solid #34302A; font-size:.8rem; }
+  .corner-h2h-value { color:#FACC15; font-weight:850; text-align:center; white-space:nowrap; }
   .h2h-score { text-align:center; color:#FACC15; font-weight:900; white-space:nowrap; }
   @keyframes matchFlipIn { from {opacity:0; transform:perspective(900px) rotateX(-8deg) translateY(-7px)} to {opacity:1; transform:perspective(900px) rotateX(0) translateY(0)} }
-  @media(max-width:620px) { .match-action-grid {grid-template-columns:repeat(2,minmax(0,1fr));} .h2h-match-row {grid-template-columns:65px minmax(0,1fr) 48px minmax(0,1fr);font-size:.7rem;gap:4px;} .h2h-team img {width:18px;height:18px;flex-basis:18px;} }
+  @media(max-width:620px) { .match-action-grid {grid-template-columns:repeat(2,minmax(0,1fr));} .h2h-match-row {grid-template-columns:65px minmax(0,1fr) 48px minmax(0,1fr);font-size:.7rem;gap:4px;} .corner-h2h-row {grid-template-columns:56px minmax(0,1fr) 42px minmax(0,1fr) 58px;font-size:.64rem;gap:3px;padding:8px 2px;} .h2h-team img {width:18px;height:18px;flex-basis:18px;} }
 
   @media (max-width: 420px) { .fixture-hero-team {font-size:.72rem;} .fixture-hero-team img {width:31px;height:31px;} .fixture-hero-score {font-size:1.25rem;padding:6px 9px;} }
 
@@ -1690,26 +1692,26 @@ else:
                                                 st.markdown(history_html, unsafe_allow_html=True)
                                                 st.caption(history.get("note", "Promedios históricos de partidos recientes; N/D significa que la API no entregó datos suficientes."))
 
-                                                st.markdown("### ⌁ Histórico de enfrentamientos directos")
+                                                st.markdown("### ⌁ Histórico de córners")
                                                 home_team = (match.get("teams") or {}).get("home") or {}
                                                 away_team = (match.get("teams") or {}).get("away") or {}
-                                                h2h_key = f"{home_team.get('id')}-{away_team.get('id')}"
+                                                h2h_key = f"corner-h2h-v2-{home_team.get('id')}-{away_team.get('id')}"
                                                 if "corner_h2h_cache" not in st.session_state:
                                                     st.session_state.corner_h2h_cache = {}
-                                                if st.button("Consultar córners de los últimos enfrentamientos", key=f"corner_h2h_{match_id}"):
+                                                if st.button("Consultar histórico de córners", key=f"corner_h2h_{match_id}"):
                                                     if not home_team.get("id") or not away_team.get("id"):
                                                         st.warning("No están disponibles los IDs de los dos equipos.")
                                                     else:
                                                         try:
                                                             if h2h_key not in st.session_state.corner_h2h_cache:
-                                                                h2h_payload = api_get("fixtures/headtohead", {"h2h": h2h_key, "last": 5})
+                                                                # Pedimos un margen amplio y después tomamos los 10 partidos finalizados más recientes.
+                                                                h2h_payload = api_get("fixtures/headtohead", {"h2h": f"{home_team.get('id')}-{away_team.get('id')}", "last": 50})
                                                                 past_matches = h2h_payload.get("response") or []
-                                                                # Priorizar hasta cinco enfrentamientos finalizados; si hay menos, mostrar los disponibles.
                                                                 finished_statuses = {"FT", "AET", "PEN"}
                                                                 past_matches = [
                                                                     past for past in past_matches
                                                                     if (((past.get("fixture") or {}).get("status") or {}).get("short") in finished_statuses)
-                                                                ][:5]
+                                                                ][:10]
                                                                 past_rows = []
                                                                 for past in past_matches:
                                                                     past_id = (past.get("fixture") or {}).get("id")
@@ -1724,11 +1726,15 @@ else:
                                                                     past_fixture = past.get("fixture") or {}
                                                                     past_teams = past.get("teams") or {}
                                                                     past_goals = past.get("goals") or {}
+                                                                    past_home = past_teams.get("home") or {}
+                                                                    past_away = past_teams.get("away") or {}
                                                                     past_rows.append({
                                                                         "Fecha": (past_fixture.get("date") or "")[:10],
-                                                                        "Local": (past_teams.get("home") or {}).get("name", "N/D"),
+                                                                        "Local": past_home.get("name", "N/D"),
+                                                                        "LocalLogo": past_home.get("logo", ""),
                                                                         "Marcador": f"{past_goals.get('home', '—')}–{past_goals.get('away', '—')}",
-                                                                        "Visitante": (past_teams.get("away") or {}).get("name", "N/D"),
+                                                                        "Visitante": past_away.get("name", "N/D"),
+                                                                        "VisitanteLogo": past_away.get("logo", ""),
                                                                         "Córners": f"{past_home_c if past_home_c is not None else 'N/D'}–{past_away_c if past_away_c is not None else 'N/D'}",
                                                                         "Total": (past_home_c + past_away_c) if past_home_c is not None and past_away_c is not None else None,
                                                                     })
@@ -1737,20 +1743,36 @@ else:
                                                             st.session_state.corner_h2h_cache[h2h_key] = {"error": str(h2h_exc)}
                                                 h2h_rows = st.session_state.corner_h2h_cache.get(h2h_key)
                                                 if isinstance(h2h_rows, dict) and h2h_rows.get("error"):
-                                                    st.caption("No se pudo cargar el H2H de córners: " + str(h2h_rows["error"]))
+                                                    st.caption("No se pudo cargar el histórico de córners: " + str(h2h_rows["error"]))
                                                 elif isinstance(h2h_rows, list):
                                                     if h2h_rows:
-                                                        st.dataframe(h2h_rows, use_container_width=True, hide_index=True)
+                                                        corners_html = '<div class="corner-h2h-row" style="font-weight:800;color:#FACC15;border-bottom:1px solid #51451D;"><span>Fecha</span><span>Local</span><span class="h2h-score">Marc.</span><span>Visitante</span><span class="corner-h2h-value">Córners</span></div>'
+                                                        for row in h2h_rows:
+                                                            date_label = html.escape(str(row.get("Fecha") or "N/D"))
+                                                            home_name = html.escape(str(row.get("Local") or "N/D"))
+                                                            away_name = html.escape(str(row.get("Visitante") or "N/D"))
+                                                            home_logo = html.escape(str(row.get("LocalLogo") or ""), quote=True)
+                                                            away_logo = html.escape(str(row.get("VisitanteLogo") or ""), quote=True)
+                                                            home_corner = row.get("Córners", "N/D").split("–")[0]
+                                                            away_corner = row.get("Córners", "N/D").split("–")[-1]
+                                                            corners_html += (
+                                                                f'<div class="corner-h2h-row"><span>{date_label}</span>'
+                                                                f'<span class="h2h-team"><img src="{home_logo}" onerror="this.style.display=\'none\'">{home_name}</span>'
+                                                                f'<span class="h2h-score">{html.escape(str(row.get("Marcador") or "—"))}</span>'
+                                                                f'<span class="h2h-team"><img src="{away_logo}" onerror="this.style.display=\'none\'">{away_name}</span>'
+                                                                f'<span class="corner-h2h-value">{html.escape(str(home_corner))}–{html.escape(str(away_corner))}</span></div>'
+                                                            )
+                                                        st.markdown(corners_html, unsafe_allow_html=True)
                                                         valid_totals = [row["Total"] for row in h2h_rows if isinstance(row.get("Total"), (int, float))]
                                                         if valid_totals:
                                                             h2h_avg = sum(valid_totals) / len(valid_totals)
-                                                            st.caption(f"Promedio de córners: {h2h_avg:.2f}, calculado con {len(valid_totals)} de {len(h2h_rows)} enfrentamientos consultados.")
+                                                            st.caption(f"Promedio de córners: {h2h_avg:.2f}, calculado con {len(valid_totals)} de {len(h2h_rows)} partidos con estadísticas disponibles.")
                                                         else:
-                                                            st.caption(f"Se consultaron {len(h2h_rows)} enfrentamientos, pero la API no entregó estadísticas de córners para calcular el promedio.")
+                                                            st.caption(f"Se consultaron {len(h2h_rows)} partidos, pero la API no entregó estadísticas de córners para calcular el promedio.")
                                                     elif h2h_key in st.session_state.corner_h2h_cache:
-                                                        st.caption("La API no devolvió estadísticas de córners suficientes para los enfrentamientos recientes.")
+                                                        st.caption("La API no devolvió enfrentamientos finalizados o estadísticas de córners suficientes para estos equipos.")
                                                 else:
-                                                    st.caption("Consulta hasta los últimos cinco enfrentamientos finalizados y recupera las estadísticas de córners de cada uno; si hubo menos de cinco, muestra los disponibles. Los datos que la API no entregue se indicarán como no disponibles.")
+                                                    st.caption("Consulta los últimos 10 enfrentamientos finalizados; si hay menos, se mostrarán los disponibles. Las estadísticas de córners dependen de los datos que entregue la API.")
 
                                                 pace = corner_item.get("pace")
                                                 st.markdown("### 📡 Lectura en vivo")
