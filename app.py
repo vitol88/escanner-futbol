@@ -1341,8 +1341,8 @@ else:
                                                                         "Local": (past_teams.get("home") or {}).get("name", "N/D"),
                                                                         "Marcador": f"{past_goals.get('home', '—')}–{past_goals.get('away', '—')}",
                                                                         "Visitante": (past_teams.get("away") or {}).get("name", "N/D"),
-                                                                        "Córners": f"{past_home_c}–{past_away_c}",
-                                                                        "Total": past_home_c + past_away_c,
+                                                                        "Córners": f"{past_home_c if past_home_c is not None else 'N/D'}–{past_away_c if past_away_c is not None else 'N/D'}",
+                                                                        "Total": (past_home_c + past_away_c) if past_home_c is not None and past_away_c is not None else None,
                                                                     })
                                                                 st.session_state.corner_h2h_cache[h2h_key] = past_rows
                                                         except Exception as h2h_exc:
@@ -1353,8 +1353,12 @@ else:
                                                 elif isinstance(h2h_rows, list):
                                                     if h2h_rows:
                                                         st.dataframe(h2h_rows, use_container_width=True, hide_index=True)
-                                                        h2h_avg = sum(row["Total"] for row in h2h_rows) / len(h2h_rows)
-                                                        st.caption(f"Promedio de córners en los {len(h2h_rows)} enfrentamientos con estadísticas disponibles: {h2h_avg:.2f}.")
+                                                        valid_totals = [row["Total"] for row in h2h_rows if isinstance(row.get("Total"), (int, float))]
+                                                        if valid_totals:
+                                                            h2h_avg = sum(valid_totals) / len(valid_totals)
+                                                            st.caption(f"Promedio de córners: {h2h_avg:.2f}, calculado con {len(valid_totals)} de {len(h2h_rows)} enfrentamientos consultados.")
+                                                        else:
+                                                            st.caption(f"Se consultaron {len(h2h_rows)} enfrentamientos, pero la API no entregó estadísticas de córners para calcular el promedio.")
                                                     elif h2h_key in st.session_state.corner_h2h_cache:
                                                         st.caption("La API no devolvió estadísticas de córners suficientes para los enfrentamientos recientes.")
                                                 else:
