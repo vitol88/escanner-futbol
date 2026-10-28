@@ -94,6 +94,19 @@ st.markdown("""
   [class*="st-key-sound_enabled_toggle"] [role="switch"][aria-checked="false"] > div,
   [data-testid="stToggle"] [role="switch"][aria-checked="false"] > div,
   button[role="switch"][aria-checked="false"] > div { background:#FFFFFF !important; }
+  /* Tarjeta compacta de acción principal del escáner */
+  [class*="st-key-scan_cta_card"] { margin-top:18px; margin-bottom:20px; padding:18px 16px 14px; border:1px solid #393326; border-radius:22px; background:linear-gradient(135deg,#17191F,#0B0D10); }
+  .scan-cta-heading { display:flex; align-items:center; gap:14px; margin-bottom:14px; }
+  .scan-cta-mark { display:flex; align-items:center; justify-content:center; flex:0 0 64px; height:64px; border-radius:18px; background:#FACC15; font-size:32px; }
+  .scan-cta-title { color:#FACC15; font-weight:800; font-size:clamp(1rem,4vw,1.45rem); line-height:1.35; letter-spacing:.4px; }
+  .scan-cta-subtitle { color:#A1A1AA; font-size:.95rem; margin-top:4px; line-height:1.4; }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] button { width:100%; min-height:50px; border-radius:14px; border:1px solid #FACC15; background:#FACC15; color:#111419; font-size:1.02rem; font-weight:750; }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] button:hover { background:#FFE36A; border-color:#FFE36A; color:#111419; }
+  @media(max-width:640px) {
+    [class*="st-key-scan_cta_card"] { padding:14px 12px 12px; }
+    .scan-cta-mark { flex-basis:54px; height:54px; font-size:27px; }
+    .scan-cta-subtitle { font-size:.85rem; }
+  }
   /* Header de "En vivo ahora": pill amarilla con ondas y chevrón a la derecha */
   [class*="st-key-live_now_section"] [data-testid="stExpander"] { background:transparent !important; border:0 !important; border-radius:18px !important; }
   [class*="st-key-live_now_section"] [data-testid="stExpander"] summary { min-height:72px !important; display:flex !important; flex-direction:row-reverse !important; justify-content:space-between !important; align-items:center !important; gap:12px !important; padding:14px 18px 14px 22px !important; border:1px solid #34363D !important; border-radius:20px !important; background:#0B0D10 !important; }
@@ -505,6 +518,13 @@ with st.container(key="sound_controls_row"):
 </script>
 """, height=52, scrolling=False)
 
+with st.container(key="scan_cta_card"):
+    st.markdown(
+        '<div class="scan-cta-heading"><div class="scan-cta-mark">⚽</div><div><div class="scan-cta-title">FOOTBALL LAB · ESCÁNER EN VIVO</div><div class="scan-cta-subtitle">Pulsa para detectar oportunidades en directo</div></div></div>',
+        unsafe_allow_html=True,
+    )
+    manual_scan = st.button("⚡ Escanear ahora", type="primary", key="scan_all_live")
+
 recent_events = st.session_state.notification_events[-3:]
 events_json = json.dumps(recent_events, ensure_ascii=False).replace("</", "<\\/")
 muted_js = "true" if st.session_state.sound_muted else "false"
@@ -686,15 +706,8 @@ if not fixtures:
     </div>
     """, unsafe_allow_html=True)
 else:
-    leagues = sorted({
-        (f.get("league") or {}).get("name", "Liga")
-        for f in fixtures
-    })
-    chosen_leagues = st.multiselect("🏆 Ligas", leagues, default=leagues)
-    filtered = [
-        f for f in fixtures
-        if (f.get("league") or {}).get("name", "Liga") in chosen_leagues
-    ]
+    # Mostrar todos los partidos en vivo; se oculta el filtro de ligas para simplificar la pantalla.
+    filtered = list(fixtures)
     with st.container(key="live_now_section"):
         with st.expander(f"En vivo ahora ({len(filtered)})", expanded=False):
             if filtered:
@@ -883,7 +896,7 @@ else:
 
     # Se retira el resumen de sesión de la pantalla principal.
     stats_limit = 20
-    manual_scan = st.button("⚽ Escanear todos los partidos en vivo", type="primary", key="scan_all_live")
+    manual_scan = st.session_state.get("manual_scan_requested", False)
     now_epoch = int(datetime.now().timestamp())
     auto_scan_due = (
         st.session_state.auto_refresh_enabled
