@@ -178,7 +178,13 @@ st.markdown("""
   .brand-update-label { color:#A1A1AA; font-size:.7rem; letter-spacing:1px; font-weight:750; white-space:nowrap; }
   .brand-update-time { color:#F4F4F5; font-size:.82rem; font-weight:600; margin-top:0; overflow-wrap:anywhere; }
   .brand-refresh { color:#FACC15; width:18px; height:18px; flex:0 0 18px; }
-  @keyframes update-arrive { 0%{opacity:0;transform:scale(1.18);filter:blur(5px)} 18%{opacity:1;transform:scale(1.05);filter:blur(0)} 38%{transform:scale(1.08)} 65%{transform:scale(.98)} 100%{opacity:1;transform:scale(1);filter:blur(0)} }
+  @keyframes update-arrive { 0%{opacity:0;transform:translateY(-5px) scale(.96);filter:blur(2px)} 100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)} }
+  .update-toast { position:fixed; z-index:1000001; left:50%; top:43%; width:min(88vw,370px); display:flex; align-items:center; gap:12px; padding:16px 17px; border:1px solid rgba(250,204,21,.7); border-radius:16px; background:linear-gradient(145deg,rgba(30,31,29,.98),rgba(10,12,14,.98)); box-shadow:0 18px 65px rgba(0,0,0,.72),0 0 30px rgba(250,204,21,.16); color:#F4F4F5; opacity:0; transform:translate(-50%,18px) scale(.9); animation:update-toast-life 2.5s cubic-bezier(.2,.8,.2,1) 5.8s both; }
+  .update-toast-icon { display:flex;align-items:center;justify-content:center;width:42px;height:42px;flex:0 0 42px;border-radius:12px;background:rgba(250,204,21,.12);color:#FACC15;font-size:30px; }
+  .update-toast-title { color:#FACC15;font-size:.72rem;font-weight:850;letter-spacing:1.2px; }
+  .update-toast-time { margin-top:4px;font-size:.92rem;font-weight:650; }
+  .update-toast-check { margin-left:auto;color:#4ADE80;font-size:1.25rem;font-weight:900; }
+  @keyframes update-toast-life { 0%{opacity:0;transform:translate(-50%,18px) scale(.9);filter:blur(5px)} 12%{opacity:1;transform:translate(-50%,0) scale(1.03);filter:blur(0)} 20%,65%{opacity:1;transform:translate(-50%,0) scale(1)} 100%{opacity:0;transform:translate(-50%,-12px) scale(.94);filter:blur(4px);visibility:hidden} }
   @media(max-width:640px) { .brand-header { padding:12px 12px 10px; border-radius:17px; } .brand-header-main { gap:10px; } .brand-mark { width:46px; height:46px; flex-basis:46px; border-radius:13px; } .brand-mark svg { width:27px; height:27px; } .brand-title { font-size:clamp(1.2rem,5vw,1.7rem); } .brand-subtitle { font-size:.68rem; letter-spacing:1px; } .brand-pill { padding:5px 8px; font-size:.68rem; } .brand-update { gap:7px; padding:5px 7px; } .brand-update-copy { gap:5px 8px; } .brand-update-label { font-size:.62rem; } .brand-update-time { font-size:.74rem; } }
   .loading-brand { display:flex; align-items:center; gap:12px; padding:14px; margin:8px 0; border:1px solid #393326; border-radius:14px; background:linear-gradient(120deg,#171B21,#101216); }
   .loading-orbit { width:36px; height:36px; border:3px solid #393326; border-top-color:#FACC15; border-right-color:#FACC15; border-radius:50%; animation:lab-spin .8s linear infinite; flex:0 0 36px; }
@@ -346,19 +352,20 @@ st.markdown("""
   div[data-testid="stMetricValue"] { color:#FACC15 !important; }
   @media (max-width: 640px) {
     .block-container {padding-left: .8rem; padding-right: .8rem;}
-    .brand-header {padding:18px 16px 17px; border-radius:25px;}
-    .brand-header-main {gap:12px;}
-    .brand-mark {width:70px;height:70px;flex-basis:70px;border-radius:22px;}
-    .brand-mark svg {width:42px;height:42px;}
-    .brand-title {font-size:clamp(1.35rem,6vw,2rem);letter-spacing:0;}
-    .brand-subtitle {font-size:clamp(.82rem,3.8vw,1.15rem);margin-top:6px;}
-    .brand-pill {padding:7px 10px;font-size:.76rem;}
-    .brand-divider {margin:20px 0 17px;}
-    .brand-update {gap:11px;}
-    .brand-clock {width:34px;height:34px;flex-basis:34px;}
-    .brand-update-label {font-size:.83rem;}
-    .brand-update-time {font-size:clamp(1rem,4.4vw,1.35rem);line-height:1.25;}
-    .brand-refresh {width:25px;height:25px;flex-basis:25px;}
+    .brand-header {padding:12px 12px 9px; border-radius:18px;}
+    .brand-header-main {gap:10px;}
+    .brand-mark {width:48px;height:48px;flex-basis:48px;border-radius:14px;}
+    .brand-mark svg {width:28px;height:28px;}
+    .brand-title {font-size:clamp(1.2rem,5vw,1.65rem);letter-spacing:0;}
+    .brand-subtitle {font-size:.68rem;margin-top:3px;letter-spacing:1px;}
+    .brand-pill {padding:5px 8px;font-size:.66rem;}
+    .brand-divider {margin:9px 0 7px;}
+    .brand-update {gap:7px;min-height:28px;padding:3px 6px;}
+    .brand-clock {width:15px;height:15px;flex-basis:15px;}
+    .brand-update-copy {gap:6px;flex-wrap:nowrap;}
+    .brand-update-label {font-size:.59rem;letter-spacing:.45px;}
+    .brand-update-time {font-size:.7rem;line-height:1.1;white-space:nowrap;}
+    .brand-refresh {width:14px;height:14px;flex-basis:14px;}
     h1 {font-size: 1.7rem !important;}
     h2 {font-size: 1.3rem !important;}
   }
@@ -375,6 +382,11 @@ if show_splash_intro:
       </div>
       <div class="splash-brand">FOOTBALL LAB</div>
       <div class="splash-tagline">DETECTA · COMPARA · ANALIZA</div>
+    </div>
+    <div class="update-toast" role="status">
+      <div class="update-toast-icon">◷</div>
+      <div><div class="update-toast-title">ÚLTIMA ACTUALIZACIÓN</div><div class="update-toast-time">{header_time}</div></div>
+      <div class="update-toast-check">✓</div>
     </div>
     """, unsafe_allow_html=True)
     st.session_state["football_splash_shown"] = True
