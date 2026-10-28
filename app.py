@@ -1676,7 +1676,7 @@ else:
                                                 # Los córners actuales ya aparecen en la tarjeta superior del partido.
                                                 # Evitamos repetir local, visitante y total en tres tarjetas separadas.
 
-                                                st.markdown("### 📊 Promedios de córners por localía")
+                                                st.markdown("### 📊 Promedios de córners en la competición actual")
                                                 history_rows = [
                                                     {"Indicador": "Córners a favor del local en casa", "Promedio": history.get("home_corners_for"), "Muestra": history.get("home_corner_sample", 0)},
                                                     {"Indicador": "Córners concedidos por el local en casa", "Promedio": history.get("home_corners_against"), "Muestra": history.get("home_corner_sample", 0)},
