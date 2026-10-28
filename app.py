@@ -1236,22 +1236,31 @@ else:
                                     if "h2h_cache" not in st.session_state:
                                         st.session_state.h2h_cache = {}
                                     _match_league = match.get("league") or {}
-                                    _match_season = _match_league.get("season")
-                                    h2h_key = f"{match_home_id}-{match_away_id}-{_match_league.get('id', 'all')}-{_match_season or 'season-unknown'}"
+                                    league_id = _match_league.get("id")
+                                    # Versionamos la clave para no reutilizar resultados vacíos del filtro anterior.
+                                    h2h_key = f"h2h-v2-{match_home_id}-{match_away_id}-{league_id or 'all'}"
                                     if not match_home_id or not match_away_id:
                                         st.warning("La API no entregó los identificadores de ambos equipos.")
-                                    elif not _match_season:
-                                        st.warning("La API no entregó la temporada de esta competición, necesaria para consultar el H2H.")
                                     elif h2h_key not in st.session_state.h2h_cache:
                                         try:
-                                            league_id = _match_league.get("id")
-                                            # API-Football exige el parámetro season en fixtures/headtohead.
-                                            h2h_payload = api_get("fixtures/headtohead", {"h2h": f"{match_home_id}-{match_away_id}", "season": _match_season, "last": 20, **({"league": league_id} if league_id else {})})
-                                            h2h_matches = h2h_payload.get("response") or []
-                                            if league_id:
-                                                h2h_matches = [past for past in h2h_matches if (past.get("league") or {}).get("id") == league_id]
-                                            h2h_matches = [past for past in h2h_matches if ((past.get("fixture") or {}).get("status") or {}).get("short") in {"FT", "AET", "PEN"}][:5]
-                                            st.session_state.h2h_cache[h2h_key] = h2h_matches
+                                            # Consultar el historial directo sin restringir la petición a la temporada actual.
+                                            # El filtro por competición se aplica después sobre los resultados recibidos.
+                                            h2h_payload = api_get("fixtures/headtohead", {"h2h": f"{match_home_id}-{match_away_id}", "last": 50})
+                                            all_h2h_matches = h2h_payload.get("response") or []
+                                            finished_h2h = [
+                                                past for past in all_h2h_matches
+                                                if ((past.get("fixture") or {}).get("status") or {}).get("short") in {"FT", "AET", "PEN"}
+                                            ]
+                                            same_league_h2h = [
+                                                past for past in finished_h2h
+                                                if (past.get("league") or {}).get("id") == league_id
+                                            ] if league_id else finished_h2h
+                                            # Preferimos la misma competición; si la API no devuelve ninguno,
+                                            # mostramos el historial directo general en vez de una pantalla vacía.
+                                            if same_league_h2h:
+                                                st.session_state.h2h_cache[h2h_key] = {"matches": same_league_h2h[:10], "scope": "league"}
+                                            else:
+                                                st.session_state.h2h_cache[h2h_key] = {"matches": finished_h2h[:10], "scope": "all"}
                                         except Exception as h2h_exc:
                                             st.session_state.h2h_cache[h2h_key] = {"error": str(h2h_exc)}
                                     st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "h2h"}
@@ -1332,17 +1341,20 @@ else:
                                             st.info("La API no entregó estadísticas para este partido.")
                                     elif tool_name == "h2h":
                                         _match_league = match.get("league") or {}
-                                        _match_season = _match_league.get("season")
-                                        h2h_key = f"{match_home_id}-{match_away_id}-{_match_league.get('id', 'all')}-{_match_season or 'season-unknown'}"
+                                        h2h_key = f"h2h-v2-{match_home_id}-{match_away_id}-{_match_league.get('id') or 'all'}"
                                         h2h_data = st.session_state.get("h2h_cache", {}).get(h2h_key)
-                                        st.markdown('<div class="match-analysis-kicker">Historial · misma competición</div><div class="match-analysis-title">Enfrentamientos directos</div>', unsafe_allow_html=True)
+                                        st.markdown('<div class="match-analysis-kicker">Historial · enfrentamientos directos</div><div class="match-analysis-title">Enfrentamientos directos</div>', unsafe_allow_html=True)
                                         if isinstance(h2h_data, dict) and h2h_data.get("error"):
                                             st.warning(f"No se pudieron consultar los enfrentamientos: {h2h_data['error']}")
-                                        elif isinstance(h2h_data, list) and h2h_data:
-                                            league_name_safe = html.escape(str((match.get("league") or {}).get("name") or "Competición actual"))
-                                            st.caption(f"Solo partidos finalizados de {league_name_safe} · últimos {len(h2h_data)} disponibles")
+                                        elif isinstance(h2h_data, dict) and h2h_data.get("matches"):
+                                            h2h_matches = h2h_data["matches"]
+                                            if h2h_data.get("scope") == "league":
+                                                league_name_safe = html.escape(str(_match_league.get("name") or "la competición actual"))
+                                                st.caption(f"Últimos {len(h2h_matches)} enfrentamientos finalizados de {league_name_safe}.")
+                                            else:
+                                                st.caption(f"La API no devolvió enfrentamientos finalizados de la misma competición entre sus resultados recientes; se muestran los últimos {len(h2h_matches)} enfrentamientos directos de cualquier competición.")
                                             h2h_html = ""
-                                            for past in h2h_data:
+                                            for past in h2h_matches:
                                                 pf, pt, pg = past.get("fixture") or {}, past.get("teams") or {}, past.get("goals") or {}
                                                 ph, pa = pt.get("home") or {}, pt.get("away") or {}
                                                 date_label = html.escape((pf.get("date") or "")[:10])
@@ -1350,8 +1362,11 @@ else:
                                                 ph_logo, pa_logo = html.escape(str(ph.get("logo") or ""), quote=True), html.escape(str(pa.get("logo") or ""), quote=True)
                                                 h2h_html += f'<div class="h2h-match-row"><span>{date_label}</span><span class="h2h-team"><img src="{ph_logo}" onerror="this.style.display=\'none\'">{ph_name}</span><span class="h2h-score">{pg.get("home", "—")} – {pg.get("away", "—")}</span><span class="h2h-team"><img src="{pa_logo}" onerror="this.style.display=\'none\'">{pa_name}</span></div>'
                                             st.markdown(h2h_html, unsafe_allow_html=True)
-                                        else:
-                                            st.info("No se encontraron enfrentamientos finalizados de esta competición en la respuesta disponible de la API.")
+                                        elif isinstance(h2h_data, list) and h2h_data:
+                                            # Compatibilidad con entradas de caché creadas antes de h2h-v2.
+                                            st.info("Se encontraron datos H2H antiguos en caché. Vuelve a abrir H2H para cargar el historial actualizado.")
+                                        elif h2h_data is not None:
+                                            st.info("La API no devolvió enfrentamientos directos finalizados para estos equipos en los resultados consultados.")
                                     elif tool_name == "market":
                                         market_key = selected_tool.get("market")
                                         if market_key == "goals":
