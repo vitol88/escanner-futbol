@@ -206,9 +206,9 @@ st.markdown("""
     min-height:2rem !important; height:2rem !important; padding:0 !important;
     font-size:clamp(1rem,4.2vw,1.45rem) !important; font-weight:900 !important; text-shadow:0 0 8px #FACC1580 !important;
     line-height:1.05 !important; white-space:normal !important; overflow-wrap:anywhere !important;
-    border:1px solid #8A6A16 !important; border-radius:7px !important;
+    border:1px solid #B58A19 !important; border-radius:9px !important;
     background:linear-gradient(145deg,#1A1B1F,#0B0D10) !important; color:#F6D365 !important;
-    box-shadow:inset 0 0 0 1px #FACC1512,0 0 8px #FACC150A !important;
+    box-shadow:inset 0 0 0 1px #FACC1522,0 0 12px #FACC1517 !important;
   }
   [class*="st-key-main_stats_"] button:hover, [class*="st-key-main_h2h_"] button:hover, [class*="st-key-main_market_"] button:hover { transform:translateY(-2px); border-color:#FACC15; background:linear-gradient(145deg,#3B3216,#211D12); color:#FFE566; box-shadow:0 5px 16px #0006,0 0 14px #FACC1517; }
   [class*="st-key-main_stats_"] button:active, [class*="st-key-main_h2h_"] button:active, [class*="st-key-main_market_"] button:active { transform:scale(.98) rotateX(3deg); background:#FACC15; color:#101216; }
