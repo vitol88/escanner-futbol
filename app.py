@@ -1423,9 +1423,6 @@ else:
                                                         st.markdown('<div class="tip-card risk-tip-card tip-card-empty"><div class="tip-card-label">⚡ SEÑAL DE ALTO RIESGO</div><div class="tip-card-title">Sin oportunidad confirmada por ahora</div><div class="tip-card-meta">No se fuerza una selección sin cuota real de 1.60 o superior y respaldo estadístico.</div></div>', unsafe_allow_html=True)
                                                     goals = match.get("goals") or {}
                                                     patterns = numerology_context(goals.get("home"), goals.get("away"), home_c, away_c, safe_stat(st.session_state.stats_cache.get(str(match_id), []), "Yellow Cards", 0), safe_stat(st.session_state.stats_cache.get(str(match_id), []), "Yellow Cards", 1))
-                                                    if patterns:
-                                                    if not live_rows:
-                                                        st.caption("No hay cuotas de córners devueltas por la API para este partido; no se inventan cuotas ni se sustituye por una cuota estimada.")
                                             elif corner_item:
                                                 st.warning(f"No se pudo cargar el análisis de córners: {corner_item.get('error')}")
                                             else:
