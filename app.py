@@ -64,14 +64,18 @@ st.markdown("""
   div.stButton > button[kind="primary"]:hover, div.stDownloadButton > button:hover {
     background: #FFE566; border-color: #FFE566; color: #111111;
   }
-  /* Fila compacta de actualización automática y actualización manual */
-  [class*="st-key-sound_controls_row"] > div [data-testid="stHorizontalBlock"] { align-items:center !important; gap:.5rem !important; }
-  [class*="st-key-sound_controls_row"] [data-testid="stColumn"] { min-width:0 !important; }
-  [class*="st-key-sound_controls_row"] [class*="st-key-sound_enabled_toggle"] { padding:5px 7px; border:1px solid #393326; border-radius:12px; background:#15191F; }
-  [class*="st-key-sound_controls_row"] label { font-size:.84rem !important; white-space:nowrap !important; }
+  /* Tres controles principales compactos, en una sola fila bajo la marca */
+  [class*="st-key-top_status_controls"] { margin-top:-4px !important; margin-bottom:8px !important; }
+  [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { align-items:center !important; gap:.35rem !important; flex-wrap:nowrap !important; }
+  [class*="st-key-top_status_controls"] [data-testid="stColumn"] { min-width:0 !important; padding:0 2px !important; }
+  [class*="st-key-top_status_controls"] label { font-size:.74rem !important; white-space:nowrap !important; gap:4px !important; }
+  [class*="st-key-top_status_controls"] [data-testid="stToggle"] { padding:4px 5px !important; border:1px solid #393326 !important; border-radius:9px !important; background:#15191F !important; min-height:34px !important; }
+  [class*="st-key-top_status_controls"] [data-testid="stToggle"] [role="switch"] { transform:scale(.72); transform-origin:center !important; }
+  [class*="st-key-top_status_controls"] iframe { height:36px !important; }
   @media(max-width:640px) {
-    [class*="st-key-sound_controls_row"] label { font-size:.72rem !important; }
-    [class*="st-key-sound_controls_row"] button { font-size:.72rem !important; padding:7px 8px !important; }
+    [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { gap:.22rem !important; }
+    [class*="st-key-top_status_controls"] label { font-size:.65rem !important; letter-spacing:-.2px !important; }
+    [class*="st-key-top_status_controls"] [data-testid="stToggle"] { padding:3px 2px !important; }
   }
   [class*="st-key-sound_enabled_toggle"] { padding:5px 8px; border:1px solid #393326; border-radius:12px; background:#15191F; }
   [class*="st-key-sound_enabled_toggle"] label { font-size:.92rem !important; font-weight:650 !important; }
@@ -634,39 +638,27 @@ if "signal_rows" not in st.session_state:
 if "signal_history_warning_shown" not in st.session_state:
     st.session_state.signal_history_warning_shown = False
 
-with st.container(key="control_row"):
-    control_row = st.columns([1.5, 1], gap="small")
-    with control_row[0]:
+with st.container(key="top_status_controls"):
+    status_cols = st.columns([1, 1, 1], gap="small")
+    with status_cols[0]:
         st.session_state.auto_refresh_enabled = st.toggle(
-            "Actualización automática (60 s)",
+            "⟳ Auto 60 s",
             value=st.session_state.auto_refresh_enabled,
             help="Actualiza los marcadores cada 60 segundos mientras esta página esté abierta."
         )
-    with control_row[1]:
-        refresh = st.button(
-            "🔋 Actualizar scan",
-            type="primary",
-            help="Actualiza el listado de partidos y ejecuta el escaneo disponible."
-        )
-battery_progress = st.empty()
-if refresh:
-    battery_progress.caption("🔄 Actualizando partidos en vivo…")
-
-with st.container(key="sound_controls_row"):
-    sound_toggle_state = st.session_state.get("sound_enabled_toggle", not st.session_state.sound_muted)
-    sound_col, test_col = st.columns([1.25, 1], gap="small")
-    with sound_col:
+    with status_cols[1]:
+        sound_toggle_state = st.session_state.get("sound_enabled_toggle", not st.session_state.sound_muted)
         sound_enabled = st.toggle(
-            "🔊 Sonido activado" if sound_toggle_state else "🔇 Sonido desactivado",
+            "🔊 Sonido" if sound_toggle_state else "🔇 Sonido",
             value=not st.session_state.sound_muted,
             key="sound_enabled_toggle",
             help="Activa o desactiva las alertas sonoras del escáner."
         )
         st.session_state.sound_muted = not sound_enabled
-    with test_col:
+    with status_cols[2]:
         st.components.v1.html("""
-<div style="display:flex;align-items:center;justify-content:flex-start;min-height:44px">
-  <button id="scanner-test-sound" type="button" style="padding:9px 12px;border-radius:10px;border:1px solid #FACC15;background:#242014;color:#FACC15;font:600 13px system-ui;white-space:nowrap;cursor:pointer">🔊 Activar alertas y probar voz</button>
+<div style="display:flex;align-items:center;justify-content:center;min-height:36px">
+  <button id="scanner-test-sound" type="button" title="Activar y probar las alertas sonoras" style="box-sizing:border-box;width:100%;min-height:32px;padding:5px 4px;border-radius:9px;border:1px solid #FACC15;background:#242014;color:#FACC15;font:600 11px system-ui;white-space:nowrap;cursor:pointer">🔔 Alertas</button>
 </div>
 <script>
 (() => {
@@ -683,17 +675,27 @@ with st.container(key="sound_controls_row"):
        window.speechSynthesis.speak(u);
      }
      const C=window.AudioContext||window.webkitAudioContext;
-     if(!C) { b.textContent='✓ Alertas activadas'; return; }
+     if(!C) { b.textContent='✓ Alertas'; return; }
      const c=new C(), o=c.createOscillator(), g=c.createGain();
      o.type='sine'; o.frequency.value=880; g.gain.value=0.08;
      o.connect(g); g.connect(c.destination);
      Promise.resolve(c.resume()).then(()=>{o.start();setTimeout(()=>{try{o.stop();}catch(e){} c.close();},220);});
-     b.textContent='✓ Alertas activadas';
-   } catch(e) { b.textContent='⚠️ Sonido no disponible'; }
+     b.textContent='✓ Alertas';
+   } catch(e) { b.textContent='⚠ Sin audio'; }
  });
 })();
 </script>
-""", height=52, scrolling=False)
+""", height=38, scrolling=False)
+
+with st.container(key="control_row"):
+    refresh = st.button(
+        "🔋 Actualizar scan",
+        type="primary",
+        help="Actualiza el listado de partidos y ejecuta el escaneo disponible."
+    )
+battery_progress = st.empty()
+if refresh:
+    battery_progress.caption("🔄 Actualizando partidos en vivo…")
 
 with st.container(key="scan_cta_card"):
     manual_scan = st.button(
