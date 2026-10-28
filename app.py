@@ -1511,6 +1511,7 @@ else:
                                                 away_goal_inputs = [float(value) for value in away_goal_inputs if isinstance(value, (int, float))]
                                                 projected_home_goals = sum(home_goal_inputs) / len(home_goal_inputs) if home_goal_inputs else None
                                                 projected_away_goals = sum(away_goal_inputs) / len(away_goal_inputs) if away_goal_inputs else None
+                                                expected_match_goals = None
                                                 if projected_home_goals is not None and projected_away_goals is not None:
                                                     expected_match_goals = projected_home_goals + projected_away_goals
                                                     st.markdown(
@@ -1533,6 +1534,11 @@ else:
                                                         """,
                                                         unsafe_allow_html=True,
                                                     )
+                                                # Reserve these positions directly under the competition-goals indicator;
+                                                # fill them once the H2H context has been calculated below.
+                                                goal_h2h_average_slot = st.empty()
+                                                goal_today_average_slot = st.empty()
+
                                                 # Deep, cached context: league form, H2H and response after conceding.
                                                 deep_cache = st.session_state.setdefault("deep_goal_context_cache", {})
                                                 try:
@@ -1559,10 +1565,41 @@ else:
                                                             unsafe_allow_html=True,
                                                         )
                                                     h2h_data = deep_context.get("h2h") or {}
+                                                    h2h_average_goals = h2h_data.get("avg_goals")
                                                     h2h_summary = (
-                                                        f'{h2h_data.get("matches", 0)} partidos · promedio {h2h_data.get("avg_goals") if h2h_data.get("avg_goals") is not None else "N/D"} goles · ambos marcan {h2h_data.get("btts_rate") if h2h_data.get("btts_rate") is not None else "N/D"}% · +2.5 {h2h_data.get("over_2_5_rate") if h2h_data.get("over_2_5_rate") is not None else "N/D"}%'
+                                                        f'{h2h_data.get("matches", 0)} partidos · promedio {h2h_average_goals if h2h_average_goals is not None else "N/D"} goles · ambos marcan {h2h_data.get("btts_rate") if h2h_data.get("btts_rate") is not None else "N/D"}% · +2.5 {h2h_data.get("over_2_5_rate") if h2h_data.get("over_2_5_rate") is not None else "N/D"}%'
                                                     )
                                                     st.markdown(f'<div class="goal-h2h-summary"><b>H2H · enfrentamientos directos</b><br>{html.escape(h2h_summary)}</div>', unsafe_allow_html=True)
+
+                                                    def _goal_average_badge(label, value):
+                                                        return f"""
+                                                        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+                                                                    margin:8px 0;padding:7px 10px;
+                                                                    border:1px solid #51451D;border-radius:9px;
+                                                                    background:linear-gradient(135deg,#17191f,#20232b);
+                                                                    width:fit-content;max-width:100%;clear:both;position:relative;">
+                                                          <span style="font-size:11px;font-weight:700;color:#FACC15;letter-spacing:.3px;">
+                                                            {label}
+                                                          </span>
+                                                          <span style="display:inline-block;padding:4px 9px;
+                                                                       border:1px solid #FACC15;border-radius:7px;
+                                                                       background:#FACC15;color:#111827;
+                                                                       font-size:13px;font-weight:800;line-height:1.1;">
+                                                            {value:.2f}
+                                                          </span>
+                                                        </div>
+                                                        """
+                                                    if isinstance(h2h_average_goals, (int, float)):
+                                                        goal_h2h_average_slot.markdown(
+                                                            _goal_average_badge("PROMEDIO GOLES H2H", float(h2h_average_goals)),
+                                                            unsafe_allow_html=True,
+                                                        )
+                                                        if isinstance(expected_match_goals, (int, float)):
+                                                            average_goals_today = (expected_match_goals + float(h2h_average_goals)) / 2
+                                                            goal_today_average_slot.markdown(
+                                                                _goal_average_badge("PROMEDIO DE GOLES PARA HOY", average_goals_today),
+                                                                unsafe_allow_html=True,
+                                                            )
                                                     target_minute = deep_context.get("current_goal_minute")
                                                     if target_minute is not None:
                                                         st.caption(f"Último gol detectado en el minuto {target_minute}" + (f" · anotado por {deep_context.get('current_goal_team')}" if deep_context.get("current_goal_team") else "") + ".")
