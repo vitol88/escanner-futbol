@@ -1097,7 +1097,18 @@ if _analysis_page_active:
         [class*="st-key-main_h2h_{_analysis_page_id}"] {{ display:none !important; }}
         /* El contenido del análisis debe ocupar todo el ancho y no heredar espaciados del listado. */
         [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stVerticalBlock"] {{ gap:.35rem !important; row-gap:.35rem !important; }}
-        [class*="st-key-analysis_page_nav"] {{ margin-bottom:.5rem !important; }}
+        [class*="st-key-analysis_page_nav"] {{ margin-bottom:.5rem !important; display:flex !important; justify-content:flex-start !important; }}
+        [class*="st-key-analysis_page_nav"] [data-testid="stButton"] {{ width:auto !important; max-width:230px !important; }}
+        [class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{
+            width:auto !important; min-height:2.35rem !important; padding:.35rem .85rem !important;
+            border-radius:12px !important; border:1px solid #5B512A !important;
+            background:linear-gradient(135deg,#20242B,#111419) !important;
+            color:#FACC15 !important; font-size:.9rem !important; font-weight:650 !important;
+            box-shadow:0 3px 10px #0004 !important;
+        }}
+        [class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button:hover {{
+            border-color:#FACC15 !important; background:#2A2618 !important; color:#FFE566 !important;
+        }}
         </style>
         """,
         unsafe_allow_html=True,
@@ -2079,630 +2090,632 @@ else:
             st.session_state.signal_history_write_error = str(history_exc)
         st.session_state.last_scan_api_calls = st.session_state.api_request_count - scan_api_calls_start
 
-    tab_goals, tab_corners, tab_overview = st.tabs(["⚽ Goles y señales", "🚩 Córners", "📈 Rendimiento del modelo"])
+    # El panel global de escaneo no debe mezclarse con la pantalla individual seleccionada.
+    if not _analysis_page_active:
+        tab_goals, tab_corners, tab_overview = st.tabs(["⚽ Goles y señales", "🚩 Córners", "📈 Rendimiento del modelo"])
 
-    with tab_goals:
-        st.markdown("### ⚽ Goles · lectura del partido en vivo")
-        st.caption("El bot combina promedios de localía, marcador, minuto y estadísticas disponibles en vivo. Presenta una sola recomendación principal por partido, no una lista de mercados.")
-        goal_results = st.session_state.get("goal_scan_results", [])
-        if goal_results:
-            corner_history_by_id = {
-                (item.get("fixture", {}).get("fixture") or {}).get("id"): item.get("automatic_history") or {}
-                for item in st.session_state.get("corner_scan_results", [])
-            }
-            search_matches = st.text_input("🔎 Buscar equipo o liga", placeholder="Ej. Argentinos Juniors, Premier League…", key="search_goal_matches").strip().casefold()
-            cards_shown = 0
-            for goal_row in goal_results:
-                # Compatibilidad con resultados guardados en session_state por versiones anteriores:
-                # el formato antiguo tenía 3 elementos y el actual incluye también el contexto.
-                if not isinstance(goal_row, (tuple, list)) or len(goal_row) < 3:
-                    continue
-                fixture, estimate, tips = goal_row[:3]
-                context = goal_row[3] if len(goal_row) >= 4 and isinstance(goal_row[3], dict) else {}
-                fixture_id = (fixture.get("fixture") or {}).get("id")
-                if search_matches and search_matches not in fixture_label(fixture).casefold():
-                    continue
-                history = corner_history_by_id.get(fixture_id, {})
-                if not estimate.get("available"):
-                    continue
-                home = (fixture.get("teams") or {}).get("home") or {}
-                away = (fixture.get("teams") or {}).get("away") or {}
-                home_name = home.get("name", "Local")
-                away_name = away.get("name", "Visitante")
-                goals = fixture.get("goals") or {}
-                home_score = goals.get("home")
-                away_score = goals.get("away")
-                minute = ((fixture.get("fixture") or {}).get("status") or {}).get("elapsed")
-                st.markdown(fixture_hero_html(fixture), unsafe_allow_html=True)
-                st.markdown("**📊 Promedios de goles por localía**")
-                goal_history_rows = [
-                    {"Indicador": f"{home_name} · goles a favor en casa", "Promedio": history.get("home_goals_for"), "Muestra": history.get("home_goal_sample", 0)},
-                    {"Indicador": f"{home_name} · goles recibidos en casa", "Promedio": history.get("home_goals_against"), "Muestra": history.get("home_goal_sample", 0)},
-                    {"Indicador": f"{away_name} · goles a favor fuera", "Promedio": history.get("away_goals_for"), "Muestra": history.get("away_goal_sample", 0)},
-                    {"Indicador": f"{away_name} · goles recibidos fuera", "Promedio": history.get("away_goals_against"), "Muestra": history.get("away_goal_sample", 0)},
-                ]
-                goal_table_html = '<table class="history-table"><thead><tr><th>Equipo / indicador</th><th>Promedio</th><th>Muestra</th></tr></thead><tbody>'
-                for row in goal_history_rows:
-                    avg = row["Promedio"]
-                    avg_text = f"{avg:.2f}".rstrip("0").rstrip(".") if isinstance(avg, (int, float)) else "N/D"
-                    goal_table_html += f"<tr><td>{html.escape(str(row['Indicador']))}</td><td>{avg_text}</td><td>{row['Muestra']}</td></tr>"
-                goal_table_html += "</tbody></table>"
-                st.markdown(goal_table_html, unsafe_allow_html=True)
+        with tab_goals:
+            st.markdown("### ⚽ Goles · lectura del partido en vivo")
+            st.caption("El bot combina promedios de localía, marcador, minuto y estadísticas disponibles en vivo. Presenta una sola recomendación principal por partido, no una lista de mercados.")
+            goal_results = st.session_state.get("goal_scan_results", [])
+            if goal_results:
+                corner_history_by_id = {
+                    (item.get("fixture", {}).get("fixture") or {}).get("id"): item.get("automatic_history") or {}
+                    for item in st.session_state.get("corner_scan_results", [])
+                }
+                search_matches = st.text_input("🔎 Buscar equipo o liga", placeholder="Ej. Argentinos Juniors, Premier League…", key="search_goal_matches").strip().casefold()
+                cards_shown = 0
+                for goal_row in goal_results:
+                    # Compatibilidad con resultados guardados en session_state por versiones anteriores:
+                    # el formato antiguo tenía 3 elementos y el actual incluye también el contexto.
+                    if not isinstance(goal_row, (tuple, list)) or len(goal_row) < 3:
+                        continue
+                    fixture, estimate, tips = goal_row[:3]
+                    context = goal_row[3] if len(goal_row) >= 4 and isinstance(goal_row[3], dict) else {}
+                    fixture_id = (fixture.get("fixture") or {}).get("id")
+                    if search_matches and search_matches not in fixture_label(fixture).casefold():
+                        continue
+                    history = corner_history_by_id.get(fixture_id, {})
+                    if not estimate.get("available"):
+                        continue
+                    home = (fixture.get("teams") or {}).get("home") or {}
+                    away = (fixture.get("teams") or {}).get("away") or {}
+                    home_name = home.get("name", "Local")
+                    away_name = away.get("name", "Visitante")
+                    goals = fixture.get("goals") or {}
+                    home_score = goals.get("home")
+                    away_score = goals.get("away")
+                    minute = ((fixture.get("fixture") or {}).get("status") or {}).get("elapsed")
+                    st.markdown(fixture_hero_html(fixture), unsafe_allow_html=True)
+                    st.markdown("**📊 Promedios de goles por localía**")
+                    goal_history_rows = [
+                        {"Indicador": f"{home_name} · goles a favor en casa", "Promedio": history.get("home_goals_for"), "Muestra": history.get("home_goal_sample", 0)},
+                        {"Indicador": f"{home_name} · goles recibidos en casa", "Promedio": history.get("home_goals_against"), "Muestra": history.get("home_goal_sample", 0)},
+                        {"Indicador": f"{away_name} · goles a favor fuera", "Promedio": history.get("away_goals_for"), "Muestra": history.get("away_goal_sample", 0)},
+                        {"Indicador": f"{away_name} · goles recibidos fuera", "Promedio": history.get("away_goals_against"), "Muestra": history.get("away_goal_sample", 0)},
+                    ]
+                    goal_table_html = '<table class="history-table"><thead><tr><th>Equipo / indicador</th><th>Promedio</th><th>Muestra</th></tr></thead><tbody>'
+                    for row in goal_history_rows:
+                        avg = row["Promedio"]
+                        avg_text = f"{avg:.2f}".rstrip("0").rstrip(".") if isinstance(avg, (int, float)) else "N/D"
+                        goal_table_html += f"<tr><td>{html.escape(str(row['Indicador']))}</td><td>{avg_text}</td><td>{row['Muestra']}</td></tr>"
+                    goal_table_html += "</tbody></table>"
+                    st.markdown(goal_table_html, unsafe_allow_html=True)
 
-                # Choose one main tip: favor a team-goal signal when live pressure supports it.
-                candidates = list(tips or [])
-                live_stats = st.session_state.stats_cache.get(str(fixture_id), [])
-                home_shots = safe_stat(live_stats, "Total Shots", 0)
-                away_shots = safe_stat(live_stats, "Total Shots", 1)
-                home_on = safe_stat(live_stats, "Shots on Goal", 0)
-                away_on = safe_stat(live_stats, "Shots on Goal", 1)
-                home_poss = safe_stat(live_stats, "Ball Possession", 0)
-                away_poss = safe_stat(live_stats, "Ball Possession", 1)
-                home_corners = safe_stat(live_stats, "Corner Kicks", 0)
-                away_corners = safe_stat(live_stats, "Corner Kicks", 1)
-                if isinstance(home_poss, str):
-                    try: home_poss = float(home_poss.replace("%", "").strip())
-                    except ValueError: home_poss = None
-                if isinstance(away_poss, str):
-                    try: away_poss = float(away_poss.replace("%", "").strip())
-                    except ValueError: away_poss = None
-                live_values = [v for v in (home_shots, away_shots, home_on, away_on, home_poss, away_poss, home_corners, away_corners) if isinstance(v, (int, float))]
-                pressure_home = (float(home_on or 0) * 2.0 + float(home_shots or 0) * 0.35 + float(home_corners or 0) * 0.7 + (max(0, float(home_poss) - 50) * 0.06 if isinstance(home_poss, (int, float)) else 0))
-                pressure_away = (float(away_on or 0) * 2.0 + float(away_shots or 0) * 0.35 + float(away_corners or 0) * 0.7 + (max(0, float(away_poss) - 50) * 0.06 if isinstance(away_poss, (int, float)) else 0))
-                pressure_gap = pressure_home - pressure_away
-                scored_home = isinstance(home_score, int) and home_score > 0
-                scored_away = isinstance(away_score, int) and away_score > 0
-                # Live probability refresh: show chance of at least one additional goal
-                # alongside the corner split and the pressure reading used by the model.
-                prob_next_goal = estimate.get("probability_next_goal")
-                metric_cols = st.columns(3)
-                metric_cols[0].metric(
-                    "Prob. de otro gol",
-                    f"{prob_next_goal * 100:.1f}%" if isinstance(prob_next_goal, (int, float)) else "N/D",
-                )
-                metric_cols[1].metric(
-                    f"Córners · {home_name}",
-                    str(home_corners) if home_corners is not None else "N/D",
-                )
-                metric_cols[2].metric(
-                    f"Córners · {away_name}",
-                    str(away_corners) if away_corners is not None else "N/D",
-                )
-                pressure_note = (
-                    f"Presión estadística: {home_name} {pressure_home:.1f} · "
-                    f"{away_name} {pressure_away:.1f}. "
-                    "Los córners pesan como una señal más; tiros a puerta y posesión ayudan a distinguir "
-                    "presión real de córners sin peligro."
-                    if live_values else
-                    "No hay estadísticas en vivo suficientes para ajustar la probabilidad por presión."
-                )
-                st.caption(pressure_note)
-                st.caption(
-                    "Estimación exploratoria, no probabilidad calibrada. Se actualiza al refrescar el escáner; "
-                    "un 8–2 en córners no significa por sí solo que vaya a llegar un gol."
-                )
-                tip_label = None
-                tip_probability = None
-                rationale = []
-                if isinstance(home_score, int) and isinstance(away_score, int):
-                    total_goals = home_score + away_score
-                    if total_goals == 0 and isinstance(minute, int) and minute < 88:
-                        if pressure_gap >= 1.5 and any(isinstance(v, (int, float)) and v > 0 for v in (home_on, home_shots, home_corners)):
-                            tip_label = f"{home_name} marcará al menos 1 gol (más de 0.5 goles del local)"
-                            tip_probability = estimate.get("home_final_goals_at_least", {}).get("1", {}).get("probability")
-                            rationale.append(f"presión ofensiva favorece a {home_name}")
-                        elif pressure_gap <= -1.5 and any(isinstance(v, (int, float)) and v > 0 for v in (away_on, away_shots, away_corners)):
-                            tip_label = f"{away_name} marcará al menos 1 gol (más de 0.5 goles del visitante)"
-                            tip_probability = estimate.get("away_final_goals_at_least", {}).get("1", {}).get("probability")
-                            rationale.append(f"presión ofensiva favorece a {away_name}")
-                        elif candidates:
+                    # Choose one main tip: favor a team-goal signal when live pressure supports it.
+                    candidates = list(tips or [])
+                    live_stats = st.session_state.stats_cache.get(str(fixture_id), [])
+                    home_shots = safe_stat(live_stats, "Total Shots", 0)
+                    away_shots = safe_stat(live_stats, "Total Shots", 1)
+                    home_on = safe_stat(live_stats, "Shots on Goal", 0)
+                    away_on = safe_stat(live_stats, "Shots on Goal", 1)
+                    home_poss = safe_stat(live_stats, "Ball Possession", 0)
+                    away_poss = safe_stat(live_stats, "Ball Possession", 1)
+                    home_corners = safe_stat(live_stats, "Corner Kicks", 0)
+                    away_corners = safe_stat(live_stats, "Corner Kicks", 1)
+                    if isinstance(home_poss, str):
+                        try: home_poss = float(home_poss.replace("%", "").strip())
+                        except ValueError: home_poss = None
+                    if isinstance(away_poss, str):
+                        try: away_poss = float(away_poss.replace("%", "").strip())
+                        except ValueError: away_poss = None
+                    live_values = [v for v in (home_shots, away_shots, home_on, away_on, home_poss, away_poss, home_corners, away_corners) if isinstance(v, (int, float))]
+                    pressure_home = (float(home_on or 0) * 2.0 + float(home_shots or 0) * 0.35 + float(home_corners or 0) * 0.7 + (max(0, float(home_poss) - 50) * 0.06 if isinstance(home_poss, (int, float)) else 0))
+                    pressure_away = (float(away_on or 0) * 2.0 + float(away_shots or 0) * 0.35 + float(away_corners or 0) * 0.7 + (max(0, float(away_poss) - 50) * 0.06 if isinstance(away_poss, (int, float)) else 0))
+                    pressure_gap = pressure_home - pressure_away
+                    scored_home = isinstance(home_score, int) and home_score > 0
+                    scored_away = isinstance(away_score, int) and away_score > 0
+                    # Live probability refresh: show chance of at least one additional goal
+                    # alongside the corner split and the pressure reading used by the model.
+                    prob_next_goal = estimate.get("probability_next_goal")
+                    metric_cols = st.columns(3)
+                    metric_cols[0].metric(
+                        "Prob. de otro gol",
+                        f"{prob_next_goal * 100:.1f}%" if isinstance(prob_next_goal, (int, float)) else "N/D",
+                    )
+                    metric_cols[1].metric(
+                        f"Córners · {home_name}",
+                        str(home_corners) if home_corners is not None else "N/D",
+                    )
+                    metric_cols[2].metric(
+                        f"Córners · {away_name}",
+                        str(away_corners) if away_corners is not None else "N/D",
+                    )
+                    pressure_note = (
+                        f"Presión estadística: {home_name} {pressure_home:.1f} · "
+                        f"{away_name} {pressure_away:.1f}. "
+                        "Los córners pesan como una señal más; tiros a puerta y posesión ayudan a distinguir "
+                        "presión real de córners sin peligro."
+                        if live_values else
+                        "No hay estadísticas en vivo suficientes para ajustar la probabilidad por presión."
+                    )
+                    st.caption(pressure_note)
+                    st.caption(
+                        "Estimación exploratoria, no probabilidad calibrada. Se actualiza al refrescar el escáner; "
+                        "un 8–2 en córners no significa por sí solo que vaya a llegar un gol."
+                    )
+                    tip_label = None
+                    tip_probability = None
+                    rationale = []
+                    if isinstance(home_score, int) and isinstance(away_score, int):
+                        total_goals = home_score + away_score
+                        if total_goals == 0 and isinstance(minute, int) and minute < 88:
+                            if pressure_gap >= 1.5 and any(isinstance(v, (int, float)) and v > 0 for v in (home_on, home_shots, home_corners)):
+                                tip_label = f"{home_name} marcará al menos 1 gol (más de 0.5 goles del local)"
+                                tip_probability = estimate.get("home_final_goals_at_least", {}).get("1", {}).get("probability")
+                                rationale.append(f"presión ofensiva favorece a {home_name}")
+                            elif pressure_gap <= -1.5 and any(isinstance(v, (int, float)) and v > 0 for v in (away_on, away_shots, away_corners)):
+                                tip_label = f"{away_name} marcará al menos 1 gol (más de 0.5 goles del visitante)"
+                                tip_probability = estimate.get("away_final_goals_at_least", {}).get("1", {}).get("probability")
+                                rationale.append(f"presión ofensiva favorece a {away_name}")
+                            elif candidates:
+                                tip_label, tip_probability = max(candidates, key=lambda x: x[1])
+                        elif total_goals == 0 and isinstance(minute, int) and minute < 88 and candidates:
                             tip_label, tip_probability = max(candidates, key=lambda x: x[1])
-                    elif total_goals == 0 and isinstance(minute, int) and minute < 88 and candidates:
+                        elif total_goals > 0 and isinstance(minute, int) and minute < 88:
+                            # With a goal already scored, prefer another-goal or a team-to-score market over full-time unders.
+                            future_candidates = [x for x in candidates if ("goles o más" in x[0] or "terminará con" in x[0] or "No habrá más goles" in x[0])]
+                            if future_candidates:
+                                tip_label, tip_probability = max(future_candidates, key=lambda x: x[1])
+                    if tip_label is None and candidates:
                         tip_label, tip_probability = max(candidates, key=lambda x: x[1])
-                    elif total_goals > 0 and isinstance(minute, int) and minute < 88:
-                        # With a goal already scored, prefer another-goal or a team-to-score market over full-time unders.
-                        future_candidates = [x for x in candidates if ("goles o más" in x[0] or "terminará con" in x[0] or "No habrá más goles" in x[0])]
-                        if future_candidates:
-                            tip_label, tip_probability = max(future_candidates, key=lambda x: x[1])
-                if tip_label is None and candidates:
-                    tip_label, tip_probability = max(candidates, key=lambda x: x[1])
 
-                st.markdown("**📡 Lectura en vivo**")
-                live_bits = []
-                if isinstance(home_poss, (int, float)) and isinstance(away_poss, (int, float)):
-                    live_bits.append(f"Posesión: {home_name} {home_poss:g}% · {away_name} {away_poss:g}%")
-                if isinstance(home_shots, (int, float)) and isinstance(away_shots, (int, float)):
-                    live_bits.append(f"Tiros: {home_name} {home_shots:g} · {away_name} {away_shots:g}")
-                if isinstance(home_on, (int, float)) and isinstance(away_on, (int, float)):
-                    live_bits.append(f"Tiros a puerta: {home_name} {home_on:g} · {away_name} {away_on:g}")
-                if isinstance(home_corners, (int, float)) and isinstance(away_corners, (int, float)):
-                    live_bits.append(f"Córners: {home_name} {home_corners:g} · {away_name} {away_corners:g}")
-                st.write(" · ".join(live_bits) if live_bits else "La API no entregó estadísticas detalladas suficientes para comparar la presión ofensiva.")
-                if tip_label:
-                    # This is model context only, not a betting recommendation.
-                    # The actual main/risk tips are selected below from verified live bookmaker odds.
-                    probability_text = f" · probabilidad exploratoria {float(tip_probability)*100:.1f}%" if isinstance(tip_probability, (int, float)) else ""
-                    st.caption(
-                        f"Lectura interna del modelo (no es un tip): {tip_label} · "
-                        f"marcador {home_score}–{away_score} · minuto {minute if minute is not None else 'N/D'}"
-                        f"{probability_text}"
-                    )
-                    if rationale:
-                        st.caption("Contexto observado: " + "; ".join(rationale) + ".")
-                st.caption(f"Referencia usada por el modelo: {estimate.get('baseline_league', 'genérica')} · muestra de liga: {estimate.get('baseline_matches', 0)} partidos · contexto: {context.get('context_status', 'no disponible')}.")
-                odds_by_fixture = st.session_state.get("live_odds_by_fixture", {})
-                match_odds = odds_by_fixture.get(str(fixture_id), [])
-                main_options = []
-                risk_options = []
-                draw_prob = estimate.get("draw_final") if isinstance(estimate, dict) else None
-                btts_prob = estimate.get("btts_final") if isinstance(estimate, dict) else None
-
-                for odds_row in match_odds:
-                    market_label = classify_market(odds_row)
-                    if not market_label:
-                        continue
-                    odd = odds_row.get("odd")
-                    if not isinstance(odd, (int, float)) or odd <= 1:
-                        continue
-
-                    model_prob = None
-                    if market_label == "Empate final":
-                        model_prob = draw_prob
-                    elif market_label == "Ambos equipos marcan: Sí":
-                        model_prob = btts_prob
-                    elif market_label == "Ambos equipos marcan: No" and isinstance(btts_prob, (int, float)):
-                        model_prob = 1.0 - btts_prob
-                    elif market_label.startswith(("Más de ", "Menos de ")):
-                        # Match real odds to a modelled goal or corner line. Corner
-                        # probability is a rough Poisson projection from the observed
-                        # live pace, so it remains exploratory and requires live stats.
-                        import re
-                        line_match = re.search(r"(\d+(?:[.,]\d+)?)", market_label)
-                        if line_match:
-                            line = float(line_match.group(1).replace(",", "."))
-                            is_corner_market = "córner" in market_label.casefold()
-                            if is_corner_market:
-                                corner_stats = st.session_state.stats_cache.get(str(fixture_id), [])
-                                current_home_corners = safe_stat(corner_stats, "Corner Kicks", 0)
-                                current_away_corners = safe_stat(corner_stats, "Corner Kicks", 1)
-                                corner_minute = (match_fixture.get("status") or {}).get("elapsed")
-                                if (isinstance(current_home_corners, (int, float))
-                                    and isinstance(current_away_corners, (int, float))
-                                    and isinstance(corner_minute, int) and 1 <= corner_minute < 90):
-                                    current_corners = float(current_home_corners) + float(current_away_corners)
-                                    remaining_mean = max(0.05, current_corners / corner_minute * (90 - corner_minute) * 0.70)
-                                    if market_label.startswith("Más de "):
-                                        needed = max(0, int(line - current_corners + 0.5))
-                                        model_prob = poisson_at_least(remaining_mean, needed)
-                                    else:
-                                        max_remaining = int(line - current_corners)
-                                        model_prob = (
-                                            sum(poisson_pmf(remaining_mean, n) for n in range(max_remaining + 1))
-                                            if max_remaining >= 0 else 0.0
-                                        )
-                            elif market_label.startswith("Más de "):
-                                target = str(int(line + 0.5))
-                                model_prob = estimate.get("over_total_goals", {}).get(target)
-                            else:
-                                model_prob = estimate.get("under_total_goals", {}).get(str(line))
-                    # Do not promote a market just because its price fits the range:
-                    # require a mapped model probability and a provisional edge over
-                    # the odds-implied probability. The model is not calibrated yet.
-                    if not isinstance(model_prob, (int, float)) or not 0.0 < model_prob < 1.0:
-                        continue
-                    implied_probability = 1.0 / float(odd)
-                    estimated_edge = float(model_prob) - implied_probability
-                    if estimated_edge < 0.02:
-                        continue
-                    option = {
-                        "market": market_label,
-                        "odd": float(odd),
-                        "model_prob": float(model_prob),
-                        "implied_probability": implied_probability,
-                        "estimated_edge": estimated_edge,
-                        "bookmaker": odds_row.get("bookmaker", "Casa no identificada"),
-                    }
-                    if 1.25 <= odd < 1.60:
-                        main_options.append(option)
-                    if odd >= 1.60:
-                        # High-risk candidates may include goals, draw, and BTTS;
-                        # numeric score patterns only add context to this slot.
-                        risk_options.append(option)
-
-                # Keep one stable high-risk slot in the UI, whether or not a suitable
-                # live market exists. This slot is also the only place for numerology.
-                if main_options:
-                    chosen_main = max(
-                        main_options,
-                        key=lambda item: item["model_prob"] if item["model_prob"] is not None else -1,
-                    )
-                    st.markdown('<div class="tip-section-heading"><span class="tip-heading-icon">◈</span><span>TIP PRINCIPAL</span><span class="tip-heading-status">EN VIVO</span></div>', unsafe_allow_html=True)
-                    st.markdown(
-                        f'<div class="tip-card"><div class="tip-card-label">TIP PRINCIPAL · CUOTA {chosen_main["odd"]:.2f}</div>'
-                        f'<div class="tip-card-title">{html.escape(chosen_main["market"])}</div>'
-                        f'<div class="tip-card-meta">{html.escape(chosen_main["bookmaker"])} · Probabilidad estimada {chosen_main["model_prob"]:.1%} · Implícita {chosen_main["implied_probability"]:.1%} · Ventaja estimada {chosen_main["estimated_edge"]:.1%}</div></div>',
-                        unsafe_allow_html=True,
-                    )
-                else:
-                    st.info("Sin oportunidades por ahora.")
-
-                if risk_options:
-                    risk_options.sort(
-                        key=lambda item: item["model_prob"] if item["model_prob"] is not None else -1,
-                        reverse=True,
-                    )
-                    selected_risk = risk_options[:2]
-                    st.markdown('<div class="tip-section-heading risk-heading"><span class="tip-heading-icon">⌁</span><span>TIP DE ALTO RIESGO</span><span class="tip-heading-status">RIESGO ALTO</span></div>', unsafe_allow_html=True)
-                    for risk_item in selected_risk:
-                        st.markdown(
-                            f'<div class="tip-card risk-tip-card"><div class="tip-card-label">ALTO RIESGO · CUOTA {risk_item["odd"]:.2f}</div>'
-                            f'<div class="tip-card-title">{html.escape(risk_item["market"])}</div>'
-                            f'<div class="tip-card-meta">{html.escape(risk_item["bookmaker"])} · Probabilidad estimada {risk_item["model_prob"]:.1%} · Implícita {risk_item["implied_probability"]:.1%} · Ventaja estimada {risk_item["estimated_edge"]:.1%}</div></div>',
-                            unsafe_allow_html=True,
+                    st.markdown("**📡 Lectura en vivo**")
+                    live_bits = []
+                    if isinstance(home_poss, (int, float)) and isinstance(away_poss, (int, float)):
+                        live_bits.append(f"Posesión: {home_name} {home_poss:g}% · {away_name} {away_poss:g}%")
+                    if isinstance(home_shots, (int, float)) and isinstance(away_shots, (int, float)):
+                        live_bits.append(f"Tiros: {home_name} {home_shots:g} · {away_name} {away_shots:g}")
+                    if isinstance(home_on, (int, float)) and isinstance(away_on, (int, float)):
+                        live_bits.append(f"Tiros a puerta: {home_name} {home_on:g} · {away_name} {away_on:g}")
+                    if isinstance(home_corners, (int, float)) and isinstance(away_corners, (int, float)):
+                        live_bits.append(f"Córners: {home_name} {home_corners:g} · {away_name} {away_corners:g}")
+                    st.write(" · ".join(live_bits) if live_bits else "La API no entregó estadísticas detalladas suficientes para comparar la presión ofensiva.")
+                    if tip_label:
+                        # This is model context only, not a betting recommendation.
+                        # The actual main/risk tips are selected below from verified live bookmaker odds.
+                        probability_text = f" · probabilidad exploratoria {float(tip_probability)*100:.1f}%" if isinstance(tip_probability, (int, float)) else ""
+                        st.caption(
+                            f"Lectura interna del modelo (no es un tip): {tip_label} · "
+                            f"marcador {home_score}–{away_score} · minuto {minute if minute is not None else 'N/D'}"
+                            f"{probability_text}"
                         )
-                    risk_stats = st.session_state.stats_cache.get(str(fixture_id), [])
-                    risk_home_corners = safe_stat(risk_stats, "Corner Kicks", 0)
-                    risk_away_corners = safe_stat(risk_stats, "Corner Kicks", 1)
-                    risk_home_yellow = safe_stat(risk_stats, "Yellow Cards", 0)
-                    risk_away_yellow = safe_stat(risk_stats, "Yellow Cards", 1)
-                    risk_context_bits = [score_pattern_context(home_score, away_score)]
-                    if isinstance(risk_home_corners, (int, float)) and isinstance(risk_away_corners, (int, float)):
-                        if abs(risk_home_corners - risk_away_corners) >= 3:
-                            leader = home_name if risk_home_corners > risk_away_corners else away_name
-                            risk_context_bits.append(f"desequilibrio de córners a favor de {leader} ({risk_home_corners:.0f}–{risk_away_corners:.0f})")
-                        else:
-                            risk_context_bits.append(f"córners relativamente equilibrados ({risk_home_corners:.0f}–{risk_away_corners:.0f})")
-                    if isinstance(risk_home_yellow, (int, float)) and isinstance(risk_away_yellow, (int, float)):
-                        risk_context_bits.append(f"tarjetas amarillas {risk_home_yellow:.0f}–{risk_away_yellow:.0f}")
-                    pattern_matches = numerology_context(
-                        home_score, away_score,
-                        risk_home_corners, risk_away_corners,
-                        risk_home_yellow, risk_away_yellow,
-                    )
-                    if pattern_matches:
-                        risk_context_bits.extend(pattern_matches)
-                    else:
-                        risk_context_bits.append("sin coincidencia numérica clara entre marcador y córners/tarjetas")
-                    st.caption(
-                        "Numerología/contexto del alto riesgo: " + "; ".join(risk_context_bits)
-                        + ". Es solo una coincidencia descriptiva para contextualizar el tip de riesgo; no predice un marcador ni genera apuestas por sí sola. No se inventan estadísticas faltantes."
-                    )
-                else:
-                    st.markdown('<div class="tip-section-heading risk-heading"><span class="tip-heading-icon">⌁</span><span>TIP DE ALTO RIESGO</span><span class="tip-heading-status">RIESGO ALTO</span></div>', unsafe_allow_html=True)
-                    st.info("Sin oportunidad de alto riesgo por ahora.")
+                        if rationale:
+                            st.caption("Contexto observado: " + "; ".join(rationale) + ".")
+                    st.caption(f"Referencia usada por el modelo: {estimate.get('baseline_league', 'genérica')} · muestra de liga: {estimate.get('baseline_matches', 0)} partidos · contexto: {context.get('context_status', 'no disponible')}.")
+                    odds_by_fixture = st.session_state.get("live_odds_by_fixture", {})
+                    match_odds = odds_by_fixture.get(str(fixture_id), [])
+                    main_options = []
+                    risk_options = []
+                    draw_prob = estimate.get("draw_final") if isinstance(estimate, dict) else None
+                    btts_prob = estimate.get("btts_final") if isinstance(estimate, dict) else None
 
-                if not match_odds:
-                    odds_error = st.session_state.get("live_odds_error", "")
-                    if odds_error:
-                        st.warning("No se pudieron actualizar las cuotas en vivo. No se inventan mercados. " + str(odds_error))
-                    else:
-                        st.caption("La API no devolvió cuotas en vivo para este partido. Puede faltar cobertura de la casa o del mercado.")
-                odds_stamp = st.session_state.get("live_odds_last_fetch")
-                if odds_stamp:
-                    st.caption(f"Cuotas verificadas por última vez: {odds_stamp}. Las cuotas pueden cambiar o suspenderse.")
-                st.caption("Las cuotas reales filtran los mercados disponibles; las probabilidades del modelo son exploratorias y aún no están calibradas. La numerología solo aporta contexto al tip de alto riesgo.")
-                action_cols = st.columns(4)
-                action_specs = [
-                    ("⚽ Goles", "goals"),
-                    ("🚩 Córners", "corners"),
-                    ("🤝 Empate", "draw"),
-                    ("🥅 Ambos marcan", "btts"),
-                ]
-                for action_col, (action_label, action_key) in zip(action_cols, action_specs):
-                    with action_col:
-                        if st.button(action_label, key=f"match_action_{fixture_id}_{action_key}"):
-                            st.session_state["selected_match_detail"] = {
-                                "fixture_id": fixture_id,
-                                "market": action_key,
-                            }
-                selected_detail = st.session_state.get("selected_match_detail") or {}
-                if str(selected_detail.get("fixture_id")) == str(fixture_id):
-                    market_names = {
-                        "goals": "Goles",
-                        "corners": "Córners",
-                        "draw": "Empate",
-                        "btts": "Ambos equipos marcan",
-                    }
-                    selected_market = selected_detail.get("market")
-                    st.markdown(f"**Vista seleccionada: {market_names.get(selected_market, 'Mercado')}**")
-                    if selected_market == "goals":
-                        remaining = estimate.get("expected_total_goals_remaining")
-                        if estimate.get("available") and isinstance(remaining, (int, float)):
-                            st.write(f"Marcador actual: {home_score}–{away_score}. Media exploratoria de goles restantes: {remaining:.2f}.")
-                        else:
-                            st.info(estimate.get("reason") or "No hay datos suficientes para estimar goles restantes.")
-                    elif selected_market == "draw":
-                        probability = estimate.get("draw_final")
-                        if estimate.get("available") and isinstance(probability, (int, float)):
-                            st.write(f"Probabilidad exploratoria de empate final: {probability:.1%}.")
-                        else:
-                            st.info(estimate.get("reason") or "No hay datos suficientes para estimar empate.")
-                    elif selected_market == "btts":
-                        probability = estimate.get("btts_final")
-                        if estimate.get("available") and isinstance(probability, (int, float)):
-                            if estimate.get("btts_already_settled"):
-                                st.write("Ambos equipos ya marcaron: el mercado «ambos marcan» ya se cumplió.")
-                            else:
-                                st.write(f"Probabilidad exploratoria de que ambos equipos marquen al final: {probability:.1%}.")
-                        else:
-                            st.info(estimate.get("reason") or "No hay datos suficientes para estimar ambos marcan.")
-                    elif selected_market == "corners":
-                        st.write("Consulta la pestaña Córners para ver el ritmo en vivo y la referencia histórica disponible.")
+                    for odds_row in match_odds:
+                        market_label = classify_market(odds_row)
+                        if not market_label:
+                            continue
+                        odd = odds_row.get("odd")
+                        if not isinstance(odd, (int, float)) or odd <= 1:
+                            continue
 
-                    # Visualización esquemática del campo; no representa posiciones reales de jugadores.
-                    st.markdown(
-                        f"""
-                        <div style="background:linear-gradient(90deg,#16452f,#1b5839);border:1px solid #4d8b63;border-radius:12px;padding:12px;margin:10px 0">
-                          <div style="text-align:center;color:#d7f5df;font-weight:800;margin-bottom:8px">VISTA DEL PARTIDO · {html.escape(str(minute if minute is not None else 'N/D'))}'</div>
-                          <svg viewBox="0 0 320 150" role="img" aria-label="Campo de fútbol esquemático" style="width:100%;max-height:180px">
-                            <rect x="3" y="3" width="314" height="144" rx="4" fill="none" stroke="#b6e2c2" stroke-width="1.5"/>
-                            <line x1="160" y1="3" x2="160" y2="147" stroke="#b6e2c2" stroke-width="1.2"/>
-                            <circle cx="160" cy="75" r="24" fill="none" stroke="#b6e2c2" stroke-width="1.2"/>
-                            <circle cx="160" cy="75" r="2.5" fill="#b6e2c2"/>
-                            <rect x="3" y="40" width="38" height="70" fill="none" stroke="#b6e2c2" stroke-width="1.2"/>
-                            <rect x="279" y="40" width="38" height="70" fill="none" stroke="#b6e2c2" stroke-width="1.2"/>
-                            <circle cx="64" cy="75" r="5" fill="#FACC15"/><circle cx="256" cy="75" r="5" fill="#F4F4F5"/>
-                            <text x="64" y="64" text-anchor="middle" font-size="9" fill="#ffffff">LOCAL</text>
-                            <text x="256" y="64" text-anchor="middle" font-size="9" fill="#ffffff">VISITANTE</text>
-                          </svg>
-                          <div style="display:flex;justify-content:space-between;gap:8px;color:#f4f4f5;font-size:12px;font-weight:700">
-                            <span>{html.escape(str(home_name))} · {home_score}</span>
-                            <span>{away_score} · {html.escape(str(away_name))}</span>
-                          </div>
-                        </div>
-                        """,
-                        unsafe_allow_html=True,
-                    )
-
-                    # H2H solo bajo demanda y cacheado para respetar la cuota de API.
-                    home_id = ((fixture.get("teams") or {}).get("home") or {}).get("id")
-                    away_id = ((fixture.get("teams") or {}).get("away") or {}).get("id")
-                    h2h_key = f"{home_id}-{away_id}"
-                    if "h2h_cache" not in st.session_state:
-                        st.session_state.h2h_cache = {}
-                    if st.button("📚 Consultar últimos enfrentamientos directos", key=f"h2h_{fixture_id}"):
-                        if not home_id or not away_id:
-                            st.warning("La API no entregó los identificadores de ambos equipos.")
-                        elif h2h_key not in st.session_state.h2h_cache:
-                            try:
-                                h2h_payload = api_get("fixtures/headtohead", {"h2h": h2h_key, "last": 5})
-                                st.session_state.h2h_cache[h2h_key] = h2h_payload.get("response") or []
-                            except Exception as h2h_exc:
-                                st.session_state.h2h_cache[h2h_key] = {"error": str(h2h_exc)}
-                    h2h_data = st.session_state.get("h2h_cache", {}).get(h2h_key)
-                    if isinstance(h2h_data, dict) and h2h_data.get("error"):
-                        st.warning(f"No se pudieron consultar los enfrentamientos: {h2h_data['error']}")
-                    elif isinstance(h2h_data, list):
-                        if h2h_data:
-                            h2h_rows = []
-                            for past in h2h_data:
-                                past_fixture = past.get("fixture") or {}
-                                past_teams = past.get("teams") or {}
-                                past_goals = past.get("goals") or {}
-                                past_home = past_teams.get("home") or {}
-                                past_away = past_teams.get("away") or {}
-                                h2h_rows.append({
-                                    "Fecha": (past_fixture.get("date") or "")[:10],
-                                    "Local": past_home.get("name", "N/D"),
-                                    "Marcador": f"{past_goals.get('home', '—')} – {past_goals.get('away', '—')}",
-                                    "Visitante": past_away.get("name", "N/D"),
-                                })
-                            st.dataframe(h2h_rows, use_container_width=True, hide_index=True)
-                        else:
-                            st.info("La API no devolvió enfrentamientos directos anteriores para esta pareja.")
-
-            if cards_shown == 0:
-                st.info("No hay partidos con una señal principal en esta ronda. Los partidos sin estadísticas o con señal débil se omiten.")
-        else:
-            st.info("Pulsa «Escanear todos los partidos en vivo» para calcular las señales.")
-
-    with tab_corners:
-        st.markdown("### Córners · historial automático y ritmo en vivo")
-        st.caption("El bot consulta partidos anteriores por API, distingue local/visitante y cachea los resultados. No tienes que subir CSV.")
-        corner_results = st.session_state.get("corner_scan_results", [])
-        if corner_results:
-            for item in corner_results:
-                st.markdown(
-                    fixture_hero_html(
-                        item["fixture"],
-                        mode="corners",
-                        home_corners=item.get("home_corners"),
-                        away_corners=item.get("away_corners"),
-                    ),
-                    unsafe_allow_html=True,
-                )
-                if item.get("error"):
-                    st.caption("Las estadísticas en vivo no están disponibles para este partido.")
-                else:
-                    if item.get("home_corners") is not None and item.get("away_corners") is not None:
-                        st.caption(f"Córners actuales: local {item['home_corners']} · visitante {item['away_corners']} · total {item['home_corners'] + item['away_corners']}.")
-                    history = item.get("automatic_history") or {}
-                    if history.get("available"):
-                        history_rows = [
-                            {"Indicador": "Córners a favor del local en casa", "Promedio": history.get("home_corners_for") if history.get("home_corners_for") is not None else "N/D", "Muestra": history.get("home_corner_sample", 0)},
-                            {"Indicador": "Córners concedidos por el local en casa", "Promedio": history.get("home_corners_against") if history.get("home_corners_against") is not None else "N/D", "Muestra": history.get("home_corner_sample", 0)},
-                            {"Indicador": "Córners a favor del visitante fuera", "Promedio": history.get("away_corners_for") if history.get("away_corners_for") is not None else "N/D", "Muestra": history.get("away_corner_sample", 0)},
-                            {"Indicador": "Córners concedidos por el visitante fuera", "Promedio": history.get("away_corners_against") if history.get("away_corners_against") is not None else "N/D", "Muestra": history.get("away_corner_sample", 0)},
-                        ]
-                        table_html = '<table class="history-table"><thead><tr><th>Indicador</th><th>Promedio</th><th>Muestra</th></tr></thead><tbody>'
-                        for history_row in history_rows:
-                            average = history_row["Promedio"]
-                            average_text = f"{average:.2f}".rstrip("0").rstrip(".") if isinstance(average, (int, float)) else str(average)
-                            table_html += (
-                                "<tr>"
-                                f"<td>{history_row['Indicador']}</td>"
-                                f"<td>{average_text}</td>"
-                                f"<td>{history_row['Muestra']}</td>"
-                                "</tr>"
-                            )
-                        table_html += "</tbody></table>"
-                        st.markdown(table_html, unsafe_allow_html=True)
-                        st.caption(history.get("note", "Historial automático de partidos anteriores."))
-                    else:
-                        st.caption(history.get("note", "Historial automático no disponible para este encuentro."))
-                    minute = (((item.get("fixture") or {}).get("fixture") or {}).get("status") or {}).get("elapsed")
-                    if item.get("home_corners") is not None and item.get("away_corners") is not None and isinstance(minute, int) and minute < 90:
-                        total_now = item["home_corners"] + item["away_corners"]
-                        hist_rate = None
-                        if history.get("home_corners_for") is not None and history.get("away_corners_for") is not None:
-                            hist_rate = float(history["home_corners_for"]) + float(history["away_corners_for"])
-                        # Live-first fallback: if history is unavailable, estimate remaining
-                        # corner pace from the observed match, using shots as a weak context cue.
-                        history_used = hist_rate is not None
-                        if hist_rate is None:
-                            hist_rate = 9.6
-                        live_projection = total_now * 90 / max(1, minute)
-                        projected = (0.55 * hist_rate + 0.45 * live_projection) if history_used else max(total_now, 0.70 * hist_rate + 0.30 * live_projection)
-                        shots_total = (item.get("home_shots") or 0) + (item.get("away_shots") or 0)
-                        if isinstance(shots_total, (int, float)) and shots_total >= 10 and minute >= 20:
-                            projected *= 1.05
-                        # Round projected total to a sensible half-corner line.
-                        import math
-                        suggested_line = max(0.5, math.floor(projected * 2) / 2)
-                        line_text = str(int(suggested_line)) if suggested_line.is_integer() else f"{suggested_line:.1f}"
-                        remaining_expected = max(0.0, projected - total_now)
-                        # Match live corner markets to real odds from API-Football.
-                        # A price alone is never enough: require a provisional model edge.
-                        fixture_id = ((item.get("fixture") or {}).get("fixture") or {}).get("id")
-                        live_rows = st.session_state.get("live_odds_by_fixture", {}).get(str(fixture_id), [])
-                        corner_options = []
-                        remaining_mean = max(0.05, remaining_expected * 0.70)
-                        for odds_row in live_rows:
-                            market_label = classify_market(odds_row)
-                            odd = odds_row.get("odd")
-                            if not market_label or "córner" not in market_label.casefold() or not isinstance(odd, (int, float)):
-                                continue
+                        model_prob = None
+                        if market_label == "Empate final":
+                            model_prob = draw_prob
+                        elif market_label == "Ambos equipos marcan: Sí":
+                            model_prob = btts_prob
+                        elif market_label == "Ambos equipos marcan: No" and isinstance(btts_prob, (int, float)):
+                            model_prob = 1.0 - btts_prob
+                        elif market_label.startswith(("Más de ", "Menos de ")):
+                            # Match real odds to a modelled goal or corner line. Corner
+                            # probability is a rough Poisson projection from the observed
+                            # live pace, so it remains exploratory and requires live stats.
                             import re
                             line_match = re.search(r"(\d+(?:[.,]\d+)?)", market_label)
-                            if not line_match:
-                                continue
-                            market_line = float(line_match.group(1).replace(",", "."))
-                            if market_label.startswith("Más de "):
-                                needed = max(0, int(market_line - total_now + 0.5))
-                                model_prob = poisson_at_least(remaining_mean, needed)
-                            elif market_label.startswith("Menos de "):
-                                max_remaining = int(market_line - total_now)
-                                model_prob = sum(poisson_pmf(remaining_mean, n) for n in range(max_remaining + 1)) if max_remaining >= 0 else 0.0
+                            if line_match:
+                                line = float(line_match.group(1).replace(",", "."))
+                                is_corner_market = "córner" in market_label.casefold()
+                                if is_corner_market:
+                                    corner_stats = st.session_state.stats_cache.get(str(fixture_id), [])
+                                    current_home_corners = safe_stat(corner_stats, "Corner Kicks", 0)
+                                    current_away_corners = safe_stat(corner_stats, "Corner Kicks", 1)
+                                    corner_minute = (match_fixture.get("status") or {}).get("elapsed")
+                                    if (isinstance(current_home_corners, (int, float))
+                                        and isinstance(current_away_corners, (int, float))
+                                        and isinstance(corner_minute, int) and 1 <= corner_minute < 90):
+                                        current_corners = float(current_home_corners) + float(current_away_corners)
+                                        remaining_mean = max(0.05, current_corners / corner_minute * (90 - corner_minute) * 0.70)
+                                        if market_label.startswith("Más de "):
+                                            needed = max(0, int(line - current_corners + 0.5))
+                                            model_prob = poisson_at_least(remaining_mean, needed)
+                                        else:
+                                            max_remaining = int(line - current_corners)
+                                            model_prob = (
+                                                sum(poisson_pmf(remaining_mean, n) for n in range(max_remaining + 1))
+                                                if max_remaining >= 0 else 0.0
+                                            )
+                                elif market_label.startswith("Más de "):
+                                    target = str(int(line + 0.5))
+                                    model_prob = estimate.get("over_total_goals", {}).get(target)
+                                else:
+                                    model_prob = estimate.get("under_total_goals", {}).get(str(line))
+                        # Do not promote a market just because its price fits the range:
+                        # require a mapped model probability and a provisional edge over
+                        # the odds-implied probability. The model is not calibrated yet.
+                        if not isinstance(model_prob, (int, float)) or not 0.0 < model_prob < 1.0:
+                            continue
+                        implied_probability = 1.0 / float(odd)
+                        estimated_edge = float(model_prob) - implied_probability
+                        if estimated_edge < 0.02:
+                            continue
+                        option = {
+                            "market": market_label,
+                            "odd": float(odd),
+                            "model_prob": float(model_prob),
+                            "implied_probability": implied_probability,
+                            "estimated_edge": estimated_edge,
+                            "bookmaker": odds_row.get("bookmaker", "Casa no identificada"),
+                        }
+                        if 1.25 <= odd < 1.60:
+                            main_options.append(option)
+                        if odd >= 1.60:
+                            # High-risk candidates may include goals, draw, and BTTS;
+                            # numeric score patterns only add context to this slot.
+                            risk_options.append(option)
+
+                    # Keep one stable high-risk slot in the UI, whether or not a suitable
+                    # live market exists. This slot is also the only place for numerology.
+                    if main_options:
+                        chosen_main = max(
+                            main_options,
+                            key=lambda item: item["model_prob"] if item["model_prob"] is not None else -1,
+                        )
+                        st.markdown('<div class="tip-section-heading"><span class="tip-heading-icon">◈</span><span>TIP PRINCIPAL</span><span class="tip-heading-status">EN VIVO</span></div>', unsafe_allow_html=True)
+                        st.markdown(
+                            f'<div class="tip-card"><div class="tip-card-label">TIP PRINCIPAL · CUOTA {chosen_main["odd"]:.2f}</div>'
+                            f'<div class="tip-card-title">{html.escape(chosen_main["market"])}</div>'
+                            f'<div class="tip-card-meta">{html.escape(chosen_main["bookmaker"])} · Probabilidad estimada {chosen_main["model_prob"]:.1%} · Implícita {chosen_main["implied_probability"]:.1%} · Ventaja estimada {chosen_main["estimated_edge"]:.1%}</div></div>',
+                            unsafe_allow_html=True,
+                        )
+                    else:
+                        st.info("Sin oportunidades por ahora.")
+
+                    if risk_options:
+                        risk_options.sort(
+                            key=lambda item: item["model_prob"] if item["model_prob"] is not None else -1,
+                            reverse=True,
+                        )
+                        selected_risk = risk_options[:2]
+                        st.markdown('<div class="tip-section-heading risk-heading"><span class="tip-heading-icon">⌁</span><span>TIP DE ALTO RIESGO</span><span class="tip-heading-status">RIESGO ALTO</span></div>', unsafe_allow_html=True)
+                        for risk_item in selected_risk:
+                            st.markdown(
+                                f'<div class="tip-card risk-tip-card"><div class="tip-card-label">ALTO RIESGO · CUOTA {risk_item["odd"]:.2f}</div>'
+                                f'<div class="tip-card-title">{html.escape(risk_item["market"])}</div>'
+                                f'<div class="tip-card-meta">{html.escape(risk_item["bookmaker"])} · Probabilidad estimada {risk_item["model_prob"]:.1%} · Implícita {risk_item["implied_probability"]:.1%} · Ventaja estimada {risk_item["estimated_edge"]:.1%}</div></div>',
+                                unsafe_allow_html=True,
+                            )
+                        risk_stats = st.session_state.stats_cache.get(str(fixture_id), [])
+                        risk_home_corners = safe_stat(risk_stats, "Corner Kicks", 0)
+                        risk_away_corners = safe_stat(risk_stats, "Corner Kicks", 1)
+                        risk_home_yellow = safe_stat(risk_stats, "Yellow Cards", 0)
+                        risk_away_yellow = safe_stat(risk_stats, "Yellow Cards", 1)
+                        risk_context_bits = [score_pattern_context(home_score, away_score)]
+                        if isinstance(risk_home_corners, (int, float)) and isinstance(risk_away_corners, (int, float)):
+                            if abs(risk_home_corners - risk_away_corners) >= 3:
+                                leader = home_name if risk_home_corners > risk_away_corners else away_name
+                                risk_context_bits.append(f"desequilibrio de córners a favor de {leader} ({risk_home_corners:.0f}–{risk_away_corners:.0f})")
                             else:
-                                continue
-                            if not isinstance(model_prob, (int, float)) or not 0 < model_prob < 1:
-                                continue
-                            implied = 1.0 / float(odd)
-                            edge = float(model_prob) - implied
-                            if edge < 0.02:
-                                continue
-                            corner_options.append({
-                                "market": market_label, "odd": float(odd),
-                                "probability": float(model_prob), "edge": edge,
-                                "bookmaker": odds_row.get("bookmaker", "Casa no identificada"),
-                            })
-                        main_options = [option for option in corner_options if 1.25 <= option["odd"] < 1.60]
-                        risk_options = [option for option in corner_options if option["odd"] >= 1.60]
-                        st.markdown('<div class="tip-section-heading"><span class="tip-heading-icon">◈</span><span>TIP PRINCIPAL · CÓRNERS</span></div>', unsafe_allow_html=True)
-                        if main_options:
-                            chosen = max(main_options, key=lambda option: option["edge"])
-                            st.markdown(
-                                f'<div class="tip-card"><div class="tip-card-label">TIP PRINCIPAL</div>'
-                                f'<div class="tip-card-title">{html.escape(chosen["market"])}</div>'
-                                f'<div class="tip-card-meta">Cuota {chosen["odd"]:.2f} · {html.escape(chosen["bookmaker"])} · probabilidad exploratoria {chosen["probability"]:.1%}</div></div>',
-                                unsafe_allow_html=True,
-                            )
-                        else:
-                            st.info("Sin oportunidad confirmada por ahora.")
-                        st.markdown('<div class="tip-section-heading risk-heading"><span class="tip-heading-icon">⌁</span><span>TIP DE ALTO RIESGO · CÓRNERS</span></div>', unsafe_allow_html=True)
-                        if risk_options:
-                            chosen_risk = max(risk_options, key=lambda option: option["edge"])
-                            st.markdown(
-                                f'<div class="tip-card risk-tip-card"><div class="tip-card-label">ALTO RIESGO</div>'
-                                f'<div class="tip-card-title">{html.escape(chosen_risk["market"])}</div>'
-                                f'<div class="tip-card-meta">Cuota {chosen_risk["odd"]:.2f} · {html.escape(chosen_risk["bookmaker"])} · probabilidad exploratoria {chosen_risk["probability"]:.1%}</div></div>',
-                                unsafe_allow_html=True,
-                            )
-                        else:
-                            st.info("Sin oportunidad confirmada por ahora.")
-                        corner_patterns = numerology_context(
-                            (item.get("fixture", {}).get("goals") or {}).get("home"),
-                            (item.get("fixture", {}).get("goals") or {}).get("away"),
-                            item.get("home_corners"), item.get("away_corners"),
-                            item.get("home_yellow"), item.get("away_yellow"),
+                                risk_context_bits.append(f"córners relativamente equilibrados ({risk_home_corners:.0f}–{risk_away_corners:.0f})")
+                        if isinstance(risk_home_yellow, (int, float)) and isinstance(risk_away_yellow, (int, float)):
+                            risk_context_bits.append(f"tarjetas amarillas {risk_home_yellow:.0f}–{risk_away_yellow:.0f}")
+                        pattern_matches = numerology_context(
+                            home_score, away_score,
+                            risk_home_corners, risk_away_corners,
+                            risk_home_yellow, risk_away_yellow,
                         )
+                        if pattern_matches:
+                            risk_context_bits.extend(pattern_matches)
+                        else:
+                            risk_context_bits.append("sin coincidencia numérica clara entre marcador y córners/tarjetas")
                         st.caption(
-                            f"Proyección exploratoria: {projected:.1f} córners totales · actuales {total_now} · minuto {minute} · restantes estimados {remaining_expected:.1f}. "
-                            + ("Se combina historial con ritmo en vivo." if history_used else "Falta historial específico; se usa una referencia genérica.")
-                            + " La estimación no está calibrada y no garantiza valor real."
+                            "Numerología/contexto del alto riesgo: " + "; ".join(risk_context_bits)
+                            + ". Es solo una coincidencia descriptiva para contextualizar el tip de riesgo; no predice un marcador ni genera apuestas por sí sola. No se inventan estadísticas faltantes."
                         )
-                        if minute <= 5:
-                            st.caption("Partido muy reciente: el ritmo en vivo todavía tiene poca muestra.")
-                st.divider()
-        else:
-            st.info("Pulsa «Escanear todos los partidos en vivo» para obtener el análisis automático.")
+                    else:
+                        st.markdown('<div class="tip-section-heading risk-heading"><span class="tip-heading-icon">⌁</span><span>TIP DE ALTO RIESGO</span><span class="tip-heading-status">RIESGO ALTO</span></div>', unsafe_allow_html=True)
+                        st.info("Sin oportunidad de alto riesgo por ahora.")
 
-    with tab_overview:
-        st.subheader("Rendimiento del modelo")
-        st.caption("Historial de señales, verificación retrospectiva y evaluación de calidad del pronóstico.")
-        market_status = [
-            ("Córners", "Consulta automática de promedios recientes local/visitante y combinación exploratoria con el ritmo en vivo; pendiente de validación."),
-            ("Goles", "Probabilidades exploratorias basadas en medias históricas de liga; aún no calibradas."),
-            ("Empate", "Estimación exploratoria con un modelo Poisson simplificado; requiere validación retrospectiva."),
-            ("Ambos equipos marcan", "Estimación condicionada al marcador y a los goles restantes; requiere validación retrospectiva."),
-        ]
-        market_cols = st.columns(2)
-        for col, (market, status_text) in zip(market_cols * 2, market_status):
-            with col:
-                st.markdown(f"**{market}**")
-                st.caption(status_text)
-        st.caption("Las probabilidades no están validadas. No hay cuotas verificadas de RushBet ni EV calculado todavía; no se ejecutan apuestas automáticamente.")
-        st.markdown("### Validación retrospectiva")
-        st.caption("En cada fila, outcome=1 si se cumplió ESE mercado y outcome=0 si no se cumplió (no escribas el marcador final). Marca outcome_verified=true solo después de comprobar el resultado real. Las filas no verificadas o inválidas se excluyen.")
-        backtest_file = st.file_uploader(
-            "Cargar CSV de señales con resultados verificados",
-            type=["csv"],
-            key="backtest_csv_upload",
-        )
-        if backtest_file is not None:
-            try:
-                uploaded_rows = list(csv.DictReader(io.StringIO(backtest_file.getvalue().decode("utf-8-sig"))))
-                metrics = evaluate_binary_predictions(uploaded_rows)
-                metric_cols = st.columns(4)
-                metric_cols[0].metric("Muestra verificada", metrics["sample_size"])
-                metric_cols[1].metric("Tasa de acierto", f"{metrics['hit_rate']:.1%}" if metrics["hit_rate"] is not None else "N/D")
-                metric_cols[2].metric("Brier score", f"{metrics['brier_score']:.3f}" if metrics["brier_score"] is not None else "N/D")
-                metric_cols[3].metric("Filas excluidas", metrics["excluded"])
-                if metrics["sample_size"]:
-                    st.caption(
-                        f"Probabilidad media pronosticada: {metrics['mean_probability']:.1%} frente a "
-                        f"frecuencia real de acierto: {metrics['observed_rate']:.1%}. "
-                        "Una diferencia grande puede indicar mala calibración; evalúa cada mercado por separado y con una muestra suficiente. Brier score: cuanto más bajo, mejor (0 es perfecto)."
+                    if not match_odds:
+                        odds_error = st.session_state.get("live_odds_error", "")
+                        if odds_error:
+                            st.warning("No se pudieron actualizar las cuotas en vivo. No se inventan mercados. " + str(odds_error))
+                        else:
+                            st.caption("La API no devolvió cuotas en vivo para este partido. Puede faltar cobertura de la casa o del mercado.")
+                    odds_stamp = st.session_state.get("live_odds_last_fetch")
+                    if odds_stamp:
+                        st.caption(f"Cuotas verificadas por última vez: {odds_stamp}. Las cuotas pueden cambiar o suspenderse.")
+                    st.caption("Las cuotas reales filtran los mercados disponibles; las probabilidades del modelo son exploratorias y aún no están calibradas. La numerología solo aporta contexto al tip de alto riesgo.")
+                    action_cols = st.columns(4)
+                    action_specs = [
+                        ("⚽ Goles", "goals"),
+                        ("🚩 Córners", "corners"),
+                        ("🤝 Empate", "draw"),
+                        ("🥅 Ambos marcan", "btts"),
+                    ]
+                    for action_col, (action_label, action_key) in zip(action_cols, action_specs):
+                        with action_col:
+                            if st.button(action_label, key=f"match_action_{fixture_id}_{action_key}"):
+                                st.session_state["selected_match_detail"] = {
+                                    "fixture_id": fixture_id,
+                                    "market": action_key,
+                                }
+                    selected_detail = st.session_state.get("selected_match_detail") or {}
+                    if str(selected_detail.get("fixture_id")) == str(fixture_id):
+                        market_names = {
+                            "goals": "Goles",
+                            "corners": "Córners",
+                            "draw": "Empate",
+                            "btts": "Ambos equipos marcan",
+                        }
+                        selected_market = selected_detail.get("market")
+                        st.markdown(f"**Vista seleccionada: {market_names.get(selected_market, 'Mercado')}**")
+                        if selected_market == "goals":
+                            remaining = estimate.get("expected_total_goals_remaining")
+                            if estimate.get("available") and isinstance(remaining, (int, float)):
+                                st.write(f"Marcador actual: {home_score}–{away_score}. Media exploratoria de goles restantes: {remaining:.2f}.")
+                            else:
+                                st.info(estimate.get("reason") or "No hay datos suficientes para estimar goles restantes.")
+                        elif selected_market == "draw":
+                            probability = estimate.get("draw_final")
+                            if estimate.get("available") and isinstance(probability, (int, float)):
+                                st.write(f"Probabilidad exploratoria de empate final: {probability:.1%}.")
+                            else:
+                                st.info(estimate.get("reason") or "No hay datos suficientes para estimar empate.")
+                        elif selected_market == "btts":
+                            probability = estimate.get("btts_final")
+                            if estimate.get("available") and isinstance(probability, (int, float)):
+                                if estimate.get("btts_already_settled"):
+                                    st.write("Ambos equipos ya marcaron: el mercado «ambos marcan» ya se cumplió.")
+                                else:
+                                    st.write(f"Probabilidad exploratoria de que ambos equipos marquen al final: {probability:.1%}.")
+                            else:
+                                st.info(estimate.get("reason") or "No hay datos suficientes para estimar ambos marcan.")
+                        elif selected_market == "corners":
+                            st.write("Consulta la pestaña Córners para ver el ritmo en vivo y la referencia histórica disponible.")
+
+                        # Visualización esquemática del campo; no representa posiciones reales de jugadores.
+                        st.markdown(
+                            f"""
+                            <div style="background:linear-gradient(90deg,#16452f,#1b5839);border:1px solid #4d8b63;border-radius:12px;padding:12px;margin:10px 0">
+                              <div style="text-align:center;color:#d7f5df;font-weight:800;margin-bottom:8px">VISTA DEL PARTIDO · {html.escape(str(minute if minute is not None else 'N/D'))}'</div>
+                              <svg viewBox="0 0 320 150" role="img" aria-label="Campo de fútbol esquemático" style="width:100%;max-height:180px">
+                                <rect x="3" y="3" width="314" height="144" rx="4" fill="none" stroke="#b6e2c2" stroke-width="1.5"/>
+                                <line x1="160" y1="3" x2="160" y2="147" stroke="#b6e2c2" stroke-width="1.2"/>
+                                <circle cx="160" cy="75" r="24" fill="none" stroke="#b6e2c2" stroke-width="1.2"/>
+                                <circle cx="160" cy="75" r="2.5" fill="#b6e2c2"/>
+                                <rect x="3" y="40" width="38" height="70" fill="none" stroke="#b6e2c2" stroke-width="1.2"/>
+                                <rect x="279" y="40" width="38" height="70" fill="none" stroke="#b6e2c2" stroke-width="1.2"/>
+                                <circle cx="64" cy="75" r="5" fill="#FACC15"/><circle cx="256" cy="75" r="5" fill="#F4F4F5"/>
+                                <text x="64" y="64" text-anchor="middle" font-size="9" fill="#ffffff">LOCAL</text>
+                                <text x="256" y="64" text-anchor="middle" font-size="9" fill="#ffffff">VISITANTE</text>
+                              </svg>
+                              <div style="display:flex;justify-content:space-between;gap:8px;color:#f4f4f5;font-size:12px;font-weight:700">
+                                <span>{html.escape(str(home_name))} · {home_score}</span>
+                                <span>{away_score} · {html.escape(str(away_name))}</span>
+                              </div>
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+
+                        # H2H solo bajo demanda y cacheado para respetar la cuota de API.
+                        home_id = ((fixture.get("teams") or {}).get("home") or {}).get("id")
+                        away_id = ((fixture.get("teams") or {}).get("away") or {}).get("id")
+                        h2h_key = f"{home_id}-{away_id}"
+                        if "h2h_cache" not in st.session_state:
+                            st.session_state.h2h_cache = {}
+                        if st.button("📚 Consultar últimos enfrentamientos directos", key=f"h2h_{fixture_id}"):
+                            if not home_id or not away_id:
+                                st.warning("La API no entregó los identificadores de ambos equipos.")
+                            elif h2h_key not in st.session_state.h2h_cache:
+                                try:
+                                    h2h_payload = api_get("fixtures/headtohead", {"h2h": h2h_key, "last": 5})
+                                    st.session_state.h2h_cache[h2h_key] = h2h_payload.get("response") or []
+                                except Exception as h2h_exc:
+                                    st.session_state.h2h_cache[h2h_key] = {"error": str(h2h_exc)}
+                        h2h_data = st.session_state.get("h2h_cache", {}).get(h2h_key)
+                        if isinstance(h2h_data, dict) and h2h_data.get("error"):
+                            st.warning(f"No se pudieron consultar los enfrentamientos: {h2h_data['error']}")
+                        elif isinstance(h2h_data, list):
+                            if h2h_data:
+                                h2h_rows = []
+                                for past in h2h_data:
+                                    past_fixture = past.get("fixture") or {}
+                                    past_teams = past.get("teams") or {}
+                                    past_goals = past.get("goals") or {}
+                                    past_home = past_teams.get("home") or {}
+                                    past_away = past_teams.get("away") or {}
+                                    h2h_rows.append({
+                                        "Fecha": (past_fixture.get("date") or "")[:10],
+                                        "Local": past_home.get("name", "N/D"),
+                                        "Marcador": f"{past_goals.get('home', '—')} – {past_goals.get('away', '—')}",
+                                        "Visitante": past_away.get("name", "N/D"),
+                                    })
+                                st.dataframe(h2h_rows, use_container_width=True, hide_index=True)
+                            else:
+                                st.info("La API no devolvió enfrentamientos directos anteriores para esta pareja.")
+
+                if cards_shown == 0:
+                    st.info("No hay partidos con una señal principal en esta ronda. Los partidos sin estadísticas o con señal débil se omiten.")
+            else:
+                st.info("Pulsa «Escanear todos los partidos en vivo» para calcular las señales.")
+
+        with tab_corners:
+            st.markdown("### Córners · historial automático y ritmo en vivo")
+            st.caption("El bot consulta partidos anteriores por API, distingue local/visitante y cachea los resultados. No tienes que subir CSV.")
+            corner_results = st.session_state.get("corner_scan_results", [])
+            if corner_results:
+                for item in corner_results:
+                    st.markdown(
+                        fixture_hero_html(
+                            item["fixture"],
+                            mode="corners",
+                            home_corners=item.get("home_corners"),
+                            away_corners=item.get("away_corners"),
+                        ),
+                        unsafe_allow_html=True,
                     )
-                else:
-                    st.info("Todavía no hay filas con probabilidad válida y resultado binario marcado como verificado.")
-            except (UnicodeDecodeError, csv.Error, ValueError) as exc:
-                st.error(f"No se pudo leer el CSV para la evaluación: {exc}")
+                    if item.get("error"):
+                        st.caption("Las estadísticas en vivo no están disponibles para este partido.")
+                    else:
+                        if item.get("home_corners") is not None and item.get("away_corners") is not None:
+                            st.caption(f"Córners actuales: local {item['home_corners']} · visitante {item['away_corners']} · total {item['home_corners'] + item['away_corners']}.")
+                        history = item.get("automatic_history") or {}
+                        if history.get("available"):
+                            history_rows = [
+                                {"Indicador": "Córners a favor del local en casa", "Promedio": history.get("home_corners_for") if history.get("home_corners_for") is not None else "N/D", "Muestra": history.get("home_corner_sample", 0)},
+                                {"Indicador": "Córners concedidos por el local en casa", "Promedio": history.get("home_corners_against") if history.get("home_corners_against") is not None else "N/D", "Muestra": history.get("home_corner_sample", 0)},
+                                {"Indicador": "Córners a favor del visitante fuera", "Promedio": history.get("away_corners_for") if history.get("away_corners_for") is not None else "N/D", "Muestra": history.get("away_corner_sample", 0)},
+                                {"Indicador": "Córners concedidos por el visitante fuera", "Promedio": history.get("away_corners_against") if history.get("away_corners_against") is not None else "N/D", "Muestra": history.get("away_corner_sample", 0)},
+                            ]
+                            table_html = '<table class="history-table"><thead><tr><th>Indicador</th><th>Promedio</th><th>Muestra</th></tr></thead><tbody>'
+                            for history_row in history_rows:
+                                average = history_row["Promedio"]
+                                average_text = f"{average:.2f}".rstrip("0").rstrip(".") if isinstance(average, (int, float)) else str(average)
+                                table_html += (
+                                    "<tr>"
+                                    f"<td>{history_row['Indicador']}</td>"
+                                    f"<td>{average_text}</td>"
+                                    f"<td>{history_row['Muestra']}</td>"
+                                    "</tr>"
+                                )
+                            table_html += "</tbody></table>"
+                            st.markdown(table_html, unsafe_allow_html=True)
+                            st.caption(history.get("note", "Historial automático de partidos anteriores."))
+                        else:
+                            st.caption(history.get("note", "Historial automático no disponible para este encuentro."))
+                        minute = (((item.get("fixture") or {}).get("fixture") or {}).get("status") or {}).get("elapsed")
+                        if item.get("home_corners") is not None and item.get("away_corners") is not None and isinstance(minute, int) and minute < 90:
+                            total_now = item["home_corners"] + item["away_corners"]
+                            hist_rate = None
+                            if history.get("home_corners_for") is not None and history.get("away_corners_for") is not None:
+                                hist_rate = float(history["home_corners_for"]) + float(history["away_corners_for"])
+                            # Live-first fallback: if history is unavailable, estimate remaining
+                            # corner pace from the observed match, using shots as a weak context cue.
+                            history_used = hist_rate is not None
+                            if hist_rate is None:
+                                hist_rate = 9.6
+                            live_projection = total_now * 90 / max(1, minute)
+                            projected = (0.55 * hist_rate + 0.45 * live_projection) if history_used else max(total_now, 0.70 * hist_rate + 0.30 * live_projection)
+                            shots_total = (item.get("home_shots") or 0) + (item.get("away_shots") or 0)
+                            if isinstance(shots_total, (int, float)) and shots_total >= 10 and minute >= 20:
+                                projected *= 1.05
+                            # Round projected total to a sensible half-corner line.
+                            import math
+                            suggested_line = max(0.5, math.floor(projected * 2) / 2)
+                            line_text = str(int(suggested_line)) if suggested_line.is_integer() else f"{suggested_line:.1f}"
+                            remaining_expected = max(0.0, projected - total_now)
+                            # Match live corner markets to real odds from API-Football.
+                            # A price alone is never enough: require a provisional model edge.
+                            fixture_id = ((item.get("fixture") or {}).get("fixture") or {}).get("id")
+                            live_rows = st.session_state.get("live_odds_by_fixture", {}).get(str(fixture_id), [])
+                            corner_options = []
+                            remaining_mean = max(0.05, remaining_expected * 0.70)
+                            for odds_row in live_rows:
+                                market_label = classify_market(odds_row)
+                                odd = odds_row.get("odd")
+                                if not market_label or "córner" not in market_label.casefold() or not isinstance(odd, (int, float)):
+                                    continue
+                                import re
+                                line_match = re.search(r"(\d+(?:[.,]\d+)?)", market_label)
+                                if not line_match:
+                                    continue
+                                market_line = float(line_match.group(1).replace(",", "."))
+                                if market_label.startswith("Más de "):
+                                    needed = max(0, int(market_line - total_now + 0.5))
+                                    model_prob = poisson_at_least(remaining_mean, needed)
+                                elif market_label.startswith("Menos de "):
+                                    max_remaining = int(market_line - total_now)
+                                    model_prob = sum(poisson_pmf(remaining_mean, n) for n in range(max_remaining + 1)) if max_remaining >= 0 else 0.0
+                                else:
+                                    continue
+                                if not isinstance(model_prob, (int, float)) or not 0 < model_prob < 1:
+                                    continue
+                                implied = 1.0 / float(odd)
+                                edge = float(model_prob) - implied
+                                if edge < 0.02:
+                                    continue
+                                corner_options.append({
+                                    "market": market_label, "odd": float(odd),
+                                    "probability": float(model_prob), "edge": edge,
+                                    "bookmaker": odds_row.get("bookmaker", "Casa no identificada"),
+                                })
+                            main_options = [option for option in corner_options if 1.25 <= option["odd"] < 1.60]
+                            risk_options = [option for option in corner_options if option["odd"] >= 1.60]
+                            st.markdown('<div class="tip-section-heading"><span class="tip-heading-icon">◈</span><span>TIP PRINCIPAL · CÓRNERS</span></div>', unsafe_allow_html=True)
+                            if main_options:
+                                chosen = max(main_options, key=lambda option: option["edge"])
+                                st.markdown(
+                                    f'<div class="tip-card"><div class="tip-card-label">TIP PRINCIPAL</div>'
+                                    f'<div class="tip-card-title">{html.escape(chosen["market"])}</div>'
+                                    f'<div class="tip-card-meta">Cuota {chosen["odd"]:.2f} · {html.escape(chosen["bookmaker"])} · probabilidad exploratoria {chosen["probability"]:.1%}</div></div>',
+                                    unsafe_allow_html=True,
+                                )
+                            else:
+                                st.info("Sin oportunidad confirmada por ahora.")
+                            st.markdown('<div class="tip-section-heading risk-heading"><span class="tip-heading-icon">⌁</span><span>TIP DE ALTO RIESGO · CÓRNERS</span></div>', unsafe_allow_html=True)
+                            if risk_options:
+                                chosen_risk = max(risk_options, key=lambda option: option["edge"])
+                                st.markdown(
+                                    f'<div class="tip-card risk-tip-card"><div class="tip-card-label">ALTO RIESGO</div>'
+                                    f'<div class="tip-card-title">{html.escape(chosen_risk["market"])}</div>'
+                                    f'<div class="tip-card-meta">Cuota {chosen_risk["odd"]:.2f} · {html.escape(chosen_risk["bookmaker"])} · probabilidad exploratoria {chosen_risk["probability"]:.1%}</div></div>',
+                                    unsafe_allow_html=True,
+                                )
+                            else:
+                                st.info("Sin oportunidad confirmada por ahora.")
+                            corner_patterns = numerology_context(
+                                (item.get("fixture", {}).get("goals") or {}).get("home"),
+                                (item.get("fixture", {}).get("goals") or {}).get("away"),
+                                item.get("home_corners"), item.get("away_corners"),
+                                item.get("home_yellow"), item.get("away_yellow"),
+                            )
+                            st.caption(
+                                f"Proyección exploratoria: {projected:.1f} córners totales · actuales {total_now} · minuto {minute} · restantes estimados {remaining_expected:.1f}. "
+                                + ("Se combina historial con ritmo en vivo." if history_used else "Falta historial específico; se usa una referencia genérica.")
+                                + " La estimación no está calibrada y no garantiza valor real."
+                            )
+                            if minute <= 5:
+                                st.caption("Partido muy reciente: el ritmo en vivo todavía tiene poca muestra.")
+                    st.divider()
+            else:
+                st.info("Pulsa «Escanear todos los partidos en vivo» para obtener el análisis automático.")
 
-        signal_rows = st.session_state.get("signal_rows", [])
-        log_cols = st.columns(2)
-        log_cols[0].metric("Señales registradas", len(signal_rows))
-        log_cols[1].metric("Resultados por verificar", sum(1 for row in signal_rows if not row.get("outcome_verified")))
-        if signal_rows:
-            buffer = io.StringIO()
-            writer = csv.DictWriter(buffer, fieldnames=list(signal_rows[0].keys()))
-            writer.writeheader()
-            writer.writerows(signal_rows)
-            st.download_button(
-                "⬇️ Descargar registro de señales (CSV)",
-                data=buffer.getvalue().encode("utf-8-sig"),
-                file_name="registro_senales_escanner.csv",
-                mime="text/csv",
-                help="Descarga las señales de esta sesión para conservarlas y verificar los resultados después."
+        with tab_overview:
+            st.subheader("Rendimiento del modelo")
+            st.caption("Historial de señales, verificación retrospectiva y evaluación de calidad del pronóstico.")
+            market_status = [
+                ("Córners", "Consulta automática de promedios recientes local/visitante y combinación exploratoria con el ritmo en vivo; pendiente de validación."),
+                ("Goles", "Probabilidades exploratorias basadas en medias históricas de liga; aún no calibradas."),
+                ("Empate", "Estimación exploratoria con un modelo Poisson simplificado; requiere validación retrospectiva."),
+                ("Ambos equipos marcan", "Estimación condicionada al marcador y a los goles restantes; requiere validación retrospectiva."),
+            ]
+            market_cols = st.columns(2)
+            for col, (market, status_text) in zip(market_cols * 2, market_status):
+                with col:
+                    st.markdown(f"**{market}**")
+                    st.caption(status_text)
+            st.caption("Las probabilidades no están validadas. No hay cuotas verificadas de RushBet ni EV calculado todavía; no se ejecutan apuestas automáticamente.")
+            st.markdown("### Validación retrospectiva")
+            st.caption("En cada fila, outcome=1 si se cumplió ESE mercado y outcome=0 si no se cumplió (no escribas el marcador final). Marca outcome_verified=true solo después de comprobar el resultado real. Las filas no verificadas o inválidas se excluyen.")
+            backtest_file = st.file_uploader(
+                "Cargar CSV de señales con resultados verificados",
+                type=["csv"],
+                key="backtest_csv_upload",
             )
-            st.caption(f"Registro guardado en el archivo local {SIGNAL_HISTORY_PATH}. En servicios de alojamiento con disco efímero, descarga el CSV para conservarlo fuera de la sesión.")
-            if st.session_state.get("signal_history_write_error"):
-                st.warning(f"No se pudo guardar el registro en disco: {st.session_state.signal_history_write_error}")
+            if backtest_file is not None:
+                try:
+                    uploaded_rows = list(csv.DictReader(io.StringIO(backtest_file.getvalue().decode("utf-8-sig"))))
+                    metrics = evaluate_binary_predictions(uploaded_rows)
+                    metric_cols = st.columns(4)
+                    metric_cols[0].metric("Muestra verificada", metrics["sample_size"])
+                    metric_cols[1].metric("Tasa de acierto", f"{metrics['hit_rate']:.1%}" if metrics["hit_rate"] is not None else "N/D")
+                    metric_cols[2].metric("Brier score", f"{metrics['brier_score']:.3f}" if metrics["brier_score"] is not None else "N/D")
+                    metric_cols[3].metric("Filas excluidas", metrics["excluded"])
+                    if metrics["sample_size"]:
+                        st.caption(
+                            f"Probabilidad media pronosticada: {metrics['mean_probability']:.1%} frente a "
+                            f"frecuencia real de acierto: {metrics['observed_rate']:.1%}. "
+                            "Una diferencia grande puede indicar mala calibración; evalúa cada mercado por separado y con una muestra suficiente. Brier score: cuanto más bajo, mejor (0 es perfecto)."
+                        )
+                    else:
+                        st.info("Todavía no hay filas con probabilidad válida y resultado binario marcado como verificado.")
+                except (UnicodeDecodeError, csv.Error, ValueError) as exc:
+                    st.error(f"No se pudo leer el CSV para la evaluación: {exc}")
 
-    if not goal_results and not corner_results:
-        st.info("Pulsa «Escanear todos los partidos en vivo» para generar el primer informe.")
-    elif not goal_results:
-        st.info("En esta ronda no hubo señales de goles que superaran el umbral experimental del 65%. Esto no significa que todos los partidos carezcan de datos ni que no existan candidatos de córners.")
-        st.caption("El modelo necesita una referencia histórica compatible para estimar goles. Si no la encuentra, la señal se marca como no disponible; las estadísticas en vivo no sustituyen por sí solas una base histórica fiable.")
+            signal_rows = st.session_state.get("signal_rows", [])
+            log_cols = st.columns(2)
+            log_cols[0].metric("Señales registradas", len(signal_rows))
+            log_cols[1].metric("Resultados por verificar", sum(1 for row in signal_rows if not row.get("outcome_verified")))
+            if signal_rows:
+                buffer = io.StringIO()
+                writer = csv.DictWriter(buffer, fieldnames=list(signal_rows[0].keys()))
+                writer.writeheader()
+                writer.writerows(signal_rows)
+                st.download_button(
+                    "⬇️ Descargar registro de señales (CSV)",
+                    data=buffer.getvalue().encode("utf-8-sig"),
+                    file_name="registro_senales_escanner.csv",
+                    mime="text/csv",
+                    help="Descarga las señales de esta sesión para conservarlas y verificar los resultados después."
+                )
+                st.caption(f"Registro guardado en el archivo local {SIGNAL_HISTORY_PATH}. En servicios de alojamiento con disco efímero, descarga el CSV para conservarlo fuera de la sesión.")
+                if st.session_state.get("signal_history_write_error"):
+                    st.warning(f"No se pudo guardar el registro en disco: {st.session_state.signal_history_write_error}")
+
+        if not goal_results and not corner_results:
+            st.info("Pulsa «Escanear todos los partidos en vivo» para generar el primer informe.")
+        elif not goal_results:
+            st.info("En esta ronda no hubo señales de goles que superaran el umbral experimental del 65%. Esto no significa que todos los partidos carezcan de datos ni que no existan candidatos de córners.")
+            st.caption("El modelo necesita una referencia histórica compatible para estimar goles. Si no la encuentra, la señal se marca como no disponible; las estadísticas en vivo no sustituyen por sí solas una base histórica fiable.")
 
 
