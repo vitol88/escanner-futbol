@@ -1,6 +1,6 @@
 import unittest
 
-from models.live_odds import classify_market, extract_live_odds, score_pattern_context
+from models.live_odds import classify_market, extract_live_odds, numerology_context, score_pattern_context
 
 
 class LiveOddsTests(unittest.TestCase):
@@ -30,6 +30,12 @@ class LiveOddsTests(unittest.TestCase):
             classify_market({"market": "Both Teams Score", "value": "Yes", "odd": 1.8}),
             "Ambos equipos marcan: Sí",
         )
+
+    def test_numerology_matches_score_to_corners_and_cards_within_one(self):
+        self.assertTrue(numerology_context(1, 0, home_yellows=1, away_yellows=1))
+        self.assertTrue(numerology_context(4, 2, home_corners=4, away_corners=3))
+        self.assertEqual(numerology_context(1, 0, home_corners=7, away_corners=2), [])
+        self.assertEqual(numerology_context(1, 0), [])
 
     def test_score_pattern_is_context_only(self):
         self.assertIn("Diferencia de un gol", score_pattern_context(0, 1))
