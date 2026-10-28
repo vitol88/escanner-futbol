@@ -14,6 +14,7 @@ from streamlit_autorefresh import st_autorefresh
 from models.live_context import qualifies_as_corner_candidate, summarize_live_context
 from models.backtest import evaluate_binary_predictions
 from models.automatic_history import build_automatic_history
+from models.deep_goal_context import build_deep_goal_context
 from models.probabilities import (
     corner_pace_per_90,
     estimate_live_goal_markets,
@@ -276,6 +277,17 @@ st.markdown("""
   .goal-live-summary { border:1px solid #3C3524; border-left:3px solid #FACC15; border-radius:12px; padding:12px 13px; margin:.65rem 0 .8rem; background:linear-gradient(135deg,#191C22,#101216); }
   .goal-live-summary-title { color:#FACC15; font-weight:900; font-size:.78rem; letter-spacing:1.2px; margin-bottom:6px; }
   .goal-live-summary p { color:#D4D4D8; font-size:.88rem; line-height:1.45; margin:0; }
+  .goal-deep-heading { color:#FACC15; font-size:.78rem; letter-spacing:1.1px; font-weight:900; margin:.85rem 0 .45rem; }
+  .goal-form-card { border:1px solid #393326; border-radius:11px; padding:10px; background:linear-gradient(145deg,#191D24,#101216); min-height:132px; }
+  .goal-form-team { color:#E4E4E7; font-size:.78rem; font-weight:800; line-height:1.25; overflow-wrap:anywhere; }
+  .goal-form-record { color:#FACC15; font-size:1.15rem; font-weight:900; margin:4px 0; }
+  .goal-form-line { color:#BFC2CA; font-size:.68rem; line-height:1.45; }
+  .goal-h2h-summary { margin:.5rem 0; border:1px solid #393326; border-radius:10px; padding:9px 11px; color:#D4D4D8; background:#15191F; font-size:.78rem; line-height:1.5; }
+  .goal-h2h-summary b { color:#FACC15; }
+  .goal-comeback-card { display:flex; flex-direction:column; gap:5px; border:1px solid #393326; border-radius:10px; padding:9px; background:#12151A; margin:.2rem 0 .45rem; }
+  .goal-comeback-card b { color:#FACC15; font-size:.75rem; }
+  .goal-comeback-card span { color:#E4E4E7; font-size:.72rem; line-height:1.4; }
+  .goal-comeback-card small { color:#9CA3AF; font-size:.62rem; line-height:1.35; }
   .goal-history-wrap { border:1px solid #4A4024; border-radius:12px; overflow:hidden; margin:.6rem 0 1rem; background:#111419; }
   .goal-history-heading { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:9px 10px; color:#FACC15; font-size:.82rem; font-weight:850; background:#191B20; }
   .goal-history-heading span { color:#A1A1AA; font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.6px; }
@@ -1021,6 +1033,55 @@ else:
                                                     goal_table_html += f'<tr><td>{html.escape(str(label))}</td><td>{avg_text}</td><td>{sample if sample else "—"}</td></tr>'
                                                 goal_table_html += '</tbody></table></div>'
                                                 st.markdown(goal_table_html, unsafe_allow_html=True)
+                                                # Deep, cached context: league form, H2H and response after conceding.
+                                                deep_cache = st.session_state.setdefault("deep_goal_context_cache", {})
+                                                try:
+                                                    deep_context = build_deep_goal_context(
+                                                        match,
+                                                        api_get=api_get,
+                                                        cache=deep_cache,
+                                                        event_fixture_budget=3,
+                                                    )
+                                                except Exception as deep_exc:
+                                                    deep_context = {"available": False, "notes": [f"Contexto profundo no disponible: {deep_exc}"]}
+                                                if deep_context.get("available"):
+                                                    st.markdown('<div class="goal-deep-heading">⌁ CONTEXTO HISTÓRICO Y REACCIÓN AL GOL</div>', unsafe_allow_html=True)
+                                                    form_cols = st.columns(2, gap="small")
+                                                    for col, label, form_data in (
+                                                        (form_cols[0], home_name, deep_context.get("home_form") or {}),
+                                                        (form_cols[1], away_name, deep_context.get("away_form") or {}),
+                                                    ):
+                                                        col.markdown(
+                                                            f'<div class="goal-form-card"><div class="goal-form-team">{html.escape(label)}</div>'
+                                                            f'<div class="goal-form-record">{html.escape(str(form_data.get("record", "N/D")))}</div>'
+                                                            f'<div class="goal-form-line">GF {form_data.get("goals_for_avg") if form_data.get("goals_for_avg") is not None else "N/D"} · GC {form_data.get("goals_against_avg") if form_data.get("goals_against_avg") is not None else "N/D"}</div>'
+                                                            f'<div class="goal-form-line">Ambos marcan {form_data.get("btts_rate") if form_data.get("btts_rate") is not None else "N/D"}% · +2.5 goles {form_data.get("over_2_5_rate") if form_data.get("over_2_5_rate") is not None else "N/D"}%</div></div>',
+                                                            unsafe_allow_html=True,
+                                                        )
+                                                    h2h_data = deep_context.get("h2h") or {}
+                                                    h2h_summary = (
+                                                        f'{h2h_data.get("matches", 0)} partidos · promedio {h2h_data.get("avg_goals") if h2h_data.get("avg_goals") is not None else "N/D"} goles · ambos marcan {h2h_data.get("btts_rate") if h2h_data.get("btts_rate") is not None else "N/D"}% · +2.5 {h2h_data.get("over_2_5_rate") if h2h_data.get("over_2_5_rate") is not None else "N/D"}%'
+                                                    )
+                                                    st.markdown(f'<div class="goal-h2h-summary"><b>H2H · enfrentamientos directos</b><br>{html.escape(h2h_summary)}</div>', unsafe_allow_html=True)
+                                                    target_minute = deep_context.get("current_goal_minute")
+                                                    if target_minute is not None:
+                                                        st.caption(f"Último gol detectado en el minuto {target_minute}" + (f" · anotado por {deep_context.get('current_goal_team')}" if deep_context.get("current_goal_team") else "") + ".")
+                                                    comeback = deep_context.get("comeback") or {}
+                                                    comeback_cols = st.columns(2, gap="small")
+                                                    for col, team in zip(comeback_cols, (match_home, match_away)):
+                                                        data = comeback.get(team.get("id"), {})
+                                                        sample = data.get("sample", 0)
+                                                        if sample:
+                                                            col.markdown(
+                                                                f'<div class="goal-comeback-card"><b>{html.escape(str(team.get("name") or "Equipo"))} · reacción</b>'
+                                                                f'<span>Se quedó por detrás en {data.get("behind_cases", 0)} casos comparables; marcó después en {data.get("scored_after_conceding", 0)} y empató en {data.get("equalized", 0)}.</span>'
+                                                                f'<small>Muestra de eventos analizados: {sample}; no representa una probabilidad calibrada.</small></div>',
+                                                                unsafe_allow_html=True,
+                                                            )
+                                                        else:
+                                                            col.caption(f"{team.get('name') or 'Equipo'}: muestra insuficiente de eventos para estimar reacción tras recibir gol.")
+                                                else:
+                                                    st.caption("El contexto profundo de forma/H2H no está disponible con las consultas actuales; el bot no lo tratará como dato conocido.")
                                                 # Exclude overly obvious under lines (e.g. under 4.5 at 0-0) from the main recommendation.
                                                 current_total = (home_score or 0) + (away_score or 0) if isinstance(home_score, int) and isinstance(away_score, int) else None
                                                 meaningful_tips = []
