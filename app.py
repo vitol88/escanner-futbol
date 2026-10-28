@@ -1375,9 +1375,9 @@ else:
                                             h2h_matches = h2h_data["matches"]
                                             if h2h_data.get("scope") == "league":
                                                 league_name_safe = html.escape(str(_match_league.get("name") or "la competición actual"))
-                                                st.caption(f"Últimos {len(h2h_matches)} enfrentamientos finalizados de {league_name_safe}.")
+                                                st.caption(f"Últimos {len(h2h_matches)} enfrentamientos finalizados de {league_name_safe}, con el equipo local actual jugando en casa.")
                                             else:
-                                                st.caption(f"La API no devolvió enfrentamientos finalizados de la misma competición entre sus resultados recientes; se muestran los últimos {len(h2h_matches)} enfrentamientos directos de cualquier competición.")
+                                                st.caption(f"Últimos {len(h2h_matches)} enfrentamientos finalizados con el equipo local actual jugando en casa; se prioriza la misma competición y se completa con otras si hace falta.")
                                             h2h_html = ""
                                             for past in h2h_matches:
                                                 pf, pt, pg = past.get("fixture") or {}, past.get("teams") or {}, past.get("goals") or {}
