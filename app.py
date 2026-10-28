@@ -1749,10 +1749,23 @@ else:
                             f'<div class="tip-card-meta">Cuota {risk_item["odd"]:.2f} · {html.escape(risk_item["bookmaker"])}{probability_note}</div></div>',
                             unsafe_allow_html=True,
                         )
+                    risk_stats = st.session_state.stats_cache.get(str(fixture_id), [])
+                    risk_home_corners = safe_stat(risk_stats, "Corner Kicks", 0)
+                    risk_away_corners = safe_stat(risk_stats, "Corner Kicks", 1)
+                    risk_home_yellow = safe_stat(risk_stats, "Yellow Cards", 0)
+                    risk_away_yellow = safe_stat(risk_stats, "Yellow Cards", 1)
+                    risk_context_bits = [score_pattern_context(home_score, away_score)]
+                    if isinstance(risk_home_corners, (int, float)) and isinstance(risk_away_corners, (int, float)):
+                        if abs(risk_home_corners - risk_away_corners) >= 3:
+                            leader = home_name if risk_home_corners > risk_away_corners else away_name
+                            risk_context_bits.append(f"desequilibrio de córners a favor de {leader} ({risk_home_corners:.0f}–{risk_away_corners:.0f})")
+                        else:
+                            risk_context_bits.append(f"córners relativamente equilibrados ({risk_home_corners:.0f}–{risk_away_corners:.0f})")
+                    if isinstance(risk_home_yellow, (int, float)) and isinstance(risk_away_yellow, (int, float)):
+                        risk_context_bits.append(f"tarjetas amarillas {risk_home_yellow:.0f}–{risk_away_yellow:.0f}")
                     st.caption(
-                        "Numerología/contexto del marcador: " + score_pattern_context(home_score, away_score)
-                        + ". Solo se usa como contexto complementario del alto riesgo; no predice un marcador exacto. "
-                        "Se pondera junto con presión, córners y tarjetas disponibles, nunca como evidencia suficiente por sí sola."
+                        "Numerología/contexto del alto riesgo: " + "; ".join(risk_context_bits)
+                        + ". Solo es un desempate contextual, no predice un marcador exacto. No se inventan estadísticas faltantes."
                     )
                 else:
                     st.markdown("**🔥 TIP DE ALTO RIESGO**")
