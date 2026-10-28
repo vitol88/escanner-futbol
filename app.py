@@ -2107,19 +2107,80 @@ else:
                         suggested_line = max(0.5, math.floor(projected * 2) / 2)
                         line_text = str(int(suggested_line)) if suggested_line.is_integer() else f"{suggested_line:.1f}"
                         remaining_expected = max(0.0, projected - total_now)
-                        st.markdown(
-                            '<div class="signal-card">'
-                            '<div class="signal-kicker">🚩 Tip sugerido · mercado de córners</div>'
-                            '<div class="signal-title">Línea orientativa según ritmo del partido</div>'
-                            f'<div class="signal-pick">Más de {line_text} córners totales</div>'
-                            f'<div class="signal-meta">Proyección: {projected:.1f} · Actual: {total_now} · Minuto: {minute} · Restantes estimados: {remaining_expected:.1f}</div>'
-                            '</div>',
-                            unsafe_allow_html=True,
-                        )
-                        if history_used:
-                            st.caption("Tip exploratorio que combina promedios históricos y ritmo en vivo; no es una probabilidad validada.")
+                        # Match live corner markets to real odds from API-Football.
+                        # A price alone is never enough: require a provisional model edge.
+                        fixture_id = ((item.get("fixture") or {}).get("fixture") or {}).get("id")
+                        live_rows = st.session_state.get("live_odds_by_fixture", {}).get(str(fixture_id), [])
+                        corner_options = []
+                        remaining_mean = max(0.05, remaining_expected * 0.70)
+                        for odds_row in live_rows:
+                            market_label = classify_market(odds_row)
+                            odd = odds_row.get("odd")
+                            if not market_label or "córner" not in market_label.casefold() or not isinstance(odd, (int, float)):
+                                continue
+                            import re
+                            line_match = re.search(r"(\\d+(?:[.,]\\d+)?)", market_label)
+                            if not line_match:
+                                continue
+                            market_line = float(line_match.group(1).replace(",", "."))
+                            if market_label.startswith("Más de "):
+                                needed = max(0, int(market_line - total_now + 0.5))
+                                model_prob = poisson_at_least(remaining_mean, needed)
+                            elif market_label.startswith("Menos de "):
+                                max_remaining = int(market_line - total_now)
+                                model_prob = sum(poisson_pmf(remaining_mean, n) for n in range(max_remaining + 1)) if max_remaining >= 0 else 0.0
+                            else:
+                                continue
+                            if not isinstance(model_prob, (int, float)) or not 0 < model_prob < 1:
+                                continue
+                            implied = 1.0 / float(odd)
+                            edge = float(model_prob) - implied
+                            if edge < 0.02:
+                                continue
+                            corner_options.append({
+                                "market": market_label, "odd": float(odd),
+                                "probability": float(model_prob), "edge": edge,
+                                "bookmaker": odds_row.get("bookmaker", "Casa no identificada"),
+                            })
+                        main_options = [option for option in corner_options if 1.25 <= option["odd"] < 1.60]
+                        risk_options = [option for option in corner_options if option["odd"] >= 1.60]
+                        st.markdown('<div class="tip-section-heading"><span class="tip-heading-icon">◈</span><span>TIP PRINCIPAL · CÓRNERS</span><span class="tip-heading-status">CUOTA 1.25–1.59</span></div>', unsafe_allow_html=True)
+                        if main_options:
+                            chosen = max(main_options, key=lambda option: option["edge"])
+                            st.markdown(
+                                f'<div class="tip-card"><div class="tip-card-label">TIP PRINCIPAL</div>'
+                                f'<div class="tip-card-title">{html.escape(chosen["market"])}</div>'
+                                f'<div class="tip-card-meta">Cuota {chosen["odd"]:.2f} · {html.escape(chosen["bookmaker"])} · probabilidad exploratoria {chosen["probability"]:.1%}</div></div>',
+                                unsafe_allow_html=True,
+                            )
                         else:
-                            st.caption("Tip provisional basado en el ritmo en vivo y una referencia genérica porque falta historial. Confirma la línea y cuota disponibles antes de evaluar una apuesta.")
+                            st.info("Sin tip principal de córners con cuota verificada entre 1.25 y 1.59 y ventaja estimada suficiente.")
+                        st.markdown('<div class="tip-section-heading risk-heading"><span class="tip-heading-icon">⌁</span><span>TIP DE ALTO RIESGO · CÓRNERS</span><span class="tip-heading-status">CUOTA ≥ 1.60</span></div>', unsafe_allow_html=True)
+                        if risk_options:
+                            chosen_risk = max(risk_options, key=lambda option: option["edge"])
+                            st.markdown(
+                                f'<div class="tip-card risk-tip-card"><div class="tip-card-label">ALTO RIESGO</div>'
+                                f'<div class="tip-card-title">{html.escape(chosen_risk["market"])}</div>'
+                                f'<div class="tip-card-meta">Cuota {chosen_risk["odd"]:.2f} · {html.escape(chosen_risk["bookmaker"])} · probabilidad exploratoria {chosen_risk["probability"]:.1%}</div></div>',
+                                unsafe_allow_html=True,
+                            )
+                        else:
+                            st.info("Sin tip de alto riesgo de córners con cuota verificada de 1.60 o superior y ventaja estimada suficiente.")
+                        corner_patterns = numerology_context(
+                            (item.get("fixture", {}).get("goals") or {}).get("home"),
+                            (item.get("fixture", {}).get("goals") or {}).get("away"),
+                            item.get("home_corners"), item.get("away_corners"),
+                            item.get("home_yellow"), item.get("away_yellow"),
+                        )
+                        if corner_patterns:
+                            st.caption("Contexto numérico solo para alto riesgo (no predice el resultado): " + "; ".join(corner_patterns) + ".")
+                        if not live_rows:
+                            st.caption("No hay cuotas de córners disponibles para este partido en la respuesta de la API; no se inventan precios.")
+                        st.caption(
+                            f"Proyección exploratoria: {projected:.1f} córners totales · actuales {total_now} · minuto {minute} · restantes estimados {remaining_expected:.1f}. "
+                            + ("Se combina historial con ritmo en vivo." if history_used else "Falta historial específico; se usa una referencia genérica.")
+                            + " La estimación no está calibrada y no garantiza valor real."
+                        )
                         if minute <= 5:
                             st.caption("Partido muy reciente: el ritmo en vivo todavía tiene poca muestra.")
                 st.divider()
