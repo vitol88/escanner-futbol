@@ -1832,9 +1832,14 @@ else:
                                                     )
                                                     if isinstance(expected_match_goals, (int, float)):
                                                         raw_average_goals_today = (expected_match_goals + float(h2h_average_goals)) / 2
-                                                        # Aplicar margen conservador de 0.5 goles y redondear hacia abajo
-                                                        # a la línea de mercado más cercana (entero o .5).
-                                                        average_goals_today = max(0.0, (int((raw_average_goals_today - 0.5) * 2)) / 2)
+                                                        # Aplicar margen conservador de 0.5 goles y redondear al medio gol
+                                                        # más cercano: .58/.68 -> .5; .88 -> siguiente entero.
+                                                        adjusted_goals_average = max(0.0, raw_average_goals_today - 0.5)
+                                                        half_goal_steps = adjusted_goals_average * 2
+                                                        lower_half_step = int(half_goal_steps)
+                                                        if half_goal_steps - lower_half_step >= 0.5:
+                                                            lower_half_step += 1
+                                                        average_goals_today = lower_half_step / 2
                                                         goal_today_average_slot.markdown(
                                                             _goal_average_badge("PROMEDIO DE GOLES PARA HOY", average_goals_today),
                                                             unsafe_allow_html=True,
