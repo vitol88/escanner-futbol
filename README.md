@@ -37,7 +37,7 @@ Los nombres exactos de botones pueden variar según la interfaz actual del prove
 
 ## Registro y evaluación retrospectiva de señales
 
-En la pestaña **Estado de los mercados**, descarga el CSV de señales de la sesión y consérvalo. Cuando ya se conozca el resultado del evento, completa estas columnas en cada fila que quieras evaluar:
+En la pestaña **Rendimiento del modelo**, puedes descargar el CSV de señales y cargarlo en el evaluador retrospectivo. Cuando ya se conozca el resultado del evento, completa estas columnas en cada fila que quieras evaluar:
 
 - `estimated_probability_exploratory`: probabilidad que guardó el escáner, entre 0 y 1.
 - `outcome`: **1 si se cumplió el mercado concreto de esa fila** y **0 si no se cumplió**. No escribas aquí el marcador final. Ejemplo: para “Ambos equipos marcan”, usa 1 si ambos anotaron y 0 si no.
@@ -62,3 +62,14 @@ Durante el escaneo, la app consulta los últimos partidos de cada equipo dentro 
 Para limitar consumo de API, la primera versión limita las búsquedas históricas de equipos a 12 consultas por escaneo y las consultas de estadísticas históricas a 8 por escaneo. Cuando se alcanza el límite, los datos no disponibles se muestran como N/D; no se inventan valores. El caché de sesión desaparece al reiniciarse la aplicación.
 
 Esta versión aún no incorpora un archivo histórico minuto a minuto ni un historial de enfrentamientos directos al modelo. Los promedios de resultados recientes y córners por sede son contexto exploratorio; no son probabilidades calibradas ni garantías de rentabilidad.
+
+
+## Cambios recientes del escáner
+
+- Los accesos rápidos de cada partido permiten consultar la lectura exploratoria de goles, empate, ambos marcan y córners.
+- El detalle de partido muestra un campo esquemático (no posiciones reales) y permite solicitar los últimos cinco enfrentamientos directos bajo demanda. Esa consulta se cachea durante la sesión para no repetirla innecesariamente.
+- El registro de señales se carga desde `registro_senales_escanner.csv` si el archivo existe y se actualiza al registrar señales nuevas. La ruta se puede cambiar con la variable de entorno `SIGNAL_HISTORY_PATH`. Se evita duplicar una señal idéntica del mismo partido, mercado, minuto y marcador.
+- **Importante sobre persistencia:** el archivo se conserva mientras el sistema de archivos del host conserve los datos. Algunos alojamientos gratuitos reinician o usan disco efímero; en esos casos descarga el CSV o configura almacenamiento externo antes de depender de él como histórico permanente.
+- El botón «Probar sonido» ayuda a comprobar el audio después de una interacción del usuario. El navegador puede bloquear sonido automático y notificaciones si la página no está activa o no se concedieron permisos.
+- Las notificaciones push con la app cerrada en iPhone todavía requieren un servicio push, service worker, suscripción y claves de configuración; no se consideran implementadas por estas alertas dentro de Streamlit.
+- El campo esquemático y las probabilidades son informativos. Los modelos siguen siendo exploratorios y no han demostrado calibración ni rentabilidad.
