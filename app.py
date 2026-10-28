@@ -1790,7 +1790,13 @@ else:
             }
             search_matches = st.text_input("🔎 Buscar equipo o liga", placeholder="Ej. Argentinos Juniors, Premier League…", key="search_goal_matches").strip().casefold()
             cards_shown = 0
-            for fixture, estimate, tips, context in goal_results:
+            for goal_row in goal_results:
+                # Compatibilidad con resultados guardados en session_state por versiones anteriores:
+                # el formato antiguo tenía 3 elementos y el actual incluye también el contexto.
+                if not isinstance(goal_row, (tuple, list)) or len(goal_row) < 3:
+                    continue
+                fixture, estimate, tips = goal_row[:3]
+                context = goal_row[3] if len(goal_row) >= 4 and isinstance(goal_row[3], dict) else {}
                 fixture_id = (fixture.get("fixture") or {}).get("id")
                 if search_matches and search_matches not in fixture_label(fixture).casefold():
                     continue
