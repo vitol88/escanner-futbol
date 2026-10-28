@@ -2324,10 +2324,6 @@ else:
                             item.get("home_corners"), item.get("away_corners"),
                             item.get("home_yellow"), item.get("away_yellow"),
                         )
-                        if corner_patterns:
-                            st.caption("Contexto numérico solo para alto riesgo (no predice el resultado): " + "; ".join(corner_patterns) + ".")
-                        if not live_rows:
-                            st.caption("No hay cuotas de córners disponibles para este partido en la respuesta de la API; no se inventan precios.")
                         st.caption(
                             f"Proyección exploratoria: {projected:.1f} córners totales · actuales {total_now} · minuto {minute} · restantes estimados {remaining_expected:.1f}. "
                             + ("Se combina historial con ritmo en vivo." if history_used else "Falta historial específico; se usa una referencia genérica.")
