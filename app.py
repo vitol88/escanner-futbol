@@ -1471,8 +1471,10 @@ else:
                             score_label = f"{match_goals.get('home', '—')}–{match_goals.get('away', '—')}"
                             match_minute = ((match_fixture.get("status") or {}).get("elapsed"))
                             match_label = f"{match_home_name} vs {match_away_name}"
-                            # Encabezado compacto para abrir el análisis; el marcador completo se muestra una sola vez debajo.
-                            match_row_label = f"⚽ **Abrir análisis del partido** · {match_minute if match_minute is not None else 'EN VIVO'}′"
+                            # Fila de partido con equipos, marcador y minuto; al desplegar aparece el marcador premium y los cuatro botones.
+                            home_md = f"![{match_home_name}]({match_home_logo}) " if match_home_logo else "⚽ "
+                            away_md = f" ![{match_away_name}]({match_away_logo})" if match_away_logo else ""
+                            match_row_label = f"{home_md}**{match_home_name}**  **{score_label}**  **{match_away_name}**{away_md} · {match_minute if match_minute is not None else 'EN VIVO'}′"
                             if not match_id:
                                 continue
                             with st.expander(match_row_label, expanded=st.session_state.get(f"live_match_{match_id}", False), key=f"live_match_{match_id}", on_change="rerun"):
