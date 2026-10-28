@@ -111,7 +111,7 @@ def build_deep_goal_context(
     if not current_id or not home.get("id") or not away.get("id"):
         result["notes"].append("Faltan identificadores para consultar historial.")
         return result
-    key = f"deep-goal-context:{current_id}"
+    key = f"deep-goal-context-v2:{current_id}"
     if key in cache:
         # Refresh only the current match's events so the latest goal updates on reruns;
         # historical form/H2H stays cached to protect the API request budget.
