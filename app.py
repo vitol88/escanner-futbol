@@ -700,8 +700,9 @@ with st.container(key="top_status_controls"):
         st.session_state.sound_muted = not sound_enabled
     with status_cols[2]:
         st.components.v1.html("""
-<div style="display:flex;align-items:center;justify-content:center;min-height:36px">
-  <button id="scanner-test-sound" type="button" title="Activar y probar las alertas sonoras" style="box-sizing:border-box;width:100%;min-height:32px;padding:5px 4px;border-radius:9px;border:1px solid #FACC15;background:#242014;color:#FACC15;font:600 11px system-ui;white-space:nowrap;cursor:pointer">🔔 Alertas</button>
+<style>html,body{margin:0!important;padding:0!important;width:100%!important;background:transparent!important;overflow:hidden!important;}</style>
+<div style="box-sizing:border-box;display:flex;align-items:center;justify-content:center;width:100%;height:48px;min-height:48px;margin:0;padding:0">
+  <button id="scanner-test-sound" type="button" title="Activar y probar las alertas sonoras" style="box-sizing:border-box;display:block;width:100%;height:48px;min-height:48px;margin:0;padding:6px 3px;border-radius:11px;border:1px solid #D4A72C;background:linear-gradient(145deg,#201D14,#111419);color:#F4D778;font:600 11px system-ui;white-space:nowrap;cursor:pointer">🔔 Alertas</button>
 </div>
 <script>
 (() => {
