@@ -1708,9 +1708,15 @@ else:
                                                                 h2h_payload = api_get("fixtures/headtohead", {"h2h": f"{home_team.get('id')}-{away_team.get('id')}", "last": 50})
                                                                 past_matches = h2h_payload.get("response") or []
                                                                 finished_statuses = {"FT", "AET", "PEN"}
+                                                                # Mantener solo enfrentamientos finalizados en los que el equipo local actual también jugó como local.
+                                                                # Después de filtrar por localía, tomar los 10 más recientes disponibles.
+                                                                current_home_id = home_team.get("id")
                                                                 past_matches = [
                                                                     past for past in past_matches
-                                                                    if (((past.get("fixture") or {}).get("status") or {}).get("short") in finished_statuses)
+                                                                    if (
+                                                                        (((past.get("fixture") or {}).get("status") or {}).get("short") in finished_statuses)
+                                                                        and str((((past.get("teams") or {}).get("home") or {}).get("id"))) == str(current_home_id)
+                                                                    )
                                                                 ][:10]
                                                                 past_rows = []
                                                                 for past in past_matches:
