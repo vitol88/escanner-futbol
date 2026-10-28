@@ -60,10 +60,18 @@ st.markdown("""
   [class*="st-key-sound_enabled_toggle"] { padding:5px 8px; border:1px solid #393326; border-radius:12px; background:#15191F; }
   [class*="st-key-sound_enabled_toggle"] label { font-size:.92rem !important; font-weight:650 !important; }
   [class*="st-key-sound_enabled_toggle"] [role="switch"] { transform:scale(.88); transform-origin:center; }
-  [class*="st-key-sound_enabled_toggle"] [role="switch"][aria-checked="true"] { background:#FACC15 !important; border-color:#FFE566 !important; }
-  [class*="st-key-sound_enabled_toggle"] [role="switch"][aria-checked="true"] > div { background:#111419 !important; }
-  [class*="st-key-sound_enabled_toggle"] [role="switch"][aria-checked="false"] { background:#FF4B4B !important; border-color:#FF4B4B !important; }
-  [class*="st-key-sound_enabled_toggle"] [role="switch"][aria-checked="false"] > div { background:#FFFFFF !important; }
+  [class*="st-key-sound_enabled_toggle"] [role="switch"][aria-checked="true"],
+  [data-testid="stToggle"] [role="switch"][aria-checked="true"],
+  button[role="switch"][aria-checked="true"] { background:#FACC15 !important; background-color:#FACC15 !important; border-color:#FFE566 !important; }
+  [class*="st-key-sound_enabled_toggle"] [role="switch"][aria-checked="true"] > div,
+  [data-testid="stToggle"] [role="switch"][aria-checked="true"] > div,
+  button[role="switch"][aria-checked="true"] > div { background:#111419 !important; }
+  [class*="st-key-sound_enabled_toggle"] [role="switch"][aria-checked="false"],
+  [data-testid="stToggle"] [role="switch"][aria-checked="false"],
+  button[role="switch"][aria-checked="false"] { background:#FF4B4B !important; background-color:#FF4B4B !important; border-color:#FF4B4B !important; }
+  [class*="st-key-sound_enabled_toggle"] [role="switch"][aria-checked="false"] > div,
+  [data-testid="stToggle"] [role="switch"][aria-checked="false"] > div,
+  button[role="switch"][aria-checked="false"] > div { background:#FFFFFF !important; }
   [data-testid="stTabs"] button[role="tab"] { color: #D4D4D8; font-weight: 650; }
   [data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
     color: #FACC15; border-bottom-color: #FACC15;
@@ -402,23 +410,95 @@ if "signal_rows" not in st.session_state:
 if "signal_history_warning_shown" not in st.session_state:
     st.session_state.signal_history_warning_shown = False
 
-controls = st.columns([1.4, 1, 1])
-with controls[0]:
-    st.session_state.auto_refresh_enabled = st.toggle(
-        "Actualización automática (60 s)",
-        value=st.session_state.auto_refresh_enabled,
-        help="Actualiza los marcadores cada 60 segundos mientras esta página esté abierta."
-    )
-with controls[1]:
-    sound_enabled = st.toggle(
-        "Activar sonido",
-        value=not st.session_state.sound_muted,
-        key="sound_enabled_toggle",
-        help="Activa o desactiva las alertas sonoras del escáner."
-    )
-    st.session_state.sound_muted = not sound_enabled
-with controls[2]:
-    refresh = st.button("⚽ Actualizar escáner", type="primary", help="Actualiza el listado y ejecuta el escaneo disponible.")
+st.session_state.auto_refresh_enabled = st.toggle(
+    "Actualización automática (60 s)",
+    value=st.session_state.auto_refresh_enabled,
+    help="Actualiza los marcadores cada 60 segundos mientras esta página esté abierta."
+)
+sound_enabled = st.toggle(
+    "🔊 Sonido activado" if not st.session_state.sound_muted else "🔇 Sonido desactivado",
+    value=not st.session_state.sound_muted,
+    key="sound_enabled_toggle",
+    help="Activa o desactiva las alertas sonoras del escáner."
+)
+st.session_state.sound_muted = not sound_enabled
+
+recent_events = st.session_state.notification_events[-3:]
+events_json = json.dumps(recent_events, ensure_ascii=False).replace("</", "<\\/")
+muted_js = "true" if st.session_state.sound_muted else "false"
+st.components.v1.html(
+    f"""
+    <div id="scanner-notices" style="font-family:system-ui;color:#f4f4f5"></div>
+    <button id="scanner-test-sound" type="button" style="margin:3px 0 5px;padding:6px 10px;border-radius:9px;border:1px solid #FACC15;background:#242014;color:#FACC15;font-weight:700;cursor:pointer">🔊 Probar sonido</button>
+    <div style="font:12px system-ui;color:#A1A1AA;margin-bottom:4px">El sonido puede requerir interacción del usuario y que esta página permanezca abierta.</div>
+    <script>
+    const events = {events_json};
+    const muted = {muted_js};
+    const root = document.getElementById('scanner-notices');
+    const testSoundButton = document.getElementById('scanner-test-sound');
+    function playScannerTone() {{
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      [880, 1175].forEach((freq, i) => {{
+        const osc = ctx.createOscillator(), gain = ctx.createGain(), t = ctx.currentTime + i * 0.14;
+        osc.type = 'sine'; osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(0.12, t + 0.025);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+        osc.connect(gain); gain.connect(ctx.destination); osc.start(t); osc.stop(t + 0.2);
+      }});
+      setTimeout(() => ctx.close(), 700);
+    }}
+    testSoundButton.addEventListener('click', () => {{
+      try {{ playScannerTone(); testSoundButton.textContent = '✓ Sonido probado'; }}
+      catch (e) {{ testSoundButton.textContent = 'No disponible en este navegador'; }}
+    }});
+    const seenKey = 'football-lab-seen-events';
+    let seen = [];
+    try {{ seen = JSON.parse(localStorage.getItem(seenKey) || '[]'); }} catch (e) {{}}
+    const fresh = events.filter(e => !seen.includes(e.id));
+    if (fresh.length) {{
+      fresh.forEach(e => {{
+        const card = document.createElement('div');
+        card.style.cssText = 'margin:8px 0;padding:12px 14px;border-radius:12px;background:#242014;border:1px solid #FACC15;box-shadow:0 6px 20px #0008';
+        card.innerHTML = '<b style="color:#FACC15">' + e.title + '</b><div style="margin-top:4px">' + e.message + '</div>';
+        root.appendChild(card);
+        setTimeout(() => card.remove(), 9000);
+      }});
+      seen = [...seen, ...fresh.map(e => e.id)].slice(-30);
+      try {{ localStorage.setItem(seenKey, JSON.stringify(seen)); }} catch (e) {{}}
+      if ("Notification" in window && Notification.permission === "default") {{
+        try {{ Notification.requestPermission(); }} catch (e) {{}}
+      }}
+      if ("Notification" in window && Notification.permission === "granted") {{
+        fresh.forEach(e => {{ try {{ new Notification(e.title, {{ body: e.message, tag: e.id }}); }} catch (err) {{}} }});
+      }}
+      if (!muted) {{
+        try {{
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) {{
+            const ctx = new AudioCtx();
+            [880, 1175].forEach((freq, i) => {{
+              const osc = ctx.createOscillator(), gain = ctx.createGain(), t = ctx.currentTime + i * 0.14;
+              osc.type = 'sine'; osc.frequency.value = freq;
+              gain.gain.setValueAtTime(0.0001, t);
+              gain.gain.exponentialRampToValueAtTime(0.12, t + 0.025);
+              gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+              osc.connect(gain); gain.connect(ctx.destination); osc.start(t); osc.stop(t + 0.2);
+            }});
+            setTimeout(() => ctx.close(), 700);
+          }}
+        }} catch (e) {{}}
+      }}
+    }}
+    </script>
+    """,
+    height=105,
+    scrolling=False,
+)
+
+refresh = st.button("⚽ Actualizar escáner", type="primary", help="Actualiza el listado y ejecuta el escaneo disponible.")
 
 auto_tick = None
 if st.session_state.auto_refresh_enabled:
@@ -520,81 +600,6 @@ if st.session_state.last_refresh:
     st.caption(f"Última actualización: {st.session_state.last_refresh} · intervalo: 60 segundos")
 if st.session_state.last_auto_refresh_error:
     st.warning(f"No se pudo actualizar el listado en vivo: {st.session_state.last_auto_refresh_error}")
-
-recent_events = st.session_state.notification_events[-3:]
-events_json = json.dumps(recent_events, ensure_ascii=False).replace("</", "<\\/")
-muted_js = "true" if st.session_state.sound_muted else "false"
-st.components.v1.html(
-    f"""
-    <div id="scanner-notices" style="font-family:system-ui;color:#f4f4f5"></div>
-    <button id="scanner-test-sound" type="button" style="margin:6px 0;padding:8px 12px;border-radius:9px;border:1px solid #FACC15;background:#242014;color:#FACC15;font-weight:700;cursor:pointer">🔊 Probar sonido</button>
-    <div style="font:12px system-ui;color:#A1A1AA;margin-bottom:4px">El sonido puede requerir interacción del usuario y que esta página permanezca abierta.</div>
-    <script>
-    const events = {events_json};
-    const muted = {muted_js};
-    const root = document.getElementById('scanner-notices');
-    const testSoundButton = document.getElementById('scanner-test-sound');
-    function playScannerTone() {{
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-      [880, 1175].forEach((freq, i) => {{
-        const osc = ctx.createOscillator(), gain = ctx.createGain(), t = ctx.currentTime + i * 0.14;
-        osc.type = 'sine'; osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.0001, t);
-        gain.gain.exponentialRampToValueAtTime(0.12, t + 0.025);
-        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
-        osc.connect(gain); gain.connect(ctx.destination); osc.start(t); osc.stop(t + 0.2);
-      }});
-      setTimeout(() => ctx.close(), 700);
-    }}
-    testSoundButton.addEventListener('click', () => {{
-      try {{ playScannerTone(); testSoundButton.textContent = '✓ Sonido probado'; }}
-      catch (e) {{ testSoundButton.textContent = 'No disponible en este navegador'; }}
-    }});
-    const seenKey = 'football-lab-seen-events';
-    let seen = [];
-    try {{ seen = JSON.parse(localStorage.getItem(seenKey) || '[]'); }} catch (e) {{}}
-    const fresh = events.filter(e => !seen.includes(e.id));
-    if (fresh.length) {{
-      fresh.forEach(e => {{
-        const card = document.createElement('div');
-        card.style.cssText = 'margin:8px 0;padding:12px 14px;border-radius:12px;background:#242014;border:1px solid #FACC15;box-shadow:0 6px 20px #0008';
-        card.innerHTML = '<b style="color:#FACC15">' + e.title + '</b><div style="margin-top:4px">' + e.message + '</div>';
-        root.appendChild(card);
-        setTimeout(() => card.remove(), 9000);
-      }});
-      seen = [...seen, ...fresh.map(e => e.id)].slice(-30);
-      try {{ localStorage.setItem(seenKey, JSON.stringify(seen)); }} catch (e) {{}}
-      if ("Notification" in window && Notification.permission === "default") {{
-        try {{ Notification.requestPermission(); }} catch (e) {{}}
-      }}
-      if ("Notification" in window && Notification.permission === "granted") {{
-        fresh.forEach(e => {{ try {{ new Notification(e.title, {{ body: e.message, tag: e.id }}); }} catch (err) {{}} }});
-      }}
-      if (!muted) {{
-        try {{
-          const AudioCtx = window.AudioContext || window.webkitAudioContext;
-          if (AudioCtx) {{
-            const ctx = new AudioCtx();
-            [880, 1175].forEach((freq, i) => {{
-              const osc = ctx.createOscillator(), gain = ctx.createGain(), t = ctx.currentTime + i * 0.14;
-              osc.type = 'sine'; osc.frequency.value = freq;
-              gain.gain.setValueAtTime(0.0001, t);
-              gain.gain.exponentialRampToValueAtTime(0.12, t + 0.025);
-              gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
-              osc.connect(gain); gain.connect(ctx.destination); osc.start(t); osc.stop(t + 0.2);
-            }});
-            setTimeout(() => ctx.close(), 700);
-          }}
-        }} catch (e) {{}}
-      }}
-    }}
-    </script>
-    """,
-    height=150,
-    scrolling=False,
-)
 
 left, right = st.columns([2, 1])
 with left:
