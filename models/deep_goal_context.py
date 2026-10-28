@@ -42,6 +42,7 @@ def _goal_events(payload: Any) -> list[dict[str, Any]]:
 
 
 def _goal_minute(event: dict[str, Any]) -> int | None:
+    """Numeric minute used for comparisons and comeback windows."""
     time = event.get("time") or {}
     elapsed = time.get("elapsed")
     extra = time.get("extra") or 0
@@ -49,6 +50,36 @@ def _goal_minute(event: dict[str, Any]) -> int | None:
         return int(elapsed) + int(extra)
     except (TypeError, ValueError):
         return None
+
+
+def _goal_sort_key(event: dict[str, Any]) -> tuple[int, int]:
+    """Order events by the API's elapsed and stoppage-time fields."""
+    time = event.get("time") or {}
+    try:
+        elapsed = int(time.get("elapsed") or 0)
+    except (TypeError, ValueError):
+        elapsed = 0
+    try:
+        extra = int(time.get("extra") or 0)
+    except (TypeError, ValueError):
+        extra = 0
+    return elapsed, extra
+
+
+def _goal_minute_label(event: dict[str, Any]) -> str | None:
+    """Keep stoppage time exact, e.g. 45+2′ rather than converting it to 47′."""
+    time = event.get("time") or {}
+    elapsed = time.get("elapsed")
+    extra = time.get("extra")
+    try:
+        elapsed = int(elapsed)
+    except (TypeError, ValueError):
+        return None
+    try:
+        extra = int(extra) if extra is not None else 0
+    except (TypeError, ValueError):
+        extra = 0
+    return f"{elapsed}+{extra}′" if extra > 0 else f"{elapsed}′"
 
 
 def build_deep_goal_context(
@@ -74,7 +105,7 @@ def build_deep_goal_context(
     result: dict[str, Any] = {
         "available": False,
         "home_form": {}, "away_form": {}, "h2h": {},
-        "current_goal_minute": None, "current_goal_team": None,
+        "current_goal_minute": None, "current_goal_minute_label": None, "current_goal_team": None,
         "comeback": {}, "notes": [],
     }
     if not current_id or not home.get("id") or not away.get("id"):
@@ -82,7 +113,26 @@ def build_deep_goal_context(
         return result
     key = f"deep-goal-context:{current_id}"
     if key in cache:
-        return cache[key]
+        # Refresh only the current match's events so the latest goal updates on reruns;
+        # historical form/H2H stays cached to protect the API request budget.
+        cached_result = cache[key]
+        try:
+            current_events = api_get("fixtures/events", {"fixture": current_id}).get("response") or []
+            current_goals = _goal_events(current_events)
+            if current_goals:
+                latest = max(current_goals, key=_goal_sort_key)
+                cached_result["current_goal_minute"] = _goal_minute(latest)
+                cached_result["current_goal_minute_label"] = _goal_minute_label(latest)
+                cached_result["current_goal_team"] = (latest.get("team") or {}).get("name")
+            elif isinstance(minute, int) and isinstance(score.get("home"), int) and isinstance(score.get("away"), int) and score["home"] + score["away"] > 0:
+                cached_result["current_goal_minute"] = None
+                cached_result["current_goal_minute_label"] = None
+                cached_result["current_goal_team"] = None
+        except Exception:
+            # Preserve the last known event data rather than guessing a scorer/minute.
+            pass
+        cache[key] = cached_result
+        return cached_result
 
     league_id, season = league.get("id"), league.get("season")
 
@@ -158,11 +208,17 @@ def build_deep_goal_context(
     }
 
     # Current match events tell us when/which side scored most recently.
-    current_events = get_cached(f"events:{current_id}", "fixtures/events", {"fixture": current_id})
+    try:
+        # Always query the current fixture's event timeline fresh; cached historical events
+        # can miss a goal scored moments ago.
+        current_events = api_get("fixtures/events", {"fixture": current_id}).get("response") or []
+    except Exception:
+        current_events = []
     current_goals = _goal_events(current_events)
     if current_goals:
-        latest = max(current_goals, key=lambda event: _goal_minute(event) or 0)
+        latest = max(current_goals, key=_goal_sort_key)
         result["current_goal_minute"] = _goal_minute(latest)
+        result["current_goal_minute_label"] = _goal_minute_label(latest)
         result["current_goal_team"] = (latest.get("team") or {}).get("name")
     elif isinstance(minute, int) and isinstance(score.get("home"), int) and isinstance(score.get("away"), int) and score["home"] + score["away"] > 0:
         result["notes"].append("No se pudo determinar el minuto exacto del último gol; no se asumió.")
