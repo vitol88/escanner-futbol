@@ -184,8 +184,10 @@ st.markdown("""
   .update-toast-title { color:#FACC15;font-size:.72rem;font-weight:850;letter-spacing:1.2px; }
   .update-toast-time { margin-top:4px;font-size:.92rem;font-weight:650; }
   .update-toast-check { margin-left:auto;color:#4ADE80;font-size:1.25rem;font-weight:900; }
-  .update-toast-close { position:absolute; top:7px; right:8px; width:28px; height:28px; display:flex;align-items:center;justify-content:center; border:1px solid #49402A; border-radius:8px; background:#17191D; color:#F4F4F5; font-size:20px; line-height:1; cursor:pointer; padding:0; }
-  .update-toast-close:hover { background:#FACC15; color:#111419; border-color:#FFE566; }
+  .update-toast-toggle { position:fixed; width:1px; height:1px; opacity:0; pointer-events:none; }
+  .update-toast-toggle:checked + .update-toast { display:none !important; }
+  .update-toast-close { position:absolute; top:7px; right:8px; width:28px; height:28px; display:flex;align-items:center;justify-content:center; border:1px solid #49402A; border-radius:8px; background:#FACC15; color:#111419; font-size:20px; line-height:1; cursor:pointer; padding:0; }
+  .update-toast-close:hover { background:#FFE566; color:#111419; border-color:#FFE566; }
   @keyframes update-toast-life { 0%{opacity:0;transform:translate(-50%,18px) scale(.9);filter:blur(5px)} 70%{opacity:1;transform:translate(-50%,0) scale(1.03);filter:blur(0)} 100%{opacity:1;transform:translate(-50%,0) scale(1);filter:blur(0)} }
   @media(max-width:640px) { .brand-header { padding:12px 12px 10px; border-radius:17px; } .brand-header-main { gap:10px; } .brand-mark { width:46px; height:46px; flex-basis:46px; border-radius:13px; } .brand-mark svg { width:27px; height:27px; } .brand-title { font-size:clamp(1.2rem,5vw,1.7rem); } .brand-subtitle { font-size:.68rem; letter-spacing:1px; } .brand-pill { padding:5px 8px; font-size:.68rem; } .brand-update { gap:7px; padding:5px 7px; } .brand-update-copy { gap:5px 8px; } .brand-update-label { font-size:.62rem; } .brand-update-time { font-size:.74rem; } }
   .loading-brand { display:flex; align-items:center; gap:12px; padding:14px; margin:8px 0; border:1px solid #393326; border-radius:14px; background:linear-gradient(120deg,#171B21,#101216); }
@@ -411,7 +413,7 @@ st.markdown(f"""
     <svg class="brand-refresh" viewBox="0 0 32 32" fill="none" stroke="#FACC15" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M26 10V4m0 0h-6m6 0-5 5a11 11 0 0 0-18 5"/><path d="M6 22v6m0 0h6m-6 0 5-5a11 11 0 0 0 18-5"/></svg>
   </div>
 </div>
-{f'<div class="update-toast" role="status"><div class="update-toast-icon">◷</div><div><div class="update-toast-title">ÚLTIMA ACTUALIZACIÓN</div><div class="update-toast-time">{header_time}</div></div><div class="update-toast-check">✓</div><button class="update-toast-close" type="button" aria-label="Cerrar notificación" title="Cerrar" onclick="this.parentElement.remove()">×</button></div>' if show_splash_intro else ''}
+{f'<input class="update-toast-toggle" type="checkbox" id="close-update-toast" aria-label="Ocultar notificación"><div class="update-toast" role="status"><div class="update-toast-icon">◷</div><div><div class="update-toast-title">ÚLTIMA ACTUALIZACIÓN</div><div class="update-toast-time">{header_time}</div></div><div class="update-toast-check">✓</div><label class="update-toast-close" for="close-update-toast" role="button" tabindex="0" aria-label="Cerrar notificación" title="Cerrar">×</label></div>' if show_splash_intro else ''}
 """, unsafe_allow_html=True)
 # Cabecera limpia; los detalles del modelo aparecen en Rendimiento del modelo.
 
