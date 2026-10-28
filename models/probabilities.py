@@ -276,9 +276,10 @@ def estimate_live_goal_markets(
             "already_settled": score_away >= target,
         }
 
+    warning_reason = result.get("reason")
     result.update({
         "available": True,
-        "reason": None,
+        "reason": warning_reason,
         "baseline_league": baseline["league"],
         "baseline_matches": matches,
         "baseline_fallback": baseline_fallback,
