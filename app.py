@@ -1379,14 +1379,40 @@ else:
                                             else:
                                                 st.caption(f"Últimos {len(h2h_matches)} enfrentamientos finalizados con el equipo local actual jugando en casa; se prioriza la misma competición y se completa con otras si hace falta.")
                                             h2h_html = ""
+                                            valid_goal_totals = []
                                             for past in h2h_matches:
                                                 pf, pt, pg = past.get("fixture") or {}, past.get("teams") or {}, past.get("goals") or {}
                                                 ph, pa = pt.get("home") or {}, pt.get("away") or {}
                                                 date_label = html.escape((pf.get("date") or "")[:10])
                                                 ph_name, pa_name = html.escape(str(ph.get("name") or "Local")), html.escape(str(pa.get("name") or "Visitante"))
                                                 ph_logo, pa_logo = html.escape(str(ph.get("logo") or ""), quote=True), html.escape(str(pa.get("logo") or ""), quote=True)
-                                                h2h_html += f'<div class="h2h-match-row"><span>{date_label}</span><span class="h2h-team"><img src="{ph_logo}" onerror="this.style.display=\'none\'">{ph_name}</span><span class="h2h-score">{pg.get("home", "—")} – {pg.get("away", "—")}</span><span class="h2h-team"><img src="{pa_logo}" onerror="this.style.display=\'none\'">{pa_name}</span></div>'
+                                                home_goals, away_goals = pg.get("home"), pg.get("away")
+                                                if isinstance(home_goals, (int, float)) and isinstance(away_goals, (int, float)):
+                                                    valid_goal_totals.append(home_goals + away_goals)
+                                                h2h_html += f'<div class="h2h-match-row"><span>{date_label}</span><span class="h2h-team"><img src="{ph_logo}" onerror="this.style.display=\'none\'">{ph_name}</span><span class="h2h-score">{home_goals if home_goals is not None else "—"} – {away_goals if away_goals is not None else "—"}</span><span class="h2h-team"><img src="{pa_logo}" onerror="this.style.display=\'none\'">{pa_name}</span></div>'
                                             st.markdown(h2h_html, unsafe_allow_html=True)
+                                            if valid_goal_totals:
+                                                average_goals = sum(valid_goal_totals) / len(valid_goal_totals)
+                                                st.markdown(
+                                                    f"""
+                                                    <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+                                                                margin:16px 0 18px;padding:7px 10px;
+                                                                border:1px solid #51451D;border-radius:9px;
+                                                                background:linear-gradient(135deg,#17191f,#20232b);
+                                                                width:fit-content;max-width:100%;clear:both;position:relative;">
+                                                      <span style="font-size:11px;font-weight:700;color:#FACC15;letter-spacing:.3px;">
+                                                        PROMEDIO DE GOLES
+                                                      </span>
+                                                      <span style="display:inline-block;padding:4px 9px;
+                                                                   border:1px solid #FACC15;border-radius:7px;
+                                                                   background:#FACC15;color:#111827;
+                                                                   font-size:13px;font-weight:800;line-height:1.1;">
+                                                        {average_goals:.2f}
+                                                      </span>
+                                                    </div>
+                                                    """,
+                                                    unsafe_allow_html=True,
+                                                )
                                         elif isinstance(h2h_data, list) and h2h_data:
                                             # Compatibilidad con entradas de caché creadas antes de h2h-v2.
                                             st.info("Se encontraron datos H2H antiguos en caché. Vuelve a abrir H2H para cargar el historial actualizado.")
