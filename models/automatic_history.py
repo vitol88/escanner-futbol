@@ -67,7 +67,8 @@ def build_automatic_history(
                 cache[key] = []
                 cache["error:" + key] = "Límite de consultas históricas por escaneo alcanzado."
                 return cache[key]
-            params = {"team": team_id, "last": 8, "league": league_id, "season": season}
+            # Ventana más amplia para encontrar suficientes partidos según la localía.
+            params = {"team": team_id, "last": 20, "league": league_id, "season": season}
             try:
                 cache["_automatic_history_team_fixture_calls"] = int(cache.get("_automatic_history_team_fixture_calls", 0)) + 1
                 cache[key] = (api_get("fixtures", params).get("response") or [])
