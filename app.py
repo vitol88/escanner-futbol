@@ -855,7 +855,8 @@ else:
                                 selected_tool = st.session_state.get("main_fixture_tool") or {}
                                 if str(selected_tool.get("fixture_id")) == str(match_id):
                                     tool_name = selected_tool.get("tool")
-                                    st.markdown('<div class="match-analysis-kicker">PARTIDO SELECCIONADO</div>', unsafe_allow_html=True)
+                                    if tool_name != "stats":
+                                        st.markdown('<div class="match-analysis-kicker">PARTIDO SELECCIONADO</div>', unsafe_allow_html=True)
                                     if tool_name == "stats":
                                         stat_data = st.session_state.stats_cache.get(str(match_id), [])
                                         stats_error = st.session_state.get("stats_errors", {}).get(str(match_id))
