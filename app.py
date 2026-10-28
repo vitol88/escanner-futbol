@@ -21,6 +21,7 @@ from models.probabilities import (
     load_league_baselines,
     poisson_at_least,
 )
+from models.live_odds import extract_live_odds, classify_market, score_pattern_context
 
 API_BASE = "https://v3.football.api-sports.io"
 TIMEOUT_SECONDS = 15
@@ -1458,6 +1459,19 @@ else:
                 }
             goal_results_with_context.append((fixture, estimate, tips, context))
         st.session_state.goal_scan_results = goal_results_with_context
+
+        # One bulk in-play odds request per completed scan (not one request per fixture).
+        # API-Football's /odds/live may omit fixtures/markets when no bookmaker publishes them.
+        try:
+            live_odds_payload = api_get("odds/live")
+            st.session_state.live_odds_by_fixture = extract_live_odds(live_odds_payload)
+            st.session_state.live_odds_error = ""
+            st.session_state.live_odds_last_fetch = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        except Exception as odds_exc:
+            st.session_state.live_odds_error = str(odds_exc)
+            # Keep the last successful odds snapshot, but disclose its timestamp in the UI.
+            st.session_state.setdefault("live_odds_by_fixture", {})
+
         st.session_state.previous_scan_scores = current_scores
 
         # Auditable signal log: avoid duplicate rows when Streamlit reruns the same scan.
@@ -1653,7 +1667,52 @@ else:
                 else:
                     st.info("Sin tip principal en este momento: faltan señales suficientes para respaldar una recomendación.")
                 st.caption(f"Referencia usada por el modelo: {estimate.get('baseline_league', 'genérica')} · muestra de liga: {estimate.get('baseline_matches', 0)} partidos · contexto: {context.get('context_status', 'no disponible')}.")
-                st.caption("Tip exploratorio, no garantía de gol ni señal de valor esperado positivo. Si faltan estadísticas en vivo, el bot lo indica en vez de inventarlas.")
+                odds_by_fixture = st.session_state.get("live_odds_by_fixture", {})
+                match_odds = odds_by_fixture.get(str(fixture_id), [])
+                if match_odds:
+                    st.markdown("**💹 Cuotas reales disponibles en vivo**")
+                    main_options = []
+                    risk_options = []
+                    for odds_row in match_odds:
+                        market_label = classify_market(odds_row)
+                        if not market_label:
+                            continue
+                        odd = odds_row["odd"]
+                        row_view = {
+                            "Mercado": market_label,
+                            "Cuota": f"{odd:.2f}",
+                            "Casa": odds_row["bookmaker"],
+                            "Prob. implícita": f"{(1 / odd) * 100:.1f}%",
+                        }
+                        if 1.23 <= odd <= 1.40:
+                            main_options.append((odd, row_view))
+                        if odd >= 1.66 and market_label in {"Empate final", "Ambos equipos marcan: Sí", "Ambos equipos marcan: No"}:
+                            risk_options.append((odd, row_view))
+                    if main_options:
+                        # Prefer the highest price inside the requested lower-risk band.
+                        _, chosen_main = max(main_options, key=lambda item: item[0])
+                        st.markdown("**TIP PRINCIPAL · cuota objetivo 1.23–1.40**")
+                        st.dataframe([chosen_main], hide_index=True, use_container_width=True)
+                    else:
+                        st.info("Sin mercado verificable dentro de 1.23–1.40 en las cuotas recibidas.")
+                    if risk_options:
+                        # Risk tip allows draw/BTTS; score-pattern numerology is contextual only.
+                        _, chosen_risk = max(risk_options, key=lambda item: item[0])
+                        st.markdown("**TIP DE ALTO RIESGO · cuota 1.66+**")
+                        st.dataframe([chosen_risk], hide_index=True, use_container_width=True)
+                        st.caption("Contexto de patrón numérico: " + score_pattern_context(home_score, away_score) + ". Es solo un desempate descriptivo; no aumenta por sí mismo la probabilidad ni predice un 1–1.")
+                    else:
+                        st.info("No hay cuota verificable de 1.66+ para empate o ambos marcan en los mercados recibidos.")
+                else:
+                    odds_error = st.session_state.get("live_odds_error", "")
+                    if odds_error:
+                        st.warning("No se pudieron actualizar las cuotas en vivo. No se inventan precios. " + str(odds_error))
+                    else:
+                        st.info("La API no devolvió cuotas en vivo para este partido. Puede no haber cobertura de bookmaker/mercado.")
+                odds_stamp = st.session_state.get("live_odds_last_fetch")
+                if odds_stamp:
+                    st.caption(f"Última consulta de cuotas: {odds_stamp}. Las cuotas pueden cambiar o suspenderse.")
+                st.caption("Tip exploratorio, no garantía de gol ni señal de valor esperado positivo. La cuota real no basta por sí sola: el siguiente paso es validar cada mercado contra una probabilidad estimada y calibrada.")
                 action_cols = st.columns(4)
                 action_specs = [
                     ("⚽ Goles", "goals"),
