@@ -96,20 +96,20 @@ st.markdown("""
   button[role="switch"][aria-checked="false"] > div { background:#FFFFFF !important; }
   /* Tarjeta compacta de acción principal del escáner */
   [class*="st-key-scan_cta_card"] { margin-top:14px; margin-bottom:18px; }
-  [class*="st-key-scan_cta_card"] [data-testid="stButton"] button { position:relative; overflow:hidden; width:100%; min-height:142px; white-space:pre-line; text-align:left; padding:24px 18px 24px 118px; border-radius:22px; border:1px solid #FACC15; background:radial-gradient(ellipse at 8% 50%,rgba(250,204,21,.17),transparent 43%),linear-gradient(135deg,#17191F,#080A0D); color:#FACC15; font-size:clamp(1rem,3.8vw,1.35rem); line-height:1.7; font-weight:800; box-shadow:inset 0 0 20px rgba(250,204,21,.05),0 0 0 1px rgba(250,204,21,.08); }
-  [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before { content:""; position:absolute; left:20px; top:50%; width:72px; height:72px; transform:translateY(-50%); border-radius:50%; border:2px solid #FACC15; background:repeating-radial-gradient(circle,transparent 0 9px,rgba(250,204,21,.55) 10px 11px,transparent 12px 18px),conic-gradient(from 0deg,rgba(250,204,21,.55),transparent 35%,rgba(250,204,21,.1) 65%,transparent); box-shadow:0 0 18px rgba(250,204,21,.3),inset 0 0 14px rgba(250,204,21,.18); animation:scanner-radar-spin 4s linear infinite; }
-  [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::after { content:""; position:absolute; left:48px; top:calc(50% - 10px); width:16px; height:16px; border-radius:4px; background:#FACC15; box-shadow:0 0 16px #FACC15; animation:scanner-core-pulse 1.2s ease-in-out infinite alternate; }
-  [class*="st-key-scan_cta_card"] [data-testid="stButton"] button:hover { border-color:#FFE36A; background:radial-gradient(ellipse at 8% 50%,rgba(250,204,21,.25),transparent 43%),linear-gradient(135deg,#242014,#111419); color:#FFE36A; }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] button { position:relative; overflow:hidden; width:100%; min-height:190px; white-space:pre-line; text-align:left; padding:24px 18px 24px 50%; border-radius:22px; border:1px solid #FACC15; background:linear-gradient(135deg,#090A0D,#111319); color:#F4F4F5; font-size:clamp(1rem,3.8vw,1.35rem); line-height:1.55; font-weight:800; box-shadow:inset 0 0 24px rgba(250,204,21,.06),0 0 0 1px rgba(250,204,21,.08); }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before { content:""; position:absolute; left:4%; top:50%; width:min(42%,210px); aspect-ratio:1; height:auto; transform:translateY(-50%); border-radius:50%; border:3px solid #FACC15; background:radial-gradient(circle at center,#FACC15 0 6%,#14151A 7% 14%,transparent 15%),repeating-radial-gradient(circle at center,transparent 0 13px,rgba(250,204,21,.55) 14px 16px,transparent 17px 25px),conic-gradient(from 0deg,transparent 0 12%,rgba(250,204,21,.95) 16%,transparent 28% 48%,rgba(250,204,21,.45) 53%,transparent 68%); box-shadow:0 0 20px rgba(250,204,21,.45),inset 0 0 18px rgba(250,204,21,.25); animation:scanner-radar-spin 3s linear infinite; }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::after { content:"⚽"; position:absolute; left:calc(4% + min(15%,75px)); top:50%; transform:translate(-50%,-50%); width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-size:clamp(1.8rem,6vw,2.7rem); filter:drop-shadow(0 0 10px rgba(250,204,21,.75)); animation:scanner-ball-orbit 2s ease-in-out infinite; }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] button:hover { border-color:#FFE36A; background:linear-gradient(135deg,#14151A,#1A180F); color:#FFE36A; }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] button:active { transform:scale(.99); }
   .scan-running-status { position:relative; display:flex; align-items:center; gap:12px; overflow:hidden; color:#FACC15; margin:8px 2px 0; padding:12px 14px; border:1px solid rgba(250,204,21,.35); border-radius:14px; background:linear-gradient(110deg,#17191F,#0B0D10); font-size:.92rem; font-weight:700; }
   .scan-code-icon { display:inline-block; flex:0 0 auto; font-size:2rem; transform-origin:center; animation:scanner-spiral-spin .8s linear infinite; text-shadow:0 0 12px rgba(250,204,21,.8); }
   .scan-running-subtitle { color:#A1A1AA; font-size:.82rem; font-weight:500; margin-top:3px; }
   .scan-sweep { position:absolute; left:0; right:0; bottom:0; height:2px; background:linear-gradient(90deg,transparent,#FACC15,transparent); animation:scanner-sweep 1.4s ease-in-out infinite; }
   @keyframes scanner-radar-spin { to { rotate:360deg; } }
-  @keyframes scanner-core-pulse { from { opacity:.55; transform:scale(.8); } to { opacity:1; transform:scale(1.15); } }
+  @keyframes scanner-ball-orbit { 0%,100% { transform:translate(-50%,-50%) scale(.9); } 50% { transform:translate(-50%,-50%) scale(1.1); } }
   @keyframes scanner-spiral-spin { to { transform:rotate(360deg); } }
   @keyframes scanner-sweep { 0% { transform:translateX(-100%); } 100% { transform:translateX(100%); } }
-  @media(max-width:640px) { [class*="st-key-scan_cta_card"] [data-testid="stButton"] button { min-height:130px; padding:18px 12px 18px 104px; font-size:1rem; } [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before { left:15px; width:66px; height:66px; } [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::after { left:40px; } }
+  @media(max-width:640px) { [class*="st-key-scan_cta_card"] [data-testid="stButton"] button { min-height:190px; padding:18px 12px 18px 50%; font-size:1rem; } [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before { left:3%; width:44%; } [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::after { left:25%; } }
   /* Header de "En vivo ahora": pill amarilla con ondas y chevrón a la derecha */
   [class*="st-key-live_now_section"] [data-testid="stExpander"] { background:transparent !important; border:0 !important; border-radius:18px !important; }
   [class*="st-key-live_now_section"] [data-testid="stExpander"] summary { min-height:72px !important; display:flex !important; flex-direction:row-reverse !important; justify-content:space-between !important; align-items:center !important; gap:12px !important; padding:14px 18px 14px 22px !important; border:1px solid #34363D !important; border-radius:20px !important; background:#0B0D10 !important; }
@@ -523,7 +523,7 @@ with st.container(key="sound_controls_row"):
 
 with st.container(key="scan_cta_card"):
     manual_scan = st.button(
-        "FOOTBALL LAB  ·  ESCÁNER EN VIVO\n◎  Pulsa para escanear oportunidades",
+        "FOOTBALL LAB\nESCÁNER EN VIVO\nPulsa para escanear oportunidades en directo",
         type="primary",
         key="scan_all_live",
     )
