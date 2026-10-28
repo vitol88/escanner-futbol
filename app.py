@@ -44,7 +44,16 @@ st.markdown("""
     width: 100%; min-height: 2.8rem; border-radius: 12px;
     border: 1px solid #FACC15; background: #FACC15; color: #111111; font-weight: 700;
   }
-  div.stButton > button:hover, div.stDownloadButton > button:hover {
+  div.stButton > button[kind="secondary"] {
+    border-color: #49402A; background: linear-gradient(145deg,#20252D,#111419); color: #E5E7EB;
+  }
+  div.stButton > button[kind="secondary"]:hover {
+    border-color: #FACC15; background: linear-gradient(145deg,#3B3216,#211D12); color: #FFE566;
+  }
+  div.stButton > button[kind="primary"], div.stDownloadButton > button {
+    border-color: #FFE566; background: #FACC15; color: #111111;
+  }
+  div.stButton > button[kind="primary"]:hover, div.stDownloadButton > button:hover {
     background: #FFE566; border-color: #FFE566; color: #111111;
   }
   [data-testid="stTabs"] button[role="tab"] { color: #D4D4D8; font-weight: 650; }
@@ -96,7 +105,8 @@ st.markdown("""
   [class*="st-key-main_stats_"] button, [class*="st-key-main_h2h_"] button, [class*="st-key-main_market_"] button { min-height:3.4rem; white-space:normal; line-height:1.15; padding:.45rem .3rem; border-radius:12px; border:1px solid #49402A; background:linear-gradient(145deg,#20252D,#111419); color:#E5E7EB; box-shadow:inset 0 1px 0 #ffffff0b; transition:transform .18s ease, background .22s ease, border-color .22s ease, box-shadow .22s ease; }
   [class*="st-key-main_stats_"] button:hover, [class*="st-key-main_h2h_"] button:hover, [class*="st-key-main_market_"] button:hover { transform:translateY(-2px); border-color:#FACC15; background:linear-gradient(145deg,#3B3216,#211D12); color:#FFE566; box-shadow:0 5px 16px #0006,0 0 14px #FACC1517; }
   [class*="st-key-main_stats_"] button:active, [class*="st-key-main_h2h_"] button:active, [class*="st-key-main_market_"] button:active { transform:scale(.98) rotateX(3deg); background:#FACC15; color:#101216; }
-  [class*="st-key-main_stats_"] button[kind="primary"], [class*="st-key-main_h2h_"] button[kind="primary"], [class*="st-key-main_market_"] button[kind="primary"] { background:#FACC15; color:#101216; border-color:#FFE566; box-shadow:0 0 0 1px #FACC1544,0 5px 18px #FACC1520; }
+  [class*="st-key-main_stats_"] button[kind="secondary"], [class*="st-key-main_h2h_"] button[kind="secondary"], [class*="st-key-main_market_"] button[kind="secondary"] { background:linear-gradient(145deg,#20252D,#111419) !important; color:#E5E7EB !important; border-color:#49402A !important; }
+  [class*="st-key-main_stats_"] button[kind="primary"], [class*="st-key-main_h2h_"] button[kind="primary"], [class*="st-key-main_market_"] button[kind="primary"] { background:#FACC15 !important; color:#101216 !important; border-color:#FFE566 !important; box-shadow:0 0 0 1px #FACC1544,0 5px 18px #FACC1520; }
   .match-analysis-panel { animation:matchFlipIn .38s cubic-bezier(.2,.75,.25,1) both; border:1px solid #5B4A19; border-radius:15px; padding:14px; margin:.65rem 0 1rem; background:radial-gradient(circle at 100% 0,rgba(250,204,21,.15),transparent 38%),linear-gradient(140deg,#242014,#171B21 55%,#101216); box-shadow:0 9px 28px #0005; transform-origin:top center; }
   .match-analysis-kicker { color:#FACC15; font-size:.72rem; font-weight:900; letter-spacing:1.2px; text-transform:uppercase; }
   .match-analysis-title { color:#F4F4F5; font-size:1.08rem; font-weight:850; margin:.25rem 0 .65rem; }
@@ -579,8 +589,8 @@ else:
             grouped.setdefault((country, league_name), []).append(match)
         for (country, league_name), league_matches in sorted(grouped.items()):
             with st.expander(f"⚽ {country} · {league_name} ({len(league_matches)})", expanded=False):
-                cards_html = '<div class="live-match-grid">' + "".join(fixture_card_html(match) for match in league_matches) + "</div>"
-                st.markdown(cards_html, unsafe_allow_html=True)
+                # Cada partido tiene una sola tarjeta principal; evitamos duplicar el marcador
+                # en una cuadrícula y otra vez dentro del expander de análisis.
                 # Match tools are available from the main live scanner, before a full market scan.
                 for match in league_matches:
                     match_fixture = match.get("fixture") or {}
