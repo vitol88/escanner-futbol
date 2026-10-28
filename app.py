@@ -1402,6 +1402,7 @@ if _analysis_page_active:
             st.session_state["live_now_expander"] = True
             st.session_state["main_fixture_tool"] = {}
             st.session_state["return_to_fixture_id"] = _analysis_page_id
+            st.session_state["highlight_fixture_id"] = _analysis_page_id
             st.rerun()
     st.markdown(
         '<div class="match-analysis-panel"><div class="match-analysis-kicker">FOOTBALL LAB · ANÁLISIS INDIVIDUAL</div><div class="match-analysis-title">Vista ampliada del partido</div><div class="signal-meta">Consulta el análisis seleccionado y vuelve a los partidos cuando termines.</div></div>',
@@ -1409,6 +1410,21 @@ if _analysis_page_active:
     )
 
 fixtures = st.session_state.live_fixtures
+_highlight_fixture_id = str(st.session_state.get("highlight_fixture_id") or "")
+if _highlight_fixture_id:
+    st.markdown(
+        f"""
+        <style>
+        [class*="st-key-live_match_{_highlight_fixture_id}"] {{
+            border:2px solid #FACC15 !important;
+            border-radius:18px !important;
+            box-shadow:0 0 0 1px rgba(250,204,21,.35),0 0 18px rgba(250,204,21,.14) !important;
+            background:linear-gradient(145deg,rgba(250,204,21,.045),transparent 65%) !important;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 if not fixtures:
     st.markdown("### Tu centro de análisis")
     st.info("Pulsa «Actualizar partidos» para cargar los encuentros en vivo. Después podrás escanear goles, córners, empate y ambos equipos marcan.")
@@ -1471,13 +1487,11 @@ else:
                             score_label = f"{match_goals.get('home', '—')}–{match_goals.get('away', '—')}"
                             match_minute = ((match_fixture.get("status") or {}).get("elapsed"))
                             match_label = f"{match_home_name} vs {match_away_name}"
-                            # Fila de partido con equipos, marcador y minuto; al desplegar aparece el marcador premium y los cuatro botones.
-                            home_md = f"![{match_home_name}]({match_home_logo}) " if match_home_logo else "⚽ "
-                            away_md = f" ![{match_away_name}]({match_away_logo})" if match_away_logo else ""
-                            match_row_label = f"{home_md}**{match_home_name}**  **{score_label}**  **{match_away_name}**{away_md} · {match_minute if match_minute is not None else 'EN VIVO'}′"
                             if not match_id:
                                 continue
-                            with st.expander(match_row_label, expanded=st.session_state.get(f"live_match_{match_id}", False), key=f"live_match_{match_id}", on_change="rerun"):
+                            # Los partidos no son expanders individuales: al abrir una liga aparecen todos los marcadores grandes.
+                            # La única flecha para contraer/expandir es la de la liga.
+                            with st.container(key=f"live_match_{match_id}"):
                                 # Marcador detallado primero: reloj a la izquierda y una fila por equipo.
                                 _clock_text = f"{match_minute}′" if match_minute is not None else str(((match_fixture.get("status") or {}).get("short") or "EN VIVO"))
                                 _home_score = match_goals.get("home") if match_goals.get("home") is not None else "—"
