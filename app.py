@@ -255,6 +255,11 @@ st.markdown("""
   [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details > summary::after { content:"◖))  ﹀"; display:flex; align-items:center; justify-content:center; min-width:108px; height:48px; padding:0 14px; border-radius:28px; background:#FACC15; color:#111419; font-size:23px; font-weight:700; letter-spacing:1px; box-sizing:border-box; }
   [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details[open] > summary::after { content:"◖))  ⌃"; }
   [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details > summary p { color:#FACC15 !important; font-size:clamp(1.2rem,3.8vw,1.8rem) !important; font-weight:750 !important; margin:0 !important; }
+  /* Encabezado de liga: nombre y logo a la izquierda, contador al extremo derecho. */
+  [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] details > div > [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"] [data-testid="stExpander"] > details > summary p {
+    display:flex !important; align-items:center !important; justify-content:space-between !important;
+    gap:8px !important; width:100% !important; box-sizing:border-box !important;
+  }
   /* Filas de ligas y partidos alineadas al borde izquierdo, sin huecos de los contenedores Streamlit */
   [class*="st-key-live_now_section"] [data-testid="stExpander"] details[open] > div,
   [class*="st-key-live_now_section"] [data-testid="stExpander"] details[open] > div > [data-testid="stVerticalBlock"] { padding:0 !important; margin:0 !important; gap:0 !important; row-gap:0 !important; }
