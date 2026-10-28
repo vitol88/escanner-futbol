@@ -1665,6 +1665,13 @@ else:
                                                     st.caption("El contexto profundo de forma/H2H no está disponible con las consultas actuales; el bot no lo tratará como dato conocido.")
 
                                                 def _goal_average_badge(label, value):
+                                                    if label == "PROMEDIO DE GOLES PARA HOY":
+                                                        return f"""
+                                                        <div class="goal-last-goal">
+                                                          <b>{html.escape(label)}</b>
+                                                          <span>{value:.2f}</span>
+                                                        </div>
+                                                        """
                                                     return f"""
                                                     <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;
                                                                 margin:8px 0 16px;padding:7px 10px;
