@@ -475,7 +475,7 @@ st.markdown("""
   .goal-live-summary { border:1px solid #3C3524; border-left:3px solid #FACC15; border-radius:12px; padding:12px 13px; margin:.65rem 0 .8rem; background:linear-gradient(135deg,#191C22,#101216); }
   .goal-live-summary-title { color:#FACC15; font-weight:900; font-size:.78rem; letter-spacing:1.2px; margin-bottom:6px; }
   .goal-live-summary p { color:#D4D4D8; font-size:.88rem; line-height:1.45; margin:0; }
-  .goal-deep-heading { color:#FACC15; font-size:.78rem; letter-spacing:1.1px; font-weight:900; margin:.85rem 0 .45rem; }
+  .goal-deep-heading { display:block; clear:both; position:relative; z-index:1; color:#FACC15; font-size:.78rem; letter-spacing:1.1px; font-weight:900; margin:1.55rem 0 .8rem; padding-top:.25rem; line-height:1.5; }
   .goal-form-card { border:1px solid #393326; border-radius:11px; padding:10px; background:linear-gradient(145deg,#191D24,#101216); min-height:132px; }
   .goal-form-team { color:#E4E4E7; font-size:.78rem; font-weight:800; line-height:1.25; overflow-wrap:anywhere; }
   .goal-form-record { color:#FACC15; font-size:1.15rem; font-weight:900; margin:4px 0; }
