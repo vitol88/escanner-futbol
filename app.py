@@ -161,22 +161,25 @@ st.markdown("""
   [data-testid="stDataFrame"] { border: 1px solid #3A3426; border-radius: 10px; overflow: hidden; }
   [data-testid="stExpander"] { background: #15191F; border: 1px solid #3A3426; border-radius: 12px; }
   hr { border-color: #38342B; }
-  .brand-header { display:block; padding:22px 24px 20px; margin:0 0 18px 0; background:#0B0D10; border:1px solid #34363B; border-radius:28px; color:#F4F4F5; }
-  .brand-header-main { display:flex; align-items:center; gap:18px; min-width:0; }
-  .brand-mark { width:88px; height:88px; flex:0 0 88px; display:flex; align-items:center; justify-content:center; background:#FACC15; border:1px solid #FFE566; border-radius:25px; box-shadow:none; color:#0B0D10; }
-  .brand-mark svg { width:48px; height:48px; }
+  .brand-header { display:block; padding:15px 20px 12px; margin:0 0 14px 0; background:#0B0D10; border:1px solid #34363B; border-radius:22px; color:#F4F4F5; }
+  .brand-header-main { display:flex; align-items:center; gap:14px; min-width:0; }
+  .brand-mark { width:60px; height:60px; flex:0 0 60px; display:flex; align-items:center; justify-content:center; background:#FACC15; border:1px solid #FFE566; border-radius:18px; box-shadow:none; color:#0B0D10; }
+  .brand-mark svg { width:34px; height:34px; }
   .brand-wordmark { min-width:0; }
-  .brand-title { font-size:clamp(1.7rem,4.5vw,2.8rem); line-height:1.12; letter-spacing:.5px; font-weight:500; color:#F4F4F5; white-space:nowrap; }
+  .brand-title { font-size:clamp(1.45rem,3.8vw,2.2rem); line-height:1.12; letter-spacing:.5px; font-weight:600; color:#F4F4F5; white-space:nowrap; }
   .brand-title span { color:#FACC15; }
-  .brand-subtitle { color:#A1A1AA; font-size:clamp(1rem,2.8vw,1.8rem); letter-spacing:.5px; margin-top:8px; white-space:nowrap; }
-  .brand-pill { margin-left:auto; white-space:nowrap; color:#22C55E; border:1px solid #103B25; background:#062719; border-radius:999px; padding:9px 16px; font-size:clamp(.8rem,2.5vw,1.2rem); font-weight:600; }
-  .brand-divider { height:1px; background:#3A3A40; margin:24px 0 20px; }
-  .brand-update { display:flex; align-items:center; gap:18px; min-width:0; }
-  .brand-clock { color:#FACC15; width:42px; height:42px; flex:0 0 42px; }
-  .brand-update-copy { min-width:0; flex:1; }
-  .brand-update-label { color:#A1A1AA; font-size:clamp(.9rem,2.6vw,1.7rem); letter-spacing:.5px; }
-  .brand-update-time { color:#F4F4F5; font-size:clamp(1.15rem,3.6vw,2.1rem); font-weight:550; margin-top:5px; overflow-wrap:anywhere; }
-  .brand-refresh { color:#FACC15; width:31px; height:31px; flex:0 0 31px; }
+  .brand-subtitle { color:#A1A1AA; font-size:clamp(.78rem,2vw,1.1rem); letter-spacing:1.5px; margin-top:4px; white-space:nowrap; }
+  .brand-pill { margin-left:auto; white-space:nowrap; color:#22C55E; border:1px solid #103B25; background:#062719; border-radius:999px; padding:6px 11px; font-size:.78rem; font-weight:700; }
+  .brand-divider { height:1px; background:#292B30; margin:10px 0 8px; }
+  .brand-update { display:flex; align-items:center; gap:9px; min-width:0; min-height:34px; padding:5px 9px; border:1px solid #2C2A20; border-radius:10px; background:linear-gradient(90deg,#141610,#101216); transform-origin:center left; }
+  .brand-update-intro { animation:update-arrive .9s cubic-bezier(.16,1,.3,1) 5.75s both; }
+  .brand-clock { color:#FACC15; width:20px; height:20px; flex:0 0 20px; }
+  .brand-update-copy { min-width:0; flex:1; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .brand-update-label { color:#A1A1AA; font-size:.7rem; letter-spacing:1px; font-weight:750; white-space:nowrap; }
+  .brand-update-time { color:#F4F4F5; font-size:.82rem; font-weight:600; margin-top:0; overflow-wrap:anywhere; }
+  .brand-refresh { color:#FACC15; width:18px; height:18px; flex:0 0 18px; }
+  @keyframes update-arrive { 0%{opacity:0;transform:scale(1.18);filter:blur(5px)} 18%{opacity:1;transform:scale(1.05);filter:blur(0)} 38%{transform:scale(1.08)} 65%{transform:scale(.98)} 100%{opacity:1;transform:scale(1);filter:blur(0)} }
+  @media(max-width:640px) { .brand-header { padding:12px 12px 10px; border-radius:17px; } .brand-header-main { gap:10px; } .brand-mark { width:46px; height:46px; flex-basis:46px; border-radius:13px; } .brand-mark svg { width:27px; height:27px; } .brand-title { font-size:clamp(1.2rem,5vw,1.7rem); } .brand-subtitle { font-size:.68rem; letter-spacing:1px; } .brand-pill { padding:5px 8px; font-size:.68rem; } .brand-update { gap:7px; padding:5px 7px; } .brand-update-copy { gap:5px 8px; } .brand-update-label { font-size:.62rem; } .brand-update-time { font-size:.74rem; } }
   .loading-brand { display:flex; align-items:center; gap:12px; padding:14px; margin:8px 0; border:1px solid #393326; border-radius:14px; background:linear-gradient(120deg,#171B21,#101216); }
   .loading-orbit { width:36px; height:36px; border:3px solid #393326; border-top-color:#FACC15; border-right-color:#FACC15; border-radius:50%; animation:lab-spin .8s linear infinite; flex:0 0 36px; }
   @keyframes lab-spin { to {transform:rotate(360deg);} }
@@ -362,7 +365,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-if not st.session_state.get("football_splash_shown", False):
+show_splash_intro = not st.session_state.get("football_splash_shown", False)
+if show_splash_intro:
     st.markdown("""
     <div class="football-splash" aria-label="Bienvenido a Football Lab">
       <div class="splash-pitch">
@@ -389,7 +393,7 @@ st.markdown(f"""
     <div class="brand-pill">EN VIVO</div>
   </div>
   <div class="brand-divider"></div>
-  <div class="brand-update">
+  <div class="brand-update{"-intro" if show_splash_intro else ""}">
     <svg class="brand-clock" viewBox="0 0 48 48" fill="none" stroke="#FACC15" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="24" cy="24" r="18"/><path d="M24 12v13h11"/></svg>
     <div class="brand-update-copy">
       <div class="brand-update-label">ÚLTIMA ACTUALIZACIÓN</div>
