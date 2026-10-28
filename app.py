@@ -88,8 +88,19 @@ st.markdown("""
   [class*="st-key-control_row"] { flex-wrap:nowrap !important; align-items:flex-start !important; justify-content:flex-start !important; }
   [class*="st-key-control_row"] [data-testid="stButton"] { width:auto !important; flex:0 0 auto !important; }
   [class*="st-key-control_row"] [data-testid="stButton"] button { width:auto !important; min-width:150px !important; }
-  [class*="st-key-control_row"] button[kind="primary"] { background:#FACC15 !important; background-color:#FACC15 !important; color:#111419 !important; border:1px solid #FFE566 !important; box-shadow:none !important; }
-  [class*="st-key-control_row"] button[kind="primary"]:hover { background:#FFE566 !important; color:#111419 !important; }
+  [class*="st-key-control_row"] button[kind="primary"] {
+    background:#FFE34D !important; background-color:#FFE34D !important; color:#090A0D !important;
+    border:1px solid #FFF29A !important; font-weight:800 !important;
+    box-shadow:0 0 0 1px rgba(255,227,77,.22),0 0 16px rgba(255,211,36,.32) !important;
+    transition:background .18s ease,box-shadow .18s ease,transform .18s ease !important;
+  }
+  [class*="st-key-control_row"] button[kind="primary"]:hover {
+    background:#FFF078 !important; background-color:#FFF078 !important; color:#090A0D !important;
+    border-color:#FFF6BD !important; box-shadow:0 0 20px rgba(255,227,77,.5) !important;
+  }
+  [class*="st-key-control_row"] button[kind="primary"] p {
+    color:#090A0D !important; font-weight:800 !important;
+  }
   [class*="st-key-scan-progress"] [data-testid="stProgress"] { margin:2px 0 0 !important; height:7px !important; }
   [class*="st-key-scan-progress"] [data-testid="stProgress"] > div { height:7px !important; border-radius:8px !important; background:#25231B !important; }
   [class*="st-key-scan-progress"] [data-testid="stProgress"] > div > div { background:repeating-linear-gradient(90deg,#FACC15 0 5px,#8A6A0A 5px 7px) !important; border-radius:8px !important; }
