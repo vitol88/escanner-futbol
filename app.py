@@ -1692,6 +1692,14 @@ else:
                                                 history_html += "</tbody></table>"
                                                 st.markdown(history_html, unsafe_allow_html=True)
                                                 st.caption(history.get("note", "Promedios históricos de partidos recientes; N/D significa que la API no entregó datos suficientes."))
+                                                # Diagnóstico seguro: muestra parámetros y conteos devueltos por API-Football,
+                                                # nunca la clave ni las cabeceras de autenticación.
+                                                with st.expander("Diagnóstico API-Football · historial de córners"):
+                                                    diagnostics = history.get("diagnostics") or {}
+                                                    if diagnostics:
+                                                        st.json(diagnostics)
+                                                    else:
+                                                        st.info("Este resultado no incluye diagnóstico. Pulsa «Actualizar scan» y vuelve a abrir Córners.")
 
                                                 st.markdown("### ⌁ Histórico de córners")
                                                 home_team = (match.get("teams") or {}).get("home") or {}
