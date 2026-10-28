@@ -1768,11 +1768,14 @@ else:
                                                 # Los córners actuales ya aparecen en la tarjeta superior del partido.
                                                 # Evitamos repetir local, visitante y total en tres tarjetas separadas.
 
+                                                corner_teams = match.get("teams") or {}
+                                                corner_home_name = str((corner_teams.get("home") or {}).get("name") or "Local")
+                                                corner_away_name = str((corner_teams.get("away") or {}).get("name") or "Visitante")
                                                 history_rows = [
-                                                    {"Indicador": "Córners a favor del local en casa", "Promedio": history.get("home_corners_for"), "Muestra": history.get("home_corner_sample", 0)},
-                                                    {"Indicador": "Córners concedidos por el local en casa", "Promedio": history.get("home_corners_against"), "Muestra": history.get("home_corner_sample", 0)},
-                                                    {"Indicador": "Córners a favor del visitante fuera", "Promedio": history.get("away_corners_for"), "Muestra": history.get("away_corner_sample", 0)},
-                                                    {"Indicador": "Córners concedidos por el visitante fuera", "Promedio": history.get("away_corners_against"), "Muestra": history.get("away_corner_sample", 0)},
+                                                    {"Indicador": f"{corner_home_name} · córners a favor en casa", "Promedio": history.get("home_corners_for"), "Muestra": history.get("home_corner_sample", 0)},
+                                                    {"Indicador": f"{corner_home_name} · córners concedidos en casa", "Promedio": history.get("home_corners_against"), "Muestra": history.get("home_corner_sample", 0)},
+                                                    {"Indicador": f"{corner_away_name} · córners a favor fuera", "Promedio": history.get("away_corners_for"), "Muestra": history.get("away_corner_sample", 0)},
+                                                    {"Indicador": f"{corner_away_name} · córners concedidos fuera", "Promedio": history.get("away_corners_against"), "Muestra": history.get("away_corner_sample", 0)},
                                                 ]
                                                 history_html = '<div class="goal-history-wrap"><div class="goal-history-heading">📊 Promedios de córners en la competición actual <span>Promedio</span></div><table class="goal-history-table"><thead><tr><th>Indicador</th><th>Prom.</th></tr></thead><tbody>'
                                                 for row in history_rows:
