@@ -1366,7 +1366,7 @@ else:
                                             st.info("La API no entregó estadísticas para este partido.")
                                     elif tool_name == "h2h":
                                         _match_league = match.get("league") or {}
-                                        h2h_key = f"h2h-v2-{match_home_id}-{match_away_id}-{_match_league.get('id') or 'all'}"
+                                        h2h_key = f"h2h-v3-home-{match_home_id}-{match_away_id}-{_match_league.get('id') or 'all'}"
                                         h2h_data = st.session_state.get("h2h_cache", {}).get(h2h_key)
                                         st.markdown('<div class="match-analysis-kicker">Historial · enfrentamientos directos</div><div class="match-analysis-title">Enfrentamientos directos</div>', unsafe_allow_html=True)
                                         if isinstance(h2h_data, dict) and h2h_data.get("error"):
