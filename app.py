@@ -896,7 +896,7 @@ else:
 
     # Se retira el resumen de sesión de la pantalla principal.
     stats_limit = 20
-    manual_scan = st.session_state.get("manual_scan_requested", False)
+    # manual_scan se obtiene del botón principal situado bajo los controles de sonido.
     now_epoch = int(datetime.now().timestamp())
     auto_scan_due = (
         st.session_state.auto_refresh_enabled
