@@ -492,7 +492,6 @@ muted_js = "true" if st.session_state.sound_muted else "false"
 st.components.v1.html(
     f"""
     <div id="scanner-notices" style="font-family:system-ui;color:#f4f4f5"></div>
-    <button id="scanner-test-sound" type="button" style="margin:3px 0 5px;padding:6px 10px;border-radius:9px;border:1px solid #FACC15;background:#242014;color:#FACC15;font-weight:700;cursor:pointer">🔊 Probar sonido</button>
     <script>
     const events = {events_json};
     const muted = {muted_js};
