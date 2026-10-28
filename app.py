@@ -773,6 +773,8 @@ if should_refresh:
                 try:
                     stat_payload = api_get("fixtures/statistics", {"fixture": fixture_id})
                     stat_rows = stat_payload.get("response") or []
+                    # Reuse live stats in the selected-match panel and corners tab.
+                    st.session_state.stats_cache[fixture_id] = stat_rows
                     home_c = safe_stat(stat_rows, "Corner Kicks", 0)
                     away_c = safe_stat(stat_rows, "Corner Kicks", 1)
                     if home_c is None or away_c is None:
@@ -1206,7 +1208,7 @@ else:
                                                         model_prob = 1.0 - current_estimate["btts_final"]
                                                     elif market_label.startswith(("Más de ", "Menos de ")) and "goles" in market_label.casefold():
                                                         import re
-                                                        line_match = re.search(r"(\\d+(?:[.,]\\d+)?)", market_label)
+                                                        line_match = re.search(r"(\d+(?:[.,]\d+)?)", market_label)
                                                         if line_match:
                                                             line = float(line_match.group(1).replace(",", "."))
                                                             if market_label.startswith("Más de "):
@@ -1261,6 +1263,7 @@ else:
                                                 st.info("Primero pulsa «Escanear todos los partidos en vivo». Después, vuelve a abrir Goles y señales para ver promedios por localía, lectura en vivo y tip principal.")
                                         elif market_key == "corners":
                                             st.markdown('<div class="match-analysis-kicker">Mercado seleccionado · córners</div><div class="match-analysis-title">Ritmo y proyección de córners</div>', unsafe_allow_html=True)
+                                            st.markdown(fixture_hero_html(match, mode="corners"), unsafe_allow_html=True)
                                             corner_item = next((item for item in st.session_state.get("corner_scan_results", []) if str(((item.get("fixture") or {}).get("fixture") or {}).get("id")) == str(match_id)), None)
                                             if corner_item and not corner_item.get("error"):
                                                 home_c, away_c = corner_item.get("home_corners"), corner_item.get("away_corners")
@@ -2119,7 +2122,7 @@ else:
                             if not market_label or "córner" not in market_label.casefold() or not isinstance(odd, (int, float)):
                                 continue
                             import re
-                            line_match = re.search(r"(\\d+(?:[.,]\\d+)?)", market_label)
+                            line_match = re.search(r"(\d+(?:[.,]\d+)?)", market_label)
                             if not line_match:
                                 continue
                             market_line = float(line_match.group(1).replace(",", "."))
