@@ -99,8 +99,12 @@ st.markdown("""
   [class*="st-key-live_now_section"] [data-testid="stExpander"] summary { min-height:72px !important; display:flex !important; flex-direction:row-reverse !important; justify-content:space-between !important; align-items:center !important; gap:12px !important; padding:14px 18px 14px 22px !important; border:1px solid #34363D !important; border-radius:20px !important; background:#0B0D10 !important; }
   [class*="st-key-live_now_section"] [data-testid="stExpander"] summary [data-testid="stExpanderToggleIcon"] { display:none !important; }
   [class*="st-key-live_now_section"] [data-testid="stExpander"] summary::after { content:"◖))  ﹀"; display:flex; align-items:center; justify-content:center; min-width:118px; height:52px; padding:0 16px; border-radius:28px; background:#FACC15; color:#111419; font-size:24px; font-weight:700; letter-spacing:1px; box-sizing:border-box; }
-  [class*="st-key-live_now_section"] [data-testid="stExpander"] details[open] summary::after { content:"◖))  ⌃"; }
+  [class*="st-key-live_now_section"] [data-testid="stExpander"] details[open] > summary::after { content:"◖))  ⌃"; }
   [class*="st-key-live_now_section"] [data-testid="stExpander"] summary p { color:#FACC15 !important; font-size:clamp(1.25rem,4vw,2rem) !important; font-weight:750 !important; margin:0 !important; }
+  /* Los expanders internos de liga conservan solo la flecha estándar */
+  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] summary::after { content:none !important; display:none !important; }
+  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] summary [data-testid="stExpanderToggleIcon"] { display:flex !important; color:#FACC15 !important; }
+  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] summary p { color:#E5E7EB !important; font-size:clamp(1rem,3.5vw,1.35rem) !important; font-weight:650 !important; }
   [class*="st-key-live_now_section"] [data-testid="stExpander"] details[open] > div { padding-top:14px !important; }
   @media(max-width:640px) {
     [class*="st-key-live_now_section"] [data-testid="stExpander"] summary { min-height:62px !important; padding:10px 12px 10px 16px !important; }
@@ -701,7 +705,7 @@ else:
                     league_name = league_data.get("name") or "Liga sin nombre"
                     grouped.setdefault((country, league_name), []).append(match)
                 for (country, league_name), league_matches in sorted(grouped.items()):
-                    with st.expander(f"⚽ {country} · {league_name} ({len(league_matches)})", expanded=False):
+                    with st.expander(f"{country} · {league_name} ({len(league_matches)})", expanded=False):
                         # Cada partido tiene una sola tarjeta principal; evitamos duplicar el marcador
                         # en una cuadrícula y otra vez dentro del expander de análisis.
                         # Match tools are available from the main live scanner, before a full market scan.
