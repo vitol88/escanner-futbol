@@ -22,7 +22,12 @@ from models.probabilities import (
     poisson_at_least,
     poisson_pmf,
 )
-from models.live_odds import extract_live_odds, classify_market, score_pattern_context, numerology_context
+from models.live_odds import (
+    classify_market,
+    extract_live_odds,
+    numerology_context,
+    score_pattern_context,
+)
 
 API_BASE = "https://v3.football.api-sports.io"
 TIMEOUT_SECONDS = 15
