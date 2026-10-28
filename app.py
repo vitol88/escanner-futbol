@@ -609,6 +609,42 @@ st.markdown("""
   [class*="st-key-sound_control_card"] [data-testid="stToggle"] label p {
     margin:0 !important; padding:0 !important;
   }
+
+  /* Cuatro tarjetas de acciones dentro de cada partido, adaptadas a pantallas móviles */
+  [class*="st-key-live_match_"] [data-testid="stHorizontalBlock"] {
+    display:flex !important; flex-wrap:nowrap !important; gap:.45rem !important; align-items:stretch !important;
+  }
+  [class*="st-key-live_match_"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+    min-width:0 !important; padding:0 !important; flex:1 1 0 !important;
+  }
+  [class*="st-key-live_match_"] [data-testid="stButton"] > button {
+    width:100% !important; min-width:0 !important; min-height:62px !important; height:62px !important;
+    padding:5px 3px !important; border-radius:12px !important; border:1px solid #655522 !important;
+    background:linear-gradient(145deg,#20232A,#12151A) !important; color:#F4D778 !important;
+    font-size:.76rem !important; font-weight:700 !important; line-height:1.2 !important;
+    white-space:pre-line !important; overflow-wrap:anywhere !important;
+    box-shadow:inset 0 0 0 1px rgba(250,204,21,.04) !important;
+  }
+  [class*="st-key-live_match_"] [data-testid="stButton"] > button:hover {
+    border-color:#FACC15 !important; color:#FFE566 !important;
+    background:linear-gradient(145deg,#302916,#17191F) !important;
+  }
+  [class*="st-key-live_match_"] [data-testid="stButton"] > button[kind="primary"] {
+    background:linear-gradient(145deg,#FDE047,#FACC15) !important; color:#111419 !important;
+    border-color:#FFE566 !important; box-shadow:0 0 12px rgba(250,204,21,.18) !important;
+  }
+  [class*="st-key-live_match_"] [data-testid="stButton"] > button p {
+    font-size:inherit !important; line-height:inherit !important; margin:0 !important;
+    white-space:pre-line !important; overflow-wrap:anywhere !important;
+  }
+  @media(max-width:420px) {
+    [class*="st-key-live_match_"] [data-testid="stHorizontalBlock"] { gap:.3rem !important; }
+    [class*="st-key-live_match_"] [data-testid="stButton"] > button {
+      min-height:58px !important; height:58px !important; padding:4px 2px !important;
+      font-size:.66rem !important; letter-spacing:-.2px !important; border-radius:10px !important;
+    }
+  }
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -1386,13 +1422,13 @@ else:
                                 # Estadísticas, Goles, Córners y H2H.
                                 action_cols = st.columns(4, gap="small")
                                 with action_cols[0]:
-                                    show_stats = st.button("▥", help="Estadísticas en vivo", key=f"main_stats_{match_id}", type="primary" if active_tool == "stats" else "secondary", use_container_width=True)
+                                    show_stats = st.button("▥\nEstadísticas", help="Estadísticas en vivo", key=f"main_stats_{match_id}", type="primary" if active_tool == "stats" else "secondary", use_container_width=True)
                                 with action_cols[1]:
-                                    show_goals = st.button("⚽︎⚡", help="Goles y señales", key=f"main_market_{match_id}_goals", type="primary" if active_market == "goals" else "secondary", use_container_width=True)
+                                    show_goals = st.button("⚽\nGoles y señales", help="Goles y señales", key=f"main_market_{match_id}_goals", type="primary" if active_market == "goals" else "secondary", use_container_width=True)
                                 with action_cols[2]:
-                                    show_corners = st.button("⚑", help="Córners", key=f"main_market_{match_id}_corners", type="primary" if active_market == "corners" else "secondary", use_container_width=True)
+                                    show_corners = st.button("⚑\nCórners", help="Córners", key=f"main_market_{match_id}_corners", type="primary" if active_market == "corners" else "secondary", use_container_width=True)
                                 with action_cols[3]:
-                                    show_h2h = st.button("H2H", help="Historial H2H", key=f"main_h2h_{match_id}", type="primary" if active_tool == "h2h" else "secondary", use_container_width=True)
+                                    show_h2h = st.button("H2H\nHistorial", help="Historial H2H", key=f"main_h2h_{match_id}", type="primary" if active_tool == "h2h" else "secondary", use_container_width=True)
                                 if show_stats:
                                     stats_key = str(match_id)
                                     if stats_key not in st.session_state.stats_cache or stats_key in st.session_state.get("stats_errors", {}):
