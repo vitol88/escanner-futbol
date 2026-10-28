@@ -1656,16 +1656,16 @@ else:
                     live_bits.append(f"Córners: {home_name} {home_corners:g} · {away_name} {away_corners:g}")
                 st.write(" · ".join(live_bits) if live_bits else "La API no entregó estadísticas detalladas suficientes para comparar la presión ofensiva.")
                 if tip_label:
-                    cards_shown += 1
+                    # This is model context only, not a betting recommendation.
+                    # The actual main/risk tips are selected below from verified live bookmaker odds.
                     probability_text = f" · probabilidad exploratoria {float(tip_probability)*100:.1f}%" if isinstance(tip_probability, (int, float)) else ""
-                    st.markdown(
-                        f'<div class="tip-card"><div class="tip-card-label">📊 LECTURA DEL MODELO · SIN FILTRO DE CUOTA</div><div class="tip-card-title">{html.escape(str(tip_label))}</div><div class="tip-card-meta">Marcador {home_score}–{away_score} · minuto {minute if minute is not None else "N/D"}{probability_text}</div></div>',
-                        unsafe_allow_html=True,
+                    st.caption(
+                        f"Lectura interna del modelo (no es un tip): {tip_label} · "
+                        f"marcador {home_score}–{away_score} · minuto {minute if minute is not None else 'N/D'}"
+                        f"{probability_text}"
                     )
                     if rationale:
-                        st.caption("Motivo: " + "; ".join(rationale) + ".")
-                else:
-                    st.info("Sin tip principal en este momento: faltan señales suficientes para respaldar una recomendación.")
+                        st.caption("Contexto observado: " + "; ".join(rationale) + ".")
                 st.caption(f"Referencia usada por el modelo: {estimate.get('baseline_league', 'genérica')} · muestra de liga: {estimate.get('baseline_matches', 0)} partidos · contexto: {context.get('context_status', 'no disponible')}.")
                 odds_by_fixture = st.session_state.get("live_odds_by_fixture", {})
                 match_odds = odds_by_fixture.get(str(fixture_id), [])
@@ -1707,7 +1707,7 @@ else:
                         "model_prob": model_prob if isinstance(model_prob, (int, float)) else None,
                         "bookmaker": odds_row.get("bookmaker", "Casa no identificada"),
                     }
-                    if 1.25 <= odd <= 1.40:
+                    if 1.25 <= odd < 1.60:
                         main_options.append(option)
                     if odd >= 1.60:
                         # High-risk candidates may include goals, draw, and BTTS;
@@ -1721,7 +1721,7 @@ else:
                         main_options,
                         key=lambda item: item["model_prob"] if item["model_prob"] is not None else -1,
                     )
-                    st.markdown("**⚽ TIP PRINCIPAL · CUOTA OBJETIVO 1.25–1.40**")
+                    st.markdown("**⚽ TIP PRINCIPAL · CUOTA OBJETIVO 1.25–1.59**")
                     st.markdown(
                         f'<div class="tip-card"><div class="tip-card-label">TIP PRINCIPAL</div>'
                         f'<div class="tip-card-title">{html.escape(chosen_main["market"])}</div>'
@@ -1729,7 +1729,7 @@ else:
                         unsafe_allow_html=True,
                     )
                 else:
-                    st.info("Sin tip principal con cuota entre 1.25 y 1.40: no se encontró un mercado en vivo verificable en ese rango.")
+                    st.info("Sin tip principal con cuota entre 1.25 y 1.59: no se encontró un mercado en vivo verificable en ese rango.")
 
                 if risk_options:
                     risk_options.sort(
