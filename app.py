@@ -1263,7 +1263,19 @@ else:
                                                 st.info("Primero pulsa «Escanear todos los partidos en vivo». Después, vuelve a abrir Goles y señales para ver promedios por localía, lectura en vivo y tip principal.")
                                         elif market_key == "corners":
                                             st.markdown('<div class="match-analysis-kicker">Mercado seleccionado · córners</div><div class="match-analysis-title">Ritmo y proyección de córners</div>', unsafe_allow_html=True)
-                                            st.markdown(fixture_hero_html(match, mode="corners"), unsafe_allow_html=True)
+                                            # Reutilizar primero las estadísticas que ya consultó el escáner en vivo.
+                                            live_corner_stats = st.session_state.stats_cache.get(str(match_id))
+                                            if live_corner_stats is None:
+                                                try:
+                                                    live_corner_stats = (api_get("fixtures/statistics", {"fixture": match_id}).get("response") or [])
+                                                    st.session_state.stats_cache[str(match_id)] = live_corner_stats
+                                                except Exception as live_corner_exc:
+                                                    live_corner_stats = []
+                                                    st.session_state.stats_cache[str(match_id)] = []
+                                                    st.session_state.setdefault("stats_errors", {})[str(match_id)] = str(live_corner_exc)
+                                            selected_home_corners = safe_stat(live_corner_stats, "Corner Kicks", 0)
+                                            selected_away_corners = safe_stat(live_corner_stats, "Corner Kicks", 1)
+                                            st.markdown(fixture_hero_html(match, mode="corners", home_corners=selected_home_corners, away_corners=selected_away_corners), unsafe_allow_html=True)
                                             corner_item = next((item for item in st.session_state.get("corner_scan_results", []) if str(((item.get("fixture") or {}).get("fixture") or {}).get("id")) == str(match_id)), None)
                                             if corner_item and not corner_item.get("error"):
                                                 home_c, away_c = corner_item.get("home_corners"), corner_item.get("away_corners")
@@ -1304,8 +1316,14 @@ else:
                                                             if h2h_key not in st.session_state.corner_h2h_cache:
                                                                 h2h_payload = api_get("fixtures/headtohead", {"h2h": h2h_key, "last": 5})
                                                                 past_matches = h2h_payload.get("response") or []
+                                                                # Priorizar hasta cinco enfrentamientos finalizados; si hay menos, mostrar los disponibles.
+                                                                finished_statuses = {"FT", "AET", "PEN"}
+                                                                past_matches = [
+                                                                    past for past in past_matches
+                                                                    if (((past.get("fixture") or {}).get("status") or {}).get("short") in finished_statuses)
+                                                                ][:5]
                                                                 past_rows = []
-                                                                for past in past_matches[:3]:
+                                                                for past in past_matches:
                                                                     past_id = (past.get("fixture") or {}).get("id")
                                                                     if not past_id:
                                                                         continue
@@ -1315,8 +1333,6 @@ else:
                                                                     past_stats = st.session_state.stats_cache.get(stats_key) or []
                                                                     past_home_c = safe_stat(past_stats, "Corner Kicks", 0)
                                                                     past_away_c = safe_stat(past_stats, "Corner Kicks", 1)
-                                                                    if past_home_c is None or past_away_c is None:
-                                                                        continue
                                                                     past_fixture = past.get("fixture") or {}
                                                                     past_teams = past.get("teams") or {}
                                                                     past_goals = past.get("goals") or {}
@@ -1342,7 +1358,7 @@ else:
                                                     elif h2h_key in st.session_state.corner_h2h_cache:
                                                         st.caption("La API no devolvió estadísticas de córners suficientes para los enfrentamientos recientes.")
                                                 else:
-                                                    st.caption("Consulta los últimos enfrentamientos para calcular su promedio real de córners. Se limita a cinco partidos y hasta tres consultas de estadísticas por pareja.")
+                                                    st.caption("Consulta hasta los últimos cinco enfrentamientos finalizados y recupera las estadísticas de córners de cada uno; si hubo menos de cinco, muestra los disponibles. Los datos que la API no entregue se indicarán como no disponibles.")
 
                                                 pace = corner_item.get("pace")
                                                 st.markdown("### 📡 Lectura en vivo")
