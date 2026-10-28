@@ -663,9 +663,32 @@ def api_get(endpoint: str, params: dict[str, Any] | None = None) -> dict[str, An
         timeout=TIMEOUT_SECONDS,
     )
     if response.status_code == 429:
+        # Preserve API-Football's own explanation so we can distinguish daily quota
+        # exhaustion from per-minute throttling on paid plans.
+        try:
+            error_payload = response.json()
+        except (ValueError, requests.exceptions.JSONDecodeError):
+            error_payload = {}
+        api_errors = error_payload.get("errors") or {}
+        if isinstance(api_errors, dict):
+            detail = "; ".join(f"{name}: {value}" for name, value in api_errors.items() if value)
+        elif api_errors:
+            detail = str(api_errors)
+        else:
+            detail = ""
+        daily_remaining = response.headers.get("x-ratelimit-requests-remaining")
+        minute_remaining = response.headers.get("X-RateLimit-Remaining")
+        limit_info = []
+        if daily_remaining is not None:
+            limit_info.append(f"solicitudes diarias restantes: {daily_remaining}")
+        if minute_remaining is not None:
+            limit_info.append(f"solicitudes disponibles este minuto: {minute_remaining}")
+        diagnostics = " · ".join(part for part in [detail, " | ".join(limit_info)] if part)
+        suffix = f" Detalle de API-Football: {diagnostics}." if diagnostics else ""
         raise RuntimeError(
-            "API-Football rechazó la consulta por límite de solicitudes (HTTP 429). "
-            "Se detuvo el escaneo; revisa el límite de tu plan."
+            "API-Football rechazó la consulta (HTTP 429)."
+            f"{suffix} Se pausó el escaneo para evitar más solicitudes rechazadas. "
+            "Comprueba el consumo y el límite por minuto de la suscripción."
         )
     response.raise_for_status()
     payload = response.json()
