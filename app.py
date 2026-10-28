@@ -1708,10 +1708,21 @@ else:
                                 model_prob = estimate.get("over_total_goals", {}).get(target)
                             else:
                                 model_prob = estimate.get("under_total_goals", {}).get(str(line))
+                    # Do not promote a market just because its price fits the range:
+                    # require a mapped model probability and a provisional edge over
+                    # the odds-implied probability. The model is not calibrated yet.
+                    if not isinstance(model_prob, (int, float)) or not 0.0 < model_prob < 1.0:
+                        continue
+                    implied_probability = 1.0 / float(odd)
+                    estimated_edge = float(model_prob) - implied_probability
+                    if estimated_edge < 0.02:
+                        continue
                     option = {
                         "market": market_label,
                         "odd": float(odd),
-                        "model_prob": model_prob if isinstance(model_prob, (int, float)) else None,
+                        "model_prob": float(model_prob),
+                        "implied_probability": implied_probability,
+                        "estimated_edge": estimated_edge,
                         "bookmaker": odds_row.get("bookmaker", "Casa no identificada"),
                     }
                     if 1.25 <= odd < 1.60:
@@ -1732,7 +1743,7 @@ else:
                     st.markdown(
                         f'<div class="tip-card"><div class="tip-card-label">TIP PRINCIPAL</div>'
                         f'<div class="tip-card-title">{html.escape(chosen_main["market"])}</div>'
-                        f'<div class="tip-card-meta">Cuota {chosen_main["odd"]:.2f} · {html.escape(chosen_main["bookmaker"])} · mercado en vivo verificado</div></div>',
+                        f'<div class="tip-card-meta">Cuota {chosen_main["odd"]:.2f} · {html.escape(chosen_main["bookmaker"])} · ventaja estimada {chosen_main["estimated_edge"]:.1%} · mercado en vivo verificado</div></div>',
                         unsafe_allow_html=True,
                     )
                 else:
@@ -1747,7 +1758,7 @@ else:
                     st.markdown("**🔥 TIP DE ALTO RIESGO · CUOTA 1.60+**")
                     for risk_item in selected_risk:
                         probability_note = (
-                            f' · probabilidad exploratoria {risk_item["model_prob"]:.1%}'
+                            f' · prob. exploratoria {risk_item["model_prob"]:.1%} · ventaja estimada {risk_item["estimated_edge"]:.1%}'
                             if isinstance(risk_item["model_prob"], (int, float)) else ""
                         )
                         st.markdown(
