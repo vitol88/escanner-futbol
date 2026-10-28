@@ -1778,18 +1778,18 @@ else:
                                                             h2h_avg = sum(valid_totals) / len(valid_totals)
                                                             st.markdown(
                                                                 f"""
-                                                                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-                                                                            margin:8px 0 14px;padding:9px 12px;
-                                                                            border:1px solid #51451D;border-radius:10px;
+                                                                <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+                                                                            margin:16px 0 18px;padding:7px 10px;
+                                                                            border:1px solid #51451D;border-radius:9px;
                                                                             background:linear-gradient(135deg,#17191f,#20232b);
-                                                                            width:fit-content;max-width:100%;">
-                                                                  <span style="font-size:13px;font-weight:700;color:#FACC15;">
+                                                                            width:fit-content;max-width:100%;clear:both;position:relative;">
+                                                                  <span style="font-size:11px;font-weight:700;color:#FACC15;letter-spacing:.3px;">
                                                                     PROMEDIO DE CÓRNERS
                                                                   </span>
-                                                                  <span style="display:inline-block;padding:5px 12px;
-                                                                               border:1px solid #FACC15;border-radius:8px;
+                                                                  <span style="display:inline-block;padding:4px 9px;
+                                                                               border:1px solid #FACC15;border-radius:7px;
                                                                                background:#FACC15;color:#111827;
-                                                                               font-size:16px;font-weight:800;line-height:1.2;">
+                                                                               font-size:13px;font-weight:800;line-height:1.1;">
                                                                     {h2h_avg:.2f}
                                                                   </span>
                                                                 </div>
