@@ -94,7 +94,10 @@ st.markdown("""
   [class*="st-key-sound_enabled_toggle"] [role="switch"][aria-checked="false"] > div,
   [data-testid="stToggle"] [role="switch"][aria-checked="false"] > div,
   button[role="switch"][aria-checked="false"] > div { background:#FFFFFF !important; }
-  [data-testid="stTabs"] button[role="tab"] { color: #D4D4D8; font-weight: 650; }
+  /* Live section header and compact team crests in fixture rows */
+  [data-testid="stExpander"] summary img { width:20px !important; height:20px !important; object-fit:contain !important; vertical-align:middle !important; margin:0 3px !important; }
+  [data-testid="stExpander"] summary p { display:flex; align-items:center; flex-wrap:wrap; gap:4px; }
+    [data-testid="stTabs"] button[role="tab"] { color: #D4D4D8; font-weight: 650; }
   [data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
     color: #FACC15; border-bottom-color: #FACC15;
   }
@@ -676,180 +679,190 @@ else:
         f for f in fixtures
         if (f.get("league") or {}).get("name", "Liga") in chosen_leagues
     ]
-    st.markdown(f"### En vivo ahora ({len(filtered)})")
-    if filtered:
-        grouped = {}
-        for match in filtered:
-            league_data = match.get("league") or {}
-            country = league_data.get("country") or "Otros países"
-            league_name = league_data.get("name") or "Liga sin nombre"
-            grouped.setdefault((country, league_name), []).append(match)
-        for (country, league_name), league_matches in sorted(grouped.items()):
-            with st.expander(f"⚽ {country} · {league_name} ({len(league_matches)})", expanded=False):
-                # Cada partido tiene una sola tarjeta principal; evitamos duplicar el marcador
-                # en una cuadrícula y otra vez dentro del expander de análisis.
-                # Match tools are available from the main live scanner, before a full market scan.
-                for match in league_matches:
-                    match_fixture = match.get("fixture") or {}
-                    match_id = match_fixture.get("id")
-                    match_teams = match.get("teams") or {}
-                    match_home = match_teams.get("home") or {}
-                    match_away = match_teams.get("away") or {}
-                    match_home_id, match_away_id = match_home.get("id"), match_away.get("id")
-                    match_label = f"{match_home.get('name', 'Local')} vs {match_away.get('name', 'Visitante')}"
-                    if not match_id:
-                        continue
-                    with st.expander(f"⚽ {match_label} · {((match_fixture.get('status') or {}).get('elapsed')) or 'EN VIVO'}′", expanded=False):
-                        current_tool = st.session_state.get("main_fixture_tool") or {}
-                        active_market = current_tool.get("market") if str(current_tool.get("fixture_id")) == str(match_id) else None
-                        active_tool = current_tool.get("tool") if str(current_tool.get("fixture_id")) == str(match_id) else None
-                        # Match hero uses the same crests, live minute and scoreboard as the approved mockups.
-                        st.markdown(fixture_hero_html(match), unsafe_allow_html=True)
-                        action_cols = st.columns(4, gap="small")
-                        with action_cols[0]:
-                            show_stats = st.button("📊\nEstadísticas en vivo", key=f"main_stats_{match_id}", type="primary" if active_tool == "stats" else "secondary", use_container_width=True)
-                        with action_cols[1]:
-                            show_h2h = st.button("🤝\nH2H", key=f"main_h2h_{match_id}", type="primary" if active_tool == "h2h" else "secondary", use_container_width=True)
-                        with action_cols[2]:
-                            show_goals = st.button("⚽\nGoles y señales", key=f"main_market_{match_id}_goals", type="primary" if active_market == "goals" else "secondary", use_container_width=True)
-                        with action_cols[3]:
-                            show_corners = st.button("🚩\nCórners", key=f"main_market_{match_id}_corners", type="primary" if active_market == "corners" else "secondary", use_container_width=True)
-                        if show_stats:
-                            stats_key = str(match_id)
-                            if stats_key not in st.session_state.stats_cache or stats_key in st.session_state.get("stats_errors", {}):
-                                try:
-                                    stats_payload = api_get("fixtures/statistics", {"fixture": match_id})
-                                    st.session_state.stats_cache[stats_key] = stats_payload.get("response") or []
-                                    st.session_state.setdefault("stats_errors", {}).pop(stats_key, None)
-                                except Exception as stats_exc:
-                                    st.session_state.stats_cache[stats_key] = []
-                                    st.session_state.setdefault("stats_errors", {})[stats_key] = str(stats_exc)
-                            st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "stats"}
-                            st.rerun()
-                        if show_h2h:
-                            if "h2h_cache" not in st.session_state:
-                                st.session_state.h2h_cache = {}
-                            h2h_key = f"{match_home_id}-{match_away_id}-{(match.get('league') or {}).get('id', 'all')}"
-                            if not match_home_id or not match_away_id:
-                                st.warning("La API no entregó los identificadores de ambos equipos.")
-                            elif h2h_key not in st.session_state.h2h_cache:
-                                try:
-                                    league_id = (match.get("league") or {}).get("id")
-                                    h2h_payload = api_get("fixtures/headtohead", {"h2h": f"{match_home_id}-{match_away_id}", "last": 20, **({"league": league_id} if league_id else {})})
-                                    h2h_matches = h2h_payload.get("response") or []
-                                    if league_id:
-                                        h2h_matches = [past for past in h2h_matches if (past.get("league") or {}).get("id") == league_id]
-                                    h2h_matches = [past for past in h2h_matches if ((past.get("fixture") or {}).get("status") or {}).get("short") in {"FT", "AET", "PEN"}][:5]
-                                    st.session_state.h2h_cache[h2h_key] = h2h_matches
-                                except Exception as h2h_exc:
-                                    st.session_state.h2h_cache[h2h_key] = {"error": str(h2h_exc)}
-                            st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "h2h"}
-                            st.rerun()
-                        if show_goals:
-                            st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "market", "market": "goals"}
-                            st.rerun()
-                        if show_corners:
-                            st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "market", "market": "corners"}
-                            st.rerun()
-                        selected_tool = st.session_state.get("main_fixture_tool") or {}
-                        if str(selected_tool.get("fixture_id")) == str(match_id):
-                            tool_name = selected_tool.get("tool")
-                            st.markdown('<div class="match-analysis-kicker">PARTIDO SELECCIONADO</div>', unsafe_allow_html=True)
-                            if tool_name == "stats":
-                                st.markdown('<div class="match-analysis-kicker">En vivo · estadísticas</div><div class="match-analysis-title">Comparativa del partido</div>', unsafe_allow_html=True)
-                                stat_data = st.session_state.stats_cache.get(str(match_id), [])
-                                stats_error = st.session_state.get("stats_errors", {}).get(str(match_id))
-                                if stats_error:
-                                    st.warning(f"No se pudieron cargar las estadísticas: {stats_error}")
-                                elif stat_data:
-                                    stat_rows = []
-                                    stat_names = ("Ball Possession", "Total Shots", "Shots on Goal", "Corner Kicks", "Total passes", "Passes %", "Fouls", "Yellow Cards", "Red Cards", "Offsides", "Goalkeeper Saves")
-                                    stat_labels = {"Ball Possession":"Posesión", "Total Shots":"Tiros totales", "Shots on Goal":"Tiros a puerta", "Corner Kicks":"Córners", "Total passes":"Pases", "Passes %":"Precisión de pases", "Fouls":"Faltas", "Yellow Cards":"Tarjetas amarillas", "Red Cards":"Tarjetas rojas", "Offsides":"Fuera de juego", "Goalkeeper Saves":"Atajadas"}
-                                    for team_idx, team_stats in enumerate(stat_data[:2]):
-                                        team_name = ((match_teams.get("home") if team_idx == 0 else match_teams.get("away")) or {}).get("name", "Equipo")
-                                        stat_map = {entry.get("type"): entry.get("value") for entry in (team_stats.get("statistics") or [])}
-                                        for stat_name in stat_names:
-                                            if stat_name in stat_map:
-                                                stat_rows.append({"Equipo": team_name, "Indicador": stat_labels.get(stat_name, stat_name), "Valor": stat_map[stat_name] if stat_map[stat_name] is not None else "N/D"})
-                                    if stat_rows:
-                                        st.dataframe(stat_rows, use_container_width=True, hide_index=True)
-                                    else:
-                                        st.info("La API no entregó estadísticas detalladas para este partido.")
-                                else:
-                                    st.info("La API no entregó estadísticas para este partido.")
-                            elif tool_name == "h2h":
+    with st.expander(f"📡 En vivo ahora ({len(filtered)})", expanded=True):
+        if filtered:
+            grouped = {}
+            for match in filtered:
+                league_data = match.get("league") or {}
+                country = league_data.get("country") or "Otros países"
+                league_name = league_data.get("name") or "Liga sin nombre"
+                grouped.setdefault((country, league_name), []).append(match)
+            for (country, league_name), league_matches in sorted(grouped.items()):
+                with st.expander(f"⚽ {country} · {league_name} ({len(league_matches)})", expanded=False):
+                    # Cada partido tiene una sola tarjeta principal; evitamos duplicar el marcador
+                    # en una cuadrícula y otra vez dentro del expander de análisis.
+                    # Match tools are available from the main live scanner, before a full market scan.
+                    for match in league_matches:
+                        match_fixture = match.get("fixture") or {}
+                        match_id = match_fixture.get("id")
+                        match_teams = match.get("teams") or {}
+                        match_home = match_teams.get("home") or {}
+                        match_away = match_teams.get("away") or {}
+                        match_home_id, match_away_id = match_home.get("id"), match_away.get("id")
+                        match_home_name = str(match_home.get("name") or "Local")
+                        match_away_name = str(match_away.get("name") or "Visitante")
+                        match_home_logo = str(match_home.get("logo") or "")
+                        match_away_logo = str(match_away.get("logo") or "")
+                        match_goals = match.get("goals") or {}
+                        score_label = f"{match_goals.get('home', '—')}–{match_goals.get('away', '—')}"
+                        match_minute = ((match_fixture.get("status") or {}).get("elapsed"))
+                        match_label = f"{match_home_name} vs {match_away_name}"
+                        home_md = f"![{match_home_name}]({match_home_logo}) " if match_home_logo else "⚽ "
+                        away_md = f" ![{match_away_name}]({match_away_logo})" if match_away_logo else ""
+                        match_row_label = f"{home_md}**{match_home_name}**  **{score_label}**  **{match_away_name}**{away_md} · {match_minute if match_minute is not None else 'EN VIVO'}′"
+                        if not match_id:
+                            continue
+                        with st.expander(match_row_label, expanded=False):
+                            current_tool = st.session_state.get("main_fixture_tool") or {}
+                            active_market = current_tool.get("market") if str(current_tool.get("fixture_id")) == str(match_id) else None
+                            active_tool = current_tool.get("tool") if str(current_tool.get("fixture_id")) == str(match_id) else None
+                            # Match hero uses the same crests, live minute and scoreboard as the approved mockups.
+                            st.markdown(fixture_hero_html(match), unsafe_allow_html=True)
+                            action_cols = st.columns(4, gap="small")
+                            with action_cols[0]:
+                                show_stats = st.button("📊\nEstadísticas en vivo", key=f"main_stats_{match_id}", type="primary" if active_tool == "stats" else "secondary", use_container_width=True)
+                            with action_cols[1]:
+                                show_h2h = st.button("🤝\nH2H", key=f"main_h2h_{match_id}", type="primary" if active_tool == "h2h" else "secondary", use_container_width=True)
+                            with action_cols[2]:
+                                show_goals = st.button("⚽\nGoles y señales", key=f"main_market_{match_id}_goals", type="primary" if active_market == "goals" else "secondary", use_container_width=True)
+                            with action_cols[3]:
+                                show_corners = st.button("🚩\nCórners", key=f"main_market_{match_id}_corners", type="primary" if active_market == "corners" else "secondary", use_container_width=True)
+                            if show_stats:
+                                stats_key = str(match_id)
+                                if stats_key not in st.session_state.stats_cache or stats_key in st.session_state.get("stats_errors", {}):
+                                    try:
+                                        stats_payload = api_get("fixtures/statistics", {"fixture": match_id})
+                                        st.session_state.stats_cache[stats_key] = stats_payload.get("response") or []
+                                        st.session_state.setdefault("stats_errors", {}).pop(stats_key, None)
+                                    except Exception as stats_exc:
+                                        st.session_state.stats_cache[stats_key] = []
+                                        st.session_state.setdefault("stats_errors", {})[stats_key] = str(stats_exc)
+                                st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "stats"}
+                                st.rerun()
+                            if show_h2h:
+                                if "h2h_cache" not in st.session_state:
+                                    st.session_state.h2h_cache = {}
                                 h2h_key = f"{match_home_id}-{match_away_id}-{(match.get('league') or {}).get('id', 'all')}"
-                                h2h_data = st.session_state.get("h2h_cache", {}).get(h2h_key)
-                                st.markdown('<div class="match-analysis-kicker">Historial · misma competición</div><div class="match-analysis-title">Enfrentamientos directos</div>', unsafe_allow_html=True)
-                                if isinstance(h2h_data, dict) and h2h_data.get("error"):
-                                    st.warning(f"No se pudieron consultar los enfrentamientos: {h2h_data['error']}")
-                                elif isinstance(h2h_data, list) and h2h_data:
-                                    league_name_safe = html.escape(str((match.get("league") or {}).get("name") or "Competición actual"))
-                                    st.caption(f"Solo partidos finalizados de {league_name_safe} · últimos {len(h2h_data)} disponibles")
-                                    h2h_html = ""
-                                    for past in h2h_data:
-                                        pf, pt, pg = past.get("fixture") or {}, past.get("teams") or {}, past.get("goals") or {}
-                                        ph, pa = pt.get("home") or {}, pt.get("away") or {}
-                                        date_label = html.escape((pf.get("date") or "")[:10])
-                                        ph_name, pa_name = html.escape(str(ph.get("name") or "Local")), html.escape(str(pa.get("name") or "Visitante"))
-                                        ph_logo, pa_logo = html.escape(str(ph.get("logo") or ""), quote=True), html.escape(str(pa.get("logo") or ""), quote=True)
-                                        h2h_html += f'<div class="h2h-match-row"><span>{date_label}</span><span class="h2h-team"><img src="{ph_logo}" onerror="this.style.display=\'none\'">{ph_name}</span><span class="h2h-score">{pg.get("home", "—")} – {pg.get("away", "—")}</span><span class="h2h-team"><img src="{pa_logo}" onerror="this.style.display=\'none\'">{pa_name}</span></div>'
-                                    st.markdown(h2h_html, unsafe_allow_html=True)
-                                else:
-                                    st.info("No se encontraron enfrentamientos finalizados de esta competición en la respuesta disponible de la API.")
-                            elif tool_name == "market":
-                                market_key = selected_tool.get("market")
-                                if market_key == "goals":
-                                    st.markdown('<div class="match-analysis-kicker">Mercado seleccionado · goles</div><div class="match-analysis-title">Goles y señales</div>', unsafe_allow_html=True)
-                                    goal_item = next((item for item in st.session_state.get("goal_scan_results", []) if str((item[0].get("fixture") or {}).get("id")) == str(match_id)), None)
-                                    corner_item = next((item for item in st.session_state.get("corner_scan_results", []) if str(((item.get("fixture") or {}).get("fixture") or {}).get("id")) == str(match_id)), None)
-                                    if goal_item:
-                                        _, estimate, tips, *rest = goal_item
-                                        history = (corner_item or {}).get("automatic_history") or {}
-                                        if history:
-                                            avg_cols = st.columns(2)
-                                            avg_cols[0].metric("Promedio local en casa", f"{history.get('home_goals_for'):.2f}" if isinstance(history.get("home_goals_for"), (int,float)) else "N/D")
-                                            avg_cols[1].metric("Promedio visitante fuera", f"{history.get('away_goals_for'):.2f}" if isinstance(history.get("away_goals_for"), (int,float)) else "N/D")
-                                        st.markdown("**📡 Lectura en vivo**")
-                                        current_goals = match.get("goals") or {}
-                                        current_minute = (match_fixture.get("status") or {}).get("elapsed")
-                                        st.write(f"Marcador {current_goals.get('home', '—')}–{current_goals.get('away', '—')} · minuto {current_minute if current_minute is not None else 'N/D'}")
-                                        if tips:
-                                            tip, prob = max(tips, key=lambda x: x[1])
-                                            st.markdown(f'<div class="signal-card"><div class="signal-kicker">Tip principal</div><div class="signal-title">{html.escape(str(tip))}</div><div class="signal-pick">{prob:.0%}</div><div class="signal-meta">Estimación exploratoria · no calibrada</div></div>', unsafe_allow_html=True)
+                                if not match_home_id or not match_away_id:
+                                    st.warning("La API no entregó los identificadores de ambos equipos.")
+                                elif h2h_key not in st.session_state.h2h_cache:
+                                    try:
+                                        league_id = (match.get("league") or {}).get("id")
+                                        h2h_payload = api_get("fixtures/headtohead", {"h2h": f"{match_home_id}-{match_away_id}", "last": 20, **({"league": league_id} if league_id else {})})
+                                        h2h_matches = h2h_payload.get("response") or []
+                                        if league_id:
+                                            h2h_matches = [past for past in h2h_matches if (past.get("league") or {}).get("id") == league_id]
+                                        h2h_matches = [past for past in h2h_matches if ((past.get("fixture") or {}).get("status") or {}).get("short") in {"FT", "AET", "PEN"}][:5]
+                                        st.session_state.h2h_cache[h2h_key] = h2h_matches
+                                    except Exception as h2h_exc:
+                                        st.session_state.h2h_cache[h2h_key] = {"error": str(h2h_exc)}
+                                st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "h2h"}
+                                st.rerun()
+                            if show_goals:
+                                st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "market", "market": "goals"}
+                                st.rerun()
+                            if show_corners:
+                                st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "market", "market": "corners"}
+                                st.rerun()
+                            selected_tool = st.session_state.get("main_fixture_tool") or {}
+                            if str(selected_tool.get("fixture_id")) == str(match_id):
+                                tool_name = selected_tool.get("tool")
+                                st.markdown('<div class="match-analysis-kicker">PARTIDO SELECCIONADO</div>', unsafe_allow_html=True)
+                                if tool_name == "stats":
+                                    st.markdown('<div class="match-analysis-kicker">En vivo · estadísticas</div><div class="match-analysis-title">Comparativa del partido</div>', unsafe_allow_html=True)
+                                    stat_data = st.session_state.stats_cache.get(str(match_id), [])
+                                    stats_error = st.session_state.get("stats_errors", {}).get(str(match_id))
+                                    if stats_error:
+                                        st.warning(f"No se pudieron cargar las estadísticas: {stats_error}")
+                                    elif stat_data:
+                                        stat_rows = []
+                                        stat_names = ("Ball Possession", "Total Shots", "Shots on Goal", "Corner Kicks", "Total passes", "Passes %", "Fouls", "Yellow Cards", "Red Cards", "Offsides", "Goalkeeper Saves")
+                                        stat_labels = {"Ball Possession":"Posesión", "Total Shots":"Tiros totales", "Shots on Goal":"Tiros a puerta", "Corner Kicks":"Córners", "Total passes":"Pases", "Passes %":"Precisión de pases", "Fouls":"Faltas", "Yellow Cards":"Tarjetas amarillas", "Red Cards":"Tarjetas rojas", "Offsides":"Fuera de juego", "Goalkeeper Saves":"Atajadas"}
+                                        for team_idx, team_stats in enumerate(stat_data[:2]):
+                                            team_name = ((match_teams.get("home") if team_idx == 0 else match_teams.get("away")) or {}).get("name", "Equipo")
+                                            stat_map = {entry.get("type"): entry.get("value") for entry in (team_stats.get("statistics") or [])}
+                                            for stat_name in stat_names:
+                                                if stat_name in stat_map:
+                                                    stat_rows.append({"Equipo": team_name, "Indicador": stat_labels.get(stat_name, stat_name), "Valor": stat_map[stat_name] if stat_map[stat_name] is not None else "N/D"})
+                                        if stat_rows:
+                                            st.dataframe(stat_rows, use_container_width=True, hide_index=True)
                                         else:
-                                            st.info("El análisis está disponible, pero ningún mercado de goles superó el umbral experimental para emitir un tip principal.")
+                                            st.info("La API no entregó estadísticas detalladas para este partido.")
                                     else:
-                                        st.info("Primero pulsa «Escanear todos los partidos en vivo». Después, vuelve a abrir Goles y señales para ver promedios por localía, lectura en vivo y tip principal.")
-                                elif market_key == "corners":
-                                    st.markdown('<div class="match-analysis-kicker">Mercado seleccionado · córners</div><div class="match-analysis-title">Ritmo y proyección de córners</div>', unsafe_allow_html=True)
-                                    corner_item = next((item for item in st.session_state.get("corner_scan_results", []) if str(((item.get("fixture") or {}).get("fixture") or {}).get("id")) == str(match_id)), None)
-                                    if corner_item and not corner_item.get("error"):
-                                        home_c, away_c = corner_item.get("home_corners"), corner_item.get("away_corners")
-                                        current_minute = (match_fixture.get("status") or {}).get("elapsed")
-                                        current_total = (home_c or 0) + (away_c or 0) if isinstance(home_c, (int,float)) and isinstance(away_c, (int,float)) else None
-                                        history = corner_item.get("automatic_history") or {}
-                                        metric_cols = st.columns(3)
-                                        metric_cols[0].metric("Córners local", home_c if home_c is not None else "N/D")
-                                        metric_cols[1].metric("Córners visitante", away_c if away_c is not None else "N/D")
-                                        metric_cols[2].metric("Total actual", current_total if current_total is not None else "N/D")
-                                        if history:
-                                            hcols = st.columns(2)
-                                            hcols[0].metric("Promedio local en casa", f"{history.get('home_corners_for'):.2f}" if isinstance(history.get('home_corners_for'), (int,float)) else "N/D")
-                                            hcols[1].metric("Promedio visitante fuera", f"{history.get('away_corners_for'):.2f}" if isinstance(history.get('away_corners_for'), (int,float)) else "N/D")
-                                        pace = corner_item.get("pace")
-                                        st.markdown("**📡 Lectura en vivo**")
-                                        st.write(f"Minuto {current_minute if current_minute is not None else 'N/D'} · ritmo actual {pace:.2f} córners/90' " if isinstance(pace, (int,float)) else f"Minuto {current_minute if current_minute is not None else 'N/D'} · ritmo no disponible con los datos actuales.")
-                                        if isinstance(current_total, (int,float)) and isinstance(current_minute, int) and current_minute > 0:
-                                            projected = current_total / current_minute * 90
-                                            st.markdown(f'<div class="signal-card"><div class="signal-kicker">Tip principal · córners</div><div class="signal-title">Proyección orientativa a 90 minutos</div><div class="signal-pick">{projected:.1f} córners</div><div class="signal-meta">Actuales: {current_total} · No es una probabilidad validada ni una línea de cuota.</div></div>', unsafe_allow_html=True)
-                                    elif corner_item:
-                                        st.warning(f"No se pudo cargar el análisis de córners: {corner_item.get('error')}")
+                                        st.info("La API no entregó estadísticas para este partido.")
+                                elif tool_name == "h2h":
+                                    h2h_key = f"{match_home_id}-{match_away_id}-{(match.get('league') or {}).get('id', 'all')}"
+                                    h2h_data = st.session_state.get("h2h_cache", {}).get(h2h_key)
+                                    st.markdown('<div class="match-analysis-kicker">Historial · misma competición</div><div class="match-analysis-title">Enfrentamientos directos</div>', unsafe_allow_html=True)
+                                    if isinstance(h2h_data, dict) and h2h_data.get("error"):
+                                        st.warning(f"No se pudieron consultar los enfrentamientos: {h2h_data['error']}")
+                                    elif isinstance(h2h_data, list) and h2h_data:
+                                        league_name_safe = html.escape(str((match.get("league") or {}).get("name") or "Competición actual"))
+                                        st.caption(f"Solo partidos finalizados de {league_name_safe} · últimos {len(h2h_data)} disponibles")
+                                        h2h_html = ""
+                                        for past in h2h_data:
+                                            pf, pt, pg = past.get("fixture") or {}, past.get("teams") or {}, past.get("goals") or {}
+                                            ph, pa = pt.get("home") or {}, pt.get("away") or {}
+                                            date_label = html.escape((pf.get("date") or "")[:10])
+                                            ph_name, pa_name = html.escape(str(ph.get("name") or "Local")), html.escape(str(pa.get("name") or "Visitante"))
+                                            ph_logo, pa_logo = html.escape(str(ph.get("logo") or ""), quote=True), html.escape(str(pa.get("logo") or ""), quote=True)
+                                            h2h_html += f'<div class="h2h-match-row"><span>{date_label}</span><span class="h2h-team"><img src="{ph_logo}" onerror="this.style.display=\'none\'">{ph_name}</span><span class="h2h-score">{pg.get("home", "—")} – {pg.get("away", "—")}</span><span class="h2h-team"><img src="{pa_logo}" onerror="this.style.display=\'none\'">{pa_name}</span></div>'
+                                        st.markdown(h2h_html, unsafe_allow_html=True)
                                     else:
-                                        st.info("Primero pulsa «Escanear todos los partidos en vivo» para calcular promedios históricos, ritmo en vivo y tip principal de córners.")
+                                        st.info("No se encontraron enfrentamientos finalizados de esta competición en la respuesta disponible de la API.")
+                                elif tool_name == "market":
+                                    market_key = selected_tool.get("market")
+                                    if market_key == "goals":
+                                        st.markdown('<div class="match-analysis-kicker">Mercado seleccionado · goles</div><div class="match-analysis-title">Goles y señales</div>', unsafe_allow_html=True)
+                                        goal_item = next((item for item in st.session_state.get("goal_scan_results", []) if str((item[0].get("fixture") or {}).get("id")) == str(match_id)), None)
+                                        corner_item = next((item for item in st.session_state.get("corner_scan_results", []) if str(((item.get("fixture") or {}).get("fixture") or {}).get("id")) == str(match_id)), None)
+                                        if goal_item:
+                                            _, estimate, tips, *rest = goal_item
+                                            history = (corner_item or {}).get("automatic_history") or {}
+                                            if history:
+                                                avg_cols = st.columns(2)
+                                                avg_cols[0].metric("Promedio local en casa", f"{history.get('home_goals_for'):.2f}" if isinstance(history.get("home_goals_for"), (int,float)) else "N/D")
+                                                avg_cols[1].metric("Promedio visitante fuera", f"{history.get('away_goals_for'):.2f}" if isinstance(history.get("away_goals_for"), (int,float)) else "N/D")
+                                            st.markdown("**📡 Lectura en vivo**")
+                                            current_goals = match.get("goals") or {}
+                                            current_minute = (match_fixture.get("status") or {}).get("elapsed")
+                                            st.write(f"Marcador {current_goals.get('home', '—')}–{current_goals.get('away', '—')} · minuto {current_minute if current_minute is not None else 'N/D'}")
+                                            if tips:
+                                                tip, prob = max(tips, key=lambda x: x[1])
+                                                st.markdown(f'<div class="signal-card"><div class="signal-kicker">Tip principal</div><div class="signal-title">{html.escape(str(tip))}</div><div class="signal-pick">{prob:.0%}</div><div class="signal-meta">Estimación exploratoria · no calibrada</div></div>', unsafe_allow_html=True)
+                                            else:
+                                                st.info("El análisis está disponible, pero ningún mercado de goles superó el umbral experimental para emitir un tip principal.")
+                                        else:
+                                            st.info("Primero pulsa «Escanear todos los partidos en vivo». Después, vuelve a abrir Goles y señales para ver promedios por localía, lectura en vivo y tip principal.")
+                                    elif market_key == "corners":
+                                        st.markdown('<div class="match-analysis-kicker">Mercado seleccionado · córners</div><div class="match-analysis-title">Ritmo y proyección de córners</div>', unsafe_allow_html=True)
+                                        corner_item = next((item for item in st.session_state.get("corner_scan_results", []) if str(((item.get("fixture") or {}).get("fixture") or {}).get("id")) == str(match_id)), None)
+                                        if corner_item and not corner_item.get("error"):
+                                            home_c, away_c = corner_item.get("home_corners"), corner_item.get("away_corners")
+                                            current_minute = (match_fixture.get("status") or {}).get("elapsed")
+                                            current_total = (home_c or 0) + (away_c or 0) if isinstance(home_c, (int,float)) and isinstance(away_c, (int,float)) else None
+                                            history = corner_item.get("automatic_history") or {}
+                                            metric_cols = st.columns(3)
+                                            metric_cols[0].metric("Córners local", home_c if home_c is not None else "N/D")
+                                            metric_cols[1].metric("Córners visitante", away_c if away_c is not None else "N/D")
+                                            metric_cols[2].metric("Total actual", current_total if current_total is not None else "N/D")
+                                            if history:
+                                                hcols = st.columns(2)
+                                                hcols[0].metric("Promedio local en casa", f"{history.get('home_corners_for'):.2f}" if isinstance(history.get('home_corners_for'), (int,float)) else "N/D")
+                                                hcols[1].metric("Promedio visitante fuera", f"{history.get('away_corners_for'):.2f}" if isinstance(history.get('away_corners_for'), (int,float)) else "N/D")
+                                            pace = corner_item.get("pace")
+                                            st.markdown("**📡 Lectura en vivo**")
+                                            st.write(f"Minuto {current_minute if current_minute is not None else 'N/D'} · ritmo actual {pace:.2f} córners/90' " if isinstance(pace, (int,float)) else f"Minuto {current_minute if current_minute is not None else 'N/D'} · ritmo no disponible con los datos actuales.")
+                                            if isinstance(current_total, (int,float)) and isinstance(current_minute, int) and current_minute > 0:
+                                                projected = current_total / current_minute * 90
+                                                st.markdown(f'<div class="signal-card"><div class="signal-kicker">Tip principal · córners</div><div class="signal-title">Proyección orientativa a 90 minutos</div><div class="signal-pick">{projected:.1f} córners</div><div class="signal-meta">Actuales: {current_total} · No es una probabilidad validada ni una línea de cuota.</div></div>', unsafe_allow_html=True)
+                                        elif corner_item:
+                                            st.warning(f"No se pudo cargar el análisis de córners: {corner_item.get('error')}")
+                                        else:
+                                            st.info("Primero pulsa «Escanear todos los partidos en vivo» para calcular promedios históricos, ritmo en vivo y tip principal de córners.")
 
-    else:
-        st.info("No hay partidos activos en las ligas seleccionadas.")
+        else:
+            st.info("No hay partidos activos en las ligas seleccionadas.")
 
     # Se retira el resumen de sesión de la pantalla principal.
     stats_limit = 20
