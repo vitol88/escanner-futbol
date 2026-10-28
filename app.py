@@ -5,7 +5,6 @@ import json
 import os
 from pathlib import Path
 from datetime import datetime
-from zoneinfo import ZoneInfo
 from typing import Any
 
 import requests
@@ -391,9 +390,7 @@ if show_splash_intro:
     """, unsafe_allow_html=True)
     st.session_state["football_splash_shown"] = True
 
-header_now = datetime.now(ZoneInfo("America/Bogota"))
-month_es = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"][header_now.month - 1]
-header_time = f"{header_now.day:02d} {month_es} {header_now.year} · {header_now:%H:%M:%S}"
+header_time = "Detectando hora local…"
 st.markdown(f"""
 <div class="brand-header">
   <div class="brand-header-main">
@@ -405,8 +402,31 @@ st.markdown(f"""
     <div class="brand-pill">EN VIVO</div>
   </div>
 </div>
-{f'<input class="update-toast-toggle" type="checkbox" id="close-update-toast" aria-label="Ocultar notificación"><div class="update-toast" role="status"><div class="update-toast-icon">◷</div><div><div class="update-toast-title">ÚLTIMA ACTUALIZACIÓN</div><div class="update-toast-time">{header_time}</div></div><div class="update-toast-check">✓</div><label class="update-toast-close" for="close-update-toast" role="button" tabindex="0" aria-label="Cerrar notificación" title="Cerrar">×</label></div>' if show_splash_intro else ''}
+{f'<input class="update-toast-toggle" type="checkbox" id="close-update-toast" aria-label="Ocultar notificación"><div class="update-toast" role="status"><div class="update-toast-icon">◷</div><div><div class="update-toast-title">ÚLTIMA ACTUALIZACIÓN</div><div class="update-toast-time" id="update-toast-time">{header_time}</div></div><div class="update-toast-check">✓</div><label class="update-toast-close" for="close-update-toast" role="button" tabindex="0" aria-label="Cerrar notificación" title="Cerrar">×</label></div>' if show_splash_intro else ''}
 """, unsafe_allow_html=True)
+
+# La hora se calcula en el navegador para respetar la zona horaria local de cada dispositivo.
+st.components.v1.html("""
+<script>
+(function () {
+  const months = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+  function localStamp() {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, "0");
+    return pad(now.getDate()) + " " + months[now.getMonth()] + " " + now.getFullYear()
+      + " · " + pad(now.getHours()) + ":" + pad(now.getMinutes()) + ":" + pad(now.getSeconds());
+  }
+  function applyLocalTime() {
+    try {
+      const target = window.parent.document.getElementById("update-toast-time");
+      if (target) target.textContent = localStamp();
+    } catch (e) {}
+  }
+  applyLocalTime();
+  setTimeout(applyLocalTime, 250);
+})();
+</script>
+""", height=0, width=0, scrolling=False)
 # Cabecera limpia; los detalles del modelo aparecen en Rendimiento del modelo.
 
 MODEL_DATA = load_league_baselines()
