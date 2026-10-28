@@ -456,6 +456,7 @@ st.markdown("""
   .h2h-team img { width:22px; height:22px; object-fit:contain; flex:0 0 22px; }
   .h2h-match-row, .corner-h2h-row { animation:matchFlipIn .32s ease both; }
   .corner-h2h-row { display:grid; grid-template-columns:82px minmax(0,1fr) 70px minmax(0,1fr) 88px; gap:8px; align-items:center; padding:9px 4px; border-bottom:1px solid #34302A; font-size:.8rem; }
+  .corner-history-grid {grid-template-columns:82px minmax(0,1fr) 74px minmax(0,1fr) 74px 85px;}
   .corner-h2h-value { color:#FACC15; font-weight:850; text-align:center; white-space:nowrap; }
   .h2h-score { text-align:center; color:#FACC15; font-weight:900; white-space:nowrap; }
   @keyframes matchFlipIn { from {opacity:0; transform:perspective(900px) rotateX(-8deg) translateY(-7px)} to {opacity:1; transform:perspective(900px) rotateX(0) translateY(0)} }
@@ -1695,7 +1696,7 @@ else:
                                                 st.markdown("### ⌁ Histórico de córners")
                                                 home_team = (match.get("teams") or {}).get("home") or {}
                                                 away_team = (match.get("teams") or {}).get("away") or {}
-                                                h2h_key = f"corner-h2h-v2-{home_team.get('id')}-{away_team.get('id')}"
+                                                h2h_key = f"corner-h2h-v3-home-{home_team.get('id')}-{away_team.get('id')}"
                                                 if "corner_h2h_cache" not in st.session_state:
                                                     st.session_state.corner_h2h_cache = {}
                                                 if st.button("Consultar histórico de córners", key=f"corner_h2h_{match_id}"):
@@ -1717,7 +1718,9 @@ else:
                                                                         (((past.get("fixture") or {}).get("status") or {}).get("short") in finished_statuses)
                                                                         and str((((past.get("teams") or {}).get("home") or {}).get("id"))) == str(current_home_id)
                                                                     )
-                                                                ][:10]
+                                                                ]
+                                                                past_matches.sort(key=lambda past: ((past.get("fixture") or {}).get("date") or ""), reverse=True)
+                                                                past_matches = past_matches[:10]
                                                                 past_rows = []
                                                                 for past in past_matches:
                                                                     past_id = (past.get("fixture") or {}).get("id")
@@ -1752,7 +1755,7 @@ else:
                                                     st.caption("No se pudo cargar el histórico de córners: " + str(h2h_rows["error"]))
                                                 elif isinstance(h2h_rows, list):
                                                     if h2h_rows:
-                                                        corners_html = '<div class="corner-h2h-row" style="font-weight:800;color:#FACC15;border-bottom:1px solid #51451D;"><span>Fecha</span><span>Local</span><span class="h2h-score">Marc.</span><span>Visitante</span><span class="corner-h2h-value">Córners</span></div>'
+                                                        corners_html = '<div class="corner-h2h-row corner-history-grid" style="font-weight:800;color:#FACC15;border-bottom:1px solid #51451D;"><span>Fecha</span><span>Local</span><span class="corner-h2h-value">Córners L</span><span>Visitante</span><span class="corner-h2h-value">Córners V</span><span class="corner-h2h-value">Total córners</span></div>'
                                                         for row in h2h_rows:
                                                             date_label = html.escape(str(row.get("Fecha") or "N/D"))
                                                             home_name = html.escape(str(row.get("Local") or "N/D"))
@@ -1762,11 +1765,12 @@ else:
                                                             home_corner = row.get("Córners", "N/D").split("–")[0]
                                                             away_corner = row.get("Córners", "N/D").split("–")[-1]
                                                             corners_html += (
-                                                                f'<div class="corner-h2h-row"><span>{date_label}</span>'
+                                                                f'<div class="corner-h2h-row corner-history-grid"><span>{date_label}</span>'
                                                                 f'<span class="h2h-team"><img src="{home_logo}" onerror="this.style.display=\'none\'">{home_name}</span>'
-                                                                f'<span class="h2h-score">{html.escape(str(row.get("Marcador") or "—"))}</span>'
+                                                                f'<span class="corner-h2h-value">{html.escape(str(home_corner))}</span>'
                                                                 f'<span class="h2h-team"><img src="{away_logo}" onerror="this.style.display=\'none\'">{away_name}</span>'
-                                                                f'<span class="corner-h2h-value">{html.escape(str(home_corner))}–{html.escape(str(away_corner))}</span></div>'
+                                                                f'<span class="corner-h2h-value">{html.escape(str(away_corner))}</span>'
+                                                                f'<span class="corner-h2h-value">{html.escape(str(row.get("Total") if row.get("Total") is not None else "N/D"))}</span></div>'
                                                             )
                                                         st.markdown(corners_html, unsafe_allow_html=True)
                                                         valid_totals = [row["Total"] for row in h2h_rows if isinstance(row.get("Total"), (int, float))]
