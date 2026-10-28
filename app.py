@@ -185,6 +185,44 @@ st.markdown("""
   .fixture-hero-league { color:#A1A1AA; font-size:.7rem; text-align:center; margin-top:10px; }
   .fixture-hero-fallback { font-size:30px; line-height:38px; }
 
+  .live-stats-panel { margin:.65rem 0 1rem; overflow:hidden; border:1px solid #E9BD26; border-radius:17px; background:radial-gradient(ellipse at 50% 0%,#29230E 0%,#101216 42%,#080A0D 100%); box-shadow:0 0 0 1px #FACC1520,0 10px 30px #0007; color:#F4F4F5; }
+  .live-stats-heading { display:flex; align-items:center; gap:10px; padding:13px 14px 10px; color:#FFD43B; font-weight:900; font-size:1.08rem; border-bottom:1px solid #8A6A16; text-shadow:0 0 12px #FACC1530; }
+  .live-stats-heading-icon { color:#FFD43B; letter-spacing:-3px; font-size:1.1rem; }
+  .live-stats-live { margin-left:auto; display:flex; align-items:center; gap:5px; white-space:nowrap; color:#FF6969; font-size:.62rem; font-weight:900; }
+  .live-stats-live i { width:7px; height:7px; display:inline-block; border-radius:50%; background:#FF4545; box-shadow:0 0 9px #FF4545; }
+  .live-stats-scoreboard { padding:12px 12px 14px; background:linear-gradient(180deg,#141820,#0A0C10); }
+  .live-stats-league { color:#C7CBD3; font-size:.68rem; font-weight:850; text-align:center; letter-spacing:.6px; text-transform:uppercase; margin-bottom:12px; }
+  .live-stats-league span { color:#FACC15; padding:0 4px; }
+  .live-stats-teams { display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; gap:7px; }
+  .live-stats-team { display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:7px; min-width:0; font-size:.78rem; }
+  .live-stats-team img { width:52px; height:52px; object-fit:contain; filter:drop-shadow(0 3px 7px #0009); }
+  .live-stats-team strong { line-height:1.2; overflow-wrap:anywhere; }
+  .stats-team-fallback { font-size:40px; line-height:52px; }
+  .live-stats-score { background:#050608; color:#FFD52E; border:1px solid #4B4224; border-radius:11px; padding:7px 11px; font-size:1.7rem; font-weight:950; white-space:nowrap; text-shadow:0 0 14px #FACC1533; }
+  .live-stats-pitch { position:relative; height:190px; margin-top:17px; overflow:hidden; border:2px solid #A8E47A; border-radius:8px; background:repeating-linear-gradient(90deg,#247A24 0,#247A24 12.5%,#2C8B2A 12.5%,#2C8B2A 25%); box-shadow:inset 0 0 22px #0005; }
+  .live-stats-pitch:before { content:""; position:absolute; inset:10px; border:1.5px solid #DFFFD4; }
+  .pitch-half { position:absolute; top:10px; bottom:10px; left:50%; border-left:1.5px solid #DFFFD4; }
+  .pitch-circle { position:absolute; width:68px; height:68px; left:50%; top:50%; transform:translate(-50%,-50%); border:1.5px solid #DFFFD4; border-radius:50%; }
+  .pitch-box { position:absolute; top:34%; width:14%; height:32%; border:1.5px solid #DFFFD4; }
+  .pitch-box-left { left:10px; border-left:0; } .pitch-box-right { right:10px; border-right:0; }
+  .pitch-minute { position:absolute; top:7px; left:50%; transform:translateX(-50%); background:#111A13E8; border:1px solid #A8E47A; border-radius:20px; padding:3px 11px; font-size:.72rem; font-weight:900; }
+  .pitch-score { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:#080B0DEB; border:1px solid #FACC15; border-radius:9px; padding:4px 12px; color:#FFD52E; font-size:1.3rem; font-weight:950; }
+  .pitch-team { position:absolute; top:57%; display:flex; flex-direction:column; align-items:center; gap:3px; width:36%; font-size:.65rem; font-weight:850; text-align:center; }
+  .pitch-team img { width:43px; height:43px; object-fit:contain; filter:drop-shadow(0 2px 4px #0009); }
+  .pitch-team span { max-width:100%; overflow-wrap:anywhere; background:#071009D9; border-radius:7px; padding:3px 5px; }
+  .pitch-team-left { left:4%; } .pitch-team-right { right:4%; }
+  .live-stats-metrics { padding:7px 13px 14px; }
+  .live-stat-row { padding:7px 0 5px; }
+  .live-stat-values { display:grid; grid-template-columns:38px minmax(0,1fr) 38px; gap:5px; align-items:center; font-size:.78rem; }
+  .live-stat-values strong:first-child { text-align:left; } .live-stat-values strong:last-child { text-align:right; }
+  .live-stat-values strong { color:#F8FAFC; font-weight:900; }
+  .live-stat-values span { text-align:center; color:#D4D4D8; }
+  .live-stat-track { height:7px; display:flex; gap:3px; margin-top:5px; border-radius:99px; overflow:hidden; background:#333946; }
+  .live-stat-home { display:block; height:100%; border-radius:99px; background:linear-gradient(90deg,#D8A90A,#FFE34D); box-shadow:0 0 8px #FACC1544; }
+  .live-stat-away { display:block; height:100%; margin-left:auto; border-radius:99px; background:linear-gradient(90deg,#69758B,#A8B0C0); }
+  @media (max-width:420px) { .live-stats-heading {font-size:.95rem;padding:11px;} .live-stats-team img {width:39px;height:39px;} .live-stats-score {font-size:1.35rem;padding:6px 8px;} .live-stats-pitch {height:160px;} .pitch-team img {width:34px;height:34px;} .live-stats-metrics {padding:6px 9px 11px;} .live-stat-values {grid-template-columns:32px minmax(0,1fr) 32px;font-size:.69rem;gap:3px;} }
+
+
   [class*="st-key-main_stats_"] button, [class*="st-key-main_h2h_"] button, [class*="st-key-main_market_"] button { min-height:3.4rem; white-space:normal; line-height:1.15; padding:.45rem .3rem; border-radius:12px; border:1px solid #49402A; background:linear-gradient(145deg,#20252D,#111419); color:#E5E7EB; box-shadow:inset 0 1px 0 #ffffff0b; transition:transform .18s ease, background .22s ease, border-color .22s ease, box-shadow .22s ease; }
   /* Keep the four match actions on one horizontal row, including narrow mobile screens. */
   [data-testid="stHorizontalBlock"]:has([class*="st-key-main_stats_"]) {
@@ -819,23 +857,64 @@ else:
                                     tool_name = selected_tool.get("tool")
                                     st.markdown('<div class="match-analysis-kicker">PARTIDO SELECCIONADO</div>', unsafe_allow_html=True)
                                     if tool_name == "stats":
-                                        st.markdown('<div class="match-analysis-kicker">En vivo · estadísticas</div><div class="match-analysis-title">Comparativa del partido</div>', unsafe_allow_html=True)
                                         stat_data = st.session_state.stats_cache.get(str(match_id), [])
                                         stats_error = st.session_state.get("stats_errors", {}).get(str(match_id))
                                         if stats_error:
                                             st.warning(f"No se pudieron cargar las estadísticas: {stats_error}")
                                         elif stat_data:
-                                            stat_rows = []
-                                            stat_names = ("Ball Possession", "Total Shots", "Shots on Goal", "Corner Kicks", "Total passes", "Passes %", "Fouls", "Yellow Cards", "Red Cards", "Offsides", "Goalkeeper Saves")
-                                            stat_labels = {"Ball Possession":"Posesión", "Total Shots":"Tiros totales", "Shots on Goal":"Tiros a puerta", "Corner Kicks":"Córners", "Total passes":"Pases", "Passes %":"Precisión de pases", "Fouls":"Faltas", "Yellow Cards":"Tarjetas amarillas", "Red Cards":"Tarjetas rojas", "Offsides":"Fuera de juego", "Goalkeeper Saves":"Atajadas"}
-                                            for team_idx, team_stats in enumerate(stat_data[:2]):
-                                                team_name = ((match_teams.get("home") if team_idx == 0 else match_teams.get("away")) or {}).get("name", "Equipo")
-                                                stat_map = {entry.get("type"): entry.get("value") for entry in (team_stats.get("statistics") or [])}
-                                                for stat_name in stat_names:
-                                                    if stat_name in stat_map:
-                                                        stat_rows.append({"Equipo": team_name, "Indicador": stat_labels.get(stat_name, stat_name), "Valor": stat_map[stat_name] if stat_map[stat_name] is not None else "N/D"})
-                                            if stat_rows:
-                                                st.dataframe(stat_rows, use_container_width=True, hide_index=True)
+                                            stat_names = ("Ball Possession", "Total Shots", "Shots on Goal", "Corner Kicks", "Yellow Cards", "Red Cards", "Fouls", "Offsides", "Goalkeeper Saves", "Total passes", "Passes %")
+                                            stat_labels = {"Ball Possession":"Posesión del balón", "Total Shots":"Tiros totales", "Shots on Goal":"Tiros a puerta", "Corner Kicks":"Córners", "Yellow Cards":"Tarjetas amarillas", "Red Cards":"Tarjetas rojas", "Fouls":"Faltas", "Offsides":"Fueras de juego", "Goalkeeper Saves":"Atajadas", "Total passes":"Pases", "Passes %":"Precisión de pases"}
+                                            home_stats = {entry.get("type"): entry.get("value") for entry in ((stat_data[0].get("statistics") or []) if len(stat_data) > 0 else [])}
+                                            away_stats = {entry.get("type"): entry.get("value") for entry in ((stat_data[1].get("statistics") or []) if len(stat_data) > 1 else [])}
+                                            home_name = html.escape(str(match_home.get("name") or "Local"))
+                                            away_name = html.escape(str(match_away.get("name") or "Visitante"))
+                                            home_logo = html.escape(str(match_home.get("logo") or ""), quote=True)
+                                            away_logo = html.escape(str(match_away.get("logo") or ""), quote=True)
+                                            league_label = html.escape(str((match.get("league") or {}).get("name") or "Competición en vivo"))
+                                            minute_value = ((match.get("fixture") or {}).get("status") or {}).get("elapsed")
+                                            minute_label = f"{minute_value}′" if minute_value is not None else "EN VIVO"
+                                            goals = match.get("goals") or {}
+                                            home_goals = goals.get("home") if goals.get("home") is not None else "–"
+                                            away_goals = goals.get("away") if goals.get("away") is not None else "–"
+                                            home_badge = f'<img src="{home_logo}" alt="" onerror="this.style.display=\'none\'">' if home_logo else '<span class="stats-team-fallback">⚽</span>'
+                                            away_badge = f'<img src="{away_logo}" alt="" onerror="this.style.display=\'none\'">' if away_logo else '<span class="stats-team-fallback">⚽</span>'
+                                            stats_html = (
+                                                '<section class="live-stats-panel">'
+                                                '<header class="live-stats-heading"><span class="live-stats-heading-icon">▮▮▮</span><span>Estadísticas en vivo</span><span class="live-stats-live"><i></i> EN VIVO</span></header>'
+                                                '<div class="live-stats-scoreboard">'
+                                                f'<div class="live-stats-league">{league_label} <span>·</span> {html.escape(str(minute_label))}</div>'
+                                                f'<div class="live-stats-teams"><div class="live-stats-team">{home_badge}<strong>{home_name}</strong></div>'
+                                                f'<div class="live-stats-score">{home_goals} - {away_goals}</div>'
+                                                f'<div class="live-stats-team">{away_badge}<strong>{away_name}</strong></div></div>'
+                                                '<div class="live-stats-pitch"><div class="pitch-half"></div><div class="pitch-circle"></div><div class="pitch-box pitch-box-left"></div><div class="pitch-box pitch-box-right"></div>'
+                                                f'<div class="pitch-minute">{html.escape(str(minute_label))}</div><div class="pitch-score">{home_goals} - {away_goals}</div>'
+                                                f'<div class="pitch-team pitch-team-left">{home_badge}<span>{home_name}</span></div><div class="pitch-team pitch-team-right">{away_badge}<span>{away_name}</span></div></div>'
+                                                '</div><div class="live-stats-metrics">'
+                                            )
+                                            rendered = 0
+                                            for stat_name in stat_names:
+                                                if stat_name not in home_stats and stat_name not in away_stats:
+                                                    continue
+                                                hv, av = home_stats.get(stat_name), away_stats.get(stat_name)
+                                                def display_stat(value):
+                                                    return "N/D" if value is None else html.escape(str(value))
+                                                def numeric_stat(value):
+                                                    try:
+                                                        return float(str(value).replace("%", "").replace(",", ".").strip())
+                                                    except (TypeError, ValueError):
+                                                        return 0.0
+                                                hnum, anum = numeric_stat(hv), numeric_stat(av)
+                                                total = hnum + anum
+                                                hwidth = (hnum / total * 100) if total > 0 else 50
+                                                awidth = (anum / total * 100) if total > 0 else 50
+                                                stats_html += (
+                                                    f'<div class="live-stat-row"><div class="live-stat-values"><strong>{display_stat(hv)}</strong><span>{html.escape(stat_labels[stat_name])}</span><strong>{display_stat(av)}</strong></div>'
+                                                    f'<div class="live-stat-track"><span class="live-stat-home" style="width:{hwidth:.1f}%"></span><span class="live-stat-away" style="width:{awidth:.1f}%"></span></div></div>'
+                                                )
+                                                rendered += 1
+                                            stats_html += '</div></section>'
+                                            if rendered:
+                                                st.markdown(stats_html, unsafe_allow_html=True)
                                             else:
                                                 st.info("La API no entregó estadísticas detalladas para este partido.")
                                         else:
