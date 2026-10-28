@@ -110,6 +110,28 @@ st.markdown("""
   [class*="st-key-sound_enabled_toggle"] [role="switch"][aria-checked="false"] > div,
   [data-testid="stToggle"] [role="switch"][aria-checked="false"] > div,
   button[role="switch"][aria-checked="false"] > div { background:#FFFFFF !important; }
+  /* Tipografía y color idénticos a Alertas en los tres controles */
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label,
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label p,
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label span,
+  [class*="st-key-sound_control_card"] [data-testid="stToggle"] label,
+  [class*="st-key-sound_control_card"] [data-testid="stToggle"] label p,
+  [class*="st-key-sound_control_card"] [data-testid="stToggle"] label span {
+    color:#F4D778 !important;
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important;
+    font-size:11px !important;
+    font-weight:600 !important;
+    line-height:1.1 !important;
+    letter-spacing:0 !important;
+    white-space:nowrap !important;
+  }
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label p,
+  [class*="st-key-sound_control_card"] [data-testid="stToggle"] label p { margin:0 !important; }
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label *,
+  [class*="st-key-sound_control_card"] [data-testid="stToggle"] label * {
+    color:#F4D778 !important;
+    fill:#F4D778 !important;
+  }
   /* Ajuste final: tres tarjetas del mismo tamaño y controles dorados */
   [class*="st-key-auto_refresh_control_card"], [class*="st-key-sound_control_card"] {
     width:100% !important; height:48px !important; min-height:48px !important; max-height:48px !important;
@@ -692,7 +714,7 @@ with st.container(key="top_status_controls"):
       with st.container(key="sound_control_card"):
         sound_toggle_state = st.session_state.get("sound_enabled_toggle", not st.session_state.sound_muted)
         sound_enabled = st.toggle(
-            "◖)) Sonido" if sound_toggle_state else "◖)) Sonido",
+            "♫ Sonido" if sound_toggle_state else "♫ Sonido",
             value=not st.session_state.sound_muted,
             key="sound_enabled_toggle",
             help="Activa o desactiva las alertas sonoras del escáner."
