@@ -593,11 +593,7 @@ if auto_tick is not None:
 
 if should_refresh:
     try:
-        if refresh:
-            pass
         data = api_get("fixtures", {"live": "all"})
-        if refresh:
-            pass
         new_fixtures = data.get("response", [])
         old_snapshot = st.session_state.score_snapshot
         current_snapshot = {}
@@ -639,7 +635,6 @@ if should_refresh:
             offset = st.session_state.corner_rotation_index % len(live_for_corners)
             rotated = live_for_corners[offset:] + live_for_corners[:offset]
             for corner_idx, match in enumerate(rotated[:batch_size]):
-                if refresh:
                 fixture_data = match.get("fixture") or {}
                 fixture_id = str(fixture_data.get("id"))
                 try:
