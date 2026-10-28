@@ -188,12 +188,14 @@ st.markdown("""
   [class*="st-key-main_stats_"] button, [class*="st-key-main_h2h_"] button, [class*="st-key-main_market_"] button { min-height:3.4rem; white-space:normal; line-height:1.15; padding:.45rem .3rem; border-radius:12px; border:1px solid #49402A; background:linear-gradient(145deg,#20252D,#111419); color:#E5E7EB; box-shadow:inset 0 1px 0 #ffffff0b; transition:transform .18s ease, background .22s ease, border-color .22s ease, box-shadow .22s ease; }
   /* Keep the four match actions on one horizontal row, including narrow mobile screens. */
   [data-testid="stHorizontalBlock"]:has([class*="st-key-main_stats_"]) {
-    display:flex !important; flex-direction:row !important; flex-wrap:nowrap !important;
-    align-items:stretch !important; gap:6px !important; width:100% !important;
+    display:grid !important; grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+    grid-auto-flow:column !important; align-items:stretch !important; gap:5px !important;
+    width:100% !important; max-width:100% !important; min-width:0 !important;
+    box-sizing:border-box !important; overflow:hidden !important;
   }
   [data-testid="stHorizontalBlock"]:has([class*="st-key-main_stats_"]) > [data-testid="column"] {
-    min-width:0 !important; width:25% !important; max-width:25% !important;
-    flex:0 0 25% !important; padding:0 2px !important;
+    display:block !important; min-width:0 !important; width:100% !important; max-width:100% !important;
+    flex:none !important; padding:0 !important; margin:0 !important; box-sizing:border-box !important;
   }
   [data-testid="stHorizontalBlock"]:has([class*="st-key-main_stats_"]) [data-testid="stButton"],
   [data-testid="stHorizontalBlock"]:has([class*="st-key-main_stats_"]) [class*="st-key-main_stats_"],
@@ -202,7 +204,7 @@ st.markdown("""
   [data-testid="stHorizontalBlock"]:has([class*="st-key-main_stats_"]) button {
     box-sizing:border-box !important; min-width:0 !important; width:100% !important; max-width:100% !important;
     min-height:2rem !important; height:2rem !important; padding:0 !important;
-    font-size:1rem !important; font-weight:800 !important;
+    font-size:clamp(.78rem,3vw,1rem) !important; font-weight:800 !important;
     line-height:1.05 !important; white-space:normal !important; overflow-wrap:anywhere !important;
     border:1px solid #8A6A16 !important; border-radius:7px !important;
     background:linear-gradient(145deg,#1A1B1F,#0B0D10) !important; color:#F6D365 !important;
@@ -770,11 +772,11 @@ else:
                                 with action_cols[0]:
                                     show_stats = st.button("▥", help="Estadísticas en vivo", key=f"main_stats_{match_id}", type="primary" if active_tool == "stats" else "secondary", use_container_width=True)
                                 with action_cols[1]:
-                                    show_goals = st.button("⚡", help="Goles y señales", key=f"main_market_{match_id}_goals", type="primary" if active_market == "goals" else "secondary", use_container_width=True)
+                                    show_goals = st.button("⚽⚡", help="Goles y señales", key=f"main_market_{match_id}_goals", type="primary" if active_market == "goals" else "secondary", use_container_width=True)
                                 with action_cols[2]:
                                     show_corners = st.button("⚑", help="Córners", key=f"main_market_{match_id}_corners", type="primary" if active_market == "corners" else "secondary", use_container_width=True)
                                 with action_cols[3]:
-                                    show_h2h = st.button("⟲", help="Historial H2H", key=f"main_h2h_{match_id}", type="primary" if active_tool == "h2h" else "secondary", use_container_width=True)
+                                    show_h2h = st.button("H2H", help="Historial H2H", key=f"main_h2h_{match_id}", type="primary" if active_tool == "h2h" else "secondary", use_container_width=True)
                                 if show_stats:
                                     stats_key = str(match_id)
                                     if stats_key not in st.session_state.stats_cache or stats_key in st.session_state.get("stats_errors", {}):
