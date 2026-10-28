@@ -255,25 +255,19 @@ st.markdown("""
   [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details > summary::after { content:"◖))  ﹀"; display:flex; align-items:center; justify-content:center; min-width:108px; height:48px; padding:0 14px; border-radius:28px; background:#FACC15; color:#111419; font-size:23px; font-weight:700; letter-spacing:1px; box-sizing:border-box; }
   [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details[open] > summary::after { content:"◖))  ⌃"; }
   [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details > summary p { color:#FACC15 !important; font-size:clamp(1.2rem,3.8vw,1.8rem) !important; font-weight:750 !important; margin:0 !important; }
-  /* Encabezado de liga: nombre y logo a la izquierda, contador al extremo derecho. */
-  [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] details > div > [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"] [data-testid="stExpander"] > details > summary p {
+  /* Encabezados de ligas: selector basado en expanders anidados dentro de En vivo.
+     Evita depender de la clase key que Streamlit cambia según la versión. */
+  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] > details > summary {
+    width:100% !important; box-sizing:border-box !important;
+  }
+  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] > details > summary [data-testid="stMarkdownContainer"] {
+    display:block !important; width:100% !important; min-width:0 !important; flex:1 1 auto !important;
+  }
+  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] > details > summary [data-testid="stMarkdownContainer"] p {
     display:flex !important; align-items:center !important; gap:8px !important;
-    width:100% !important; box-sizing:border-box !important;
+    width:100% !important; min-width:0 !important; box-sizing:border-box !important;
   }
-  /* El contador es el último elemento en negrita: empujarlo al extremo derecho. */
-  [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] details > div > [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"] [data-testid="stExpander"] > details > summary p > strong:last-child {
-    margin-left:auto !important; padding-left:14px !important; white-space:nowrap !important;
-  }
-  /* FIX: seleccionar directamente cada expander de liga mediante su clave Streamlit. */
-  [class*="st-key-live_league_"] [data-testid="stExpander"] > details > summary {
-    width:100% !important; box-sizing:border-box !important;
-  }
-  [class*="st-key-live_league_"] [data-testid="stExpander"] > details > summary p {
-    display:flex !important; align-items:center !important; width:100% !important;
-    min-width:0 !important; box-sizing:border-box !important; gap:8px !important;
-  }
-  [class*="st-key-live_league_"] [data-testid="stExpander"] > details > summary p strong:last-of-type,
-  [class*="st-key-live_league_"] [data-testid="stExpander"] > details > summary p > span:last-child {
+  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] > details > summary [data-testid="stMarkdownContainer"] p > strong:last-of-type {
     margin-left:auto !important; padding-left:16px !important; white-space:nowrap !important;
     flex:0 0 auto !important;
   }
