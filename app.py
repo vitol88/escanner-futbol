@@ -486,9 +486,15 @@ st.markdown("""
   @media (prefers-reduced-motion: reduce) { .goal-form-card, .goal-form-back { animation:none; } }
   @media (prefers-reduced-motion: reduce) { .goal-form-card, .goal-form-back { animation:none; } }
   .goal-form-back-title { color:#FACC15; font-size:.72rem; font-weight:900; margin-bottom:8px; line-height:1.35; }
-  .goal-form-match { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:7px; align-items:center; padding:6px 0; border-top:1px solid #34302A; color:#E4E4E7; font-size:.68rem; line-height:1.35; }
-  .goal-form-match-opponent { overflow-wrap:anywhere; }
-  .goal-form-match-score { color:#F4F4F5; font-weight:900; white-space:nowrap; }
+  .goal-form-back { animation:goal-card-flip-in .62s cubic-bezier(.2,.75,.25,1) both; transform-origin:center; }
+  .goal-form-match { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:5px 9px; align-items:center; padding:9px 0; border-top:1px solid #34302A; color:#E4E4E7; font-size:.7rem; line-height:1.35; }
+  .goal-form-match-meta { color:#FACC15; font-size:.63rem; font-weight:800; letter-spacing:.25px; margin-bottom:3px; }
+  .goal-form-match-opponent { min-width:0; overflow-wrap:anywhere; word-break:normal; }
+  .goal-form-match-teams { color:#E4E4E7; font-weight:650; }
+  .goal-form-match-outcome { display:flex; align-items:center; justify-content:flex-end; gap:6px; white-space:nowrap; }
+  .goal-form-match-score { color:#F4F4F5; font-size:.8rem; font-weight:950; white-space:nowrap; }
+  .goal-form-match .goal-form-result { min-width:20px; }
+  @media (max-width: 700px) { .goal-form-match { grid-template-columns:minmax(0,1fr) auto; gap:4px 6px; padding:8px 0; } .goal-form-match-teams { font-size:.66rem; } }
   .goal-form-result { display:inline-flex; justify-content:center; min-width:22px; padding:2px 5px; border-radius:5px; font-size:.65rem; font-weight:900; }
   .goal-form-result-v { color:#FFFFFF; background:#16A34A; }
   .goal-form-result-e { color:#FFFFFF; background:#6B7280; }
@@ -1743,8 +1749,12 @@ else:
                                                                 st.rerun()
                                                             if is_flipped:
                                                                 recent_matches = (form_data.get("recent_matches") or [])[:3]
+                                                                recent_html = [
+                                                                    '<div class="goal-form-back">',
+                                                                    '<div class="goal-form-back-title">ÚLTIMOS 3 PARTIDOS</div>',
+                                                                ]
                                                                 if not recent_matches:
-                                                                    st.caption("No hay partidos recientes disponibles para esta condición.")
+                                                                    recent_html.append('<div class="goal-form-line">No hay partidos recientes disponibles para esta condición.</div>')
                                                                 for recent in recent_matches:
                                                                     result_code = str(recent.get("result") or "?").upper()
                                                                     result_class = {"V": "v", "E": "e", "D": "d"}.get(result_code, "e")
@@ -1753,12 +1763,19 @@ else:
                                                                     away_label = html.escape(str(recent.get("away_name") or "Visitante"))
                                                                     hg, ag = recent.get("home_goals"), recent.get("away_goals")
                                                                     score_label = f"{hg}–{ag}" if isinstance(hg, int) and isinstance(ag, int) else "—"
-                                                                    st.markdown(
-                                                                        f'<div class="goal-form-match"><span class="goal-form-match-opponent">{date_label}<br>{home_label} · {away_label}</span>'
+                                                                    recent_html.append(
+                                                                        f'<div class="goal-form-match">'
+                                                                        f'<div class="goal-form-match-opponent">'
+                                                                        f'<div class="goal-form-match-meta">{date_label}</div>'
+                                                                        f'<div class="goal-form-match-teams">{home_label} <span style="color:#FACC15">·</span> {away_label}</div>'
+                                                                        f'</div>'
+                                                                        f'<div class="goal-form-match-outcome">'
                                                                         f'<span class="goal-form-match-score">{html.escape(score_label)}</span>'
-                                                                        f'<span class="goal-form-result goal-form-result-{result_class}">{html.escape(result_code)}</span></div>',
-                                                                        unsafe_allow_html=True,
+                                                                        f'<span class="goal-form-result goal-form-result-{result_class}">{html.escape(result_code)}</span>'
+                                                                        f'</div></div>'
                                                                     )
+                                                                recent_html.append('</div>')
+                                                                st.markdown("".join(recent_html), unsafe_allow_html=True)
                                                             else:
                                                                 st.markdown(
                                                                     f'<div class="goal-form-record">{html.escape(str(form_data.get("record", "N/D")))}</div>'
