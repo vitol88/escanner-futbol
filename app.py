@@ -1768,19 +1768,18 @@ else:
                                                 # Los córners actuales ya aparecen en la tarjeta superior del partido.
                                                 # Evitamos repetir local, visitante y total en tres tarjetas separadas.
 
-                                                st.markdown("### 📊 Promedios de córners en la competición actual")
                                                 history_rows = [
                                                     {"Indicador": "Córners a favor del local en casa", "Promedio": history.get("home_corners_for"), "Muestra": history.get("home_corner_sample", 0)},
                                                     {"Indicador": "Córners concedidos por el local en casa", "Promedio": history.get("home_corners_against"), "Muestra": history.get("home_corner_sample", 0)},
                                                     {"Indicador": "Córners a favor del visitante fuera", "Promedio": history.get("away_corners_for"), "Muestra": history.get("away_corner_sample", 0)},
                                                     {"Indicador": "Córners concedidos por el visitante fuera", "Promedio": history.get("away_corners_against"), "Muestra": history.get("away_corner_sample", 0)},
                                                 ]
-                                                history_html = '<table class="history-table"><thead><tr><th>Indicador</th><th>Promedio</th></tr></thead><tbody>'
+                                                history_html = '<div class="goal-history-wrap"><div class="goal-history-heading">📊 Promedios de córners en la competición actual <span>Promedio</span></div><table class="goal-history-table"><thead><tr><th>Indicador</th><th>Prom.</th></tr></thead><tbody>'
                                                 for row in history_rows:
                                                     avg = row["Promedio"]
                                                     avg_text = f"{avg:.2f}".rstrip("0").rstrip(".") if isinstance(avg, (int, float)) else "N/D"
                                                     history_html += f"<tr><td>{html.escape(row['Indicador'])}</td><td>{avg_text}</td></tr>"
-                                                history_html += "</tbody></table>"
+                                                history_html += "</tbody></table></div>"
                                                 st.markdown(history_html, unsafe_allow_html=True)
 
                                                 # Proyección total estimada a partir de los cuatro promedios de localía.
