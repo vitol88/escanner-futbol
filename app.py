@@ -885,6 +885,25 @@ st.markdown("""
     margin:0 !important; padding:0 !important;
   }
 
+  /* Corrección definitiva: neutralizar los estilos antiguos que dibujaban tarjetas doradas. */
+  [class*="st-key-auto_refresh_control_card"], [class*="st-key-sound_control_card"] {
+    width:100% !important; height:22px !important; min-height:22px !important; max-height:22px !important;
+    margin:0 !important; padding:0 !important; border:0 !important; border-width:0 !important; border-color:transparent !important;
+    border-radius:0 !important; outline:0 !important; background:transparent !important; background-image:none !important;
+    box-shadow:none !important; overflow:visible !important; box-sizing:border-box !important;
+  }
+  [class*="st-key-auto_refresh_control_card"]::before, [class*="st-key-auto_refresh_control_card"]::after,
+  [class*="st-key-sound_control_card"]::before, [class*="st-key-sound_control_card"]::after { display:none !important; content:none !important; }
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"], [class*="st-key-sound_control_card"] [data-testid="stToggle"] {
+    width:100% !important; height:22px !important; min-height:22px !important; max-height:22px !important; margin:0 !important;
+    padding:0 !important; border:0 !important; border-radius:0 !important; background:transparent !important; box-shadow:none !important; overflow:visible !important;
+  }
+  [class*="st-key-auto_refresh_control_card"] [role="switch"], [class*="st-key-sound_control_card"] [role="switch"] {
+    transform:scale(.40) !important; transform-origin:center center !important; border:0 !important; outline:0 !important; box-shadow:none !important;
+  }
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label, [class*="st-key-sound_control_card"] [data-testid="stToggle"] label,
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label *, [class*="st-key-sound_control_card"] [data-testid="stToggle"] label * { font-size:8px !important; line-height:1 !important; font-weight:600 !important; }
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stMarkdownContainer"] > div, [class*="st-key-sound_control_card"] [data-testid="stMarkdownContainer"] > div { height:22px !important; min-height:22px !important; font-size:8px !important; line-height:1 !important; display:flex !important; align-items:center !important; }
   /* Cuatro tarjetas de acciones dentro de cada partido, adaptadas a pantallas móviles */
   [class*="st-key-live_match_"] [data-testid="stHorizontalBlock"] {
     display:flex !important; flex-wrap:nowrap !important; gap:.45rem !important; align-items:stretch !important;
