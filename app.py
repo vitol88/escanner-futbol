@@ -1967,6 +1967,51 @@ if _analysis_page_active:
             font-size:.95rem !important;line-height:1.2 !important;border-radius:12px !important;border-width:1.5px !important;
           }}
         }}
+        /* El botón central replica la tarjeta animada del inicio, pero con texto breve. */
+        div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) [data-testid="stButton"] > button {{
+            position:relative !important;display:block !important;overflow:hidden !important;
+            width:100% !important;min-width:0 !important;max-width:100% !important;
+            min-height:145px !important;height:145px !important;box-sizing:border-box !important;
+            padding:18px 14px 18px 49% !important;text-align:left !important;white-space:normal !important;
+            border:2px solid #FACC15 !important;border-radius:22px !important;
+            background-color:#090A0D !important;
+            background-image:radial-gradient(ellipse at 20% 50%,rgba(250,204,21,.10),transparent 42%),linear-gradient(135deg,#090A0D,#111319) !important;
+            color:#F4F4F5 !important;font-size:clamp(1rem,3.8vw,1.35rem) !important;
+            line-height:1.4 !important;font-weight:800 !important;
+            box-shadow:inset 0 0 24px rgba(250,204,21,.06),0 0 0 1px rgba(250,204,21,.08) !important;
+        }}
+        div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) [data-testid="stButton"] > button::before {{
+            content:"" !important;position:absolute !important;left:4% !important;top:50% !important;
+            width:min(38%,170px) !important;aspect-ratio:1 !important;height:auto !important;
+            transform:translateY(-50%);border-radius:50% !important;border:3px solid #FACC15 !important;
+            background-color:#090A0D !important;
+            background-image:radial-gradient(circle at center,#FACC15 0 6%,#14151A 7% 14%,transparent 15%),repeating-radial-gradient(circle at center,transparent 0 10px,rgba(250,204,21,.55) 11px 13px,transparent 14px 20px),conic-gradient(from 0deg,transparent 0 12%,rgba(250,204,21,.95) 16%,transparent 28% 48%,rgba(250,204,21,.45) 53%,transparent 68%) !important;
+            box-shadow:0 0 20px rgba(250,204,21,.45),inset 0 0 18px rgba(250,204,21,.25) !important;
+            animation:scanner-radar-spin 3s linear infinite !important;pointer-events:none !important;
+        }}
+        div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) [data-testid="stButton"] > button::after {{
+            content:"⚽" !important;position:absolute !important;left:23% !important;top:50% !important;
+            transform:translate(-50%,-50%);width:40px !important;height:40px !important;
+            display:flex !important;align-items:center !important;justify-content:center !important;
+            font-size:clamp(1.8rem,6vw,2.7rem) !important;
+            filter:drop-shadow(0 0 10px rgba(250,204,21,.75)) !important;
+            animation:scanner-ball-orbit 2s ease-in-out infinite !important;pointer-events:none !important;
+        }}
+        div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) [data-testid="stButton"] > button p {{
+            position:relative !important;z-index:2 !important;color:#F4F4F5 !important;
+            font-size:inherit !important;font-weight:800 !important;line-height:1.4 !important;
+        }}
+        div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) [data-testid="stButton"] > button:hover {{
+            border-color:#FFE36A !important;
+            background-image:radial-gradient(ellipse at 20% 50%,rgba(250,204,21,.13),transparent 42%),linear-gradient(135deg,#14151A,#1A180F) !important;
+            color:#FFE36A !important;
+        }}
+        @media(max-width:640px) {{
+          div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) [data-testid="stButton"] > button {{
+            min-height:145px !important;height:145px !important;padding:16px 12px 16px 49% !important;
+            font-size:.95rem !important;line-height:1.4 !important;
+          }}
+        }}
         @media(prefers-reduced-motion:reduce) {{
           div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button::after {{ animation:none !important; }}
           div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{ transition:none !important; }}
@@ -1982,7 +2027,7 @@ if _analysis_page_active:
             _back_clicked = st.button("← Volver al partido", key="analysis_page_back", use_container_width=True)
         if _nav_market in {"goals", "corners"}:
             with _nav_cols[1]:
-                _top_scan_clicked = st.button("⚽ Escanear en vivo", key="analysis_page_scan", use_container_width=True)
+                _top_scan_clicked = st.button("Escanear en vivo", key="analysis_page_scan", use_container_width=True)
             with _nav_cols[2]:
                 _top_refresh_clicked = st.button("⟳ Actualizar escáner", key="analysis_page_refresh", use_container_width=True)
             if _top_scan_clicked or _top_refresh_clicked:
