@@ -1866,21 +1866,29 @@ if _analysis_page_active:
         [class*="st-key-analysis_nav_refresh_row"] [data-testid="column"] {{
             display:block !important;width:auto !important;min-width:0 !important;max-width:100% !important;flex:none !important;
         }}
+        [class*="st-key-analysis_nav_back_row"] [data-testid="column"]:first-child,
+        [class*="st-key-analysis_nav_scan_row"] [data-testid="column"]:first-child,
+        [class*="st-key-analysis_nav_refresh_row"] [data-testid="column"]:first-child {{
+            width:76px !important;min-width:76px !important;max-width:76px !important;
+            flex:0 0 76px !important;align-self:center !important;overflow:visible !important;
+        }}
         [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"],
         [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"],
         [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] {{
-            display:block !important;width:76px !important;min-width:76px !important;max-width:76px !important;
+            display:block !important;width:100% !important;min-width:0 !important;max-width:100% !important;
+            position:relative !important;z-index:5 !important;pointer-events:auto !important;
         }}
         [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > div,
         [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > div,
         [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > div {{
-            width:100% !important;min-width:0 !important;max-width:100% !important;
+            width:100% !important;min-width:0 !important;max-width:100% !important;pointer-events:auto !important;
         }}
         [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button,
         [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button,
         [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{
-            position:relative !important;display:flex !important;align-items:center !important;justify-content:center !important;
-            width:72px !important;min-width:72px !important;max-width:72px !important;
+            position:relative !important;z-index:6 !important;pointer-events:auto !important;
+            display:flex !important;align-items:center !important;justify-content:center !important;
+            width:100% !important;min-width:0 !important;max-width:100% !important;
             height:72px !important;min-height:72px !important;max-height:72px !important;
             padding:0 !important;overflow:hidden !important;box-sizing:border-box !important;
             border:2px solid #FACC15 !important;border-radius:19px !important;
@@ -1957,15 +1965,15 @@ if _analysis_page_active:
           [class*="st-key-analysis_nav_refresh_row"] [data-testid="stHorizontalBlock"] {{
               grid-template-columns:72px minmax(0,1fr) !important;column-gap:12px !important;
           }}
-          [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"],
-          [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"],
-          [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] {{
-              width:72px !important;min-width:72px !important;max-width:72px !important;
+          [class*="st-key-analysis_nav_back_row"] [data-testid="column"]:first-child,
+          [class*="st-key-analysis_nav_scan_row"] [data-testid="column"]:first-child,
+          [class*="st-key-analysis_nav_refresh_row"] [data-testid="column"]:first-child {{
+              width:72px !important;min-width:72px !important;max-width:72px !important;flex:0 0 72px !important;
           }}
           [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button,
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button,
           [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{
-              width:68px !important;min-width:68px !important;max-width:68px !important;
+              width:100% !important;min-width:0 !important;max-width:100% !important;
               height:68px !important;min-height:68px !important;max-height:68px !important;border-radius:17px !important;
           }}
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::before {{ width:57px !important;height:57px !important; }}
