@@ -131,41 +131,41 @@ st.markdown("""
     [class*="st-key-search_live_matches_button"] button { min-height:46px !important; height:46px !important; }
     [class*="st-key-search_goal_matches"] [data-testid="stTextInput"] > div { min-height:46px !important; }
   }
-  /* Franja fija, discreta y visible para los tres controles globales. */
+  /* Franja compacta arriba a la izquierda, sin tarjetas doradas recargadas. */
   [class*="st-key-top_status_controls"] {
-    position:fixed !important; top:10px !important; left:185px !important; right:auto !important;
-    z-index:10080 !important; display:block !important; width:228px !important;
-    max-width:calc(100vw - 205px) !important; margin:0 !important; padding:0 !important;
+    position:fixed !important; top:4px !important; left:8px !important; right:auto !important;
+    z-index:10080 !important; display:block !important; width:198px !important;
+    max-width:calc(100vw - 16px) !important; margin:0 !important; padding:0 !important;
     overflow:visible !important; background:transparent !important;
   }
   [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] {
     display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)) !important;
-    align-items:center !important; gap:4px !important; flex-wrap:nowrap !important; overflow:visible !important;
+    align-items:center !important; gap:3px !important; flex-wrap:nowrap !important; overflow:visible !important;
   }
   [class*="st-key-top_status_controls"] [data-testid="stColumn"] { min-width:0 !important; width:auto !important; padding:0 !important; overflow:visible !important; }
   [class*="st-key-auto_refresh_control_card"], [class*="st-key-sound_control_card"] {
-    box-sizing:border-box !important; width:100% !important; min-width:0 !important; min-height:27px !important;
+    box-sizing:border-box !important; width:100% !important; min-width:0 !important; min-height:22px !important;
     display:flex !important; align-items:center !important; justify-content:center !important;
-    padding:1px 2px !important; border:1px solid rgba(212,167,44,.52) !important; border-radius:7px !important;
-    background:rgba(17,20,25,.94) !important; overflow:visible !important; box-shadow:0 2px 7px rgba(0,0,0,.18) !important;
+    padding:0 1px !important; border:0 !important; border-radius:5px !important;
+    background:rgba(17,20,25,.78) !important; overflow:visible !important; box-shadow:none !important;
   }
   [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"],
-  [class*="st-key-sound_control_card"] [data-testid="stToggle"] { display:flex !important; align-items:center !important; justify-content:center !important; min-height:24px !important; padding:0 !important; background:transparent !important; }
+  [class*="st-key-sound_control_card"] [data-testid="stToggle"] { display:flex !important; align-items:center !important; justify-content:center !important; min-height:21px !important; padding:0 !important; background:transparent !important; }
   [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] > label,
-  [class*="st-key-sound_control_card"] [data-testid="stToggle"] > label { display:flex !important; align-items:center !important; justify-content:center !important; gap:2px !important; width:100% !important; margin:0 !important; white-space:nowrap !important; }
+  [class*="st-key-sound_control_card"] [data-testid="stToggle"] > label { display:flex !important; align-items:center !important; justify-content:center !important; gap:1px !important; width:100% !important; margin:0 !important; white-space:nowrap !important; }
   [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label p,
-  [class*="st-key-sound_control_card"] [data-testid="stToggle"] label p { color:#F4D778 !important; font-size:8px !important; line-height:1 !important; margin:0 !important; white-space:nowrap !important; }
+  [class*="st-key-sound_control_card"] [data-testid="stToggle"] label p { color:#F4D778 !important; font-size:7px !important; line-height:1 !important; margin:0 !important; white-space:nowrap !important; }
   [class*="st-key-auto_refresh_control_card"] [role="switch"],
-  [class*="st-key-sound_control_card"] [role="switch"] { flex:0 0 auto !important; transform:scale(.54) !important; transform-origin:center !important; }
-  [class*="st-key-top_status_controls"] iframe { display:block !important; width:100% !important; height:29px !important; min-height:29px !important; margin:0 !important; padding:0 !important; border:0 !important; overflow:visible !important; }
+  [class*="st-key-sound_control_card"] [role="switch"] { flex:0 0 auto !important; transform:scale(.42) !important; transform-origin:center !important; }
+  [class*="st-key-top_status_controls"] iframe { display:block !important; width:100% !important; height:24px !important; min-height:24px !important; margin:0 !important; padding:0 !important; border:0 !important; overflow:visible !important; }
   @media(max-width:640px) {
-    [class*="st-key-top_status_controls"] { top:9px !important; left:48px !important; right:auto !important; width:174px !important; max-width:calc(100vw - 60px) !important; }
-    [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { gap:3px !important; }
-    [class*="st-key-auto_refresh_control_card"], [class*="st-key-sound_control_card"] { min-height:25px !important; padding:0 1px !important; }
+    [class*="st-key-top_status_controls"] { top:3px !important; left:5px !important; right:auto !important; width:180px !important; max-width:calc(100vw - 10px) !important; }
+    [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { gap:2px !important; }
+    [class*="st-key-auto_refresh_control_card"], [class*="st-key-sound_control_card"] { min-height:21px !important; padding:0 !important; }
     [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label p,
-    [class*="st-key-sound_control_card"] [data-testid="stToggle"] label p { font-size:7px !important; }
-    [class*="st-key-top_status_controls"] [role="switch"] { transform:scale(.48) !important; }
-    [class*="st-key-top_status_controls"] iframe { height:27px !important; min-height:27px !important; }
+    [class*="st-key-sound_control_card"] [data-testid="stToggle"] label p { font-size:6px !important; }
+    [class*="st-key-top_status_controls"] [role="switch"] { transform:scale(.38) !important; }
+    [class*="st-key-top_status_controls"] iframe { height:22px !important; min-height:22px !important; }
   }
   [class*="st-key-sound_enabled_toggle"] { padding:5px 8px; border:1px solid #393326; border-radius:12px; background:#15191F; }
   [class*="st-key-sound_enabled_toggle"] label { font-size:.92rem !important; font-weight:650 !important; }
