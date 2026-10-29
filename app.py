@@ -1527,7 +1527,7 @@ with st.sidebar:
         with st.form(key="sidebar_live_search_form", clear_on_submit=False, border=False):
             _search_cols = st.columns([5.2, 1.05], gap="small", vertical_alignment="center")
             with _search_cols[0]:
-                st.text_input("Buscar equipo o liga", placeholder="Ej. Argentinos Juniors, Premier League…", key="search_goal_matches", label_visibility="collapsed", on_change=_clear_live_search_if_empty)
+                st.text_input("Buscar equipo o liga", placeholder="Ej. Argentinos Juniors, Premier League…", key="search_goal_matches", label_visibility="collapsed")
             with _search_cols[1]:
                 search_clicked = st.form_submit_button(" ", icon=":material/search:", key="sidebar_search_button", help="Buscar equipo o liga", use_container_width=True)
     if _sidebar_tool_active:
