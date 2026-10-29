@@ -1758,6 +1758,9 @@ if _analysis_page_active:
           div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{ gap:.4rem !important; }}
           div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{ font-size:.82rem !important; padding:.5rem .25rem !important; min-height:64px !important; height:64px !important; }}
         }}
+        /* Compactar el espaciado residual de Streamlit en la vista individual para reducir el vacío vertical en móvil. */
+        .block-container:has(div[class*="st-key-analysis_page_nav"]) [data-testid="stVerticalBlock"] {{ gap:.4rem !important; row-gap:.4rem !important; }}
+        .block-container:has(div[class*="st-key-analysis_page_nav"]) [data-testid="stElementContainer"] {{ margin-block:0 !important; }}
         /* Acabado premium: navegación compacta, brillo sutil y barrido dorado sin tapar el texto. */
         div[class*="st-key-analysis_page_nav"] {{ margin:0 0 .55rem !important; }}
         div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{ gap:.45rem !important; }}
