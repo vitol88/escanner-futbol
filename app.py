@@ -1321,7 +1321,7 @@ st.markdown("""
     display:block !important;
     /* La regla del contenedor no se refleja en todos los layouts de Streamlit.
        Compensar directamente el espacio reservado por la cabecera fija. */
-    margin-top:-104px !important;
+    margin-top:-80px !important;
     margin-right:0 !important;
     margin-bottom:12px !important;
     margin-left:0 !important;
@@ -1355,7 +1355,7 @@ st.markdown("""
       padding-top:14px !important;
     }
     .h2h-page-kicker {
-      margin-top:-82px !important;
+      margin-top:-65px !important;
       font-size:.88rem !important;
       letter-spacing:.075em !important;
       line-height:1.45 !important;
