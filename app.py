@@ -330,10 +330,11 @@ st.markdown("""
      [class*="st-key-scan_actions_row"] [data-testid="stHorizontalBlock"] {
        grid-template-columns:minmax(0,1.25fr) minmax(0,.9fr) !important; gap:8px !important;
      }
+     [class*="st-key-scan_cta_card"] { margin-top:20px !important; }
      [class*="st-key-scan_cta_card"] [data-testid="stButton"] button,
      [class*="st-key-scan_cta_card"] button[kind="primary"] {
-       min-height:126px !important; height:126px !important; padding:10px 7px 10px 43% !important;
-       border-radius:16px !important; font-size:.78rem !important; line-height:1.35 !important;
+       min-height:116px !important; height:116px !important; padding:9px 7px 9px 43% !important;
+       border-radius:16px !important; font-size:.75rem !important; line-height:1.32 !important;
      }
      [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before {
        left:4% !important; width:34% !important; border-width:2px !important;
