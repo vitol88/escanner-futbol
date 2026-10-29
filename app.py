@@ -1530,7 +1530,7 @@ with st.sidebar:
     if not _sidebar_dedicated_view:
         # Campo fuera de un formulario: permite reaccionar al cambio y limpiar filtros
         # en cuanto Streamlit recibe el valor vacío, sin exigir pulsar la lupa.
-        _search_cols = st.columns([5.2, 1.05, 1.05], gap="small", vertical_alignment="center")
+        _search_cols = st.columns([5.2, 1.05], gap="small", vertical_alignment="center")
         with _search_cols[0]:
             st.text_input(
                 "Buscar equipo o liga",
@@ -1547,20 +1547,6 @@ with st.sidebar:
                 help="Buscar equipo o liga",
                 use_container_width=True,
             )
-        with _search_cols[2]:
-            if st.button(
-                " ",
-                icon=":material/close:",
-                key="sidebar_clear_search_button",
-                help="Borrar búsqueda y mostrar todos los partidos en vivo",
-                use_container_width=True,
-            ):
-                st.session_state["search_goal_matches"] = ""
-                st.session_state.pop("live_search_query", None)
-                st.session_state.pop("live_search_message", None)
-                st.session_state.pop("live_search_submit_requested", None)
-                st.session_state["live_now_expander"] = True
-                st.rerun()
     if _sidebar_tool_active:
         _sidebar_selected_fixture = st.session_state.get("selected_live_fixture") or {}
         _sidebar_home = (_sidebar_selected_fixture.get("teams") or {}).get("home") or {}
