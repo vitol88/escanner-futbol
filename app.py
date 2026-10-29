@@ -2309,7 +2309,9 @@ if _analysis_page_active:
                 with _nav_cols[2]:
                     _top_refresh_clicked = st.button("⟳ Actualizar", key="analysis_page_refresh", use_container_width=True, help="Actualizar escáner")
             else:
-                _back_clicked = st.button("← Volver al partido", key="analysis_page_back", use_container_width=True, help="Volver al partido")
+                # En Estadísticas y H2H la navegación ya está disponible en el menú lateral.
+                # No duplicar el botón "Volver al partido" dentro de esas pantallas.
+                _back_clicked = False
                 _top_scan_clicked = False
                 _top_refresh_clicked = False
             if _top_scan_clicked or _top_refresh_clicked:
