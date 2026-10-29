@@ -1696,17 +1696,29 @@ if _analysis_page_active:
         [class*="st-key-main_h2h_{_analysis_page_id}"] {{ display:none !important; }}
         /* El contenido del análisis debe ocupar todo el ancho y no heredar espaciados del listado. */
         [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stVerticalBlock"] {{ gap:.35rem !important; row-gap:.35rem !important; }}
-        [class*="st-key-analysis_page_nav"] {{ margin-bottom:.5rem !important; display:flex !important; justify-content:flex-start !important; }}
-        [class*="st-key-analysis_page_nav"] [data-testid="stButton"] {{ width:auto !important; max-width:230px !important; }}
+        [class*="st-key-analysis_page_nav"] {{ margin:0 0 .8rem !important; width:100% !important; }}
+        [class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{ display:grid !important; grid-template-columns:minmax(0,1fr) minmax(0,1.25fr) minmax(0,1.15fr) !important; gap:.55rem !important; align-items:stretch !important; }}
+        [class*="st-key-analysis_page_nav"] [data-testid="stButton"] {{ width:100% !important; max-width:none !important; min-width:0 !important; }}
         [class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{
-            width:auto !important; min-height:2.35rem !important; padding:.35rem .85rem !important;
-            border-radius:12px !important; border:1px solid #5B512A !important;
-            background:linear-gradient(135deg,#20242B,#111419) !important;
-            color:#FACC15 !important; font-size:.9rem !important; font-weight:650 !important;
-            box-shadow:0 3px 10px #0004 !important;
+            display:flex !important; align-items:center !important; justify-content:center !important;
+            width:100% !important; min-width:0 !important; min-height:68px !important; height:68px !important;
+            padding:.6rem .4rem !important; box-sizing:border-box !important; white-space:normal !important;
+            border-radius:15px !important; border:2px solid #FACC15 !important;
+            background:linear-gradient(145deg,#20242B,#111419) !important;
+            color:#FFE36A !important; font-size:clamp(.72rem,1.15vw,.98rem) !important; line-height:1.2 !important; font-weight:800 !important;
+            box-shadow:0 3px 12px rgba(250,204,21,.12) !important;
+        }}
+        [class*="st-key-analysis_page_nav"] [data-testid="stButton"]:nth-child(2) > button,
+        [class*="st-key-analysis_page_nav"] [data-testid="stButton"]:nth-child(3) > button {{
+            background:linear-gradient(145deg,#FFE36A,#D6A900) !important; color:#171717 !important;
+            border-color:#FFF09A !important; font-size:clamp(.72rem,1.2vw,1rem) !important;
         }}
         [class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button:hover {{
-            border-color:#FACC15 !important; background:#2A2618 !important; color:#FFE566 !important;
+            border-color:#FFF09A !important; filter:brightness(1.08) !important; transform:translateY(-1px) !important;
+        }}
+        @media(max-width:640px) {{
+          [class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{ gap:.3rem !important; }}
+          [class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{ min-height:60px !important; height:60px !important; padding:.35rem .2rem !important; font-size:.68rem !important; }}
         }}
         </style>
         """,
