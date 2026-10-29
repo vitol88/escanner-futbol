@@ -768,6 +768,43 @@ st.markdown("""
     [class*="st-key-live_match_"] { transition:none !important; }
   }
 
+
+  /* Ajuste final: eliminar el marco exterior duplicado y dar aire a cada liga, sin perder compacidad móvil. */
+  [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] {
+    border:0 !important; outline:0 !important; box-shadow:none !important;
+    background:transparent !important; border-radius:0 !important;
+  }
+  [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details {
+    border:0 !important; outline:0 !important; box-shadow:none !important;
+    background:transparent !important;
+  }
+  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] {
+    border:0 !important; outline:0 !important; box-shadow:none !important;
+    background:transparent !important; overflow:visible !important;
+  }
+  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] > details > summary {
+    min-height:43px !important; margin:0 !important; padding:6px 10px !important;
+    border:1px solid #30343B !important; border-radius:8px !important;
+    background:linear-gradient(100deg,#111419,#0B0D10) !important;
+    box-shadow:none !important;
+  }
+  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] + [data-testid="stExpander"] {
+    margin-top:4px !important;
+  }
+  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] > details[open] > summary {
+    border-color:#6F5C1D !important;
+    background:linear-gradient(100deg,#191A1C,#121419) !important;
+    box-shadow:inset 3px 0 0 #D6B52F !important;
+  }
+  @media(max-width:640px) {
+    [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] > details > summary {
+      min-height:42px !important; padding:5px 9px !important; border-radius:7px !important;
+    }
+    [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] + [data-testid="stExpander"] {
+      margin-top:3px !important;
+    }
+  }
+
 </style>
 """, unsafe_allow_html=True)
 
