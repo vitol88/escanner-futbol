@@ -649,13 +649,13 @@ st.markdown("""
   /* Marcador premium al abrir un partido */
   .fl-match-scoreboard {
     display:grid; grid-template-columns:104px minmax(0,1fr); gap:14px; align-items:center;
-    margin:5px 0 14px; padding:15px 13px; border:1px solid #D4A72C; border-radius:17px;
-    background:radial-gradient(ellipse at 10% 50%,rgba(250,204,21,.10),transparent 45%),linear-gradient(145deg,#171A20,#090A0D);
-    box-shadow:inset 0 0 18px rgba(250,204,21,.04),0 0 0 1px rgba(250,204,21,.06);
+    margin:3px 0 7px; padding:13px 12px; border:1px solid #343840; border-radius:15px;
+    background:radial-gradient(ellipse at 10% 50%,rgba(250,204,21,.055),transparent 45%),linear-gradient(145deg,#171A20,#090A0D);
+    box-shadow:inset 0 0 12px rgba(250,204,21,.025);
   }
   .fl-match-clock {
     display:flex; min-height:82px; flex-direction:column; align-items:center; justify-content:center; gap:7px;
-    border:1px solid #A88921; border-radius:13px; background:linear-gradient(145deg,#24200F,#111419);
+    border:1px solid #655522; border-radius:12px; background:linear-gradient(145deg,#201E16,#111419);
   }
   .fl-match-minute { display:flex; align-items:baseline; justify-content:center; gap:1px; color:#FFE566; font-size:1.12rem; line-height:1.1; font-weight:850; font-variant-numeric:tabular-nums; letter-spacing:.1px; }
   .fl-match-minute-main { font-size:1.12rem; font-weight:900; }
@@ -714,16 +714,28 @@ st.markdown("""
   }
 
 
-  /* Hover sutil premium en cada tarjeta de partido: dorado cálido, coherente con Football Lab */
+  /* Tarjetas limpias: borde discreto en reposo y un único acento dorado al pasar el cursor */
   [class*="st-key-live_match_"] {
     border:1px solid transparent !important;
-    border-radius:18px !important;
+    border-radius:16px !important;
+    margin:0 0 5px !important;
+    padding:0 !important;
+    background:transparent !important;
+    box-shadow:none !important;
     transition:background .2s ease,border-color .2s ease,box-shadow .2s ease !important;
   }
   [class*="st-key-live_match_"]:hover {
-    border-color:rgba(250,204,21,.78) !important;
-    background:linear-gradient(135deg,rgba(250,204,21,.075),rgba(250,204,21,.018) 70%,transparent) !important;
-    box-shadow:inset 3px 0 0 rgba(250,204,21,.78),0 0 14px rgba(250,204,21,.075) !important;
+    border-color:rgba(250,204,21,.72) !important;
+    background:linear-gradient(135deg,rgba(250,204,21,.045),rgba(250,204,21,.012) 70%,transparent) !important;
+    box-shadow:inset 2px 0 0 rgba(250,204,21,.62),0 2px 10px rgba(250,204,21,.045) !important;
+  }
+  /* El marcador no duplica el borde exterior de la tarjeta. */
+  [class*="st-key-live_match_"] .fl-match-scoreboard {
+    border-color:#343840 !important;
+    box-shadow:inset 0 0 12px rgba(250,204,21,.025) !important;
+  }
+  [class*="st-key-live_match_"]:hover .fl-match-scoreboard {
+    border-color:rgba(250,204,21,.45) !important;
   }
   @media(prefers-reduced-motion:reduce) {
     [class*="st-key-live_match_"] { transition:none !important; }
