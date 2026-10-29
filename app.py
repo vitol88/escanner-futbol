@@ -693,7 +693,13 @@ st.markdown("""
   }
   [class*="st-key-live_match_"] [data-testid="stButton"] > button p {
     display:flex !important; justify-content:center !important; align-items:center !important;
-    font-size:inherit !important; line-height:1 !important; margin:0 !important;
+    font-size:0 !important; line-height:1 !important; margin:0 !important; min-width:0 !important;
+  }
+  [class*="st-key-live_match_"] [data-testid="stButton"] [data-testid="stIconMaterial"] {
+    font-size:1.8rem !important; line-height:1 !important; color:inherit !important;
+  }
+  [class*="st-key-live_match_"] [data-testid="stButton"] svg {
+    width:1.8rem !important; height:1.8rem !important; flex-shrink:0 !important;
   }
   [class*="st-key-live_match_"] [data-testid="stButton"] > button:hover {
     transform:translateY(-2px) !important; border-color:#FFE566 !important;
@@ -1565,16 +1571,16 @@ else:
                                 current_tool = st.session_state.get("main_fixture_tool") or {}
                                 active_market = current_tool.get("market") if str(current_tool.get("fixture_id")) == str(match_id) else None
                                 active_tool = current_tool.get("tool") if str(current_tool.get("fixture_id")) == str(match_id) else None
-                                # Iconos solamente; los títulos descriptivos se muestran en la ayuda al pasar el cursor.
+                                # Iconografía Material uniforme: trazos consistentes y ayuda accesible en cada botón.
                                 action_cols = st.columns(4, gap="small")
                                 with action_cols[0]:
-                                    show_stats = st.button("▥", help="Estadísticas en vivo", key=f"main_stats_{match_id}", type="primary" if active_tool == "stats" else "secondary", use_container_width=True)
+                                    show_stats = st.button(" ", icon=":material/query_stats:", help="Estadísticas en vivo", key=f"main_stats_{match_id}", type="primary" if active_tool == "stats" else "secondary", use_container_width=True)
                                 with action_cols[1]:
-                                    show_goals = st.button("⚽⚡", help="Goles y señales", key=f"main_market_{match_id}_goals", type="primary" if active_market == "goals" else "secondary", use_container_width=True)
+                                    show_goals = st.button(" ", icon=":material/sports_soccer:", help="Goles y señales", key=f"main_market_{match_id}_goals", type="primary" if active_market == "goals" else "secondary", use_container_width=True)
                                 with action_cols[2]:
-                                    show_corners = st.button("⚑⚡", help="Córners y señales", key=f"main_market_{match_id}_corners", type="primary" if active_market == "corners" else "secondary", use_container_width=True)
+                                    show_corners = st.button(" ", icon=":material/flag:", help="Córners y señales", key=f"main_market_{match_id}_corners", type="primary" if active_market == "corners" else "secondary", use_container_width=True)
                                 with action_cols[3]:
-                                    show_h2h = st.button("🛡️↔️🛡️", help="Historial de enfrentamientos (H2H)", key=f"main_h2h_{match_id}", type="primary" if active_tool == "h2h" else "secondary", use_container_width=True)
+                                    show_h2h = st.button(" ", icon=":material/compare_arrows:", help="Historial de enfrentamientos (H2H)", key=f"main_h2h_{match_id}", type="primary" if active_tool == "h2h" else "secondary", use_container_width=True)
                                 if show_stats:
                                     stats_key = str(match_id)
                                     if stats_key not in st.session_state.stats_cache or stats_key in st.session_state.get("stats_errors", {}):
