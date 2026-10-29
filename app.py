@@ -241,6 +241,10 @@ st.markdown("""
     50% { transform:translate(-50%,-50%) rotate(180deg) scale(1.08); }
     100% { transform:translate(-50%,-50%) rotate(360deg) scale(1); }
   }
+  @keyframes scanner-radar-spin {
+    from { transform:translateY(-50%) rotate(0deg); }
+    to { transform:translateY(-50%) rotate(360deg); }
+  }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] button:hover, [class*="st-key-scan_cta_card"] button[kind="primary"]:hover { border-color:#FFE36A !important; background-color:#090A0D !important; background-image:radial-gradient(ellipse at 20% 50%,rgba(250,204,21,.13),transparent 42%),linear-gradient(135deg,#14151A,#1A180F) !important; color:#FFE36A !important; }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] button:active { transform:scale(.99); }
   .scan-refresh-feedback { margin:8px 2px 12px; padding:11px 14px 12px; border:1px solid rgba(250,204,21,.42); border-radius:13px; color:#FFE36A; background:linear-gradient(110deg,#17191F,#0B0D10); }
@@ -931,7 +935,7 @@ st.markdown("""
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
     content:"" !important; position:absolute !important; left:4% !important; top:50% !important;
     width:min(38%,170px) !important; aspect-ratio:1 !important; height:auto !important;
-    transform:translateY(-50%) !important; border-radius:50% !important; border:3px solid #FACC15 !important;
+    transform:translateY(-50%); border-radius:50% !important; border:3px solid #FACC15 !important;
     background-color:#090A0D !important;
     background-image:radial-gradient(circle at center,#FACC15 0 6%,#14151A 7% 14%,transparent 15%),repeating-radial-gradient(circle at center,transparent 0 10px,rgba(250,204,21,.55) 11px 13px,transparent 14px 20px),conic-gradient(from 0deg,transparent 0 12%,rgba(250,204,21,.95) 16%,transparent 28% 48%,rgba(250,204,21,.45) 53%,transparent 68%) !important;
     box-shadow:0 0 20px rgba(250,204,21,.45),inset 0 0 18px rgba(250,204,21,.25) !important;
