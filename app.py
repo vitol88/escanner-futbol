@@ -248,6 +248,8 @@ st.markdown("""
   .scan-refresh-feedback:not(.is-done) .scan-refresh-fill { animation:scan-refresh-progress 1.8s ease-in-out infinite alternate; }
   @keyframes scan-refresh-spin { to { transform:rotate(360deg); } }
   @keyframes scan-refresh-progress { from { width:24% !important; } to { width:82% !important; } }
+  [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button { width:100% !important; min-height:44px !important; padding:8px 12px !important; border:1px solid #D6B84C !important; border-radius:11px !important; background:linear-gradient(135deg,#292416,#17191F) !important; color:#FFE36A !important; font-size:.88rem !important; font-weight:850 !important; line-height:1.2 !important; white-space:normal !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 2px 8px rgba(0,0,0,.2) !important; }
+  [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button:hover { border-color:#FFE566 !important; background:linear-gradient(135deg,#443819,#242018) !important; color:#FFF1A8 !important; box-shadow:0 0 14px rgba(250,204,21,.2) !important; }
   .scan-running-status { position:relative; display:flex; align-items:center; gap:12px; overflow:hidden; color:#FACC15; margin:8px 2px 0; padding:12px 14px; border:1px solid rgba(250,204,21,.35); border-radius:14px; background:linear-gradient(110deg,#17191F,#0B0D10); font-size:.92rem; font-weight:700; }
   .scan-code-icon { display:inline-block; flex:0 0 auto; font-size:2rem; transform-origin:center; animation:scanner-spiral-spin .8s linear infinite; text-shadow:0 0 12px rgba(250,204,21,.8); }
   .scan-running-subtitle { color:#A1A1AA; font-size:.82rem; font-weight:500; margin-top:3px; }
@@ -2644,13 +2646,22 @@ else:
                                                 # El diagnóstico se conserva internamente en history para depuración,
                                                 # pero no se muestra en la interfaz normal del usuario.
 
-                                                st.markdown("### ⌁ Histórico de córners")
+                                                history_title_col, history_button_col = st.columns([1.55, 1], vertical_alignment="center", gap="small")
+                                                with history_title_col:
+                                                    st.markdown("### ⌁ Histórico de córners")
                                                 home_team = (match.get("teams") or {}).get("home") or {}
                                                 away_team = (match.get("teams") or {}).get("away") or {}
                                                 h2h_key = f"corner-h2h-v3-home-{home_team.get('id')}-{away_team.get('id')}"
                                                 if "corner_h2h_cache" not in st.session_state:
                                                     st.session_state.corner_h2h_cache = {}
-                                                if st.button("Consultar histórico de córners", key=f"corner_h2h_{match_id}"):
+                                                with history_button_col:
+                                                    show_corner_history = st.button(
+                                                        "📊 Ver histórico",
+                                                        key=f"corner_h2h_{match_id}",
+                                                        help="Pulsa para consultar los últimos enfrentamientos y sus córners.",
+                                                        use_container_width=True,
+                                                    )
+                                                if show_corner_history:
                                                     if not home_team.get("id") or not away_team.get("id"):
                                                         st.warning("No están disponibles los IDs de los dos equipos.")
                                                     else:
