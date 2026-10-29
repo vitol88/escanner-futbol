@@ -936,6 +936,81 @@ st.markdown("""
       min-height:84px !important; height:84px !important; padding:10px 5px !important; font-size:.84rem !important;
     }
   }
+
+  /* CORRECCIÓN DEFINITIVA: las dos columnas de escaneo deben ocupar el ancho disponible. */
+  [class*="st-key-analysis_scan_cta_goals_"],
+  [class*="st-key-analysis_scan_cta_corners_"] {
+    display:block !important; width:100% !important; min-width:0 !important; max-width:100% !important;
+    overflow:visible !important; margin:12px 0 18px !important;
+  }
+  [class*="st-key-analysis_scan_cta_goals_"] [data-testid="stHorizontalBlock"],
+  [class*="st-key-analysis_scan_cta_corners_"] [data-testid="stHorizontalBlock"] {
+    display:grid !important; grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+    gap:12px !important; width:100% !important; min-width:0 !important;
+    align-items:stretch !important; overflow:visible !important;
+  }
+  [class*="st-key-analysis_scan_cta_goals_"] [data-testid="column"],
+  [class*="st-key-analysis_scan_cta_corners_"] [data-testid="column"] {
+    display:block !important; width:100% !important; min-width:0 !important; max-width:100% !important;
+    flex:1 1 0 !important; overflow:visible !important;
+  }
+  [class*="st-key-analysis_scan_radar_goals_"],
+  [class*="st-key-analysis_scan_goals_"],
+  [class*="st-key-analysis_scan_radar_corners_"],
+  [class*="st-key-analysis_scan_corners_"] {
+    display:block !important; width:100% !important; min-width:0 !important; max-width:100% !important;
+    flex:1 1 0 !important; overflow:visible !important;
+  }
+  [class*="st-key-analysis_scan_radar_goals_"] [data-testid="stButton"],
+  [class*="st-key-analysis_scan_goals_"] [data-testid="stButton"],
+  [class*="st-key-analysis_scan_radar_corners_"] [data-testid="stButton"],
+  [class*="st-key-analysis_scan_corners_"] [data-testid="stButton"] {
+    display:block !important; width:100% !important; min-width:0 !important; max-width:100% !important;
+  }
+  [class*="st-key-analysis_scan_radar_goals_"] [data-testid="stButton"] > button,
+  [class*="st-key-analysis_scan_goals_"] [data-testid="stButton"] > button,
+  [class*="st-key-analysis_scan_radar_corners_"] [data-testid="stButton"] > button,
+  [class*="st-key-analysis_scan_corners_"] [data-testid="stButton"] > button {
+    display:flex !important; align-items:center !important; justify-content:center !important;
+    position:relative !important; width:100% !important; min-width:0 !important; max-width:100% !important;
+    height:94px !important; min-height:94px !important; box-sizing:border-box !important;
+    padding:12px 8px !important; margin:0 !important; overflow:hidden !important;
+    white-space:normal !important; overflow-wrap:anywhere !important; text-align:center !important;
+    border:2px solid #FACC15 !important; border-radius:16px !important;
+    background:linear-gradient(145deg,#292516,#111318) !important; color:#FFE36A !important;
+    font-size:clamp(.9rem,2.7vw,1.08rem) !important; line-height:1.3 !important; font-weight:850 !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 4px 15px rgba(0,0,0,.25) !important;
+  }
+  /* El icono radar decorativo no debe alterar el ancho real del botón. */
+  [class*="st-key-analysis_scan_radar_goals_"] [data-testid="stButton"] > button::before,
+  [class*="st-key-analysis_scan_radar_corners_"] [data-testid="stButton"] > button::before {
+    position:static !important; display:inline-block !important; flex:0 0 auto !important;
+    width:auto !important; height:auto !important; aspect-ratio:auto !important;
+    margin:0 7px 0 0 !important; transform:none !important; border:0 !important;
+    background:none !important; box-shadow:none !important; animation:none !important;
+    content:"◉" !important; color:#FACC15 !important; font-size:1.35rem !important;
+  }
+  [class*="st-key-analysis_page_nav"] { width:100% !important; margin:0 0 14px !important; }
+  [class*="st-key-analysis_page_nav"] [data-testid="stButton"] { width:auto !important; max-width:320px !important; }
+  [class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {
+    width:auto !important; min-width:220px !important; min-height:52px !important; height:auto !important;
+    padding:12px 20px !important; border-radius:14px !important; border:2px solid #FACC15 !important;
+    background:linear-gradient(145deg,#20242B,#111419) !important; color:#FFE36A !important;
+    font-size:1rem !important; font-weight:800 !important; box-shadow:0 4px 14px rgba(250,204,21,.12) !important;
+  }
+  @media(max-width:640px) {
+    [class*="st-key-analysis_scan_cta_goals_"] [data-testid="stHorizontalBlock"],
+    [class*="st-key-analysis_scan_cta_corners_"] [data-testid="stHorizontalBlock"] { gap:7px !important; }
+    [class*="st-key-analysis_scan_radar_goals_"] [data-testid="stButton"] > button,
+    [class*="st-key-analysis_scan_goals_"] [data-testid="stButton"] > button,
+    [class*="st-key-analysis_scan_radar_corners_"] [data-testid="stButton"] > button,
+    [class*="st-key-analysis_scan_corners_"] [data-testid="stButton"] > button {
+      height:82px !important; min-height:82px !important; padding:8px 4px !important; font-size:.82rem !important;
+    }
+    [class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {
+      min-width:190px !important; min-height:48px !important; padding:10px 14px !important; font-size:.9rem !important;
+    }
+  }
 </style>
 """, unsafe_allow_html=True)
 
