@@ -2058,12 +2058,8 @@ if _analysis_page_active:
         [class*="st-key-analysis_nav_back_row"],
         [class*="st-key-analysis_nav_scan_row"],
         [class*="st-key-analysis_nav_refresh_row"] {{ width:100% !important; margin:0 0 8px 0 !important; padding:0 !important; }}
-        [class*="st-key-analysis_nav_back_row"] [data-testid="stHorizontalBlock"],
-        [class*="st-key-analysis_nav_scan_row"] [data-testid="stHorizontalBlock"],
-        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stHorizontalBlock"] {{ display:block !important; }}
-        [class*="st-key-analysis_nav_back_row"] [data-testid="column"],
-        [class*="st-key-analysis_nav_scan_row"] [data-testid="column"],
-        [class*="st-key-analysis_nav_refresh_row"] [data-testid="column"] {{ width:100% !important; max-width:100% !important; }}
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stHorizontalBlock"] {{ display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)) !important; gap:10px !important; align-items:stretch !important; width:100% !important; }}
+        [class*="st-key-analysis_nav_back_row"] [data-testid="column"] {{ width:auto !important; min-width:0 !important; max-width:100% !important; flex:none !important; }}
         [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button,
         [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button,
         [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{
