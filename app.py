@@ -1288,8 +1288,6 @@ with st.sidebar:
             st.session_state["analysis_scan_feedback"] = {"fixture_id": _sidebar_tool_id, "market": _sidebar_tool_market, "action": _side_action, "state": "running"}
             st.rerun()
         st.divider()
-    st.write("La clave se lee desde Secrets o desde una variable de entorno.")
-    st.caption("No publiques tu clave de API en GitHub.")
     st.divider()
     if not _sidebar_dedicated_view:
         st.markdown('<div style="font-size:.78rem;font-weight:900;letter-spacing:.16em;color:#FFE36A;margin-bottom:12px;text-transform:uppercase;">HERRAMIENTAS DEL PARTIDO</div>', unsafe_allow_html=True)
