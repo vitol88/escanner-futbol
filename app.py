@@ -2596,8 +2596,9 @@ fixtures = st.session_state.live_fixtures
 if search_clicked:
     _query = str(st.session_state.get("search_goal_matches", "") or "").strip().casefold()
     if not _query:
-        st.session_state["live_search_message"] = "Escribe el nombre de un equipo o una liga para buscar."
+        # Una búsqueda vacía restablece la lista completa de partidos en vivo.
         st.session_state.pop("live_search_query", None)
+        st.session_state.pop("live_search_message", None)
     else:
         st.session_state["live_search_query"] = _query
         st.session_state.pop("live_search_message", None)
@@ -2639,12 +2640,15 @@ if search_clicked:
                 st.session_state[f"live_league_{_country_info}_{_league_name_info}"] = True
             st.session_state["live_search_message"] = f"Se encontraron {len(_league_matches)} partidos en la liga o país indicado."
         else:
-            st.session_state.pop("live_search_query", None)
+            # Conservar la consulta para que el listado quede vacío y muestre el estado sin resultados.
+            st.session_state["live_search_query"] = _query
             st.session_state["live_search_message"] = "No hay resultados"
     st.rerun()
 
-if st.session_state.get("live_search_message") and not _sidebar_dedicated_view:
-    st.sidebar.info(st.session_state["live_search_message"])
+# Borrar el texto de búsqueda restaura todos los partidos en vivo automáticamente.
+if not str(st.session_state.get("search_goal_matches", "") or "").strip():
+    st.session_state.pop("live_search_query", None)
+    st.session_state.pop("live_search_message", None)
 
 if not fixtures:
     st.markdown("### Tu centro de análisis")
@@ -2661,6 +2665,8 @@ else:
     # Mostrar partidos en vivo; si se envió una búsqueda, priorizar sus resultados.
     filtered = list(fixtures)
     _submitted_query = str(st.session_state.get("live_search_query", "") or "").strip().casefold()
+    if not str(st.session_state.get("search_goal_matches", "") or "").strip():
+        _submitted_query = ""
     if _submitted_query:
         _team_filtered = []
         _league_filtered = []
@@ -2676,6 +2682,14 @@ else:
         filtered = _team_filtered[:1] if _team_filtered else _league_filtered
     with st.container(key="live_now_section"):
         with st.expander(f"En vivo ahora ({len(filtered)})", expanded=st.session_state.get("live_now_expander", False) or bool(_submitted_query), key="live_now_expander", on_change="rerun"):
+            if not filtered and _submitted_query:
+                st.markdown(
+                    '<div style="display:flex;align-items:center;justify-content:center;gap:10px;'
+                    'margin:10px 0 14px;padding:22px 14px;border:1px solid #34312A;border-radius:12px;'
+                    'background:linear-gradient(135deg,#15171C,#101216);color:#FACC15;font-weight:800;'
+                    'font-size:1rem;"><span style="font-size:1.25rem;">⌕</span> No hay resultados</div>',
+                    unsafe_allow_html=True,
+                )
             if filtered:
                 grouped = {}
                 for match in filtered:
