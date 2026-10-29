@@ -1656,10 +1656,12 @@ if _analysis_page_active:
         /* Pantalla dedicada: dejar únicamente el botón de regreso y el contenido del análisis elegido. */
         [class*="st-key-control_row"], [class*="st-key-scan_cta_card"],
         [class*="st-key-scan-progress"], .brand-header, .match-analysis-panel {{ display:none !important; }}
-        /* Ocultar cabecera general, cabeceras de ligas y la cabecera del partido seleccionado. */
-        [class*="st-key-live_now_expander"] summary,
+        /* En la vista individual se oculta la cabecera de "En vivo ahora" y el reloj del listado. */
+        [class*="st-key-live_now_expander"] > div[data-testid="stExpander"] > details > summary,
+        [class*="st-key-live_now_expander"] [data-testid="stExpander"] > details > summary,
         [class*="st-key-live_league_"] summary,
         [class*="st-key-live_match_{_analysis_page_id}"] summary {{ display:none !important; }}
+        [class*="st-key-live_match_{_analysis_page_id}"] .fl-match-scoreboard {{ display:none !important; }}
         [class*="st-key-live_league_"]:not(:has([class*="st-key-live_match_{_analysis_page_id}"])) {{ display:none !important; }}
         [class*="st-key-live_league_"] [class*="st-key-live_match_"]:not([class*="st-key-live_match_{_analysis_page_id}"]) {{ display:none !important; }}
         /* La lista de ligas y su contenedor no deben añadir marco, relleno ni huecos a la vista de análisis. */
@@ -1683,11 +1685,12 @@ if _analysis_page_active:
         div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > div {{ display:block !important; width:100% !important; min-width:0 !important; max-width:none !important; }}
         div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{
             display:flex !important; align-items:center !important; justify-content:center !important;
-            width:100% !important; min-width:0 !important; max-width:none !important; min-height:88px !important; height:88px !important;
-            padding:1rem .65rem !important; box-sizing:border-box !important; white-space:normal !important; overflow-wrap:anywhere !important;
-            border-radius:18px !important; border:2px solid #FACC15 !important;
+            width:100% !important; min-width:0 !important; max-width:none !important; min-height:78px !important; height:78px !important;
+            padding:.8rem .55rem !important; box-sizing:border-box !important; white-space:normal !important; overflow-wrap:anywhere !important;
+            border-radius:17px !important; border:2px solid #FACC15 !important;
             background:radial-gradient(ellipse at 15% 50%,rgba(250,204,21,.12),transparent 45%),linear-gradient(145deg,#20242B,#111419) !important;
-            color:#FFE36A !important; font-size:clamp(.85rem,1.15vw,1.08rem) !important; line-height:1.25 !important; font-weight:850 !important;
+            color:#FFE978 !important; font-size:clamp(.95rem,1.25vw,1.12rem) !important; line-height:1.25 !important; font-weight:950 !important;
+            text-shadow:0 1px 1px rgba(0,0,0,.25) !important;
             box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 5px 18px rgba(0,0,0,.25) !important;
         }}
         div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button p {{ margin:0 !important; }}
@@ -1707,7 +1710,7 @@ if _analysis_page_active:
           div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{ gap:.35rem !important; }}
           div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{
             min-height:76px !important; height:76px !important; padding:.5rem .25rem !important;
-            font-size:.76rem !important; line-height:1.15 !important; border-radius:14px !important;
+            font-size:.78rem !important; line-height:1.2 !important; font-weight:950 !important; border-radius:14px !important;
           }}
         }}
         </style>
@@ -1723,7 +1726,7 @@ if _analysis_page_active:
             with _nav_cols[1]:
                 _top_scan_clicked = st.button("⚽ Escanear en vivo", key="analysis_page_scan", use_container_width=True)
             with _nav_cols[2]:
-                _top_refresh_clicked = st.button("⟳ Actualizar scan", key="analysis_page_refresh", use_container_width=True)
+                _top_refresh_clicked = st.button("⟳ Actualizar escáner", key="analysis_page_refresh", use_container_width=True)
             if _top_scan_clicked or _top_refresh_clicked:
                 st.session_state["analysis_scan_request"] = {
                     "fixture_id": _analysis_page_id,
@@ -1731,6 +1734,12 @@ if _analysis_page_active:
                     "action": "scan" if _top_scan_clicked else "refresh",
                 }
                 st.rerun()
+            _visible_scan_request = st.session_state.get("analysis_scan_request") or {}
+            if str(_visible_scan_request.get("fixture_id")) == _analysis_page_id and _visible_scan_request.get("market") == _nav_market:
+                st.markdown(
+                    '<div class="scan-running-status"><span class="scan-code-icon">⟳</span><div><strong>ESCANEANDO…</strong><div class="scan-running-subtitle">Actualizando señales y datos en vivo</div></div><span class="scan-sweep"></span></div>',
+                    unsafe_allow_html=True,
+                )
         if _back_clicked:
             # Mantener abierta la liga y el encuentro que originaron esta vista.
             st.session_state[f"live_match_{_analysis_page_id}"] = True
@@ -2057,7 +2066,7 @@ else:
                                             if _goal_radar_clicked or _goal_refresh_clicked:
                                                     manual_scan = True
                                                     internal_scan_requested = True
-                                                    st.markdown('<div class="scan-running-status"><span class="scan-code-icon">⟳</span><div><strong>ESCANEANDO…</strong><div class="scan-running-subtitle">Actualizando señales de goles y datos en vivo</div></div><span class="scan-sweep"></span></div>', unsafe_allow_html=True)
+                                                    # El estado de escaneo se muestra una sola vez debajo de los botones superiores.
                                             st.markdown('<div class="match-analysis-kicker">Mercado seleccionado · goles</div><div class="match-analysis-title">Goles y señales</div>', unsafe_allow_html=True)
                                             # Mostrar el marcador actual con escudos, igual que en la sección de córners.
                                             st.markdown(fixture_hero_html(match, mode="goals"), unsafe_allow_html=True)
@@ -2519,7 +2528,7 @@ else:
                                                     }
                                                     manual_scan = True
                                                     internal_scan_requested = True
-                                                    st.markdown('<div class="scan-running-status"><span class="scan-code-icon">⟳</span><div><strong>ESCANEANDO…</strong><div class="scan-running-subtitle">Actualizando proyección y datos en vivo</div></div><span class="scan-sweep"></span></div>', unsafe_allow_html=True)
+                                                    # El estado de escaneo se muestra una sola vez debajo de los botones superiores.
                                             st.markdown('<div class="match-analysis-kicker">Mercado seleccionado · córners</div><div class="match-analysis-title">Ritmo y proyección de córners</div>', unsafe_allow_html=True)
                                             # Reutilizar primero las estadísticas que ya consultó el escáner en vivo.
                                             live_corner_stats = st.session_state.stats_cache.get(str(match_id))
