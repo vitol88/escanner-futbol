@@ -1903,8 +1903,27 @@ if _analysis_page_active:
             position:relative !important;z-index:3 !important;display:block !important;margin:0 !important;
             color:inherit !important;font-size:0 !important;line-height:1 !important;
         }}
+        /* Botón Volver: borde dorado nítido y flecha tecnológica con pulso sutil. */
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button {{
+            border:2px solid #FACC15 !important;
+            background:radial-gradient(ellipse at 50% 50%,rgba(250,204,21,.18),transparent 68%),linear-gradient(145deg,#24221A,#111419) !important;
+            color:#FFE978 !important;
+            box-shadow:inset 0 0 13px rgba(250,204,21,.10),0 0 0 1px rgba(250,204,21,.22),0 0 15px rgba(250,204,21,.13),0 4px 14px rgba(0,0,0,.28) !important;
+        }}
         [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button p {{
-            font-size:43px !important;animation:analysis-arrow-tilt 1.35s ease-in-out infinite !important;
+            position:relative !important;display:flex !important;align-items:center !important;justify-content:center !important;
+            width:100% !important;height:100% !important;font-size:0 !important;line-height:1 !important;
+            animation:none !important;
+        }}
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button p::before {{
+            content:"⟵" !important;display:block !important;
+            color:#FFE978 !important;font-family:system-ui,-apple-system,"Segoe UI Symbol",sans-serif !important;
+            font-size:48px !important;font-weight:900 !important;line-height:1 !important;
+            text-shadow:0 0 7px rgba(250,204,21,.65),0 0 17px rgba(250,204,21,.24) !important;
+            transform-origin:center !important;animation:analysis-arrow-pulse 1.65s ease-in-out infinite !important;
+        }}
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"]:hover > button {{
+            border-color:#FFF09A !important;box-shadow:inset 0 0 16px rgba(250,204,21,.16),0 0 18px rgba(250,204,21,.25) !important;
         }}
         [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::before {{
             content:"" !important;display:block !important;position:absolute !important;z-index:1 !important;
@@ -1953,6 +1972,10 @@ if _analysis_page_active:
             25% {{ transform:translateX(-3px) rotate(-8deg); }}
             60% {{ transform:translateX(2px) rotate(4deg); }}
         }}
+        @keyframes analysis-arrow-pulse {{
+            0%,100% {{ transform:scale(.94) translateX(0);opacity:.86; }}
+            50% {{ transform:scale(1.08) translateX(-2px);opacity:1; }}
+        }}
         @keyframes analysis-refresh-spin {{
             from {{ transform:rotate(0deg); }}
             to {{ transform:rotate(360deg); }}
@@ -1983,7 +2006,7 @@ if _analysis_page_active:
           .analysis-nav-label {{ font-size:1rem !important; }}
         }}
         @media(prefers-reduced-motion:reduce) {{
-          [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button p,
+          [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button p::before,
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::before,
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::after,
           [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button p {{ animation-duration:2.5s !important; }}
