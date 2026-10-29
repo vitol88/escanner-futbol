@@ -648,26 +648,30 @@ st.markdown("""
 
   /* Marcador premium al abrir un partido */
   .fl-match-scoreboard {
-    display:grid; grid-template-columns:104px minmax(0,1fr); gap:14px; align-items:center;
-    margin:3px 0 7px; padding:13px 12px; border:1px solid #343840; border-radius:15px;
+    display:grid; grid-template-columns:100px minmax(0,1fr); gap:13px; align-items:center;
+    margin:3px 0 7px; padding:12px; border:1px solid #343840; border-radius:15px;
     background:radial-gradient(ellipse at 10% 50%,rgba(250,204,21,.055),transparent 45%),linear-gradient(145deg,#171A20,#090A0D);
     box-shadow:inset 0 0 12px rgba(250,204,21,.025);
   }
   .fl-match-clock {
-    display:flex; min-height:82px; flex-direction:column; align-items:center; justify-content:center; gap:7px;
+    display:flex; min-height:80px; flex-direction:column; align-items:center; justify-content:center; gap:7px;
     border:1px solid #655522; border-radius:12px; background:linear-gradient(145deg,#201E16,#111419);
+    padding:5px 3px; box-sizing:border-box;
   }
   .fl-match-minute { display:flex; align-items:baseline; justify-content:center; gap:1px; color:#FFE566; font-size:1.12rem; line-height:1.1; font-weight:850; font-variant-numeric:tabular-nums; letter-spacing:.1px; }
   .fl-match-minute-main { font-size:1.12rem; font-weight:900; }
   .fl-match-clock-separator { color:#FACC15; opacity:.85; font-size:.98rem; font-weight:800; }
   .fl-match-seconds { color:#FFF0A3; font-size:.92rem; font-weight:750; }
   .fl-match-live { color:#FFF; background:#E23D32; border-radius:5px; padding:3px 7px; font-size:.62rem; font-weight:850; letter-spacing:.7px; }
-  .fl-match-teams { min-width:0; display:flex; flex-direction:column; gap:11px; }
-  .fl-match-team { display:grid; grid-template-columns:29px 25px minmax(0,1fr); align-items:center; gap:8px; color:#F4F4F5; font-size:.94rem; font-weight:650; line-height:1.2; }
-  .fl-match-goals { color:#FFE566; font-size:1.42rem; font-weight:900; font-variant-numeric:tabular-nums; text-align:center; }
-  .fl-match-crest { width:25px; height:25px; object-fit:contain; }
-  .fl-match-crest-empty { width:25px; text-align:center; color:#FACC15; }
-  .fl-match-team-name { overflow-wrap:anywhere; }
+  .fl-match-teams { min-width:0; display:flex; flex-direction:column; gap:8px; }
+  .fl-match-team {
+    display:grid; grid-template-columns:30px 26px minmax(0,1fr); align-items:center; gap:8px;
+    min-width:0; min-height:32px; color:#F4F4F5; font-size:.92rem; font-weight:620; line-height:1.15;
+  }
+  .fl-match-goals { color:#FFE566; font-size:1.36rem; font-weight:900; font-variant-numeric:tabular-nums; text-align:center; line-height:1; }
+  .fl-match-crest { display:block; width:25px; height:25px; object-fit:contain; justify-self:center; }
+  .fl-match-crest-empty { display:block; width:25px; text-align:center; color:#FACC15; justify-self:center; }
+  .fl-match-team-name { display:block; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; letter-spacing:.05px; }
   /* Botones compactos: solo iconos; el nombre aparece con el tooltip al pasar/tocar */
   [class*="st-key-live_match_"] [data-testid="stHorizontalBlock"] { gap:.55rem !important; }
   [class*="st-key-live_match_"] [data-testid="stButton"] > button {
@@ -697,15 +701,17 @@ st.markdown("""
   @keyframes fl-button-glow { 0%,100% { box-shadow:inset 0 0 10px rgba(250,204,21,.035),0 0 4px rgba(250,204,21,.025); } 50% { box-shadow:inset 0 0 14px rgba(250,204,21,.08),0 0 11px rgba(250,204,21,.12); } }
   @keyframes fl-button-active { 0%,100% { box-shadow:0 0 12px rgba(250,204,21,.20); } 50% { box-shadow:0 0 23px rgba(250,204,21,.42); } }
   @media(max-width:420px) {
-    .fl-match-scoreboard { grid-template-columns:82px minmax(0,1fr); gap:9px; padding:10px 8px; border-radius:14px; }
+    .fl-match-scoreboard { grid-template-columns:82px minmax(0,1fr); gap:10px; padding:10px 9px; border-radius:14px; }
     .fl-match-clock { min-height:76px; }
     .fl-match-minute { font-size:1rem; }
     .fl-match-minute-main { font-size:1rem; }
     .fl-match-clock-separator { font-size:.88rem; }
     .fl-match-seconds { font-size:.82rem; }
-    .fl-match-team { grid-template-columns:25px 21px minmax(0,1fr); gap:5px; font-size:.78rem; }
-    .fl-match-goals { font-size:1.2rem; }
-    .fl-match-crest,.fl-match-crest-empty { width:21px; }
+    .fl-match-team { grid-template-columns:24px 21px minmax(0,1fr); gap:5px; min-height:29px; font-size:.77rem; }
+    .fl-match-teams { gap:7px; }
+    .fl-match-goals { font-size:1.16rem; }
+    .fl-match-crest { width:21px; height:21px; }
+    .fl-match-crest-empty { width:21px; }
     [class*="st-key-live_match_"] [data-testid="stHorizontalBlock"] { gap:.35rem !important; }
     [class*="st-key-live_match_"] [data-testid="stButton"] > button { height:58px !important; min-height:58px !important; font-size:1.22rem !important; border-radius:12px !important; }
   }
