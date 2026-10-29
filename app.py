@@ -1914,12 +1914,12 @@ if _analysis_page_active:
         }}
         div[class*="st-key-analysis_nav_back_row"] div[data-testid="stButton"] button::before,
         div[class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button::before {{
-            content:"⟵" !important;position:absolute !important;inset:0 !important;
+            content:"←" !important;position:absolute !important;inset:0 !important;
             display:flex !important;align-items:center !important;justify-content:center !important;
             color:#FFE978 !important;-webkit-text-fill-color:#FFE978 !important;
             font-family:system-ui,-apple-system,"Segoe UI Symbol",sans-serif !important;
-            font-size:48px !important;font-weight:900 !important;line-height:1 !important;
-            text-shadow:0 0 7px rgba(250,204,21,.7),0 0 17px rgba(250,204,21,.28) !important;
+            font-size:36px !important;font-weight:950 !important;line-height:1 !important;
+            text-shadow:0 0 5px rgba(250,204,21,.52),0 0 10px rgba(250,204,21,.18) !important;
             transform-origin:center !important;animation:analysis-arrow-pulse 1.65s ease-in-out infinite !important;
             pointer-events:none !important;z-index:5 !important;
         }}
