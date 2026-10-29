@@ -92,9 +92,24 @@ st.markdown("""
   [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input::placeholder {
     color:#9299A5 !important; -webkit-text-fill-color:#9299A5 !important; opacity:1 !important;
   }
-  [class*="st-key-search_goal_matches"] input:focus,
-  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input:focus {
-    color:#FFFFFF !important; -webkit-text-fill-color:#FFFFFF !important; opacity:1 !important;
+  /* Fuerza el color del texto mientras se escribe; otros estilos de botones/vistas no deben ocultarlo en foco. */
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input,
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input:hover,
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input:active,
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input:focus,
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input:focus-visible,
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input:not(:placeholder-shown) {
+    color:#FFFFFF !important;
+    -webkit-text-fill-color:#FFFFFF !important;
+    caret-color:#FACC15 !important;
+    opacity:1 !important;
+    visibility:visible !important;
+    text-shadow:0 0 1px rgba(255,255,255,.12) !important;
+    filter:none !important;
+  }
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] [data-testid="stTextInput"] input {
+    color:#FFFFFF !important;
+    -webkit-text-fill-color:#FFFFFF !important;
   }
   [class*="st-key-search_live_matches_button"] { margin:0 !important; }
   [class*="st-key-search_live_matches_button"] [data-testid="stButton"] { margin:0 !important; }
