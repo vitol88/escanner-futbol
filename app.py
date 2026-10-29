@@ -133,9 +133,9 @@ st.markdown("""
   }
   /* Franja fija, discreta y visible para los tres controles globales. */
   [class*="st-key-top_status_controls"] {
-    position:fixed !important; top:48px !important; left:12px !important; right:auto !important;
+    position:fixed !important; top:4px !important; right:170px !important; left:auto !important;
     z-index:10080 !important; display:block !important; width:228px !important;
-    max-width:calc(100vw - 24px) !important; margin:0 !important; padding:0 !important;
+    max-width:calc(100vw - 190px) !important; margin:0 !important; padding:0 !important;
     overflow:visible !important; background:transparent !important;
   }
   [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] {
@@ -159,7 +159,7 @@ st.markdown("""
   [class*="st-key-sound_control_card"] [role="switch"] { flex:0 0 auto !important; transform:scale(.54) !important; transform-origin:center !important; }
   [class*="st-key-top_status_controls"] iframe { display:block !important; width:100% !important; height:29px !important; min-height:29px !important; margin:0 !important; padding:0 !important; border:0 !important; overflow:visible !important; }
   @media(max-width:640px) {
-    [class*="st-key-top_status_controls"] { top:44px !important; left:6px !important; width:198px !important; max-width:calc(100vw - 12px) !important; }
+    [class*="st-key-top_status_controls"] { top:3px !important; right:108px !important; left:auto !important; width:174px !important; max-width:calc(100vw - 118px) !important; }
     [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { gap:3px !important; }
     [class*="st-key-auto_refresh_control_card"], [class*="st-key-sound_control_card"] { min-height:25px !important; padding:0 1px !important; }
     [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label p,
