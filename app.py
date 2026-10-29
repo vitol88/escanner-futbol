@@ -190,17 +190,30 @@ st.markdown("""
     /* Tarjeta compacta de acción principal del escáner */
   [class*="st-key-scan_cta_card"] { margin-top:10px !important; margin-bottom:0 !important; }
   [class*="st-key-analysis_scan_cta"] { margin:.35rem 0 .65rem !important; }
+  /* Botones grandes y llamativos dentro de las secciones de goles y córners. */
   [class*="st-key-analysis_scan_cta"] [data-testid="stButton"] > button {
-      width:100% !important; min-height:3.15rem !important; height:auto !important;
-      padding:.65rem .7rem !important; box-sizing:border-box !important;
-      border-radius:12px !important; border:1px solid #FACC15 !important;
-      background:linear-gradient(135deg,#FFE36A,#FACC15) !important; color:#171717 !important;
-      font-size:.95rem !important; line-height:1.25 !important; font-weight:800 !important;
-      white-space:normal !important; box-shadow:0 3px 12px #FACC1533 !important;
+      width:100% !important; min-height:108px !important; height:108px !important;
+      box-sizing:border-box !important; padding:16px 12px !important;
+      border-radius:18px !important; border:2px solid #FACC15 !important;
+      background:radial-gradient(ellipse at 50% 0%,rgba(250,204,21,.16),transparent 65%),linear-gradient(145deg,#24221A,#111318) !important;
+      color:#FFE36A !important; font-size:clamp(.95rem,2.8vw,1.15rem) !important;
+      line-height:1.35 !important; font-weight:850 !important; white-space:normal !important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 1px rgba(250,204,21,.12),0 5px 18px rgba(0,0,0,.25) !important;
+      transition:transform .18s ease,background .18s ease,box-shadow .18s ease,border-color .18s ease !important;
+  }
+  [class*="st-key-analysis_scan_cta"] [data-testid="stButton"] > button:hover {
+      background:radial-gradient(ellipse at 50% 0%,rgba(250,204,21,.24),transparent 65%),linear-gradient(145deg,#39311A,#191A1F) !important;
+      border-color:#FFF09A !important; color:#FFF09A !important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 0 18px rgba(250,204,21,.22) !important;
+      transform:translateY(-2px) !important;
+  }
+  [class*="st-key-analysis_scan_cta"] [class*="st-key-analysis_scan_radar"] button {
+      background:radial-gradient(ellipse at 50% 0%,rgba(250,204,21,.22),transparent 65%),linear-gradient(145deg,#292516,#111318) !important;
   }
   @media(max-width:640px) {
     [class*="st-key-analysis_scan_cta"] [data-testid="stButton"] > button {
-      min-height:3rem !important; padding:.6rem .4rem !important; font-size:.84rem !important;
+      min-height:92px !important; height:92px !important; padding:12px 6px !important;
+      border-radius:15px !important; font-size:.9rem !important; line-height:1.3 !important;
     }
   }
   [class*="st-key-analysis_scan_cta"] [data-testid="stButton"] > button:hover {
