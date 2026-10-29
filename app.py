@@ -1936,23 +1936,30 @@ if _analysis_page_active:
         div[class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button:hover {{
             border-color:#FFF09A !important;box-shadow:inset 0 0 16px rgba(250,204,21,.16),0 0 18px rgba(250,204,21,.25) !important;
         }}
+        /* Copia visual del escáner principal: radar en espiral y balón animado, dentro del botón compacto. */
+        [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button {{
+            background-color:#090A0D !important;
+            background-image:radial-gradient(ellipse at 20% 50%,rgba(250,204,21,.10),transparent 42%),linear-gradient(135deg,#090A0D,#111319) !important;
+            border:2px solid #FACC15 !important;
+            color:transparent !important;-webkit-text-fill-color:transparent !important;
+        }}
         [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::before {{
             content:"" !important;display:block !important;position:absolute !important;z-index:1 !important;
-            left:50% !important;top:50% !important;width:61px !important;height:61px !important;
+            left:50% !important;top:50% !important;width:64px !important;height:64px !important;
             transform:translate(-50%,-50%) rotate(0deg) !important;transform-origin:center !important;
-            border:3px solid #FFD21F !important;border-radius:50% !important;box-sizing:border-box !important;
+            border:3px solid #FACC15 !important;border-radius:50% !important;box-sizing:border-box !important;
             background-color:#090A0D !important;
-            background-image:radial-gradient(circle at center,#FACC15 0 5%,#17191F 6% 13%,transparent 14%),repeating-radial-gradient(circle at center,transparent 0 8px,rgba(250,204,21,.7) 9px 11px,transparent 12px 17px),conic-gradient(from 0deg,transparent 0 8%,rgba(250,204,21,.98) 15%,transparent 30% 48%,rgba(250,204,21,.55) 55%,transparent 72%) !important;
-            box-shadow:0 0 19px rgba(250,204,21,.55),inset 0 0 17px rgba(250,204,21,.28) !important;
-            animation:analysis-radar-rotate 2.8s linear infinite !important;pointer-events:none !important;
+            background-image:radial-gradient(circle at center,#FACC15 0 6%,#14151A 7% 14%,transparent 15%),repeating-radial-gradient(circle at center,transparent 0 8px,rgba(250,204,21,.65) 9px 11px,transparent 12px 17px),conic-gradient(from 0deg,transparent 0 12%,rgba(250,204,21,.98) 16%,transparent 28% 48%,rgba(250,204,21,.55) 55%,transparent 72%) !important;
+            box-shadow:0 0 20px rgba(250,204,21,.55),inset 0 0 18px rgba(250,204,21,.28) !important;
+            animation:analysis-radar-rotate 3s linear infinite !important;pointer-events:none !important;
         }}
         [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::after {{
             content:"⚽" !important;display:flex !important;position:absolute !important;z-index:2 !important;
             left:50% !important;top:50% !important;width:43px !important;height:43px !important;
             align-items:center !important;justify-content:center !important;
             transform:translate(-50%,-50%) rotate(0deg) !important;transform-origin:center !important;
-            font-size:40px !important;line-height:1 !important;filter:drop-shadow(0 0 8px rgba(250,204,21,.72)) !important;
-            animation:analysis-ball-rotate .72s linear infinite !important;pointer-events:none !important;
+            font-size:40px !important;line-height:1 !important;filter:drop-shadow(0 0 10px rgba(250,204,21,.75)) !important;
+            animation:analysis-ball-rotate 2s ease-in-out infinite !important;pointer-events:none !important;
         }}
         /* Actualizar escáner: mismo acabado dorado del botón Volver, con icono de recarga visible. */
         div[class*="st-key-analysis_nav_refresh_row"] div[data-testid="stButton"] button,
