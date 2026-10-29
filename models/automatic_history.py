@@ -194,7 +194,7 @@ def build_automatic_history(
         "away_corners_for": a["cf"], "away_corners_against": a["ca"],
         "home_corner_sample": h["corner_sample"], "away_corner_sample": a["corner_sample"],
         "home_goal_sample": h["goal_sample"], "away_goal_sample": a["goal_sample"],
-        "diagnostics": {**diagnostics, "home_venue_matches_checked": h["matches"], "away_venue_matches_checked": a["matches"], "home_stats_attempted": h["stats_attempted"], "away_stats_attempted": a["stats_attempted"], "home_stats_nonempty": h["stats_nonempty"], "away_stats_nonempty": a["stats_nonempty"], "home_stats_with_corners": h["stats_with_corners"], "away_stats_with_corners": a["stats_with_corners"], "stats_budget_remaining": home_budget[0] + away_budget[0]},
+        "diagnostics": {**diagnostics, "home_venue_matches_checked": h["matches"], "away_venue_matches_checked": a["matches"], "home_stats_attempted": h["stats_attempted"], "away_stats_attempted": a["stats_attempted"], "home_stats_nonempty": h["stats_nonempty"], "away_stats_nonempty": a["stats_nonempty"], "home_stats_with_corners": h["stats_with_corners"], "away_stats_with_corners": a["stats_with_corners"], "stats_budget_remaining": away_budget[0]},
         "note": "Promedios calculados con partidos finalizados de la misma competición y temporada. La muestra cuenta únicamente partidos con estadísticas de córners disponibles.",
     })
     return result
