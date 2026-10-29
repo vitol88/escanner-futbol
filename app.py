@@ -451,6 +451,34 @@ st.markdown("""
   [data-testid="stExpander"] { background: #15191F; border: 1px solid #3A3426; border-radius: 12px; }
   hr { border-color: #38342B; }
   .brand-header { display:block; padding:15px 20px 12px; margin:0 0 14px 0; background:#0B0D10; border:1px solid #34363B; border-radius:22px; color:#F4F4F5; }
+  /* Cabecera de marca a todo el ancho, por encima del sidebar y del contenido. */
+  .brand-header {
+    position:fixed !important;
+    top:42px !important;
+    left:0 !important;
+    right:0 !important;
+    z-index:900 !important;
+    width:100vw !important;
+    box-sizing:border-box !important;
+    margin:0 !important;
+    padding:12px clamp(18px,3.2vw,48px) !important;
+    border-left:0 !important;
+    border-right:0 !important;
+    border-top:1px solid rgba(250,204,21,.24) !important;
+    border-bottom:1px solid rgba(250,204,21,.32) !important;
+    border-radius:0 !important;
+    background:linear-gradient(100deg,rgba(11,13,16,.99) 0%,rgba(18,19,21,.97) 48%,rgba(11,13,16,.99) 100%) !important;
+    box-shadow:0 8px 28px rgba(0,0,0,.32),inset 0 -1px 0 rgba(250,204,21,.06) !important;
+    backdrop-filter:blur(12px) !important;
+  }
+  .brand-header-main { max-width:none !important; width:100% !important; }
+  [data-testid="stSidebar"] > div:first-child { padding-top:126px !important; }
+  section.main > div.block-container { padding-top:132px !important; }
+  @media(max-width:640px) {
+    .brand-header { top:38px !important; padding:9px 12px !important; }
+    [data-testid="stSidebar"] > div:first-child { padding-top:108px !important; }
+    section.main > div.block-container { padding-top:112px !important; }
+  }
   .brand-header-main { display:flex; align-items:center; gap:14px; min-width:0; }
   .brand-mark { width:60px; height:60px; flex:0 0 60px; display:flex; align-items:center; justify-content:center; background:#FACC15; border:1px solid #FFE566; border-radius:18px; box-shadow:none; color:#0B0D10; }
   .brand-mark svg { width:34px; height:34px; }
