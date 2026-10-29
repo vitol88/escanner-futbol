@@ -1889,7 +1889,7 @@ if _analysis_page_active:
             position:relative !important;z-index:6 !important;pointer-events:auto !important;
             display:flex !important;align-items:center !important;justify-content:center !important;
             width:100% !important;min-width:0 !important;max-width:100% !important;
-            height:72px !important;min-height:72px !important;max-height:72px !important;
+            height:78px !important;min-height:78px !important;max-height:78px !important;
             padding:0 !important;overflow:hidden !important;box-sizing:border-box !important;
             border:2px solid #FACC15 !important;border-radius:19px !important;
             background:radial-gradient(ellipse at 25% 50%,rgba(250,204,21,.14),transparent 58%),linear-gradient(145deg,#201D14,#111419) !important;
@@ -1918,7 +1918,8 @@ if _analysis_page_active:
             display:flex !important;align-items:center !important;justify-content:center !important;
             color:#FFE978 !important;-webkit-text-fill-color:#FFE978 !important;
             font-family:system-ui,-apple-system,"Segoe UI Symbol",sans-serif !important;
-            font-size:36px !important;font-weight:950 !important;line-height:1 !important;
+            font-size:34px !important;font-weight:950 !important;line-height:1 !important;
+            margin:0 4px !important;max-width:calc(100% - 12px) !important;
             text-shadow:0 0 5px rgba(250,204,21,.52),0 0 10px rgba(250,204,21,.18) !important;
             transform-origin:center !important;animation:analysis-arrow-pulse 1.65s ease-in-out infinite !important;
             pointer-events:none !important;z-index:5 !important;
@@ -1999,7 +2000,7 @@ if _analysis_page_active:
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button,
           [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{
               width:100% !important;min-width:0 !important;max-width:100% !important;
-              height:68px !important;min-height:68px !important;max-height:68px !important;border-radius:17px !important;
+              height:74px !important;min-height:74px !important;max-height:74px !important;border-radius:17px !important;
           }}
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::before {{ width:57px !important;height:57px !important; }}
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::after {{ font-size:36px !important;width:39px !important;height:39px !important; }}
