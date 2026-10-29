@@ -806,19 +806,20 @@ st.markdown("""
   }
 
 
-  /* Estado seleccionado: cubre ambas variantes de DOM usadas por versiones de Streamlit. */
+  /* Botón activo: conserva el pequeño salto y queda amarillo tras seleccionar la opción. */
   [class*="st-key-main_stats_"] button[kind="primary"],
   [class*="st-key-main_market_"] button[kind="primary"],
   [class*="st-key-main_h2h_"] button[kind="primary"],
   [class*="st-key-main_stats_"] button[data-testid="stBaseButton-primary"],
   [class*="st-key-main_market_"] button[data-testid="stBaseButton-primary"],
   [class*="st-key-main_h2h_"] button[data-testid="stBaseButton-primary"] {
-    background:#FACC15 !important;
-    background-image:linear-gradient(145deg,#FFE878,#D4A900) !important;
+    background:#FFD21F !important;
+    background-image:linear-gradient(145deg,#FFE76A,#FACC15) !important;
     color:#111419 !important;
-    border:2px solid #FFE98A !important;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.38),0 0 0 2px rgba(250,204,21,.28),0 0 18px rgba(250,204,21,.3) !important;
-    transform:translateY(-1px) !important;
+    border:2px solid #FFF09A !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 0 0 2px rgba(250,204,21,.25),0 0 15px rgba(250,204,21,.3) !important;
+    transform:translateY(-2px) !important;
+    transition:transform .18s ease,background .18s ease,box-shadow .18s ease !important;
   }
   [class*="st-key-main_stats_"] button[kind="primary"] svg,
   [class*="st-key-main_market_"] button[kind="primary"] svg,
@@ -836,19 +837,16 @@ st.markdown("""
   [class*="st-key-main_h2h_"] button[data-testid="stBaseButton-secondary"] {
     background:linear-gradient(145deg,#20232A,#111318) !important;
     color:#D8C16A !important; border:1px solid #41434A !important; box-shadow:none !important;
+    transform:none !important;
   }
-  [class*="st-key-main_stats_"] [data-testid="stButton"] > button[kind="primary"] svg,
-  [class*="st-key-main_market_"] [data-testid="stButton"] > button[kind="primary"] svg,
-  [class*="st-key-main_h2h_"] [data-testid="stButton"] > button[kind="primary"] svg {
-    color:#111419 !important; fill:#111419 !important; stroke:#111419 !important;
+  /* El clic conserva la animación de salto solicitada; el estado amarillo permanece tras rerenderizar. */
+  [class*="st-key-main_stats_"] button:active,
+  [class*="st-key-main_market_"] button:active,
+  [class*="st-key-main_h2h_"] button:active {
+    transform:translateY(-3px) scale(.97) !important;
+    background:#FFE76A !important;
+    color:#111419 !important;
   }
-  [class*="st-key-main_stats_"] [data-testid="stButton"] > button[kind="secondary"],
-  [class*="st-key-main_market_"] [data-testid="stButton"] > button[kind="secondary"],
-  [class*="st-key-main_h2h_"] [data-testid="stButton"] > button[kind="secondary"] {
-    background:linear-gradient(145deg,#20232A,#111318) !important;
-    color:#D8C16A !important; border-color:#41434A !important; box-shadow:none !important;
-  }
-
 </style>
 """, unsafe_allow_html=True)
 
