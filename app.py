@@ -1246,20 +1246,17 @@ with st.sidebar:
     _sidebar_tool_id = str(_sidebar_tool_page.get("fixture_id") or "")
     _sidebar_tool_market = str(_sidebar_tool_page.get("market") or "")
     _sidebar_tool_active = bool(_sidebar_tool_id and _sidebar_tool_page.get("tool"))
-    _sidebar_section_title = {
-        "goals": "Goles y señales",
-        "corners": "Córners y señales",
-    }.get(_sidebar_tool_market, "Configuración")
+    _sidebar_dedicated_view = bool(_sidebar_tool_active and _sidebar_tool_page.get("tool") == "market" and _sidebar_tool_market in {"goals", "corners"})
+    _sidebar_section_title = {"goals": "Goles y señales", "corners": "Córners y señales"}.get(_sidebar_tool_market, "Configuración")
     _sidebar_section_icon = "⚽" if _sidebar_tool_market == "goals" else "🚩" if _sidebar_tool_market == "corners" else "⚙"
     st.markdown(
-        f'<div style="margin:0 0 18px 0;padding:4px 0 12px 0;border-bottom:1px solid rgba(250,204,21,.32);">'
-        f'<div style="font-size:.68rem;font-weight:850;letter-spacing:.19em;text-transform:uppercase;color:#B9A35A;margin-bottom:7px;">FOOTBALL LAB <span style="color:#FACC15;">/ ANÁLISIS</span></div>'
-        f'<div style="font-size:clamp(1.25rem,2vw,1.55rem);font-weight:900;letter-spacing:.035em;line-height:1.15;color:#FFE36A;text-shadow:0 0 18px rgba(250,204,21,.12);text-transform:uppercase;">{_sidebar_section_icon} {_sidebar_section_title}</div>'
-        f'<div style="width:46px;height:3px;border-radius:99px;background:linear-gradient(90deg,#FFE566,#A87909);margin-top:11px;box-shadow:0 0 10px rgba(250,204,21,.22);"></div>'
-        f'</div>',
+        f'<div style="margin:0 0 18px 0;padding:4px 0 12px 0;border-bottom:1px solid rgba(250,204,21,.32);">'+
+        f'<div style="font-size:.68rem;font-weight:850;letter-spacing:.19em;text-transform:uppercase;color:#B9A35A;margin-bottom:7px;">FOOTBALL LAB <span style="color:#FACC15;">/ ANÁLISIS</span></div>'+
+        f'<div style="font-size:clamp(1.25rem,2vw,1.55rem);font-weight:900;letter-spacing:.035em;line-height:1.15;color:#FFE36A;text-shadow:0 0 18px rgba(250,204,21,.12);text-transform:uppercase;">{_sidebar_section_icon} {_sidebar_section_title}</div>'+
+        f'<div style="width:46px;height:3px;border-radius:99px;background:linear-gradient(90deg,#FFE566,#A87909);margin-top:11px;box-shadow:0 0 10px rgba(250,204,21,.22);"></div></div>',
         unsafe_allow_html=True,
     )
-    if _sidebar_tool_active and _sidebar_tool_market in {"goals", "corners"}:
+    if _sidebar_dedicated_view:
         _side_back = st.button("←  Volver al partido", key="sidebar_analysis_back", use_container_width=True, help="Volver al partido")
         _side_scan = st.button("⚽  Escanear en vivo", key="sidebar_analysis_scan", use_container_width=True, help="Escanear en vivo")
         _side_refresh = st.button("⟳  Actualizar escáner", key="sidebar_analysis_refresh", use_container_width=True, help="Actualizar escáner")
@@ -1268,17 +1265,8 @@ with st.sidebar:
             st.rerun()
         if _side_scan or _side_refresh:
             _side_action = "scan" if _side_scan else "refresh"
-            st.session_state["analysis_scan_request"] = {
-                "fixture_id": _sidebar_tool_id,
-                "market": _sidebar_tool_market,
-                "action": _side_action,
-            }
-            st.session_state["analysis_scan_feedback"] = {
-                "fixture_id": _sidebar_tool_id,
-                "market": _sidebar_tool_market,
-                "action": _side_action,
-                "state": "running",
-            }
+            st.session_state["analysis_scan_request"] = {"fixture_id": _sidebar_tool_id, "market": _sidebar_tool_market, "action": _side_action}
+            st.session_state["analysis_scan_feedback"] = {"fixture_id": _sidebar_tool_id, "market": _sidebar_tool_market, "action": _side_action, "state": "running"}
             st.rerun()
         st.divider()
     st.write("La clave se lee desde Secrets o desde una variable de entorno.")
@@ -1289,6 +1277,41 @@ with st.sidebar:
     st.write("• Empate")
     st.write("• Goles")
     st.write("• Ambos equipos marcan")
+    if not _sidebar_dedicated_view:
+        st.divider()
+        st.markdown('<div style="font-size:.78rem;font-weight:850;letter-spacing:.12em;color:#FFE36A;margin-bottom:8px;">HERRAMIENTAS DEL PARTIDO</div>', unsafe_allow_html=True)
+        _selected_fixture_for_menu = st.session_state.get("selected_live_fixture") or {}
+        _selected_fixture_for_menu_id = str((_selected_fixture_for_menu.get("fixture") or {}).get("id") or "")
+        _selected_home_for_menu = (_selected_fixture_for_menu.get("teams") or {}).get("home") or {}
+        _selected_away_for_menu = (_selected_fixture_for_menu.get("teams") or {}).get("away") or {}
+        if _selected_fixture_for_menu_id:
+            st.markdown(f'<div style="font-size:.84rem;font-weight:750;line-height:1.35;color:#E5E7EB;margin:0 0 10px 0;">{html.escape(str(_selected_home_for_menu.get("name") or "Local"))}<span style="color:#C9A93A;"> vs </span>{html.escape(str(_selected_away_for_menu.get("name") or "Visitante"))}</div>', unsafe_allow_html=True)
+            _menu_tool_state = st.session_state.get("main_fixture_tool") or {}
+            _menu_active_tool = _menu_tool_state.get("tool") if str(_menu_tool_state.get("fixture_id")) == _selected_fixture_for_menu_id else None
+            _menu_active_market = _menu_tool_state.get("market") if str(_menu_tool_state.get("fixture_id")) == _selected_fixture_for_menu_id else None
+            _menu_tool_cols = st.columns(4, gap="small")
+            with _menu_tool_cols[0]:
+                _menu_stats = st.button(" ", icon=":material/query_stats:", help="Estadísticas en vivo", key=f"main_stats_{_selected_fixture_for_menu_id}", type="primary" if _menu_active_tool == "stats" else "secondary", use_container_width=True)
+            with _menu_tool_cols[1]:
+                _menu_goals = st.button(" ", icon=":material/sports_soccer:", help="Goles y señales", key=f"main_market_{_selected_fixture_for_menu_id}_goals", type="primary" if _menu_active_market == "goals" else "secondary", use_container_width=True)
+            with _menu_tool_cols[2]:
+                _menu_corners = st.button(" ", icon=":material/flag:", help="Córners y señales", key=f"main_market_{_selected_fixture_for_menu_id}_corners", type="primary" if _menu_active_market == "corners" else "secondary", use_container_width=True)
+            with _menu_tool_cols[3]:
+                _menu_h2h = st.button(" ", icon=":material/shield:", help="Historial de enfrentamientos (H2H)", key=f"main_h2h_{_selected_fixture_for_menu_id}", type="primary" if _menu_active_tool == "h2h" else "secondary", use_container_width=True)
+            if _menu_stats:
+                st.session_state["main_fixture_tool"] = {"fixture_id": _selected_fixture_for_menu_id, "tool": "stats"}
+                st.rerun()
+            if _menu_goals:
+                st.session_state["main_fixture_tool"] = {"fixture_id": _selected_fixture_for_menu_id, "tool": "market", "market": "goals"}
+                st.rerun()
+            if _menu_corners:
+                st.session_state["main_fixture_tool"] = {"fixture_id": _selected_fixture_for_menu_id, "tool": "market", "market": "corners"}
+                st.rerun()
+            if _menu_h2h:
+                st.session_state["main_fixture_tool"] = {"fixture_id": _selected_fixture_for_menu_id, "tool": "h2h"}
+                st.rerun()
+        else:
+            st.caption("Haz clic en la tarjeta de un partido para seleccionar el encuentro y habilitar estas herramientas.")
 
 def get_api_key() -> str:
     try:
