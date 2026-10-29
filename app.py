@@ -1287,7 +1287,7 @@ with st.sidebar:
     _sidebar_tool_id = str(_sidebar_tool_page.get("fixture_id") or "")
     _sidebar_tool_market = str(_sidebar_tool_page.get("market") or "")
     _sidebar_tool_active = bool(_sidebar_tool_id and _sidebar_tool_page.get("tool"))
-    _sidebar_dedicated_view = bool(_sidebar_tool_active and _sidebar_tool_page.get("tool") == "market" and _sidebar_tool_market in {"goals", "corners"})
+    _sidebar_dedicated_view = bool(_sidebar_tool_active)
     _sidebar_section_title = ({"stats": "Estadísticas", "h2h": "H2H"}.get(str(_sidebar_tool_page.get("tool") or ""), {"goals": "Goles y señales", "corners": "Córners y señales"}.get(_sidebar_tool_market, "Configuración")))
     _sidebar_section_icon = "📊" if _sidebar_tool_page.get("tool") == "stats" else "🛡" if _sidebar_tool_page.get("tool") == "h2h" else "⚽" if _sidebar_tool_market == "goals" else "🚩" if _sidebar_tool_market == "corners" else "⚙"
     st.markdown(
