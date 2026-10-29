@@ -1275,6 +1275,8 @@ with st.sidebar:
         f'<div style="width:46px;height:3px;border-radius:99px;background:linear-gradient(90deg,#FFE566,#A87909);margin-top:11px;box-shadow:0 0 10px rgba(250,204,21,.22);"></div></div>',
         unsafe_allow_html=True,
     )
+    if not _sidebar_dedicated_view:
+        st.text_input("🔎 Buscar equipo o liga", placeholder="Ej. Argentinos Juniors, Premier League…", key="search_goal_matches")
     if _sidebar_dedicated_view:
         _side_back = st.button("←  Volver al partido", key="sidebar_analysis_back", use_container_width=True, help="Volver al partido")
         _side_scan = st.button("⚽  Escanear en vivo", key="sidebar_analysis_scan", use_container_width=True, help="Escanear en vivo")
@@ -3725,7 +3727,7 @@ else:
                     (item.get("fixture", {}).get("fixture") or {}).get("id"): item.get("automatic_history") or {}
                     for item in st.session_state.get("corner_scan_results", [])
                 }
-                search_matches = st.text_input("🔎 Buscar equipo o liga", placeholder="Ej. Argentinos Juniors, Premier League…", key="search_goal_matches").strip().casefold()
+                search_matches = str(st.session_state.get("search_goal_matches", "")).strip().casefold()
                 cards_shown = 0
                 for goal_row in goal_results:
                     # Compatibilidad con resultados guardados en session_state por versiones anteriores:
