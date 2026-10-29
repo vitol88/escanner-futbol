@@ -1276,7 +1276,8 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
     if not _sidebar_dedicated_view:
-        st.text_input("🔎 Buscar equipo o liga", placeholder="Ej. Argentinos Juniors, Premier League…", key="search_goal_matches")
+        st.markdown('<div class="fl-sidebar-search-title">⌕ &nbsp; BUSCAR EQUIPO O LIGA</div>', unsafe_allow_html=True)
+        st.text_input("Buscar equipo o liga", placeholder="Ej. Argentinos Juniors, Premier League…", key="search_goal_matches", label_visibility="collapsed")
     if _sidebar_dedicated_view:
         _side_back = st.button("←  Volver al partido", key="sidebar_analysis_back", use_container_width=True, help="Volver al partido")
         _side_scan = st.button("⚽  Escanear en vivo", key="sidebar_analysis_scan", use_container_width=True, help="Escanear en vivo")
@@ -2240,6 +2241,56 @@ if _analysis_page_active:
     border:0 !important;
     box-shadow:none !important;
     background:transparent !important;
+  }
+
+  /* Buscador lateral premium Football Lab */
+  [data-testid="stSidebar"] .fl-sidebar-search-title {
+    margin:2px 0 9px 0 !important;
+    color:#FFE36A !important;
+    font-size:.73rem !important;
+    font-weight:900 !important;
+    letter-spacing:.105em !important;
+    line-height:1.35 !important;
+    text-transform:uppercase !important;
+    text-shadow:0 0 12px rgba(250,204,21,.12) !important;
+  }
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] {
+    margin:0 0 20px 0 !important;
+  }
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] > div {
+    gap:0 !important;
+  }
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input {
+    min-height:48px !important;
+    height:48px !important;
+    padding:0 14px !important;
+    border:1px solid #806515 !important;
+    border-right:3px solid #FACC15 !important;
+    border-radius:12px !important;
+    background:linear-gradient(135deg,#202329,#15171B) !important;
+    color:#F5F5F5 !important;
+    font-size:.86rem !important;
+    font-weight:550 !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 4px 14px rgba(0,0,0,.22) !important;
+    transition:border-color .2s ease,box-shadow .2s ease,background .2s ease !important;
+  }
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input::placeholder {
+    color:#9CA3AF !important;
+    opacity:1 !important;
+  }
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input:hover {
+    border-color:#D6B84C !important;
+    background:linear-gradient(135deg,#252830,#191B20) !important;
+  }
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input:focus,
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input:focus-visible {
+    border-color:#FFE566 !important;
+    border-right-color:#FFE566 !important;
+    box-shadow:0 0 0 1px rgba(250,204,21,.2),0 0 18px rgba(250,204,21,.14),inset 0 1px 0 rgba(255,255,255,.04) !important;
+    background:#191B20 !important;
+  }
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] [data-testid="InputInstructions"] {
+    display:none !important;
   }
 </style>
         """,
