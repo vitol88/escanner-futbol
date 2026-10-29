@@ -1201,6 +1201,61 @@ st.markdown("""
     [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button { transition:none !important; }
   }
   /* El estilo de los botones superiores se define en la vista de análisis para evitar anchos automáticos conflictivos. */
+
+  /* H2H: panel and history rows fit completely on desktop and mobile. */
+  .match-analysis-kicker, .match-analysis-title,
+  .h2h-match-row, .match-analysis-panel {
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    box-sizing:border-box !important;
+  }
+  .h2h-match-row {
+    grid-template-columns:76px minmax(0,1fr) 58px minmax(0,1fr) !important;
+    gap:7px !important;
+    padding:10px 8px !important;
+    overflow:hidden !important;
+  }
+  .h2h-match-row > span { min-width:0 !important; }
+  .h2h-match-row .h2h-team {
+    min-width:0 !important;
+    overflow:hidden !important;
+    white-space:normal !important;
+    overflow-wrap:anywhere !important;
+  }
+  .h2h-match-row .h2h-team img { flex:0 0 20px !important; }
+  @media(max-width:640px) {
+    section.main > div.block-container {
+      width:100% !important;
+      max-width:100% !important;
+      min-width:0 !important;
+      padding-left:12px !important;
+      padding-right:12px !important;
+      box-sizing:border-box !important;
+      overflow-x:hidden !important;
+    }
+    .match-analysis-kicker { margin-top:0 !important; font-size:.66rem !important; letter-spacing:.8px !important; }
+    .match-analysis-title { font-size:1rem !important; line-height:1.25 !important; margin:.2rem 0 .45rem !important; }
+    .h2h-match-row {
+      grid-template-columns:54px minmax(0,1fr) 42px minmax(0,1fr) !important;
+      gap:4px !important;
+      padding:8px 4px !important;
+      font-size:.67rem !important;
+      line-height:1.25 !important;
+    }
+    .h2h-match-row .h2h-team { gap:3px !important; }
+    .h2h-match-row .h2h-team img { width:16px !important; height:16px !important; flex-basis:16px !important; }
+    .h2h-score { font-size:.72rem !important; }
+    .match-analysis-panel { padding:10px !important; margin:6px 0 10px !important; }
+  }
+  @media(max-width:380px) {
+    .h2h-match-row {
+      grid-template-columns:48px minmax(0,1fr) 38px minmax(0,1fr) !important;
+      gap:3px !important;
+      font-size:.61rem !important;
+    }
+    .h2h-match-row .h2h-team img { width:13px !important; height:13px !important; flex-basis:13px !important; }
+  }
 </style>
 """, unsafe_allow_html=True)
 
