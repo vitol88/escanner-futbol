@@ -663,12 +663,19 @@ st.markdown("""
   .fl-match-clock-separator { color:#FACC15; opacity:.85; font-size:.98rem; font-weight:800; }
   .fl-match-seconds { color:#FFF0A3; font-size:.92rem; font-weight:750; }
   .fl-match-live { color:#FFF; background:#E23D32; border-radius:5px; padding:3px 7px; font-size:.62rem; font-weight:850; letter-spacing:.7px; }
-  .fl-match-teams { min-width:0; display:flex; flex-direction:column; gap:8px; }
+  .fl-match-teams { min-width:0; display:flex; flex-direction:column; gap:9px; }
   .fl-match-team {
-    display:grid; grid-template-columns:30px 26px minmax(0,1fr); align-items:center; gap:8px;
-    min-width:0; min-height:32px; color:#F4F4F5; font-size:.92rem; font-weight:620; line-height:1.15;
+    display:grid; grid-template-columns:34px 26px minmax(0,1fr); align-items:center; gap:8px;
+    min-width:0; min-height:34px; color:#F4F4F5; font-size:.92rem; font-weight:600; line-height:1.15;
   }
-  .fl-match-goals { color:#FFE566; font-size:1.36rem; font-weight:900; font-variant-numeric:tabular-nums; text-align:center; line-height:1; }
+  /* Jerarquía del marcador: el resultado debe leerse primero, seguido del escudo y el equipo. */
+  .fl-match-goals {
+    display:flex; align-items:center; justify-content:center; min-width:30px; min-height:31px; box-sizing:border-box;
+    padding:2px 3px; border-radius:8px; color:#FFE566; font-size:1.52rem; font-weight:950;
+    font-variant-numeric:tabular-nums; text-align:center; line-height:1;
+    background:linear-gradient(145deg,rgba(250,204,21,.12),rgba(250,204,21,.035));
+    text-shadow:0 0 12px rgba(250,204,21,.12);
+  }
   .fl-match-crest { display:block; width:25px; height:25px; object-fit:contain; justify-self:center; }
   .fl-match-crest-empty { display:block; width:25px; text-align:center; color:#FACC15; justify-self:center; }
   .fl-match-team-name { display:block; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; letter-spacing:.05px; }
@@ -707,9 +714,9 @@ st.markdown("""
     .fl-match-minute-main { font-size:1rem; }
     .fl-match-clock-separator { font-size:.88rem; }
     .fl-match-seconds { font-size:.82rem; }
-    .fl-match-team { grid-template-columns:24px 21px minmax(0,1fr); gap:5px; min-height:29px; font-size:.77rem; }
+    .fl-match-team { grid-template-columns:29px 21px minmax(0,1fr); gap:5px; min-height:30px; font-size:.77rem; }
     .fl-match-teams { gap:7px; }
-    .fl-match-goals { font-size:1.16rem; }
+    .fl-match-goals { min-width:27px; min-height:27px; padding:2px; border-radius:7px; font-size:1.28rem; }
     .fl-match-crest { width:21px; height:21px; }
     .fl-match-crest-empty { width:21px; }
     [class*="st-key-live_match_"] [data-testid="stHorizontalBlock"] { gap:.35rem !important; }
