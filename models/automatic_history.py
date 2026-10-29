@@ -61,7 +61,7 @@ def build_automatic_history(
     diagnostics: dict[str, Any] = {"league_id": league_id, "season": season, "teams": {}, "historical_stats": {"requested": 0, "nonempty_responses": 0, "responses_with_corners": 0, "empty_responses": 0, "errors": []}}
 
     def team_fixtures(team_id: int) -> list[dict[str, Any]]:
-        key = f"team-fixtures-v4:{team_id}:{league_id}:{season}"
+        key = f"team-fixtures-v5:{team_id}:{league_id}:{season}"
         if key not in cache:
             # Cap team-fixture discovery calls for the whole scan; cached teams do not
             # consume the budget again. This avoids one hidden request per live fixture.
@@ -94,7 +94,7 @@ def build_automatic_history(
             item for item in items
             if (item.get("fixture") or {}).get("status", {}).get("short") in finished
             and (item.get("league") or {}).get("id") == league_id
-            and (item.get("league") or {}).get("season") == season
+            and str((item.get("league") or {}).get("season")) == str(season)
         ]
     home_raw = team_fixtures(home["id"])
     away_raw = team_fixtures(away["id"])
@@ -105,9 +105,13 @@ def build_automatic_history(
     diagnostics["home_finished_same_competition"] = len(home_fixtures)
     diagnostics["away_finished_same_competition"] = len(away_fixtures)
 
-    budget = [max(0, int(stats_budget))]
+    # Repartir las consultas entre local y visitante evita que el primer equipo
+    # consuma todo el presupuesto y deje al segundo sin muestra histórica.
+    total_budget = max(0, int(stats_budget))
+    home_budget = [(total_budget + 1) // 2]
+    away_budget = [total_budget // 2]
 
-    def averages(matches: list[dict[str, Any]], team_id: int, venue: str) -> dict[str, Any]:
+    def averages(matches: list[dict[str, Any]], team_id: int, venue: str, request_budget: list[int]) -> dict[str, Any]:
         gf: list[float] = []
         ga: list[float] = []
         cf: list[float] = []
@@ -131,16 +135,20 @@ def build_automatic_history(
                 gf.append(float(own_goals)); ga.append(float(opp_goals))
             old_id = (old.get("fixture") or {}).get("id")
             stats_key = f"historical-stats-v2:{old_id}"
-            if old_id and stats_key not in cache and budget[0] > 0 and not cache.get("_automatic_history_rate_limited"):
+            if old_id and stats_key not in cache and request_budget[0] > 0 and not cache.get("_automatic_history_rate_limited"):
                 try:
                     stats_payload = api_get("fixtures/statistics", {"fixture": old_id})
                     stats_response = stats_payload.get("response") or []
                     stats_attempted += 1
                     diagnostics["historical_stats"]["requested"] += 1
                     cache["_automatic_history_stats_calls"] = cache.get("_automatic_history_stats_calls", 0) + 1
-                    budget[0] -= 1
+                    request_budget[0] -= 1
+                    # Guardar también respuestas vacías: evita repetir la misma
+                    # consulta en cada rerun de Streamlit.
+                    cache[stats_key] = stats_response
                     if stats_response:
-                        cache[stats_key] = stats_response
+                        stats_nonempty += 1
+                        diagnostics["historical_stats"]["nonempty_responses"] += 1
                     else:
                         diagnostics["historical_stats"]["empty_responses"] += 1
                 except Exception as exc:
@@ -172,8 +180,11 @@ def build_automatic_history(
             used += 1
         return {"matches": used, "gf": _mean(gf), "ga": _mean(ga), "cf": _mean(cf), "ca": _mean(ca), "corner_sample": len(cf), "goal_sample": len(gf), "stats_attempted": stats_attempted, "stats_nonempty": stats_nonempty, "stats_with_corners": stats_with_corners, "stats_errors": stats_errors}
 
-    h = averages(home_fixtures, home["id"], "home")
-    a = averages(away_fixtures, away["id"], "away")
+    h = averages(home_fixtures, home["id"], "home", home_budget)
+    # Si el local tuvo menos partidos consultables de los previstos, transferir
+    # el remanente al visitante sin superar el presupuesto total.
+    away_budget[0] += home_budget[0]
+    a = averages(away_fixtures, away["id"], "away", away_budget)
     result.update({
         "available": bool(h["matches"] or a["matches"]),
         "home_matches": h["matches"], "away_matches": a["matches"],
@@ -183,7 +194,7 @@ def build_automatic_history(
         "away_corners_for": a["cf"], "away_corners_against": a["ca"],
         "home_corner_sample": h["corner_sample"], "away_corner_sample": a["corner_sample"],
         "home_goal_sample": h["goal_sample"], "away_goal_sample": a["goal_sample"],
-        "diagnostics": {**diagnostics, "home_venue_matches_checked": h["matches"], "away_venue_matches_checked": a["matches"], "home_stats_attempted": h["stats_attempted"], "away_stats_attempted": a["stats_attempted"], "home_stats_nonempty": h["stats_nonempty"], "away_stats_nonempty": a["stats_nonempty"], "home_stats_with_corners": h["stats_with_corners"], "away_stats_with_corners": a["stats_with_corners"], "stats_budget_remaining": budget[0]},
+        "diagnostics": {**diagnostics, "home_venue_matches_checked": h["matches"], "away_venue_matches_checked": a["matches"], "home_stats_attempted": h["stats_attempted"], "away_stats_attempted": a["stats_attempted"], "home_stats_nonempty": h["stats_nonempty"], "away_stats_nonempty": a["stats_nonempty"], "home_stats_with_corners": h["stats_with_corners"], "away_stats_with_corners": a["stats_with_corners"], "stats_budget_remaining": home_budget[0] + away_budget[0]},
         "note": "Promedios calculados con partidos finalizados de la misma competición y temporada. La muestra cuenta únicamente partidos con estadísticas de córners disponibles.",
     })
     return result
