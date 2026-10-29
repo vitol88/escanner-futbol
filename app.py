@@ -191,10 +191,17 @@ st.markdown("""
   [class*="st-key-scan_cta_card"] { margin-top:10px !important; margin-bottom:0 !important; }
   [class*="st-key-analysis_scan_cta"] { margin:.35rem 0 .65rem !important; }
   [class*="st-key-analysis_scan_cta"] [data-testid="stButton"] > button {
-     width:100% !important; min-height:2.55rem !important; padding:.45rem .55rem !important;
-     border-radius:12px !important; border:1px solid #FACC15 !important;
-     background:linear-gradient(135deg,#FFE36A,#FACC15) !important; color:#171717 !important;
-     font-size:.82rem !important; font-weight:750 !important; box-shadow:0 3px 12px #FACC1533 !important;
+      width:100% !important; min-height:3.15rem !important; height:auto !important;
+      padding:.65rem .7rem !important; box-sizing:border-box !important;
+      border-radius:12px !important; border:1px solid #FACC15 !important;
+      background:linear-gradient(135deg,#FFE36A,#FACC15) !important; color:#171717 !important;
+      font-size:.95rem !important; line-height:1.25 !important; font-weight:800 !important;
+      white-space:normal !important; box-shadow:0 3px 12px #FACC1533 !important;
+  }
+  @media(max-width:640px) {
+    [class*="st-key-analysis_scan_cta"] [data-testid="stButton"] > button {
+      min-height:3rem !important; padding:.6rem .4rem !important; font-size:.84rem !important;
+    }
   }
   [class*="st-key-analysis_scan_cta"] [data-testid="stButton"] > button:hover {
      background:linear-gradient(135deg,#FFF0A3,#FFD629) !important; border-color:#FFF0A3 !important;
@@ -806,46 +813,41 @@ st.markdown("""
   }
 
 
-  /* Botón activo: conserva el pequeño salto y queda amarillo tras seleccionar la opción. */
-  [class*="st-key-main_stats_"] button[kind="primary"],
-  [class*="st-key-main_market_"] button[kind="primary"],
-  [class*="st-key-main_h2h_"] button[kind="primary"],
-  [class*="st-key-main_stats_"] button[data-testid="stBaseButton-primary"],
-  [class*="st-key-main_market_"] button[data-testid="stBaseButton-primary"],
-  [class*="st-key-main_h2h_"] button[data-testid="stBaseButton-primary"] {
-    background:#FFD21F !important;
-    background-image:linear-gradient(145deg,#FFE76A,#FACC15) !important;
-    color:#111419 !important;
-    border:2px solid #FFF09A !important;
+  /* Estado seleccionado persistente; el salto se limita al momento de pulsar. */
+  [class*="st-key-main_stats_"] [data-testid="stButton"] > button[kind="primary"],
+  [class*="st-key-main_market_"] [data-testid="stButton"] > button[kind="primary"],
+  [class*="st-key-main_h2h_"] [data-testid="stButton"] > button[kind="primary"],
+  [class*="st-key-main_stats_"] [data-testid="stButton"] > button[data-testid="stBaseButton-primary"],
+  [class*="st-key-main_market_"] [data-testid="stButton"] > button[data-testid="stBaseButton-primary"],
+  [class*="st-key-main_h2h_"] [data-testid="stButton"] > button[data-testid="stBaseButton-primary"] {
+    background:#FFD21F !important; background-image:linear-gradient(145deg,#FFE76A,#FACC15) !important;
+    color:#111419 !important; border:2px solid #FFF09A !important;
     box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 0 0 2px rgba(250,204,21,.25),0 0 15px rgba(250,204,21,.3) !important;
-    transform:translateY(-2px) !important;
-    transition:transform .18s ease,background .18s ease,box-shadow .18s ease !important;
+    transform:none !important;
   }
-  [class*="st-key-main_stats_"] button[kind="primary"] svg,
-  [class*="st-key-main_market_"] button[kind="primary"] svg,
-  [class*="st-key-main_h2h_"] button[kind="primary"] svg,
-  [class*="st-key-main_stats_"] button[data-testid="stBaseButton-primary"] svg,
-  [class*="st-key-main_market_"] button[data-testid="stBaseButton-primary"] svg,
-  [class*="st-key-main_h2h_"] button[data-testid="stBaseButton-primary"] svg {
+  [class*="st-key-main_stats_"] [data-testid="stButton"] > button[kind="primary"] svg,
+  [class*="st-key-main_market_"] [data-testid="stButton"] > button[kind="primary"] svg,
+  [class*="st-key-main_h2h_"] [data-testid="stButton"] > button[kind="primary"] svg,
+  [class*="st-key-main_stats_"] [data-testid="stButton"] > button[data-testid="stBaseButton-primary"] svg,
+  [class*="st-key-main_market_"] [data-testid="stButton"] > button[data-testid="stBaseButton-primary"] svg,
+  [class*="st-key-main_h2h_"] [data-testid="stButton"] > button[data-testid="stBaseButton-primary"] svg {
     color:#111419 !important; fill:#111419 !important; stroke:#111419 !important;
   }
-  [class*="st-key-main_stats_"] button[kind="secondary"],
-  [class*="st-key-main_market_"] button[kind="secondary"],
-  [class*="st-key-main_h2h_"] button[kind="secondary"],
-  [class*="st-key-main_stats_"] button[data-testid="stBaseButton-secondary"],
-  [class*="st-key-main_market_"] button[data-testid="stBaseButton-secondary"],
-  [class*="st-key-main_h2h_"] button[data-testid="stBaseButton-secondary"] {
+  [class*="st-key-main_stats_"] [data-testid="stButton"] > button[kind="secondary"],
+  [class*="st-key-main_market_"] [data-testid="stButton"] > button[kind="secondary"],
+  [class*="st-key-main_h2h_"] [data-testid="stButton"] > button[kind="secondary"],
+  [class*="st-key-main_stats_"] [data-testid="stButton"] > button[data-testid="stBaseButton-secondary"],
+  [class*="st-key-main_market_"] [data-testid="stButton"] > button[data-testid="stBaseButton-secondary"],
+  [class*="st-key-main_h2h_"] [data-testid="stButton"] > button[data-testid="stBaseButton-secondary"] {
     background:linear-gradient(145deg,#20232A,#111318) !important;
     color:#D8C16A !important; border:1px solid #41434A !important; box-shadow:none !important;
     transform:none !important;
   }
-  /* El clic conserva la animación de salto solicitada; el estado amarillo permanece tras rerenderizar. */
-  [class*="st-key-main_stats_"] button:active,
-  [class*="st-key-main_market_"] button:active,
-  [class*="st-key-main_h2h_"] button:active {
+  [class*="st-key-main_stats_"] [data-testid="stButton"] > button:active,
+  [class*="st-key-main_market_"] [data-testid="stButton"] > button:active,
+  [class*="st-key-main_h2h_"] [data-testid="stButton"] > button:active {
     transform:translateY(-3px) scale(.97) !important;
-    background:#FFE76A !important;
-    color:#111419 !important;
+    background:#FFE76A !important; color:#111419 !important;
   }
 </style>
 """, unsafe_allow_html=True)
