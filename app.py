@@ -1242,13 +1242,16 @@ st.components.v1.html("""
 MODEL_DATA = load_league_baselines()
 
 with st.sidebar:
-    st.header("Configuración")
     _sidebar_tool_page = st.session_state.get("main_fixture_tool") or {}
     _sidebar_tool_id = str(_sidebar_tool_page.get("fixture_id") or "")
     _sidebar_tool_market = str(_sidebar_tool_page.get("market") or "")
     _sidebar_tool_active = bool(_sidebar_tool_id and _sidebar_tool_page.get("tool"))
+    _sidebar_section_title = {
+        "goals": "Goles y señales",
+        "corners": "Córners y señales",
+    }.get(_sidebar_tool_market, "Configuración")
+    st.header(_sidebar_section_title)
     if _sidebar_tool_active and _sidebar_tool_market in {"goals", "corners"}:
-        st.caption("ACCIONES DEL PARTIDO")
         _side_back = st.button("←  Volver al partido", key="sidebar_analysis_back", use_container_width=True, help="Volver al partido")
         _side_scan = st.button("⚽  Escanear en vivo", key="sidebar_analysis_scan", use_container_width=True, help="Escanear en vivo")
         _side_refresh = st.button("⟳  Actualizar escáner", key="sidebar_analysis_refresh", use_container_width=True, help="Actualizar escáner")
