@@ -2640,7 +2640,7 @@ if search_clicked:
             st.session_state["live_search_message"] = f"Se encontraron {len(_league_matches)} partidos en la liga o país indicado."
         else:
             st.session_state.pop("live_search_query", None)
-            st.session_state["live_search_message"] = f"No se encontraron partidos en vivo para «{st.session_state.get('search_goal_matches', '').strip()}». Prueba con otro nombre."
+            st.session_state["live_search_message"] = "No hay resultados"
     st.rerun()
 
 if st.session_state.get("live_search_message") and not _sidebar_dedicated_view:
