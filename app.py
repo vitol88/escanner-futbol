@@ -1713,7 +1713,23 @@ if _analysis_page_active:
         unsafe_allow_html=True,
     )
     with st.container(key="analysis_page_nav"):
-        if st.button("← Volver al partido", key="analysis_page_back", use_container_width=True):
+        _nav_market = str(_current_tool_page.get("market") or "")
+        _nav_cols = st.columns([1.0, 1.25, 1.15] if _nav_market in {"goals", "corners"} else [1.0])
+        with _nav_cols[0]:
+            _back_clicked = st.button("← Volver al partido", key="analysis_page_back", use_container_width=True)
+        if _nav_market in {"goals", "corners"}:
+            with _nav_cols[1]:
+                _top_scan_clicked = st.button("⚽ Escanear en vivo", key="analysis_page_scan", use_container_width=True)
+            with _nav_cols[2]:
+                _top_refresh_clicked = st.button("⟳ Actualizar scan", key="analysis_page_refresh", use_container_width=True)
+            if _top_scan_clicked or _top_refresh_clicked:
+                st.session_state["analysis_scan_request"] = {
+                    "fixture_id": _analysis_page_id,
+                    "market": _nav_market,
+                    "action": "scan" if _top_scan_clicked else "refresh",
+                }
+                st.rerun()
+        if _back_clicked:
             # Mantener abierta la liga y el encuentro que originaron esta vista.
             st.session_state[f"live_match_{_analysis_page_id}"] = True
             for _match in st.session_state.get("live_fixtures", []):
@@ -2030,13 +2046,13 @@ else:
                                     elif tool_name == "market":
                                         market_key = selected_tool.get("market")
                                         if market_key == "goals":
-                                            with st.container(key=f"analysis_scan_cta_goals_{match_id}"):
-                                                _goal_scan_cols = st.columns(2, gap="small")
-                                                with _goal_scan_cols[0]:
-                                                    _goal_radar_clicked = st.button("⚽ Escanear en vivo", key=f"analysis_scan_radar_goals_{match_id}")
-                                                with _goal_scan_cols[1]:
-                                                    _goal_refresh_clicked = st.button("⟳ Actualizar scan", key=f"analysis_scan_goals_{match_id}")
-                                                if _goal_radar_clicked or _goal_refresh_clicked:
+                                            _pending_scan_request = st.session_state.get("analysis_scan_request") or {}
+                                            _pending_goals_request = str(_pending_scan_request.get("fixture_id")) == str(match_id) and _pending_scan_request.get("market") == "goals"
+                                            _goal_radar_clicked = _pending_goals_request and _pending_scan_request.get("action") == "scan"
+                                            _goal_refresh_clicked = _pending_goals_request and _pending_scan_request.get("action") == "refresh"
+                                            if _pending_goals_request:
+                                                st.session_state.pop("analysis_scan_request", None)
+                                            if _goal_radar_clicked or _goal_refresh_clicked:
                                                     manual_scan = True
                                                     internal_scan_requested = True
                                                     st.markdown('<div class="scan-running-status"><span class="scan-code-icon">⟳</span><div><strong>ESCANEANDO…</strong><div class="scan-running-subtitle">Actualizando señales de goles y datos en vivo</div></div><span class="scan-sweep"></span></div>', unsafe_allow_html=True)
@@ -2486,13 +2502,13 @@ else:
                                             else:
                                                 st.info("Primero pulsa «Escanear todos los partidos en vivo». Después, vuelve a abrir Goles y señales para ver promedios por localía, lectura en vivo y tip principal.")
                                         elif market_key == "corners":
-                                            with st.container(key=f"analysis_scan_cta_corners_{match_id}"):
-                                                _corner_scan_cols = st.columns(2, gap="small")
-                                                with _corner_scan_cols[0]:
-                                                    _corner_radar_clicked = st.button("⚽ Escanear en vivo", key=f"analysis_scan_radar_corners_{match_id}")
-                                                with _corner_scan_cols[1]:
-                                                    _corner_refresh_clicked = st.button("⟳ Actualizar scan", key=f"analysis_scan_corners_{match_id}")
-                                                if _corner_radar_clicked or _corner_refresh_clicked:
+                                            _pending_scan_request = st.session_state.get("analysis_scan_request") or {}
+                                            _pending_corners_request = str(_pending_scan_request.get("fixture_id")) == str(match_id) and _pending_scan_request.get("market") == "corners"
+                                            _corner_radar_clicked = _pending_corners_request and _pending_scan_request.get("action") == "scan"
+                                            _corner_refresh_clicked = _pending_corners_request and _pending_scan_request.get("action") == "refresh"
+                                            if _pending_corners_request:
+                                                st.session_state.pop("analysis_scan_request", None)
+                                            if _corner_radar_clicked or _corner_refresh_clicked:
                                                     # Dar prioridad al partido que el usuario tiene abierto antes de
                                                     # construir el contexto histórico de los demás partidos en vivo.
                                                     st.session_state["selected_match_detail"] = {
