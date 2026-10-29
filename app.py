@@ -1890,6 +1890,15 @@ if _analysis_page_active:
         [class*="st-key-main_h2h_{_analysis_page_id}"] {{ display:none !important; }}
         /* El contenido del análisis debe ocupar todo el ancho y no heredar espaciados del listado. */
         [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stVerticalBlock"] {{ gap:.35rem !important; row-gap:.35rem !important; }}
+        /* Acciones de análisis en una sola fila, con tarjetas compactas y legibles. */
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stHorizontalBlock"] {{ display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)) !important; gap:10px !important; align-items:stretch !important; }}
+        [class*="st-key-analysis_nav_back_row"] [data-testid="column"] {{ width:auto !important; min-width:0 !important; max-width:100% !important; flex:none !important; }}
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] {{ width:100% !important; }}
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button {{ min-height:54px !important; height:auto !important; max-height:none !important; padding:11px 8px !important; justify-content:center !important; text-align:center !important; font-size:clamp(.76rem,1.5vw,.96rem) !important; white-space:normal !important; overflow-wrap:anywhere !important; }}
+        @media(max-width:640px) {{
+          [class*="st-key-analysis_nav_back_row"] [data-testid="stHorizontalBlock"] {{ grid-template-columns:repeat(3,minmax(0,1fr)) !important; gap:6px !important; }}
+          [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button {{ min-height:50px !important; padding:9px 4px !important; font-size:.72rem !important; letter-spacing:-.02em !important; }}
+        }}
         /* En la vista dedicada ocultamos los controles globales para priorizar la navegación del análisis. */
         [class*="st-key-top_status_controls"] {{ display:none !important; height:0 !important; min-height:0 !important; margin:0 !important; padding:0 !important; }}
         [class*="st-key-top_status_controls"] > div {{ display:none !important; height:0 !important; margin:0 !important; padding:0 !important; }}
@@ -2102,12 +2111,18 @@ if _analysis_page_active:
     with st.container(key="analysis_page_nav"):
         _nav_market = str(_current_tool_page.get("market") or "")
         with st.container(key="analysis_nav_back_row"):
-            _back_clicked = st.button("←   Volver al partido", key="analysis_page_back", use_container_width=True, help="Volver al partido")
-        if _nav_market in {"goals", "corners"}:
-            with st.container(key="analysis_nav_scan_row"):
-                _top_scan_clicked = st.button("⚽   Escanear en vivo", key="analysis_page_scan", use_container_width=True, help="Escanear en vivo")
-            with st.container(key="analysis_nav_refresh_row"):
-                _top_refresh_clicked = st.button("⟳   Actualizar escáner", key="analysis_page_refresh", use_container_width=True, help="Actualizar escáner")
+            if _nav_market in {"goals", "corners"}:
+                _nav_cols = st.columns(3, gap="small")
+                with _nav_cols[0]:
+                    _back_clicked = st.button("← Volver", key="analysis_page_back", use_container_width=True, help="Volver al partido")
+                with _nav_cols[1]:
+                    _top_scan_clicked = st.button("⚽ Escanear en vivo", key="analysis_page_scan", use_container_width=True, help="Escanear en vivo")
+                with _nav_cols[2]:
+                    _top_refresh_clicked = st.button("⟳ Actualizar", key="analysis_page_refresh", use_container_width=True, help="Actualizar escáner")
+            else:
+                _back_clicked = st.button("← Volver al partido", key="analysis_page_back", use_container_width=True, help="Volver al partido")
+                _top_scan_clicked = False
+                _top_refresh_clicked = False
             if _top_scan_clicked or _top_refresh_clicked:
                 _requested_action = "scan" if _top_scan_clicked else "refresh"
                 st.session_state["analysis_scan_request"] = {
