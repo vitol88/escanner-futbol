@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+*{box-sizing:border-box}html,body{margin:0;padding:0;background:transparent;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.wrap{display:flex;width:100%;height:48px}
+input{flex:1;min-width:0;height:48px;padding:0 13px;border:1.5px solid #C49A20;border-right:0;border-radius:11px 0 0 11px;background:linear-gradient(135deg,#202329,#111419);color:#F5F5F5;font-size:13px;font-weight:550;outline:none}
+input::placeholder{color:#A5AAB4;opacity:1}
+input:focus{border-color:#FFE566;box-shadow:inset 0 0 0 1px rgba(250,204,21,.18),0 0 15px rgba(250,204,21,.14);background:#191B20}
+button{flex:0 0 43px;width:43px;height:48px;border:1.5px solid #C49A20;border-radius:0 11px 11px 0;background:#FACC15;color:#111;cursor:pointer;display:flex;align-items:center;justify-content:center}
+button:hover{background:#FFE566;border-color:#FFE566}
+svg{width:19px;height:19px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<input id="q" type="text" autocomplete="off" placeholder="Ej. Argentinos Juniors, Premier League…" aria-label="Buscar equipo o liga">
+<button id="go" title="Buscar equipo o liga" aria-label="Buscar equipo o liga"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg></button>
+</div>
+<script>
+const input=document.getElementById('q');
+let lastValue='';
+function send(submit){const value=input.value;lastValue=value; if(window.Streamlit){window.Streamlit.setComponentValue({value:value,submit:!!submit,changed:true});}}
+input.addEventListener('input',()=>send(false));
+input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();send(true);}});
+document.getElementById('go').addEventListener('click',()=>send(true));
+window.addEventListener('message',e=>{const d=e.data;if(d && d.type==='streamlit:render'){const a=d.args||{};if(typeof a.value==='string'&&a.value!==input.value){input.value=a.value;lastValue=a.value;}if(window.Streamlit)window.Streamlit.setFrameHeight(50);}});
+function ready(){if(window.Streamlit){window.Streamlit.setFrameHeight(50);window.Streamlit.setComponentReady();}}
+const s=document.createElement('script');s.src='https://unpkg.com/streamlit-component-lib@1.4.0/dist/streamlit-component-lib.js';s.onload=ready;document.head.appendChild(s);
+</script>
+</body></html>
