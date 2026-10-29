@@ -131,23 +131,41 @@ st.markdown("""
     [class*="st-key-search_live_matches_button"] button { min-height:46px !important; height:46px !important; }
     [class*="st-key-search_goal_matches"] [data-testid="stTextInput"] > div { min-height:46px !important; }
   }
-  /* Tres controles compactos, completos y con acabado dorado uniforme */
-  /* Controles compactos en el flujo normal: no cubrir ni desplazar el botón de escaneo. */
-  [class*="st-key-top_status_controls"] { position:relative !important; top:auto !important; right:auto !important; z-index:20 !important; width:100% !important; max-width:100% !important; margin:0 0 10px 0 !important; padding:0 !important; overflow:visible !important; }
-  [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { align-items:stretch !important; gap:.45rem !important; flex-wrap:nowrap !important; overflow:visible !important; }
-  [class*="st-key-top_status_controls"] [data-testid="stColumn"] { min-width:0 !important; padding:0 !important; overflow:visible !important; }
-  [class*="st-key-auto_refresh_control_card"], [class*="st-key-sound_control_card"] { box-sizing:border-box !important; width:100% !important; min-height:48px !important; display:flex !important; align-items:center !important; justify-content:center !important; padding:4px 5px !important; border:1px solid #D4A72C !important; border-radius:11px !important; background:linear-gradient(145deg,#201D14,#111419) !important; overflow:visible !important; }
-  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"], [class*="st-key-sound_control_card"] [data-testid="stToggle"] { box-sizing:border-box !important; display:flex !important; align-items:center !important; justify-content:center !important; width:100% !important; min-height:38px !important; padding:2px 0 !important; border:0 !important; border-radius:0 !important; background:transparent !important; overflow:visible !important; }
-  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] > label, [class*="st-key-sound_control_card"] [data-testid="stToggle"] > label { display:flex !important; align-items:center !important; justify-content:center !important; gap:5px !important; width:100% !important; margin:0 !important; white-space:nowrap !important; overflow:visible !important; }
-  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label p, [class*="st-key-sound_control_card"] [data-testid="stToggle"] label p { color:#F4D778 !important; font-size:.76rem !important; line-height:1.1 !important; white-space:nowrap !important; margin:0 !important; }
-  [class*="st-key-auto_refresh_control_card"] [data-testid="stTooltipIcon"], [class*="st-key-auto_refresh_control_card"] [data-testid="stTooltipHoverTarget"], [class*="st-key-sound_control_card"] [data-testid="stTooltipIcon"], [class*="st-key-sound_control_card"] [data-testid="stTooltipHoverTarget"] { display:none !important; }
-  [class*="st-key-auto_refresh_control_card"] [role="switch"], [class*="st-key-sound_control_card"] [role="switch"] { flex:0 0 auto !important; transform:scale(.74) !important; transform-origin:center !important; }
-  [class*="st-key-top_status_controls"] iframe { display:block !important; box-sizing:border-box !important; width:100% !important; height:56px !important; min-height:56px !important; margin:0 !important; padding:0 !important; border:0 !important; overflow:visible !important; }
+  /* Franja fija, discreta y visible para los tres controles globales. */
+  [class*="st-key-top_status_controls"] {
+    position:fixed !important; top:48px !important; left:12px !important; right:auto !important;
+    z-index:10080 !important; display:block !important; width:228px !important;
+    max-width:calc(100vw - 24px) !important; margin:0 !important; padding:0 !important;
+    overflow:visible !important; background:transparent !important;
+  }
+  [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] {
+    display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    align-items:center !important; gap:4px !important; flex-wrap:nowrap !important; overflow:visible !important;
+  }
+  [class*="st-key-top_status_controls"] [data-testid="stColumn"] { min-width:0 !important; width:auto !important; padding:0 !important; overflow:visible !important; }
+  [class*="st-key-auto_refresh_control_card"], [class*="st-key-sound_control_card"] {
+    box-sizing:border-box !important; width:100% !important; min-width:0 !important; min-height:27px !important;
+    display:flex !important; align-items:center !important; justify-content:center !important;
+    padding:1px 2px !important; border:1px solid rgba(212,167,44,.52) !important; border-radius:7px !important;
+    background:rgba(17,20,25,.94) !important; overflow:visible !important; box-shadow:0 2px 7px rgba(0,0,0,.18) !important;
+  }
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"],
+  [class*="st-key-sound_control_card"] [data-testid="stToggle"] { display:flex !important; align-items:center !important; justify-content:center !important; min-height:24px !important; padding:0 !important; background:transparent !important; }
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] > label,
+  [class*="st-key-sound_control_card"] [data-testid="stToggle"] > label { display:flex !important; align-items:center !important; justify-content:center !important; gap:2px !important; width:100% !important; margin:0 !important; white-space:nowrap !important; }
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label p,
+  [class*="st-key-sound_control_card"] [data-testid="stToggle"] label p { color:#F4D778 !important; font-size:8px !important; line-height:1 !important; margin:0 !important; white-space:nowrap !important; }
+  [class*="st-key-auto_refresh_control_card"] [role="switch"],
+  [class*="st-key-sound_control_card"] [role="switch"] { flex:0 0 auto !important; transform:scale(.54) !important; transform-origin:center !important; }
+  [class*="st-key-top_status_controls"] iframe { display:block !important; width:100% !important; height:29px !important; min-height:29px !important; margin:0 !important; padding:0 !important; border:0 !important; overflow:visible !important; }
   @media(max-width:640px) {
-    [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { gap:.35rem !important; }
-    [class*="st-key-auto_refresh_control_card"], [class*="st-key-sound_control_card"] { min-height:48px !important; padding:4px 2px !important; }
-    [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label p, [class*="st-key-sound_control_card"] [data-testid="stToggle"] label p { font-size:.69rem !important; letter-spacing:-.25px !important; }
-    [class*="st-key-top_status_controls"] [role="switch"] { transform:scale(.68) !important; }
+    [class*="st-key-top_status_controls"] { top:44px !important; left:6px !important; width:198px !important; max-width:calc(100vw - 12px) !important; }
+    [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { gap:3px !important; }
+    [class*="st-key-auto_refresh_control_card"], [class*="st-key-sound_control_card"] { min-height:25px !important; padding:0 1px !important; }
+    [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label p,
+    [class*="st-key-sound_control_card"] [data-testid="stToggle"] label p { font-size:7px !important; }
+    [class*="st-key-top_status_controls"] [role="switch"] { transform:scale(.48) !important; }
+    [class*="st-key-top_status_controls"] iframe { height:27px !important; min-height:27px !important; }
   }
   [class*="st-key-sound_enabled_toggle"] { padding:5px 8px; border:1px solid #393326; border-radius:12px; background:#15191F; }
   [class*="st-key-sound_enabled_toggle"] label { font-size:.92rem !important; font-weight:650 !important; }
