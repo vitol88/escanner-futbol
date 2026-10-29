@@ -2037,31 +2037,69 @@ if _analysis_page_active:
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::after,
           [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button::before {{ animation-duration:2.5s !important; }}
         }}
-        </style>
+                /* Corrección visual de navegación: cada opción es un botón completo y legible. */
+        [class*="st-key-analysis_nav_back_row"],
+        [class*="st-key-analysis_nav_scan_row"],
+        [class*="st-key-analysis_nav_refresh_row"] {{ width:100% !important; margin:0 0 8px 0 !important; padding:0 !important; }}
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stHorizontalBlock"],
+        [class*="st-key-analysis_nav_scan_row"] [data-testid="stHorizontalBlock"],
+        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stHorizontalBlock"] {{ display:block !important; }}
+        [class*="st-key-analysis_nav_back_row"] [data-testid="column"],
+        [class*="st-key-analysis_nav_scan_row"] [data-testid="column"],
+        [class*="st-key-analysis_nav_refresh_row"] [data-testid="column"] {{ width:100% !important; max-width:100% !important; }}
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button,
+        [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button,
+        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{
+            display:flex !important; align-items:center !important; justify-content:flex-start !important; gap:12px !important;
+            width:100% !important; height:auto !important; min-height:54px !important; max-height:none !important;
+            box-sizing:border-box !important; padding:13px 18px !important; overflow:visible !important;
+            border:1px solid #80661B !important; border-radius:13px !important;
+            background:linear-gradient(110deg,#211E14 0%,#17191F 58%,#101115 100%) !important;
+            background-color:#17191F !important; color:#FFE36A !important; -webkit-text-fill-color:#FFE36A !important;
+            font-size:1rem !important; font-weight:800 !important; letter-spacing:.01em !important; line-height:1.25 !important;
+            text-align:left !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 3px 10px rgba(0,0,0,.22) !important;
+            transform:none !important; transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .14s ease !important;
+        }}
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button p,
+        [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button p,
+        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button p {{
+            display:block !important; margin:0 !important; font-size:inherit !important; line-height:inherit !important;
+            color:inherit !important; -webkit-text-fill-color:inherit !important;
+        }}
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button::before,
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button::after,
+        [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::before,
+        [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::after,
+        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button::before,
+        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button::after {{ content:none !important; display:none !important; }}
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button:hover,
+        [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button:hover,
+        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button:hover {{
+            border-color:#FFE566 !important; background:linear-gradient(110deg,#3A3016 0%,#242018 58%,#17191F 100%) !important;
+            background-color:#242018 !important; color:#FFF1A8 !important; -webkit-text-fill-color:#FFF1A8 !important;
+            box-shadow:0 0 0 1px rgba(250,204,21,.08),0 0 16px rgba(250,204,21,.16) !important; transform:translateY(-1px) !important;
+        }}
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button:active,
+        [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button:active,
+        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button:active {{ transform:scale(.99) !important; }}
+        @media(max-width:640px) {{
+            [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button,
+            [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button,
+            [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{ min-height:50px !important; padding:12px 14px !important; font-size:.94rem !important; }}
+        }}
+</style>
         """,
         unsafe_allow_html=True,
     )
     with st.container(key="analysis_page_nav"):
         _nav_market = str(_current_tool_page.get("market") or "")
         with st.container(key="analysis_nav_back_row"):
-            _back_cols = st.columns([0.34, 1.66], gap="small")
-            with _back_cols[0]:
-                _back_clicked = st.button("←", key="analysis_page_back", use_container_width=True, help="Volver al partido")
-            with _back_cols[1]:
-                st.markdown('<div class="analysis-nav-label">Volver al partido</div>', unsafe_allow_html=True)
+            _back_clicked = st.button("←   Volver al partido", key="analysis_page_back", use_container_width=True, help="Volver al partido")
         if _nav_market in {"goals", "corners"}:
             with st.container(key="analysis_nav_scan_row"):
-                _scan_cols = st.columns([0.34, 1.66], gap="small")
-                with _scan_cols[0]:
-                    _top_scan_clicked = st.button("⚽", key="analysis_page_scan", use_container_width=True, help="Escanear en vivo")
-                with _scan_cols[1]:
-                    st.markdown('<div class="analysis-nav-label">Escanear en vivo</div>', unsafe_allow_html=True)
+                _top_scan_clicked = st.button("⚽   Escanear en vivo", key="analysis_page_scan", use_container_width=True, help="Escanear en vivo")
             with st.container(key="analysis_nav_refresh_row"):
-                _refresh_cols = st.columns([0.34, 1.66], gap="small")
-                with _refresh_cols[0]:
-                    _top_refresh_clicked = st.button("⟳", key="analysis_page_refresh", use_container_width=True, help="Actualizar escáner")
-                with _refresh_cols[1]:
-                    st.markdown('<div class="analysis-nav-label">Actualizar escáner</div>', unsafe_allow_html=True)
+                _top_refresh_clicked = st.button("⟳   Actualizar escáner", key="analysis_page_refresh", use_container_width=True, help="Actualizar escáner")
             if _top_scan_clicked or _top_refresh_clicked:
                 _requested_action = "scan" if _top_scan_clicked else "refresh"
                 st.session_state["analysis_scan_request"] = {
