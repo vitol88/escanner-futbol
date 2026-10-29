@@ -2308,6 +2308,57 @@ if _analysis_page_active:
   [data-testid="stSidebar"] [class*="st-key-sidebar_search_button"] button:hover {{ background:linear-gradient(145deg,#FFF0A0,#FACC15) !important; border-color:#FFF0A0 !important; box-shadow:0 0 18px rgba(250,204,21,.28) !important; transform:translateY(-1px) !important; }}
   [data-testid="stSidebar"] [class*="st-key-sidebar_search_button"] button [data-testid="stIconMaterial"] {{ color:#171717 !important; font-size:1.3rem !important; }}
   [data-testid="stSidebar"] [class*="st-key-sidebar_search_button"] button:focus, [data-testid="stSidebar"] [class*="st-key-sidebar_search_button"] button:focus-visible {{ outline:none !important; box-shadow:0 0 0 2px rgba(250,204,21,.24),0 0 18px rgba(250,204,21,.24) !important; }}
+
+  /* En móvil, el menú lateral ocupa menos pantalla; escritorio conserva su ancho actual. */
+  @media (max-width: 640px) {{
+    section[data-testid="stSidebar"],
+    [data-testid="stSidebar"] {{
+      width: min(82vw, 320px) !important;
+      min-width: min(82vw, 320px) !important;
+      max-width: min(82vw, 320px) !important;
+    }}
+    [data-testid="stSidebar"] > div:first-child {{
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }}
+    [data-testid="stSidebar"] [data-testid="stVerticalBlock"],
+    [data-testid="stSidebar"] [data-testid="stElementContainer"] {{
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }}
+    [data-testid="stSidebar"] .brand-header {{
+      max-width: 100% !important;
+    }}
+    [data-testid="stSidebar"] [class*="st-key-main_stats_"] button,
+    [data-testid="stSidebar"] [class*="st-key-main_market_"] button,
+    [data-testid="stSidebar"] [class*="st-key-main_h2h_"] button {{
+      min-height: 64px !important;
+      padding-left: 10px !important;
+      padding-right: 30px !important;
+      font-size: .84rem !important;
+      overflow-wrap: anywhere !important;
+    }}
+    [data-testid="stSidebar"] [class*="st-key-main_stats_"] button::after,
+    [data-testid="stSidebar"] [class*="st-key-main_market_"] button::after,
+    [data-testid="stSidebar"] [class*="st-key-main_h2h_"] button::after {{
+      right: 10px !important;
+    }}
+  }}
+  @media (max-width: 380px) {{
+    section[data-testid="stSidebar"],
+    [data-testid="stSidebar"] {{
+      width: min(84vw, 292px) !important;
+      min-width: min(84vw, 292px) !important;
+      max-width: min(84vw, 292px) !important;
+    }}
+    [data-testid="stSidebar"] [class*="st-key-main_stats_"] button,
+    [data-testid="stSidebar"] [class*="st-key-main_market_"] button,
+    [data-testid="stSidebar"] [class*="st-key-main_h2h_"] button {{
+      font-size: .78rem !important;
+    }}
+  }}
 </style>
         """,
         unsafe_allow_html=True,
