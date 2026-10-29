@@ -396,7 +396,24 @@ st.markdown("""
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] button, [class*="st-key-scan_cta_card"] button[kind="primary"] { position:relative !important; overflow:hidden !important; width:100% !important; min-height:145px !important; white-space:pre-line !important; text-align:left !important; padding:18px 18px 18px 49% !important; border-radius:22px !important; border:2px solid #FACC15 !important; background-color:#090A0D !important; background-image:radial-gradient(ellipse at 20% 50%,rgba(250,204,21,.10),transparent 42%),linear-gradient(135deg,#090A0D,#111319) !important; color:#F4F4F5 !important; font-size:clamp(1rem,3.8vw,1.35rem) !important; line-height:1.55 !important; font-weight:800 !important; box-shadow:inset 0 0 24px rgba(250,204,21,.06),0 0 0 1px rgba(250,204,21,.08) !important; }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before { content:""; position:absolute; left:4%; top:50%; width:min(38%,170px); aspect-ratio:1; height:auto; transform:translateY(-50%); border-radius:50%; border:3px solid #FACC15; background-color:#090A0D; background-image:radial-gradient(circle at center,#FACC15 0 6%,#14151A 7% 14%,transparent 15%),repeating-radial-gradient(circle at center,transparent 0 10px,rgba(250,204,21,.55) 11px 13px,transparent 14px 20px),conic-gradient(from 0deg,transparent 0 12%,rgba(250,204,21,.95) 16%,transparent 28% 48%,rgba(250,204,21,.45) 53%,transparent 68%); box-shadow:0 0 20px rgba(250,204,21,.45),inset 0 0 18px rgba(250,204,21,.25); animation:scanner-radar-spin 3s linear infinite; }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::after { content:"⚽"; position:absolute; left:23%; top:50%; transform:translate(-50%,-50%); width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-size:clamp(1.8rem,6vw,2.7rem); filter:drop-shadow(0 0 10px rgba(250,204,21,.75)); animation:scanner-ball-orbit 2s ease-in-out infinite; }
-  @keyframes scanner-ball-orbit {
+
+   /* Tipografía del escáner: jerarquía clara y texto compacto sin alterar la tarjeta ni el balón. */
+   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
+     text-align:left !important; white-space:pre-line !important;
+     letter-spacing:.01em !important; overflow-wrap:normal !important; word-break:normal !important;
+     font-weight:750 !important;
+   }
+   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p {
+     line-height:1.42 !important; margin:0 !important;
+   }
+   @media(max-width:640px) {
+     [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
+       font-size:.76rem !important; line-height:1.4 !important; letter-spacing:0 !important;
+     }
+     [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p {
+       line-height:1.45 !important;
+     }
+   }  @keyframes scanner-ball-orbit {
     0% { transform:translate(-50%,-50%) rotate(0deg) scale(1); }
     50% { transform:translate(-50%,-50%) rotate(180deg) scale(1.08); }
     100% { transform:translate(-50%,-50%) rotate(360deg) scale(1); }
@@ -2146,7 +2163,7 @@ with st.container(key="scan_actions_row"):
     with scan_action_cols[0]:
         with st.container(key="scan_cta_card"):
             manual_scan = st.button(
-                "FOOTBALL LAB\nESCÁNER EN VIVO\nPulsa para escanear oportunidades en directo",
+                "FOOTBALL LAB\nESCÁNER EN VIVO\nEscanea oportunidades\\nen directo",
                 type="primary",
                 key="scan_all_live",
             )
