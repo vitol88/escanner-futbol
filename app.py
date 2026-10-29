@@ -10,13 +10,7 @@ from typing import Any
 
 import requests
 import streamlit as st
-import streamlit.components.v1 as components
 from streamlit_autorefresh import st_autorefresh
-
-_live_search_component = components.declare_component(
-    "football_lab_live_search",
-    path=str(Path(__file__).parent / "components" / "live_search"),
-)
 
 from models.live_context import qualifies_as_corner_candidate, summarize_live_context
 from models.backtest import evaluate_binary_predictions
@@ -1530,22 +1524,22 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
     if not _sidebar_dedicated_view:
-        # Componente propio: comunica cada tecla a Streamlit, incluido borrar el texto.
-        _search_value = str(st.session_state.get("search_goal_matches", "") or "")
-        _search_event = _live_search_component(
-            value=_search_value,
-            key="football_lab_live_search_widget",
-            default={"value": _search_value, "submit": False},
-        )
-        if isinstance(_search_event, dict) and _search_event.get("changed"):
-            _new_search_value = str(_search_event.get("value", "") or "")
-            st.session_state["search_goal_matches"] = _new_search_value
-            if not _new_search_value.strip():
-                st.session_state.pop("live_search_query", None)
-                st.session_state.pop("live_search_message", None)
-                st.session_state.pop("live_search_submit_requested", None)
-            elif _search_event.get("submit"):
-                st.session_state["live_search_submit_requested"] = True
+        # Buscador nativo: evita el componente externo que fallaba al cargar en Streamlit Cloud.
+        _search_cols = st.columns([5, 1], gap="small")
+        with _search_cols[0]:
+            st.text_input(
+                "Buscar equipo o liga",
+                key="search_goal_matches",
+                placeholder="Ej. Argentinos Juniors, Premier League…",
+                label_visibility="collapsed",
+                on_change=_handle_live_search_change,
+            )
+        with _search_cols[1]:
+            search_clicked = st.button("🔍", key="search_live_matches_button", help="Buscar equipo o liga", use_container_width=True)
+        if not str(st.session_state.get("search_goal_matches", "") or "").strip():
+            st.session_state.pop("live_search_query", None)
+            st.session_state.pop("live_search_message", None)
+            st.session_state.pop("live_search_submit_requested", None)
     if _sidebar_tool_active:
         _sidebar_selected_fixture = st.session_state.get("selected_live_fixture") or {}
         _sidebar_home = (_sidebar_selected_fixture.get("teams") or {}).get("home") or {}
@@ -2615,8 +2609,8 @@ if _analysis_page_active:
         unsafe_allow_html=True,
     )
 
-# Enter o la lupa del componente ejecutan la búsqueda; borrar limpia el filtro al instante.
-search_clicked = bool(st.session_state.pop("live_search_submit_requested", False))
+# La lupa ejecuta la búsqueda; el campo nativo también actualiza al confirmar con Enter o al salir del campo.
+search_clicked = bool(search_clicked or st.session_state.pop("live_search_submit_requested", False))
 
 fixtures = st.session_state.live_fixtures
 
