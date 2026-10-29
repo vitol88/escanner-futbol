@@ -1254,7 +1254,7 @@ with st.sidebar:
     st.markdown(
         f'<div style="margin:0 0 18px 0;padding:4px 0 12px 0;border-bottom:1px solid rgba(250,204,21,.32);">'
         f'<div style="font-size:.68rem;font-weight:850;letter-spacing:.19em;text-transform:uppercase;color:#B9A35A;margin-bottom:7px;">FOOTBALL LAB <span style="color:#FACC15;">/ ANÁLISIS</span></div>'
-        f'<div style="font-size:clamp(1.25rem,2vw,1.55rem);font-weight:900;letter-spacing:-.035em;line-height:1.15;color:#FFE36A;text-shadow:0 0 18px rgba(250,204,21,.12);">{_sidebar_section_icon} {_sidebar_section_title}</div>'
+        f'<div style="font-size:clamp(1.25rem,2vw,1.55rem);font-weight:900;letter-spacing:.035em;line-height:1.15;color:#FFE36A;text-shadow:0 0 18px rgba(250,204,21,.12);text-transform:uppercase;">{_sidebar_section_icon} {_sidebar_section_title}</div>'
         f'<div style="width:46px;height:3px;border-radius:99px;background:linear-gradient(90deg,#FFE566,#A87909);margin-top:11px;box-shadow:0 0 10px rgba(250,204,21,.22);"></div>'
         f'</div>',
         unsafe_allow_html=True,
