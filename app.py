@@ -529,17 +529,14 @@ st.markdown("""
   @media(max-width:620px) {
     .match-action-grid {grid-template-columns:repeat(2,minmax(0,1fr));}
     .h2h-match-row {grid-template-columns:65px minmax(0,1fr) 48px minmax(0,1fr);font-size:.7rem;gap:4px;}
-    .corner-h2h-row.corner-history-grid {grid-template-columns:minmax(0,1fr) 48px;gap:4px;padding:8px 7px;font-size:.75rem;min-width:0;box-sizing:border-box;}
-    .corner-h2h-row.corner-history-grid:first-child {display:none;}
-    .corner-h2h-row.corner-history-grid > span:first-child {grid-column:1 / -1;color:#B8B8B8;font-size:.68rem;padding-bottom:3px;}
-    .corner-h2h-row.corner-history-grid > span:nth-child(2) {grid-column:1;grid-row:auto;min-width:0;}
-    .corner-h2h-row.corner-history-grid > span:nth-child(3) {grid-column:2;grid-row:auto;}
-    .corner-h2h-row.corner-history-grid > span:nth-child(4) {grid-column:1;grid-row:auto;min-width:0;}
-    .corner-h2h-row.corner-history-grid > span:nth-child(5) {grid-column:2;grid-row:auto;}
-    .corner-h2h-row.corner-history-grid > span:nth-child(6) {grid-column:1 / -1;text-align:right;border-top:1px solid #51451D;padding-top:5px;margin-top:2px;font-size:.76rem;}
-    .corner-h2h-total-label {display:inline !important;color:#B8B8B8;font-weight:600;margin-right:6px;}
-    .h2h-team {min-width:0;overflow-wrap:anywhere;}
-    .h2h-team img {width:18px;height:18px;flex-basis:18px;}
+    /* Mantener cada partido histórico en una sola fila, compactando las seis columnas para móvil. */
+    .corner-h2h-row.corner-history-grid {grid-template-columns:46px minmax(0,1.15fr) 25px minmax(0,1.15fr) 25px 35px;gap:2px;padding:7px 2px;font-size:.58rem;line-height:1.2;min-width:0;box-sizing:border-box;}
+    .corner-h2h-row.corner-history-grid > span {min-width:0;overflow-wrap:anywhere;word-break:normal;}
+    .corner-h2h-row.corner-history-grid > span:first-child {font-size:.56rem;}
+    .corner-h2h-row.corner-history-grid .h2h-team {gap:2px;min-width:0;overflow-wrap:anywhere;}
+    .corner-h2h-row.corner-history-grid .h2h-team img {width:13px;height:13px;flex-basis:13px;flex-shrink:0;}
+    .corner-h2h-row.corner-history-grid .corner-h2h-value {text-align:center;font-size:.62rem;}
+    .corner-h2h-total-label {display:none !important;}
   }
 
   @media (max-width: 420px) { .fixture-hero-team {font-size:.72rem;} .fixture-hero-team img {width:31px;height:31px;} .fixture-hero-score {font-size:1.25rem;padding:6px 9px;} }
