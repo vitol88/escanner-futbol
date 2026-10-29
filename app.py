@@ -1954,8 +1954,32 @@ if _analysis_page_active:
             font-size:40px !important;line-height:1 !important;filter:drop-shadow(0 0 8px rgba(250,204,21,.72)) !important;
             animation:analysis-ball-rotate .72s linear infinite !important;pointer-events:none !important;
         }}
+        /* Actualizar escáner: mismo acabado dorado del botón Volver, con icono de recarga visible. */
+        div[class*="st-key-analysis_nav_refresh_row"] div[data-testid="stButton"] button,
+        div[class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{
+            position:relative !important;isolation:isolate !important;
+            border:2px solid #FACC15 !important;
+            background:radial-gradient(ellipse at 50% 50%,rgba(250,204,21,.2),transparent 68%),linear-gradient(145deg,#24221A,#111419) !important;
+            color:transparent !important;-webkit-text-fill-color:transparent !important;
+            box-shadow:inset 0 0 13px rgba(250,204,21,.12),0 0 0 1px rgba(250,204,21,.25),0 0 15px rgba(250,204,21,.15),0 4px 14px rgba(0,0,0,.28) !important;
+        }}
+        div[class*="st-key-analysis_nav_refresh_row"] div[data-testid="stButton"] button::before,
+        div[class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button::before {{
+            content:"⟳" !important;position:absolute !important;display:flex !important;
+            left:50% !important;top:50% !important;width:58px !important;height:58px !important;
+            align-items:center !important;justify-content:center !important;
+            transform:translate(-50%,-50%) !important;transform-origin:center !important;
+            color:#FFE978 !important;-webkit-text-fill-color:#FFE978 !important;
+            font-family:system-ui,sans-serif !important;font-size:62px !important;font-weight:500 !important;line-height:1 !important;
+            text-shadow:0 0 7px rgba(250,204,21,.65),0 0 14px rgba(250,204,21,.25) !important;
+            animation:analysis-refresh-spin 2.4s linear infinite !important;pointer-events:none !important;z-index:5 !important;
+        }}
+        div[class*="st-key-analysis_nav_refresh_row"] div[data-testid="stButton"] button:hover,
+        div[class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button:hover {{
+            border-color:#FFF09A !important;box-shadow:inset 0 0 16px rgba(250,204,21,.16),0 0 18px rgba(250,204,21,.25) !important;
+        }}
         [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button p {{
-            font-size:43px !important;animation:analysis-refresh-spin 1.35s linear infinite !important;
+            font-size:0 !important;opacity:0 !important;
         }}
         .analysis-nav-label {{
             display:block !important;width:100% !important;box-sizing:border-box !important;
@@ -2021,7 +2045,7 @@ if _analysis_page_active:
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::before {{ width:57px !important;height:57px !important; }}
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::after {{ font-size:36px !important;width:39px !important;height:39px !important; }}
           [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button p {{ font-size:40px !important; }}
-          [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button p {{ font-size:40px !important; }}
+          [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button::before {{ font-size:56px !important;width:52px !important;height:52px !important; }}
           .analysis-nav-label {{ font-size:1rem !important; }}
         }}
         @media(prefers-reduced-motion:reduce) {{
