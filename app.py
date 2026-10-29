@@ -254,28 +254,34 @@ st.markdown("""
   .scan-code-icon { display:inline-block; flex:0 0 auto; font-size:2rem; transform-origin:center; animation:scanner-spiral-spin .8s linear infinite; text-shadow:0 0 12px rgba(250,204,21,.8); }
   .scan-running-subtitle { color:#A1A1AA; font-size:.82rem; font-weight:500; margin-top:3px; }
   .scan-sweep { position:absolute; left:0; right:0; bottom:0; height:2px; background:linear-gradient(90deg,transparent,#FACC15,transparent); animation:scanner-sweep 1.4s ease-in-out infinite; }
-  /* Bienvenida cinematográfica: remate, gol, marca dorada y salida elegante */
-  .football-splash { position:fixed; inset:0; z-index:999999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0; overflow:hidden; background:radial-gradient(ellipse at 50% 42%,#18251b 0%,#080b09 72%); color:#fff; pointer-events:none; transform-origin:center; animation:splash-dismiss 5.8s cubic-bezier(.65,0,.35,1) forwards; }
-  .splash-pitch { position:relative; width:min(82vw,520px); height:min(48vh,300px); border:2px solid rgba(255,255,255,.8); border-radius:4px; background:repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 10%,transparent 10% 20%),linear-gradient(180deg,#176b35,#0b4825); box-shadow:0 0 42px rgba(34,197,94,.18); }
-  .splash-pitch:before { content:""; position:absolute; inset:0 25%; border-left:2px solid rgba(255,255,255,.75); border-right:2px solid rgba(255,255,255,.75); }
-  .splash-pitch:after { content:""; position:absolute; width:28%; aspect-ratio:1; left:36%; top:36%; border:2px solid rgba(255,255,255,.75); border-radius:50%; }
-  .splash-goal { position:absolute; right:-2px; top:31%; width:14%; height:38%; border:4px solid #f8fafc; border-right:0; background:repeating-linear-gradient(0deg,transparent 0 13px,rgba(255,255,255,.45) 14px 15px),repeating-linear-gradient(90deg,transparent 0 13px,rgba(255,255,255,.45) 14px 15px); box-shadow:0 0 0 rgba(250,204,21,0); animation:splash-goal-hit .55s ease 1.85s both; }
-  .splash-ball { position:absolute; left:9%; top:66%; z-index:2; font-size:clamp(2.2rem,7vw,3.8rem); filter:drop-shadow(0 8px 4px #0008); animation:splash-shot 2.15s cubic-bezier(.2,.72,.25,1) .25s forwards; }
-  .splash-brand { margin-top:28px; font-size:clamp(1.8rem,6vw,3.5rem); font-weight:950; letter-spacing:.16em; text-align:center; opacity:0; transform:translateY(18px) scale(.86); background:linear-gradient(105deg,#8a5a10 0%,#f9df82 18%,#fff3b0 32%,#c58a19 48%,#fff0a0 62%,#a66c0c 80%,#ffe7a0 100%); background-size:220% auto; -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; text-shadow:0 0 28px rgba(250,204,21,.18); filter:drop-shadow(0 4px 18px rgba(250,204,21,.25)); animation:splash-brand-in .95s cubic-bezier(.16,1,.3,1) 2.05s both, splash-gold-shine 2.2s linear 2.8s infinite; }
-  .splash-tagline { margin-top:9px; color:#e5dfcb; font-size:.76rem; letter-spacing:.24em; opacity:0; transform:translateY(8px); animation:splash-tag-in .65s ease 2.45s both; }
+  /* Intro cinematográfica híbrida: estadio nocturno + visualización de datos ligera */
+  .football-splash { position:fixed; inset:0; z-index:999999; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0; overflow:hidden; padding:20px; box-sizing:border-box; background:radial-gradient(ellipse at 50% 48%,rgba(163,112,15,.19) 0%,rgba(10,14,20,.96) 42%,#05070A 82%); color:#fff; pointer-events:none; transform-origin:center; animation:splash-dismiss 4.1s cubic-bezier(.65,0,.35,1) forwards; }
+  .football-splash:before { content:""; position:absolute; inset:-18%; pointer-events:none; background:repeating-linear-gradient(112deg,transparent 0 13%,rgba(255,210,75,.045) 13.2%,transparent 13.5% 27%),radial-gradient(ellipse at 50% 100%,rgba(250,204,21,.18),transparent 55%); animation:splash-stadium-glow 3.4s ease-in-out both; }
+  .football-splash:after { content:""; position:absolute; inset:0; pointer-events:none; opacity:.4; background:repeating-linear-gradient(90deg,transparent 0 9.5%,rgba(250,204,21,.07) 9.7%,transparent 10%),linear-gradient(180deg,transparent 0 70%,rgba(250,204,21,.05)); }
+  .splash-pitch { position:relative; width:min(82vw,520px); height:min(39vh,260px); border:1px solid rgba(250,204,21,.65); border-radius:12px; background:radial-gradient(ellipse at 50% 55%,rgba(250,204,21,.12),transparent 55%),linear-gradient(180deg,rgba(18,25,33,.76),rgba(5,8,12,.9)); box-shadow:0 0 28px rgba(250,204,21,.12),inset 0 0 36px rgba(250,204,21,.05); overflow:hidden; transform:perspective(600px) rotateX(7deg); animation:splash-pitch-in .7s ease-out both; }
+  .splash-pitch:before { content:""; position:absolute; inset:0 25%; border-left:1px solid rgba(255,226,120,.52); border-right:1px solid rgba(255,226,120,.52); background:linear-gradient(90deg,transparent 49.7%,rgba(255,226,120,.35) 50%,transparent 50.3%); }
+  .splash-pitch:after { content:""; position:absolute; width:27%; aspect-ratio:1; left:36.5%; top:36%; border:1px solid rgba(255,226,120,.65); border-radius:50%; box-shadow:0 0 20px rgba(250,204,21,.14),inset 0 0 18px rgba(250,204,21,.08); }
+  .splash-goal { position:absolute; right:0; top:29%; width:14%; height:42%; border:1px solid rgba(255,231,143,.9); border-right:0; background:repeating-linear-gradient(0deg,transparent 0 12px,rgba(255,226,120,.22) 13px 14px),repeating-linear-gradient(90deg,transparent 0 12px,rgba(255,226,120,.22) 13px 14px); box-shadow:0 0 0 rgba(250,204,21,0); animation:splash-goal-hit .55s ease 1.25s both; }
+  .splash-data-orbit { position:absolute; left:50%; top:50%; width:min(36vw,180px); aspect-ratio:1; border:1px solid rgba(250,204,21,.55); border-radius:50%; box-shadow:0 0 18px rgba(250,204,21,.13),inset 0 0 18px rgba(250,204,21,.08); transform:translate(-50%,-50%) scale(.75); opacity:0; animation:splash-orbit-in .85s ease-out .35s both,splash-orbit-spin 8s linear .35s infinite; }
+  .splash-data-orbit:before,.splash-data-orbit:after { content:""; position:absolute; inset:12%; border:1px dashed rgba(255,224,112,.48); border-radius:50%; transform:rotateX(62deg) rotateZ(24deg); }
+  .splash-data-orbit:after { inset:0; border-style:solid; transform:rotateX(68deg) rotateZ(-28deg); }
+  .splash-ball { position:absolute; left:9%; top:66%; z-index:2; font-size:clamp(2.2rem,7vw,3.8rem); filter:drop-shadow(0 0 10px rgba(250,204,21,.65)) drop-shadow(0 8px 4px #0008); animation:splash-shot 1.55s cubic-bezier(.2,.72,.25,1) .18s forwards; }
+  .splash-brand { position:relative; z-index:3; margin-top:25px; font-size:clamp(1.8rem,6vw,3.5rem); font-weight:950; letter-spacing:clamp(.08em,.16em,.16em); text-align:center; opacity:0; transform:translateY(18px) scale(.86); background:linear-gradient(105deg,#8a5a10 0%,#f9df82 18%,#fff3b0 32%,#c58a19 48%,#fff0a0 62%,#a66c0c 80%,#ffe7a0 100%); background-size:220% auto; -webkit-background-clip:text; background-clip:text; color:transparent; -webkit-text-fill-color:transparent; filter:drop-shadow(0 4px 18px rgba(250,204,21,.25)); animation:splash-brand-in .8s cubic-bezier(.16,1,.3,1) 1.45s both,splash-gold-shine 2.2s linear 2.2s infinite; }
+  .splash-tagline { position:relative; z-index:3; margin-top:9px; color:#e5dfcb; font-size:clamp(.62rem,2.2vw,.76rem); letter-spacing:clamp(.12em,2vw,.24em); text-align:center; opacity:0; transform:translateY(8px); animation:splash-tag-in .55s ease 1.8s both; }
+  .splash-techline { position:absolute; z-index:3; left:50%; bottom:calc(50% - min(39vh,260px)/2 - 27px); transform:translateX(-50%); display:flex; align-items:center; gap:8px; color:#FACC15; font-size:clamp(.55rem,1.8vw,.68rem); font-weight:800; letter-spacing:.2em; white-space:nowrap; opacity:0; animation:splash-tag-in .5s ease 2s both; }
+  .splash-techline:before,.splash-techline:after { content:""; width:24px; height:1px; background:#FACC15; box-shadow:0 0 8px #FACC15; }
   @keyframes splash-shot { 0%{left:9%;top:66%;transform:rotate(0) scale(1);opacity:1} 38%{left:48%;top:28%;transform:rotate(330deg) scale(.82);opacity:1} 62%{left:77%;top:40%;transform:rotate(600deg) scale(.62);opacity:1} 76%{left:88%;top:44%;transform:rotate(780deg) scale(.48);opacity:1} 86%{left:94%;top:45%;transform:rotate(900deg) scale(.3);opacity:.95} 100%{left:96%;top:45%;transform:rotate(980deg) scale(.18);opacity:0} }
   @keyframes splash-goal-hit { 0%,65%{box-shadow:0 0 0 rgba(250,204,21,0)} 72%{box-shadow:0 0 34px rgba(250,204,21,.95),0 0 70px rgba(250,204,21,.45)} 100%{box-shadow:0 0 12px rgba(250,204,21,.28)} }
+  @keyframes splash-pitch-in { from{opacity:0;transform:perspective(600px) rotateX(15deg) scale(.94)} to{opacity:1;transform:perspective(600px) rotateX(7deg) scale(1)} }
+  @keyframes splash-stadium-glow { 0%{opacity:0;transform:scale(1.08)} 35%{opacity:1} 100%{opacity:.82;transform:scale(1)} }
+  @keyframes splash-orbit-in { to{opacity:.92;transform:translate(-50%,-50%) scale(1)} }
+  @keyframes splash-orbit-spin { to{rotate:360deg} }
   @keyframes splash-brand-in { 0%{opacity:0;transform:translateY(18px) scale(.86);filter:blur(8px) drop-shadow(0 4px 18px rgba(250,204,21,.25))} 70%{opacity:1;transform:translateY(-2px) scale(1.035);filter:blur(0) drop-shadow(0 4px 24px rgba(250,204,21,.48))} 100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0) drop-shadow(0 4px 18px rgba(250,204,21,.25))} }
   @keyframes splash-tag-in { to{opacity:1;transform:translateY(0)} }
   @keyframes splash-gold-shine { to{background-position:-220% center} }
-  @keyframes splash-dismiss { 0%,79%{opacity:1;visibility:visible;transform:scale(1);filter:blur(0)} 88%{opacity:1;visibility:visible;transform:scale(1.015);filter:blur(0)} 100%{opacity:0;visibility:hidden;transform:scale(1.07);filter:blur(12px)} }
-  @media(prefers-reduced-motion:reduce) { .football-splash,.splash-ball,.splash-goal,.splash-brand,.splash-tagline { animation-duration:.01ms !important; animation-delay:0s !important; } }
-
-  @keyframes scanner-radar-spin { to { rotate:360deg; } }
-  @keyframes scanner-ball-orbit { 0%,100% { transform:translate(-50%,-50%) scale(.9); } 50% { transform:translate(-50%,-50%) scale(1.1); } }
-  @keyframes scanner-spiral-spin { to { transform:rotate(360deg); } }
-  @keyframes scanner-sweep { 0% { transform:translateX(-100%); } 100% { transform:translateX(100%); } }
-  @media(max-width:640px) { [class*="st-key-scan_cta_card"] [data-testid="stButton"] button { min-height:145px; padding:16px 12px 16px 49%; font-size:.95rem; } [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before { left:3%; width:40%; } [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::after { left:23%; } }
+  @keyframes splash-dismiss { 0%,76%{opacity:1;visibility:visible;transform:scale(1);filter:blur(0)} 88%{opacity:1;visibility:visible;transform:scale(1.01);filter:blur(0)} 100%{opacity:0;visibility:hidden;transform:scale(1.04);filter:blur(7px)} }
+  @media(max-width:640px) { .splash-pitch { width:min(88vw,520px);height:min(34vh,220px); } .splash-data-orbit { width:min(42vw,150px); } .splash-techline { bottom:calc(50% - min(34vh,220px)/2 - 24px); letter-spacing:.12em; } .splash-brand { margin-top:22px; letter-spacing:.08em; } }
+  @media(prefers-reduced-motion:reduce) { .football-splash,.football-splash:before,.splash-pitch,.splash-ball,.splash-goal,.splash-data-orbit,.splash-brand,.splash-tagline,.splash-techline { animation-duration:.01ms !important; animation-delay:0s !important; } }
   /* Header de "En vivo ahora": pill amarilla con ondas y chevrón a la derecha */
   [class*="st-key-live_now_section"] [data-testid="stExpander"] { background:transparent !important; border:0 !important; border-radius:18px !important; }
   /* Toda la sección En vivo alineada al borde izquierdo y usando el ancho disponible */
@@ -1031,10 +1037,12 @@ if show_splash_intro:
     <div class="football-splash" aria-label="Bienvenido a Football Lab">
       <div class="splash-pitch">
         <div class="splash-goal"></div>
+        <div class="splash-data-orbit"></div>
         <div class="splash-ball">⚽</div>
       </div>
       <div class="splash-brand">FOOTBALL LAB</div>
-      <div class="splash-tagline">DETECTA · COMPARA · ANALIZA</div>
+      <div class="splash-tagline">ESCÁNER EN VIVO · DETECTA OPORTUNIDADES</div>
+      <div class="splash-techline">ANÁLISIS EN TIEMPO REAL</div>
     </div>
     """, unsafe_allow_html=True)
     st.session_state["football_splash_shown"] = True
