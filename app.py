@@ -1479,6 +1479,28 @@ with st.container(key="scan_cta_card"):
         key="scan_all_live",
     )
     if manual_scan:
+        # Mantener el balón girando mientras se ejecuta este escaneo, no solo mientras se pulsa.
+        st.markdown("""
+        <style>
+          [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::after {
+            animation: football-lab-ball-spin .62s linear infinite !important;
+            transform-origin:center !important;
+          }
+          [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before {
+            animation: scanner-radar-spin 1.05s linear infinite !important;
+            box-shadow:0 0 26px rgba(250,204,21,.72),inset 0 0 22px rgba(250,204,21,.38) !important;
+          }
+          @keyframes football-lab-ball-spin {
+            0% { transform:translate(-50%,-50%) rotate(0deg) scale(1); }
+            50% { transform:translate(-50%,-50%) rotate(180deg) scale(1.08); }
+            100% { transform:translate(-50%,-50%) rotate(360deg) scale(1); }
+          }
+          @media(prefers-reduced-motion:reduce) {
+            [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::after,
+            [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before { animation-duration:1.5s !important; }
+          }
+        </style>
+        """, unsafe_allow_html=True)
         st.markdown('<div class="scan-running-status"><span class="scan-code-icon">⟳</span><div><strong>ESCANEANDO…</strong><div class="scan-running-subtitle">Analizando partidos y mercados</div></div><span class="scan-sweep"></span></div>', unsafe_allow_html=True)
 
 internal_scan_requested = False
