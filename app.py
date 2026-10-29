@@ -1992,11 +1992,11 @@ if _analysis_page_active:
         [class*="st-key-live_match_{_analysis_page_id}"] {{ display:block !important; width:100% !important; max-width:100% !important; margin:0 !important; padding:0 !important; border:0 !important; }}
         [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stExpander"] {{ border:0 !important; margin:0 !important; padding:0 !important; }}
         [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stExpander"] > details > div {{ padding:0 !important; margin:0 !important; }}
-        /* Ocultar los cuatro botones de navegación del partido: queda solo el panel correspondiente al botón pulsado. */
-        [class*="st-key-main_stats_{_analysis_page_id}"],
-        [class*="st-key-main_market_{_analysis_page_id}_goals"],
-        [class*="st-key-main_market_{_analysis_page_id}_corners"],
-        [class*="st-key-main_h2h_{_analysis_page_id}"] {{ display:none !important; }}
+        /* Mantener visibles las cuatro herramientas durante toda la navegación del análisis. */
+        [data-testid="stSidebar"] [class*="st-key-main_stats_{_analysis_page_id}"],
+        [data-testid="stSidebar"] [class*="st-key-main_market_{_analysis_page_id}_goals"],
+        [data-testid="stSidebar"] [class*="st-key-main_market_{_analysis_page_id}_corners"],
+        [data-testid="stSidebar"] [class*="st-key-main_h2h_{_analysis_page_id}"] {{ display:block !important; visibility:visible !important; opacity:1 !important; }}
         /* El contenido del análisis debe ocupar todo el ancho y no heredar espaciados del listado. */
         [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stVerticalBlock"] {{ gap:.35rem !important; row-gap:.35rem !important; }}
         /* Acciones de análisis en una sola fila, con tarjetas compactas y legibles. */
