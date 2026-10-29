@@ -65,6 +65,47 @@ st.markdown("""
   div.stButton > button[kind="primary"]:hover, div.stDownloadButton > button:hover {
     background: #FFE566; border-color: #FFE566; color: #111111;
   }
+
+  /* Buscador premium de partidos: panel grafito, borde dorado y lupa compacta. */
+  [class*="st-key-search_goal_matches"] { min-width:0 !important; }
+  [class*="st-key-search_goal_matches"] [data-testid="stTextInput"] { margin:0 !important; }
+  [class*="st-key-search_goal_matches"] [data-testid="stTextInput"] > div {
+    min-height:48px !important; border:1px solid #6F5B20 !important;
+    border-right:0 !important; border-radius:13px 0 0 13px !important;
+    background:linear-gradient(145deg,#1C2027 0%,#111419 100%) !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 5px 16px rgba(0,0,0,.18) !important;
+    transition:border-color .18s ease,box-shadow .18s ease,background .18s ease !important;
+  }
+  [class*="st-key-search_goal_matches"] [data-testid="stTextInput"] > div:focus-within {
+    border-color:#FACC15 !important;
+    box-shadow:inset 0 0 0 1px rgba(250,204,21,.18),0 0 0 3px rgba(250,204,21,.08),0 0 18px rgba(250,204,21,.10) !important;
+  }
+  [class*="st-key-search_goal_matches"] input {
+    min-height:46px !important; padding:0 13px !important;
+    color:#F8FAFC !important; font-size:.88rem !important; font-weight:550 !important;
+    caret-color:#FACC15 !important; background:transparent !important;
+  }
+  [class*="st-key-search_goal_matches"] input::placeholder { color:#9299A5 !important; opacity:1 !important; }
+  [class*="st-key-search_live_matches_button"] { margin:0 !important; }
+  [class*="st-key-search_live_matches_button"] [data-testid="stButton"] { margin:0 !important; }
+  [class*="st-key-search_live_matches_button"] button {
+    min-height:48px !important; height:48px !important; padding:0 !important;
+    border:1px solid #FDE047 !important; border-radius:0 13px 13px 0 !important;
+    background:linear-gradient(145deg,#FFE566 0%,#FACC15 58%,#EAB308 100%) !important;
+    color:#111419 !important; font-size:1.15rem !important; font-weight:900 !important;
+    box-shadow:0 5px 16px rgba(250,204,21,.16),inset 0 1px 0 rgba(255,255,255,.35) !important;
+    transition:filter .18s ease,box-shadow .18s ease,transform .18s ease !important;
+  }
+  [class*="st-key-search_live_matches_button"] button:hover {
+    filter:brightness(1.08) !important; box-shadow:0 0 20px rgba(250,204,21,.28) !important;
+    transform:translateY(-1px) !important;
+  }
+  [class*="st-key-search_live_matches_button"] button:active { transform:translateY(0) scale(.98) !important; }
+  @media(max-width:640px) {
+    [class*="st-key-search_goal_matches"] input { font-size:.82rem !important; padding:0 10px !important; }
+    [class*="st-key-search_live_matches_button"] button { min-height:46px !important; height:46px !important; }
+    [class*="st-key-search_goal_matches"] [data-testid="stTextInput"] > div { min-height:46px !important; }
+  }
   /* Tres controles compactos, completos y con acabado dorado uniforme */
   [class*="st-key-top_status_controls"] { margin-top:0 !important; margin-bottom:10px !important; overflow:visible !important; }
   [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { align-items:stretch !important; gap:.45rem !important; flex-wrap:nowrap !important; overflow:visible !important; }
@@ -1527,7 +1568,14 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
     if not _sidebar_dedicated_view:
-        # Buscador nativo: evita el componente externo que fallaba al cargar en Streamlit Cloud.
+        # Buscador nativo con acabado premium; conserva Enter, lupa y limpieza automática.
+        st.markdown(
+            '<div style="display:flex;align-items:center;gap:7px;margin:2px 0 8px;'
+            'color:#E7D79A;font-size:.68rem;font-weight:850;letter-spacing:.13em;text-transform:uppercase;">'
+            '<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#FACC15;'
+            'box-shadow:0 0 9px rgba(250,204,21,.65);"></span>BUSCAR PARTIDO O LIGA</div>',
+            unsafe_allow_html=True,
+        )
         _search_cols = st.columns([5, 1], gap="small")
         with _search_cols[0]:
             st.text_input(
