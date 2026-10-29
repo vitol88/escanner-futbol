@@ -288,9 +288,15 @@ st.markdown("""
   [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stVerticalBlock"] { gap:0 !important; row-gap:0 !important; }
   [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stElementContainer"] { margin:0 !important; padding:0 !important; }
   [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] { width:100% !important; max-width:100% !important; margin:0 !important; padding:0 !important; }
-  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] summary { min-height:38px !important; padding:4px 12px !important; border:1px solid #34363D !important; border-radius:5px !important; background:#0B0D10 !important; }
+  /* Filas de ligas: compactas, separadas y sin bordes dobles visuales. */
+  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] summary {
+    min-height:44px !important; padding:6px 12px !important; box-sizing:border-box !important;
+    border:1px solid #343840 !important; border-radius:9px !important;
+    background:linear-gradient(100deg,#101216,#0B0D10) !important;
+    transition:background .18s ease,border-color .18s ease,box-shadow .18s ease !important;
+  }
   [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] details { margin:0 !important; padding:0 !important; }
-  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] + [data-testid="stExpander"] { margin-top:-7px !important; }
+  [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] + [data-testid="stExpander"] { margin-top:3px !important; }
   /* Quitar el espacio que Streamlit reserva entre expander de ligas */
   [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] [data-testid="stVerticalBlock"] { gap:0 !important; row-gap:0 !important; }
   [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] [data-testid="stElementContainer"] { margin-block:0 !important; padding-block:0 !important; }
