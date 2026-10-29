@@ -238,6 +238,16 @@ st.markdown("""
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::after { content:"⚽"; position:absolute; left:23%; top:50%; transform:translate(-50%,-50%); width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-size:clamp(1.8rem,6vw,2.7rem); filter:drop-shadow(0 0 10px rgba(250,204,21,.75)); animation:scanner-ball-orbit 2s ease-in-out infinite; }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] button:hover, [class*="st-key-scan_cta_card"] button[kind="primary"]:hover { border-color:#FFE36A !important; background-color:#090A0D !important; background-image:radial-gradient(ellipse at 20% 50%,rgba(250,204,21,.13),transparent 42%),linear-gradient(135deg,#14151A,#1A180F) !important; color:#FFE36A !important; }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] button:active { transform:scale(.99); }
+  .scan-refresh-feedback { margin:8px 2px 12px; padding:11px 14px 12px; border:1px solid rgba(250,204,21,.42); border-radius:13px; color:#FFE36A; background:linear-gradient(110deg,#17191F,#0B0D10); }
+  .scan-refresh-feedback-top { display:flex; align-items:center; gap:11px; font-size:.94rem; font-weight:900; letter-spacing:.35px; }
+  .scan-refresh-feedback .scan-code-icon { font-size:1.25rem; animation:scan-refresh-spin 1.3s linear infinite; }
+  .scan-refresh-feedback.is-done { border-color:rgba(74,222,128,.55); color:#86EFAC; background:linear-gradient(110deg,#102019,#0B0D10); }
+  .scan-refresh-feedback.is-done .scan-code-icon { animation:none; }
+  .scan-refresh-track { height:7px; margin-top:10px; overflow:hidden; border-radius:99px; background:#292A2D; }
+  .scan-refresh-fill { height:100%; border-radius:99px; background:linear-gradient(90deg,#B58D0B,#FFE566); transition:width .35s ease; }
+  .scan-refresh-feedback:not(.is-done) .scan-refresh-fill { animation:scan-refresh-progress 1.8s ease-in-out infinite alternate; }
+  @keyframes scan-refresh-spin { to { transform:rotate(360deg); } }
+  @keyframes scan-refresh-progress { from { width:24% !important; } to { width:82% !important; } }
   .scan-running-status { position:relative; display:flex; align-items:center; gap:12px; overflow:hidden; color:#FACC15; margin:8px 2px 0; padding:12px 14px; border:1px solid rgba(250,204,21,.35); border-radius:14px; background:linear-gradient(110deg,#17191F,#0B0D10); font-size:.92rem; font-weight:700; }
   .scan-code-icon { display:inline-block; flex:0 0 auto; font-size:2rem; transform-origin:center; animation:scanner-spiral-spin .8s linear infinite; text-shadow:0 0 12px rgba(250,204,21,.8); }
   .scan-running-subtitle { color:#A1A1AA; font-size:.82rem; font-weight:500; margin-top:3px; }
@@ -1728,18 +1738,36 @@ if _analysis_page_active:
             with _nav_cols[2]:
                 _top_refresh_clicked = st.button("⟳ Actualizar escáner", key="analysis_page_refresh", use_container_width=True)
             if _top_scan_clicked or _top_refresh_clicked:
+                _requested_action = "scan" if _top_scan_clicked else "refresh"
                 st.session_state["analysis_scan_request"] = {
                     "fixture_id": _analysis_page_id,
                     "market": _nav_market,
-                    "action": "scan" if _top_scan_clicked else "refresh",
+                    "action": _requested_action,
+                }
+                st.session_state["analysis_scan_feedback"] = {
+                    "fixture_id": _analysis_page_id,
+                    "market": _nav_market,
+                    "action": _requested_action,
+                    "state": "running",
                 }
                 st.rerun()
-            _visible_scan_request = st.session_state.get("analysis_scan_request") or {}
-            if str(_visible_scan_request.get("fixture_id")) == _analysis_page_id and _visible_scan_request.get("market") == _nav_market:
-                st.markdown(
-                    '<div class="scan-running-status"><span class="scan-code-icon">⟳</span><div><strong>ESCANEANDO…</strong><div class="scan-running-subtitle">Actualizando señales y datos en vivo</div></div><span class="scan-sweep"></span></div>',
-                    unsafe_allow_html=True,
-                )
+            _visible_feedback = st.session_state.get("analysis_scan_feedback") or {}
+            if str(_visible_feedback.get("fixture_id")) == _analysis_page_id and _visible_feedback.get("market") == _nav_market:
+                if _visible_feedback.get("action") == "refresh":
+                    _feedback_done = _visible_feedback.get("state") == "done"
+                    _feedback_title = "ACTUALIZADO" if _feedback_done else "ACTUALIZANDO…"
+                    _feedback_subtitle = "Los datos y señales se actualizaron" if _feedback_done else "Actualizando datos y señales de este partido"
+                    _feedback_width = "100%" if _feedback_done else "58%"
+                    _feedback_class = "scan-refresh-feedback is-done" if _feedback_done else "scan-refresh-feedback"
+                    st.markdown(
+                        f'<div class="{_feedback_class}"><div class="scan-refresh-feedback-top"><span class="scan-code-icon">{"✓" if _feedback_done else "⟳"}</span><div><strong>{_feedback_title}</strong><div class="scan-running-subtitle">{_feedback_subtitle}</div></div></div><div class="scan-refresh-track"><div class="scan-refresh-fill" style="width:{_feedback_width}"></div></div></div>',
+                        unsafe_allow_html=True,
+                    )
+                else:
+                    st.markdown(
+                        '<div class="scan-running-status"><span class="scan-code-icon">⟳</span><div><strong>ESCANEANDO…</strong><div class="scan-running-subtitle">Actualizando señales y datos en vivo</div></div><span class="scan-sweep"></span></div>',
+                        unsafe_allow_html=True,
+                    )
         if _back_clicked:
             # Mantener abierta la liga y el encuentro que originaron esta vista.
             st.session_state[f"live_match_{_analysis_page_id}"] = True
@@ -3146,8 +3174,12 @@ else:
             goal_results_with_context.append((fixture, estimate, tips, context))
         st.session_state.goal_scan_results = goal_results_with_context
 
-        # Si el escaneo se inició desde la vista individual, volver a renderizarla con resultados nuevos.
+        # Marcar como completada la actualización solicitada desde los botones de la vista individual.
         if internal_scan_requested:
+            _feedback = st.session_state.get("analysis_scan_feedback") or {}
+            if _feedback.get("action") == "refresh":
+                _feedback["state"] = "done"
+                st.session_state["analysis_scan_feedback"] = _feedback
             st.rerun()
 
         # Las cuotas se actualizan en bloque durante el refresco automático, no por partido.
