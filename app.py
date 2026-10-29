@@ -1331,12 +1331,23 @@ st.markdown("""
     border-bottom:1px solid rgba(250,204,21,.24) !important;
   }
   .h2h-page-kicker span { color:#C49A20 !important; padding:0 .25em !important; }
+  /* H2H: panel compacto, con filas limpias y marcador siempre destacado. */
+  .h2h-match-row {
+    box-sizing:border-box !important; width:100% !important; min-width:0 !important;
+    padding:11px 10px !important; border-bottom:1px solid rgba(250,204,21,.16) !important;
+    background:linear-gradient(100deg,rgba(25,28,34,.96),rgba(17,19,24,.96)) !important;
+    transition:background .18s ease,border-color .18s ease !important;
+  }
+  .h2h-match-row:hover { background:linear-gradient(100deg,#24251F,#191B20) !important; border-bottom-color:rgba(250,204,21,.42) !important; }
+  .h2h-match-row .h2h-team { font-weight:600 !important; line-height:1.3 !important; }
+  .h2h-match-row .h2h-score { font-size:.94rem !important; text-shadow:0 0 12px rgba(250,204,21,.12) !important; }
+  .h2h-page-kicker + div { margin-top:0 !important; }
   section.main > div.block-container:has(.h2h-page-kicker) {
-    padding-top:92px !important;
+    padding-top:22px !important;
   }
   @media(max-width:640px) {
     section.main > div.block-container:has(.h2h-page-kicker) {
-      padding-top:78px !important;
+      padding-top:14px !important;
     }
     .h2h-page-kicker {
       font-size:.88rem !important;
