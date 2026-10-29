@@ -1855,9 +1855,9 @@ if _analysis_page_active:
         [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stVerticalBlock"] {{ gap:.35rem !important; row-gap:.35rem !important; }}
         /* Navegación individual: reglas aisladas por fila para evitar duplicados y saltos de etiqueta. */
         div[class*="st-key-analysis_page_nav"] {{ display:block !important;width:100% !important;max-width:100% !important;margin:0 0 .75rem !important;overflow:visible !important; }}
-        [class*="st-key-analysis_nav_back_row"] > [data-testid="stHorizontalBlock"],
-        [class*="st-key-analysis_nav_scan_row"] > [data-testid="stHorizontalBlock"],
-        [class*="st-key-analysis_nav_refresh_row"] > [data-testid="stHorizontalBlock"] {{
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stHorizontalBlock"],
+        [class*="st-key-analysis_nav_scan_row"] [data-testid="stHorizontalBlock"],
+        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stHorizontalBlock"] {{
             display:grid !important;grid-template-columns:76px minmax(0,1fr) !important;
             align-items:center !important;column-gap:14px !important;width:100% !important;
         }}
@@ -1952,9 +1952,9 @@ if _analysis_page_active:
         .scan-running-status {{ margin:5px 2px 0 !important;padding:10px 12px !important; }}
         .scan-running-status .scan-sweep {{ height:2px !important;opacity:.8 !important; }}
         @media(max-width:640px) {{
-          [class*="st-key-analysis_nav_back_row"] > [data-testid="stHorizontalBlock"],
-          [class*="st-key-analysis_nav_scan_row"] > [data-testid="stHorizontalBlock"],
-          [class*="st-key-analysis_nav_refresh_row"] > [data-testid="stHorizontalBlock"] {{
+          [class*="st-key-analysis_nav_back_row"] [data-testid="stHorizontalBlock"],
+          [class*="st-key-analysis_nav_scan_row"] [data-testid="stHorizontalBlock"],
+          [class*="st-key-analysis_nav_refresh_row"] [data-testid="stHorizontalBlock"] {{
               grid-template-columns:72px minmax(0,1fr) !important;column-gap:12px !important;
           }}
           [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"],
