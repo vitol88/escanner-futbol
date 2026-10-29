@@ -131,11 +131,11 @@ st.markdown("""
     [class*="st-key-search_live_matches_button"] button { min-height:46px !important; height:46px !important; }
     [class*="st-key-search_goal_matches"] [data-testid="stTextInput"] > div { min-height:46px !important; }
   }
-  /* Controles superiores minimalistas, completos y sin marcos decorativos. */
+/* Controles superiores ligeros: sin bordes dorados y alineados en una sola fila. */
   [class*="st-key-top_status_controls"] { position:fixed !important; top:4px !important; left:8px !important; right:auto !important; z-index:10080 !important; display:block !important; width:276px !important; max-width:calc(100vw - 16px) !important; margin:0 !important; padding:0 !important; overflow:visible !important; background:transparent !important; }
   [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)) !important; align-items:center !important; gap:5px !important; flex-wrap:nowrap !important; overflow:visible !important; }
   [class*="st-key-top_status_controls"] [data-testid="stColumn"] { min-width:0 !important; width:auto !important; padding:0 !important; overflow:visible !important; }
-  [class*="st-key-auto_refresh_control_card"], [class*="st-key-sound_control_card"], [class*="st-key-auto_refresh_control_card"] > div, [class*="st-key-sound_control_card"] > div { box-sizing:border-box !important; width:100% !important; min-width:0 !important; min-height:22px !important; display:flex !important; align-items:center !important; justify-content:center !important; padding:0 !important; border:0 !important; outline:0 !important; border-radius:0 !important; background:transparent !important; overflow:visible !important; box-shadow:none !important; }
+  [class*="st-key-auto_refresh_control_card"], [class*="st-key-sound_control_card"], [class*="st-key-auto_refresh_control_card"] > div, [class*="st-key-sound_control_card"] > div, [class*="st-key-auto_refresh_control_card"] [data-testid="stVerticalBlock"], [class*="st-key-sound_control_card"] [data-testid="stVerticalBlock"] { box-sizing:border-box !important; width:100% !important; min-width:0 !important; min-height:22px !important; display:flex !important; align-items:center !important; justify-content:center !important; padding:0 !important; border:0 !important; outline:0 !important; border-radius:0 !important; background:transparent !important; overflow:visible !important; box-shadow:none !important; }
   [class*="st-key-auto_refresh_control_card"] [data-testid="stHorizontalBlock"], [class*="st-key-sound_control_card"] [data-testid="stHorizontalBlock"] { gap:1px !important; align-items:center !important; }
   [class*="st-key-auto_refresh_control_card"] [data-testid="stColumn"], [class*="st-key-sound_control_card"] [data-testid="stColumn"] { padding:0 !important; min-width:0 !important; }
   [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"], [class*="st-key-sound_control_card"] [data-testid="stToggle"] { display:flex !important; align-items:center !important; justify-content:center !important; min-height:21px !important; padding:0 !important; background:transparent !important; }
@@ -1999,14 +1999,22 @@ with st.container(key="top_status_controls"):
         st.components.v1.html("""
 <style>html,body{margin:0!important;padding:0!important;width:100%!important;background:transparent!important;overflow:hidden!important;}</style>
 <div style="box-sizing:border-box;display:flex;align-items:center;justify-content:center;width:100%;height:22px;min-height:22px;margin:0;padding:0">
-  <button id="scanner-test-sound" type="button" title="Activar y probar las alertas sonoras" style="box-sizing:border-box;display:block;width:100%;height:22px;min-height:22px;margin:0;padding:0 2px;border-radius:0;border:0;background:transparent;color:#D8C27A;font:600 8px system-ui;white-space:nowrap;cursor:pointer">🔔 Alertas</button>
+  <button id="scanner-test-sound" type="button" role="switch" aria-checked="false" title="Activar/desactivar y probar alertas sonoras" style="box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:3px;width:100%;height:22px;min-height:22px;margin:0;padding:0;border-radius:0;border:0;background:transparent;color:#D8C27A;font:600 8px system-ui;white-space:nowrap;cursor:pointer"><span id="scanner-alert-switch" style="display:inline-block;position:relative;width:20px;height:10px;border-radius:8px;background:#D94A4A;flex:0 0 20px"><span id="scanner-alert-knob" style="position:absolute;left:1px;top:1px;width:8px;height:8px;border-radius:50%;background:#FFF;transition:left .15s"></span></span><span>Alertas</span></button>
 </div>
 <script>
 (() => {
  const b=document.getElementById('scanner-test-sound');
  if(!b || b.dataset.bound) return;
  b.dataset.bound='1';
- b.addEventListener('click', () => {
+ let alertOn = localStorage.getItem('football-lab-alerts-enabled') === 'true';
+  const track=document.getElementById('scanner-alert-switch'), knob=document.getElementById('scanner-alert-knob');
+  const paint=()=>{b.setAttribute('aria-checked',String(alertOn)); track.style.background=alertOn?'#22A06B':'#D94A4A'; knob.style.left=alertOn?'11px':'1px';};
+  paint();
+  b.addEventListener('click', () => {
+    alertOn=!alertOn;
+    localStorage.setItem('football-lab-alerts-enabled',String(alertOn));
+    paint();
+    if(!alertOn){b.title='Alertas desactivadas';return;}
    try {
      localStorage.setItem('football-lab-audio-activated', 'true');
      if ('speechSynthesis' in window && 'SpeechSynthesisUtterance' in window) {
