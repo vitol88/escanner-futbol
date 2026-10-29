@@ -1249,13 +1249,9 @@ with st.sidebar:
     _sidebar_tool_active = bool(_sidebar_tool_id and _sidebar_tool_page.get("tool"))
     if _sidebar_tool_active and _sidebar_tool_market in {"goals", "corners"}:
         st.caption("ACCIONES DEL PARTIDO")
-        _side_nav_cols = st.columns(3, gap="small")
-        with _side_nav_cols[0]:
-            _side_back = st.button("← Volver", key="sidebar_analysis_back", use_container_width=True, help="Volver al partido")
-        with _side_nav_cols[1]:
-            _side_scan = st.button("⚽ Escanear", key="sidebar_analysis_scan", use_container_width=True, help="Escanear en vivo")
-        with _side_nav_cols[2]:
-            _side_refresh = st.button("⟳ Actualizar", key="sidebar_analysis_refresh", use_container_width=True, help="Actualizar escáner")
+        _side_back = st.button("←  Volver al partido", key="sidebar_analysis_back", use_container_width=True, help="Volver al partido")
+        _side_scan = st.button("⚽  Escanear en vivo", key="sidebar_analysis_scan", use_container_width=True, help="Escanear en vivo")
+        _side_refresh = st.button("⟳  Actualizar escáner", key="sidebar_analysis_refresh", use_container_width=True, help="Actualizar escáner")
         if _side_back:
             st.session_state["main_fixture_tool"] = {}
             st.rerun()
@@ -1932,11 +1928,24 @@ if _analysis_page_active:
         }}
         /* Los controles se muestran en la barra lateral; ocultar solo la fila principal, no el feedback. */
         [class*="st-key-analysis_nav_back_row"] > div > [data-testid="stHorizontalBlock"] {{ display:none !important; }}
-        [data-testid="stSidebar"] [class*="st-key-sidebar_analysis_back"] button,
-        [data-testid="stSidebar"] [class*="st-key-sidebar_analysis_scan"] button,
-        [data-testid="stSidebar"] [class*="st-key-sidebar_analysis_refresh"] button {{ min-height:48px !important; padding:8px 3px !important; font-size:.76rem !important; white-space:normal !important; }}
-        [data-testid="stSidebar"] [data-testid="stButton"] > button {{ border:1px solid #80661B !important; border-radius:10px !important; background:linear-gradient(110deg,#211E14,#17191F) !important; color:#FFE36A !important; font-weight:750 !important; }}
-        [data-testid="stSidebar"] [data-testid="stButton"] > button:hover {{ border-color:#FFE566 !important; background:linear-gradient(110deg,#3A3016,#242018) !important; color:#FFF1A8 !important; }}
+        [data-testid="stSidebar"] [class*="st-key-sidebar_analysis_back"] [data-testid="stButton"] > button,
+        [data-testid="stSidebar"] [class*="st-key-sidebar_analysis_scan"] [data-testid="stButton"] > button,
+        [data-testid="stSidebar"] [class*="st-key-sidebar_analysis_refresh"] [data-testid="stButton"] > button {{
+            display:flex !important; align-items:center !important; justify-content:flex-start !important; width:100% !important;
+            min-height:48px !important; margin:0 0 8px 0 !important; padding:12px 14px !important; box-sizing:border-box !important;
+            border:1px solid #80661B !important; border-radius:11px !important;
+            background:linear-gradient(110deg,#211E14,#17191F) !important; color:#FFE36A !important; -webkit-text-fill-color:#FFE36A !important;
+            font-size:.88rem !important; font-weight:800 !important; white-space:normal !important; text-align:left !important;
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 2px 8px rgba(0,0,0,.18) !important;
+            transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,transform .14s ease !important;
+        }}
+        [data-testid="stSidebar"] [class*="st-key-sidebar_analysis_back"] [data-testid="stButton"] > button:hover,
+        [data-testid="stSidebar"] [class*="st-key-sidebar_analysis_scan"] [data-testid="stButton"] > button:hover,
+        [data-testid="stSidebar"] [class*="st-key-sidebar_analysis_refresh"] [data-testid="stButton"] > button:hover {{
+            border-color:#FFE566 !important; background:linear-gradient(110deg,#3A3016,#242018) !important; background-color:#242018 !important;
+            color:#FFF1A8 !important; -webkit-text-fill-color:#FFF1A8 !important; box-shadow:0 0 14px rgba(250,204,21,.15) !important;
+            transform:translateY(-1px) !important;
+        }}
         /* En la vista dedicada ocultamos los controles globales para priorizar la navegación del análisis. */
         [class*="st-key-top_status_controls"] {{ display:none !important; height:0 !important; min-height:0 !important; margin:0 !important; padding:0 !important; }}
         [class*="st-key-top_status_controls"] > div {{ display:none !important; height:0 !important; margin:0 !important; padding:0 !important; }}
