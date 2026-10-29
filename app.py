@@ -787,7 +787,9 @@ st.markdown("""
   [class*="st-key-select_live_match_"] { position:absolute !important; top:0 !important; left:0 !important; right:0 !important; height:132px !important; min-height:132px !important; z-index:8 !important; opacity:0 !important; margin:0 !important; padding:0 !important; }
   [class*="st-key-select_live_match_"] [data-testid="stButton"], [class*="st-key-select_live_match_"] [data-testid="stButton"] > button { width:100% !important; height:132px !important; min-height:132px !important; max-height:132px !important; opacity:0 !important; background:transparent !important; border:0 !important; box-shadow:none !important; cursor:pointer !important; }
   .fl-match-scoreboard.is-selected { border-color:#FACC15 !important; box-shadow:inset 0 0 0 1px rgba(250,204,21,.16),0 0 15px rgba(250,204,21,.09) !important; }
-  [data-testid="stSidebar"] [class*="st-key-main_stats_"] button, [data-testid="stSidebar"] [class*="st-key-main_market_"] button, [data-testid="stSidebar"] [class*="st-key-main_h2h_"] button { min-height:48px !important; height:48px !important; }
+  [data-testid="stSidebar"] [class*="st-key-main_stats_"] button, [data-testid="stSidebar"] [class*="st-key-main_market_"] button, [data-testid="stSidebar"] [class*="st-key-main_h2h_"] button { min-height:58px !important; height:58px !important; width:100% !important; justify-content:flex-start !important; padding:0 16px !important; border:1px solid #B58A19 !important; border-radius:13px !important; background:linear-gradient(145deg,#202016,#111419) !important; color:#FFE36A !important; font-size:.83rem !important; font-weight:850 !important; letter-spacing:.015em !important; box-shadow:inset 0 1px 0 #ffffff0b,0 3px 10px #0003 !important; transition:transform .18s ease,background .2s ease,border-color .2s ease,box-shadow .2s ease !important; }
+  [data-testid="stSidebar"] [class*="st-key-main_stats_"] button:hover, [data-testid="stSidebar"] [class*="st-key-main_market_"] button:hover, [data-testid="stSidebar"] [class*="st-key-main_h2h_"] button:hover { transform:translateY(-1px) !important; background:linear-gradient(145deg,#3B3216,#211D12) !important; border-color:#FFE566 !important; box-shadow:0 5px 16px #0006,0 0 14px #FACC1522 !important; }
+  [data-testid="stSidebar"] [class*="st-key-main_stats_"] button[kind="primary"], [data-testid="stSidebar"] [class*="st-key-main_market_"] button[kind="primary"], [data-testid="stSidebar"] [class*="st-key-main_h2h_"] button[kind="primary"] { background:linear-gradient(135deg,#FACC15,#FFE566) !important; color:#101216 !important; border-color:#FFE566 !important; box-shadow:0 0 0 1px #FACC1544,0 5px 18px #FACC1520 !important; }
   /* Marcador premium al abrir un partido */
   .fl-match-scoreboard {
     display:grid; grid-template-columns:100px minmax(0,1fr); gap:13px; align-items:center;
@@ -1278,32 +1280,21 @@ with st.sidebar:
     st.write("La clave se lee desde Secrets o desde una variable de entorno.")
     st.caption("No publiques tu clave de API en GitHub.")
     st.divider()
-    st.write("Mercados objetivo")
-    st.write("• Córners")
-    st.write("• Empate")
-    st.write("• Goles")
-    st.write("• Ambos equipos marcan")
     if not _sidebar_dedicated_view:
-        st.divider()
-        st.markdown('<div style="font-size:.78rem;font-weight:850;letter-spacing:.12em;color:#FFE36A;margin-bottom:8px;">HERRAMIENTAS DEL PARTIDO</div>', unsafe_allow_html=True)
+        st.markdown('<div style="font-size:.78rem;font-weight:900;letter-spacing:.16em;color:#FFE36A;margin-bottom:12px;text-transform:uppercase;">HERRAMIENTAS DEL PARTIDO</div>', unsafe_allow_html=True)
         _selected_fixture_for_menu = st.session_state.get("selected_live_fixture") or {}
         _selected_fixture_for_menu_id = str((_selected_fixture_for_menu.get("fixture") or {}).get("id") or "")
         _selected_home_for_menu = (_selected_fixture_for_menu.get("teams") or {}).get("home") or {}
         _selected_away_for_menu = (_selected_fixture_for_menu.get("teams") or {}).get("away") or {}
         if _selected_fixture_for_menu_id:
-            st.markdown(f'<div style="font-size:.84rem;font-weight:750;line-height:1.35;color:#E5E7EB;margin:0 0 10px 0;">{html.escape(str(_selected_home_for_menu.get("name") or "Local"))}<span style="color:#C9A93A;"> vs </span>{html.escape(str(_selected_away_for_menu.get("name") or "Visitante"))}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="font-size:.84rem;font-weight:750;line-height:1.35;color:#E5E7EB;margin:0 0 12px 0;">{html.escape(str(_selected_home_for_menu.get("name") or "Local"))}<span style="color:#C9A93A;"> vs </span>{html.escape(str(_selected_away_for_menu.get("name") or "Visitante"))}</div>', unsafe_allow_html=True)
             _menu_tool_state = st.session_state.get("main_fixture_tool") or {}
             _menu_active_tool = _menu_tool_state.get("tool") if str(_menu_tool_state.get("fixture_id")) == _selected_fixture_for_menu_id else None
             _menu_active_market = _menu_tool_state.get("market") if str(_menu_tool_state.get("fixture_id")) == _selected_fixture_for_menu_id else None
-            _menu_tool_cols = st.columns(4, gap="small")
-            with _menu_tool_cols[0]:
-                _menu_stats = st.button(" ", icon=":material/query_stats:", help="Estadísticas en vivo", key=f"main_stats_{_selected_fixture_for_menu_id}", type="primary" if _menu_active_tool == "stats" else "secondary", use_container_width=True)
-            with _menu_tool_cols[1]:
-                _menu_goals = st.button(" ", icon=":material/sports_soccer:", help="Goles y señales", key=f"main_market_{_selected_fixture_for_menu_id}_goals", type="primary" if _menu_active_market == "goals" else "secondary", use_container_width=True)
-            with _menu_tool_cols[2]:
-                _menu_corners = st.button(" ", icon=":material/flag:", help="Córners y señales", key=f"main_market_{_selected_fixture_for_menu_id}_corners", type="primary" if _menu_active_market == "corners" else "secondary", use_container_width=True)
-            with _menu_tool_cols[3]:
-                _menu_h2h = st.button(" ", icon=":material/shield:", help="Historial de enfrentamientos (H2H)", key=f"main_h2h_{_selected_fixture_for_menu_id}", type="primary" if _menu_active_tool == "h2h" else "secondary", use_container_width=True)
+            _menu_stats = st.button("ESTADÍSTICAS   ›", icon=":material/query_stats:", help="Estadísticas en vivo", key=f"main_stats_{_selected_fixture_for_menu_id}", type="primary" if _menu_active_tool == "stats" else "secondary", use_container_width=True)
+            _menu_goals = st.button("GOLES Y SEÑALES   ›", icon=":material/sports_soccer:", help="Goles y señales", key=f"main_market_{_selected_fixture_for_menu_id}_goals", type="primary" if _menu_active_market == "goals" else "secondary", use_container_width=True)
+            _menu_corners = st.button("CÓRNERS   ›", icon=":material/flag:", help="Córners y señales", key=f"main_market_{_selected_fixture_for_menu_id}_corners", type="primary" if _menu_active_market == "corners" else "secondary", use_container_width=True)
+            _menu_h2h = st.button("H2H   ›", icon=":material/shield:", help="Historial de enfrentamientos (H2H)", key=f"main_h2h_{_selected_fixture_for_menu_id}", type="primary" if _menu_active_tool == "h2h" else "secondary", use_container_width=True)
             if _menu_stats:
                 st.session_state["main_fixture_tool"] = {"fixture_id": _selected_fixture_for_menu_id, "tool": "stats"}
                 st.rerun()
@@ -1318,6 +1309,7 @@ with st.sidebar:
                 st.rerun()
         else:
             st.caption("Haz clic en la tarjeta de un partido para seleccionar el encuentro y habilitar estas herramientas.")
+
 
 def get_api_key() -> str:
     try:
