@@ -990,27 +990,7 @@ st.markdown("""
     background:none !important; box-shadow:none !important; animation:none !important;
     content:"◉" !important; color:#FACC15 !important; font-size:1.35rem !important;
   }
-  [class*="st-key-analysis_page_nav"] { width:100% !important; margin:0 0 14px !important; }
-  [class*="st-key-analysis_page_nav"] [data-testid="stButton"] { width:auto !important; max-width:320px !important; }
-  [class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {
-    width:auto !important; min-width:220px !important; min-height:52px !important; height:auto !important;
-    padding:12px 20px !important; border-radius:14px !important; border:2px solid #FACC15 !important;
-    background:linear-gradient(145deg,#20242B,#111419) !important; color:#FFE36A !important;
-    font-size:1rem !important; font-weight:800 !important; box-shadow:0 4px 14px rgba(250,204,21,.12) !important;
-  }
-  @media(max-width:640px) {
-    [class*="st-key-analysis_scan_cta_goals_"] [data-testid="stHorizontalBlock"],
-    [class*="st-key-analysis_scan_cta_corners_"] [data-testid="stHorizontalBlock"] { gap:7px !important; }
-    [class*="st-key-analysis_scan_radar_goals_"] [data-testid="stButton"] > button,
-    [class*="st-key-analysis_scan_goals_"] [data-testid="stButton"] > button,
-    [class*="st-key-analysis_scan_radar_corners_"] [data-testid="stButton"] > button,
-    [class*="st-key-analysis_scan_corners_"] [data-testid="stButton"] > button {
-      height:82px !important; min-height:82px !important; padding:8px 4px !important; font-size:.82rem !important;
-    }
-    [class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {
-      min-width:190px !important; min-height:48px !important; padding:10px 14px !important; font-size:.9rem !important;
-    }
-  }
+  /* El estilo de los botones superiores se define en la vista de análisis para evitar anchos automáticos conflictivos. */
 </style>
 """, unsafe_allow_html=True)
 
@@ -1696,29 +1676,39 @@ if _analysis_page_active:
         [class*="st-key-main_h2h_{_analysis_page_id}"] {{ display:none !important; }}
         /* El contenido del análisis debe ocupar todo el ancho y no heredar espaciados del listado. */
         [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stVerticalBlock"] {{ gap:.35rem !important; row-gap:.35rem !important; }}
-        [class*="st-key-analysis_page_nav"] {{ margin:0 0 .8rem !important; width:100% !important; }}
-        [class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{ display:grid !important; grid-template-columns:minmax(0,1fr) minmax(0,1.25fr) minmax(0,1.15fr) !important; gap:.55rem !important; align-items:stretch !important; }}
-        [class*="st-key-analysis_page_nav"] [data-testid="stButton"] {{ width:100% !important; max-width:none !important; min-width:0 !important; }}
-        [class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{
+        div[class*="st-key-analysis_page_nav"] {{ display:block !important; width:100% !important; max-width:100% !important; margin:0 0 1rem !important; overflow:visible !important; }}
+        div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{ display:flex !important; flex-flow:row nowrap !important; gap:.65rem !important; align-items:stretch !important; width:100% !important; }}
+        div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] > div[data-testid="column"] {{ flex:1 1 0 !important; width:0 !important; min-width:0 !important; max-width:none !important; }}
+        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"],
+        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > div {{ display:block !important; width:100% !important; min-width:0 !important; max-width:none !important; }}
+        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{
             display:flex !important; align-items:center !important; justify-content:center !important;
-            width:100% !important; min-width:0 !important; min-height:68px !important; height:68px !important;
-            padding:.6rem .4rem !important; box-sizing:border-box !important; white-space:normal !important;
-            border-radius:15px !important; border:2px solid #FACC15 !important;
-            background:linear-gradient(145deg,#20242B,#111419) !important;
-            color:#FFE36A !important; font-size:clamp(.72rem,1.15vw,.98rem) !important; line-height:1.2 !important; font-weight:800 !important;
-            box-shadow:0 3px 12px rgba(250,204,21,.12) !important;
+            width:100% !important; min-width:0 !important; max-width:none !important; min-height:88px !important; height:88px !important;
+            padding:1rem .65rem !important; box-sizing:border-box !important; white-space:normal !important; overflow-wrap:anywhere !important;
+            border-radius:18px !important; border:2px solid #FACC15 !important;
+            background:radial-gradient(ellipse at 15% 50%,rgba(250,204,21,.12),transparent 45%),linear-gradient(145deg,#20242B,#111419) !important;
+            color:#FFE36A !important; font-size:clamp(.85rem,1.15vw,1.08rem) !important; line-height:1.25 !important; font-weight:850 !important;
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 5px 18px rgba(0,0,0,.25) !important;
         }}
-        [class*="st-key-analysis_page_nav"] [data-testid="stButton"]:nth-child(2) > button,
-        [class*="st-key-analysis_page_nav"] [data-testid="stButton"]:nth-child(3) > button {{
-            background:linear-gradient(145deg,#FFE36A,#D6A900) !important; color:#171717 !important;
-            border-color:#FFF09A !important; font-size:clamp(.72rem,1.2vw,1rem) !important;
+        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button p {{ margin:0 !important; }}
+        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"]:nth-of-type(2) > button,
+        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"]:nth-of-type(3) > button {{
+            background:radial-gradient(ellipse at 18% 50%,rgba(255,255,255,.28),transparent 38%),linear-gradient(135deg,#FFE978,#E0B51A) !important;
+            color:#171717 !important; border-color:#FFF09A !important;
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 5px 18px rgba(250,204,21,.2) !important;
         }}
-        [class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button:hover {{
-            border-color:#FFF09A !important; filter:brightness(1.08) !important; transform:translateY(-1px) !important;
+        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"]:nth-of-type(2) > button p,
+        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"]:nth-of-type(3) > button p {{ font-weight:900 !important; }}
+        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button:hover {{
+            border-color:#FFF09A !important; filter:brightness(1.07) !important; transform:translateY(-2px) !important;
+            box-shadow:0 7px 20px rgba(250,204,21,.22) !important;
         }}
         @media(max-width:640px) {{
-          [class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{ gap:.3rem !important; }}
-          [class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{ min-height:60px !important; height:60px !important; padding:.35rem .2rem !important; font-size:.68rem !important; }}
+          div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{ gap:.35rem !important; }}
+          div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{
+            min-height:76px !important; height:76px !important; padding:.5rem .25rem !important;
+            font-size:.76rem !important; line-height:1.15 !important; border-radius:14px !important;
+          }}
         }}
         </style>
         """,
