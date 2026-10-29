@@ -2146,7 +2146,7 @@ with st.container(key="scan_actions_row"):
     with scan_action_cols[0]:
         with st.container(key="scan_cta_card"):
             manual_scan = st.button(
-                "FOOTBALL LAB\\nESCÁNER EN VIVO\\nPulsa para escanear oportunidades en directo",
+                "FOOTBALL LAB\nESCÁNER EN VIVO\nPulsa para escanear oportunidades en directo",
                 type="primary",
                 key="scan_all_live",
             )
