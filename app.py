@@ -1858,7 +1858,7 @@ if _analysis_page_active:
         [class*="st-key-analysis_nav_back_row"] [data-testid="stHorizontalBlock"],
         [class*="st-key-analysis_nav_scan_row"] [data-testid="stHorizontalBlock"],
         [class*="st-key-analysis_nav_refresh_row"] [data-testid="stHorizontalBlock"] {{
-            display:grid !important;grid-template-columns:76px minmax(0,1fr) !important;
+            display:grid !important;grid-template-columns:84px minmax(0,1fr) !important;
             align-items:center !important;column-gap:14px !important;width:100% !important;
         }}
         [class*="st-key-analysis_nav_back_row"] [data-testid="column"],
@@ -1869,8 +1869,8 @@ if _analysis_page_active:
         [class*="st-key-analysis_nav_back_row"] [data-testid="column"]:first-child,
         [class*="st-key-analysis_nav_scan_row"] [data-testid="column"]:first-child,
         [class*="st-key-analysis_nav_refresh_row"] [data-testid="column"]:first-child {{
-            width:76px !important;min-width:76px !important;max-width:76px !important;
-            flex:0 0 76px !important;align-self:center !important;overflow:visible !important;
+            width:84px !important;min-width:84px !important;max-width:84px !important;
+            flex:0 0 84px !important;align-self:center !important;overflow:visible !important;
         }}
         [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"],
         [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"],
@@ -1889,7 +1889,7 @@ if _analysis_page_active:
             position:relative !important;z-index:6 !important;pointer-events:auto !important;
             display:flex !important;align-items:center !important;justify-content:center !important;
             width:100% !important;min-width:0 !important;max-width:100% !important;
-            height:78px !important;min-height:78px !important;max-height:78px !important;
+            height:84px !important;min-height:84px !important;max-height:84px !important;
             padding:0 !important;overflow:hidden !important;box-sizing:border-box !important;
             border:2px solid #FACC15 !important;border-radius:19px !important;
             background:radial-gradient(ellipse at 25% 50%,rgba(250,204,21,.14),transparent 58%),linear-gradient(145deg,#201D14,#111419) !important;
@@ -1912,17 +1912,25 @@ if _analysis_page_active:
             color:transparent !important;-webkit-text-fill-color:transparent !important;
             box-shadow:inset 0 0 13px rgba(250,204,21,.12),0 0 0 1px rgba(250,204,21,.25),0 0 15px rgba(250,204,21,.15),0 4px 14px rgba(0,0,0,.28) !important;
         }}
+        /* Flecha geométrica compacta: sus piezas se animan sin desbordar el marco. */
         div[class*="st-key-analysis_nav_back_row"] div[data-testid="stButton"] button::before,
         div[class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button::before {{
-            content:"←" !important;position:absolute !important;inset:0 !important;
-            display:flex !important;align-items:center !important;justify-content:center !important;
-            color:#FFE978 !important;-webkit-text-fill-color:#FFE978 !important;
-            font-family:system-ui,-apple-system,"Segoe UI Symbol",sans-serif !important;
-            font-size:34px !important;font-weight:950 !important;line-height:1 !important;
-            margin:0 4px !important;max-width:calc(100% - 12px) !important;
-            text-shadow:0 0 5px rgba(250,204,21,.52),0 0 10px rgba(250,204,21,.18) !important;
-            transform-origin:center !important;animation:analysis-arrow-pulse 1.65s ease-in-out infinite !important;
+            content:"" !important;position:absolute !important;left:50% !important;top:50% !important;
+            width:30px !important;height:4px !important;border:0 !important;border-radius:4px !important;
+            background:#FFE978 !important;box-shadow:0 0 5px rgba(250,204,21,.6),0 0 10px rgba(250,204,21,.22) !important;
+            transform:translate(-35%,-50%) !important;transform-origin:center !important;
+            animation:analysis-arrow-line-pulse 1.65s ease-in-out infinite !important;
             pointer-events:none !important;z-index:5 !important;
+        }}
+        div[class*="st-key-analysis_nav_back_row"] div[data-testid="stButton"] button::after,
+        div[class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button::after {{
+            content:"" !important;position:absolute !important;left:calc(50% - 15px) !important;top:50% !important;
+            width:12px !important;height:12px !important;box-sizing:border-box !important;
+            border-left:4px solid #FFE978 !important;border-bottom:4px solid #FFE978 !important;
+            border-radius:1px !important;background:transparent !important;
+            transform:translateY(-50%) rotate(45deg) !important;transform-origin:center !important;
+            animation:analysis-arrow-head-pulse 1.65s ease-in-out infinite !important;
+            pointer-events:none !important;z-index:6 !important;
         }}
         div[class*="st-key-analysis_nav_back_row"] div[data-testid="stButton"] button:hover,
         div[class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button:hover {{
@@ -1975,9 +1983,13 @@ if _analysis_page_active:
             25% {{ transform:translateX(-3px) rotate(-8deg); }}
             60% {{ transform:translateX(2px) rotate(4deg); }}
         }}
-        @keyframes analysis-arrow-pulse {{
-            0%,100% {{ transform:scale(.94) translateX(0);opacity:.86; }}
-            50% {{ transform:scale(1.08) translateX(-2px);opacity:1; }}
+        @keyframes analysis-arrow-line-pulse {{
+            0%,100% {{ transform:translate(-35%,-50%) scaleX(.94);opacity:.86; }}
+            50% {{ transform:translate(-35%,-50%) scaleX(1.04);opacity:1; }}
+        }}
+        @keyframes analysis-arrow-head-pulse {{
+            0%,100% {{ transform:translateY(-50%) rotate(45deg) scale(.94);opacity:.86; }}
+            50% {{ transform:translateY(-50%) rotate(45deg) scale(1.04);opacity:1; }}
         }}
         @keyframes analysis-refresh-spin {{
             from {{ transform:rotate(0deg); }}
@@ -1989,18 +2001,18 @@ if _analysis_page_active:
           [class*="st-key-analysis_nav_back_row"] [data-testid="stHorizontalBlock"],
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stHorizontalBlock"],
           [class*="st-key-analysis_nav_refresh_row"] [data-testid="stHorizontalBlock"] {{
-              grid-template-columns:72px minmax(0,1fr) !important;column-gap:12px !important;
+              grid-template-columns:80px minmax(0,1fr) !important;column-gap:12px !important;
           }}
           [class*="st-key-analysis_nav_back_row"] [data-testid="column"]:first-child,
           [class*="st-key-analysis_nav_scan_row"] [data-testid="column"]:first-child,
           [class*="st-key-analysis_nav_refresh_row"] [data-testid="column"]:first-child {{
-              width:72px !important;min-width:72px !important;max-width:72px !important;flex:0 0 72px !important;
+              width:80px !important;min-width:80px !important;max-width:80px !important;flex:0 0 80px !important;
           }}
           [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button,
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button,
           [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{
               width:100% !important;min-width:0 !important;max-width:100% !important;
-              height:74px !important;min-height:74px !important;max-height:74px !important;border-radius:17px !important;
+              height:80px !important;min-height:80px !important;max-height:80px !important;border-radius:17px !important;
           }}
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::before {{ width:57px !important;height:57px !important; }}
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::after {{ font-size:36px !important;width:39px !important;height:39px !important; }}
@@ -2009,7 +2021,8 @@ if _analysis_page_active:
           .analysis-nav-label {{ font-size:1rem !important; }}
         }}
         @media(prefers-reduced-motion:reduce) {{
-          [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button p::before,
+          [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button::before,
+          [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button::after,
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::before,
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::after,
           [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button p {{ animation-duration:2.5s !important; }}
