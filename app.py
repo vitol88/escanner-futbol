@@ -80,12 +80,22 @@ st.markdown("""
     border-color:#FACC15 !important;
     box-shadow:inset 0 0 0 1px rgba(250,204,21,.18),0 0 0 3px rgba(250,204,21,.08),0 0 18px rgba(250,204,21,.10) !important;
   }
-  [class*="st-key-search_goal_matches"] input {
+  [class*="st-key-search_goal_matches"] input,
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input {
     min-height:46px !important; padding:0 13px !important;
-    color:#F8FAFC !important; font-size:.88rem !important; font-weight:550 !important;
+    color:#F8FAFC !important; -webkit-text-fill-color:#F8FAFC !important;
+    opacity:1 !important; text-shadow:none !important;
+    font-size:.88rem !important; font-weight:550 !important;
     caret-color:#FACC15 !important; background:transparent !important;
   }
-  [class*="st-key-search_goal_matches"] input::placeholder { color:#9299A5 !important; opacity:1 !important; }
+  [class*="st-key-search_goal_matches"] input::placeholder,
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input::placeholder {
+    color:#9299A5 !important; -webkit-text-fill-color:#9299A5 !important; opacity:1 !important;
+  }
+  [class*="st-key-search_goal_matches"] input:focus,
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input:focus {
+    color:#FFFFFF !important; -webkit-text-fill-color:#FFFFFF !important; opacity:1 !important;
+  }
   [class*="st-key-search_live_matches_button"] { margin:0 !important; }
   [class*="st-key-search_live_matches_button"] [data-testid="stButton"] { margin:0 !important; }
   [class*="st-key-search_live_matches_button"] button {
