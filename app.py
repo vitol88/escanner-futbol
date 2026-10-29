@@ -1319,7 +1319,12 @@ st.markdown("""
   /* H2H: cabecera única, más visible y con menos espacio superior. */
   .h2h-page-kicker {
     display:block !important;
-    margin:0 0 12px 0 !important;
+    /* La regla del contenedor no se refleja en todos los layouts de Streamlit.
+       Compensar directamente el espacio reservado por la cabecera fija. */
+    margin-top:-104px !important;
+    margin-right:0 !important;
+    margin-bottom:12px !important;
+    margin-left:0 !important;
     padding:0 0 12px 0 !important;
     color:#FFE566 !important;
     font-size:clamp(1rem,1.35vw,1.18rem) !important;
@@ -1350,6 +1355,7 @@ st.markdown("""
       padding-top:14px !important;
     }
     .h2h-page-kicker {
+      margin-top:-82px !important;
       font-size:.88rem !important;
       letter-spacing:.075em !important;
       line-height:1.45 !important;
