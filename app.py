@@ -132,6 +132,37 @@ st.markdown("""
     [class*="st-key-search_goal_matches"] [data-testid="stTextInput"] > div { min-height:46px !important; }
   }
 /* Los tres controles comparten tamaño, altura y línea; sin marcos dorados. */
+  /* Forzar estilo minimalista en los contenedores Streamlit que envuelven los toggles. */
+  [class*="st-key-auto_refresh_control_card"], [class*="st-key-sound_control_card"],
+  [class*="st-key-auto_refresh_control_card"] *, [class*="st-key-sound_control_card"] * {
+    box-shadow:none !important;
+  }
+  [class*="st-key-auto_refresh_control_card"], [class*="st-key-sound_control_card"],
+  [class*="st-key-auto_refresh_control_card"] > div, [class*="st-key-sound_control_card"] > div,
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stVerticalBlock"],
+  [class*="st-key-sound_control_card"] [data-testid="stVerticalBlock"],
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stHorizontalBlock"],
+  [class*="st-key-sound_control_card"] [data-testid="stHorizontalBlock"],
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"],
+  [class*="st-key-sound_control_card"] [data-testid="stToggle"],
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] > label,
+  [class*="st-key-sound_control_card"] [data-testid="stToggle"] > label {
+    border:0 !important; outline:0 !important; border-color:transparent !important;
+    border-radius:0 !important; background:transparent !important;
+    min-height:22px !important; height:22px !important; padding:0 !important; margin:0 !important;
+  }
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] [role="switch"],
+  [class*="st-key-sound_control_card"] [data-testid="stToggle"] [role="switch"] {
+    transform:scale(.36) !important; transform-origin:center !important;
+  }
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stMarkdownContainer"] > div,
+  [class*="st-key-sound_control_card"] [data-testid="stMarkdownContainer"] > div {
+    height:22px !important; min-height:22px !important; line-height:1 !important;
+    font-size:8px !important; display:flex !important; align-items:center !important;
+  }
+  [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { align-items:center !important; }
+  [class*="st-key-top_status_controls"] [data-testid="stColumn"] { align-self:center !important; }
+  
   [class*="st-key-top_status_controls"] { position:fixed !important; top:4px !important; left:8px !important; right:auto !important; z-index:10080 !important; display:block !important; width:276px !important; max-width:calc(100vw - 16px) !important; margin:0 !important; padding:0 !important; overflow:visible !important; background:transparent !important; }
   [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)) !important; align-items:center !important; gap:5px !important; flex-wrap:nowrap !important; overflow:visible !important; }
   [class*="st-key-top_status_controls"] [data-testid="stColumn"] { min-width:0 !important; width:auto !important; padding:0 !important; overflow:visible !important; }
