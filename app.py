@@ -131,42 +131,19 @@ st.markdown("""
     [class*="st-key-search_live_matches_button"] button { min-height:46px !important; height:46px !important; }
     [class*="st-key-search_goal_matches"] [data-testid="stTextInput"] > div { min-height:46px !important; }
   }
-  /* Franja compacta arriba a la izquierda, sin tarjetas doradas recargadas. */
-  [class*="st-key-top_status_controls"] {
-    position:fixed !important; top:4px !important; left:8px !important; right:auto !important;
-    z-index:10080 !important; display:block !important; width:198px !important;
-    max-width:calc(100vw - 16px) !important; margin:0 !important; padding:0 !important;
-    overflow:visible !important; background:transparent !important;
-  }
-  [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] {
-    display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)) !important;
-    align-items:center !important; gap:3px !important; flex-wrap:nowrap !important; overflow:visible !important;
-  }
+  /* Controles superiores minimalistas, completos y sin marcos decorativos. */
+  [class*="st-key-top_status_controls"] { position:fixed !important; top:4px !important; left:8px !important; right:auto !important; z-index:10080 !important; display:block !important; width:276px !important; max-width:calc(100vw - 16px) !important; margin:0 !important; padding:0 !important; overflow:visible !important; background:transparent !important; }
+  [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)) !important; align-items:center !important; gap:5px !important; flex-wrap:nowrap !important; overflow:visible !important; }
   [class*="st-key-top_status_controls"] [data-testid="stColumn"] { min-width:0 !important; width:auto !important; padding:0 !important; overflow:visible !important; }
-  [class*="st-key-auto_refresh_control_card"], [class*="st-key-sound_control_card"] {
-    box-sizing:border-box !important; width:100% !important; min-width:0 !important; min-height:22px !important;
-    display:flex !important; align-items:center !important; justify-content:center !important;
-    padding:0 1px !important; border:0 !important; border-radius:5px !important;
-    background:rgba(17,20,25,.78) !important; overflow:visible !important; box-shadow:none !important;
-  }
-  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"],
-  [class*="st-key-sound_control_card"] [data-testid="stToggle"] { display:flex !important; align-items:center !important; justify-content:center !important; min-height:21px !important; padding:0 !important; background:transparent !important; }
-  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] > label,
-  [class*="st-key-sound_control_card"] [data-testid="stToggle"] > label { display:flex !important; align-items:center !important; justify-content:center !important; gap:1px !important; width:100% !important; margin:0 !important; white-space:nowrap !important; }
-  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label p,
-  [class*="st-key-sound_control_card"] [data-testid="stToggle"] label p { color:#F4D778 !important; font-size:7px !important; line-height:1 !important; margin:0 !important; white-space:nowrap !important; }
-  [class*="st-key-auto_refresh_control_card"] [role="switch"],
-  [class*="st-key-sound_control_card"] [role="switch"] { flex:0 0 auto !important; transform:scale(.42) !important; transform-origin:center !important; }
+  [class*="st-key-auto_refresh_control_card"], [class*="st-key-sound_control_card"], [class*="st-key-auto_refresh_control_card"] > div, [class*="st-key-sound_control_card"] > div { box-sizing:border-box !important; width:100% !important; min-width:0 !important; min-height:22px !important; display:flex !important; align-items:center !important; justify-content:center !important; padding:0 !important; border:0 !important; outline:0 !important; border-radius:0 !important; background:transparent !important; overflow:visible !important; box-shadow:none !important; }
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stHorizontalBlock"], [class*="st-key-sound_control_card"] [data-testid="stHorizontalBlock"] { gap:1px !important; align-items:center !important; }
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stColumn"], [class*="st-key-sound_control_card"] [data-testid="stColumn"] { padding:0 !important; min-width:0 !important; }
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"], [class*="st-key-sound_control_card"] [data-testid="stToggle"] { display:flex !important; align-items:center !important; justify-content:center !important; min-height:21px !important; padding:0 !important; background:transparent !important; }
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] > label, [class*="st-key-sound_control_card"] [data-testid="stToggle"] > label { display:flex !important; align-items:center !important; justify-content:center !important; gap:1px !important; width:100% !important; margin:0 !important; white-space:nowrap !important; }
+  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label p, [class*="st-key-sound_control_card"] [data-testid="stToggle"] label p { color:#D8C27A !important; font-size:8px !important; line-height:1 !important; margin:0 !important; white-space:nowrap !important; }
+  [class*="st-key-auto_refresh_control_card"] [role="switch"], [class*="st-key-sound_control_card"] [role="switch"] { flex:0 0 auto !important; transform:scale(.42) !important; transform-origin:center !important; }
   [class*="st-key-top_status_controls"] iframe { display:block !important; width:100% !important; height:24px !important; min-height:24px !important; margin:0 !important; padding:0 !important; border:0 !important; overflow:visible !important; }
-  @media(max-width:640px) {
-    [class*="st-key-top_status_controls"] { top:3px !important; left:5px !important; right:auto !important; width:180px !important; max-width:calc(100vw - 10px) !important; }
-    [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { gap:2px !important; }
-    [class*="st-key-auto_refresh_control_card"], [class*="st-key-sound_control_card"] { min-height:21px !important; padding:0 !important; }
-    [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label p,
-    [class*="st-key-sound_control_card"] [data-testid="stToggle"] label p { font-size:6px !important; }
-    [class*="st-key-top_status_controls"] [role="switch"] { transform:scale(.38) !important; }
-    [class*="st-key-top_status_controls"] iframe { height:22px !important; min-height:22px !important; }
-  }
+  @media(max-width:640px) { [class*="st-key-top_status_controls"] { top:3px !important; left:5px !important; right:auto !important; width:248px !important; max-width:calc(100vw - 10px) !important; } [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { gap:3px !important; } [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label p, [class*="st-key-sound_control_card"] [data-testid="stToggle"] label p { font-size:7px !important; } [class*="st-key-top_status_controls"] [role="switch"] { transform:scale(.38) !important; } [class*="st-key-top_status_controls"] iframe { height:22px !important; min-height:22px !important; } }
   [class*="st-key-sound_enabled_toggle"] { padding:5px 8px; border:1px solid #393326; border-radius:12px; background:#15191F; }
   [class*="st-key-sound_enabled_toggle"] label { font-size:.92rem !important; font-weight:650 !important; }
   [class*="st-key-sound_enabled_toggle"] [role="switch"] { transform:scale(.88); transform-origin:center; }
@@ -2021,8 +1998,8 @@ with st.container(key="top_status_controls"):
     with status_cols[2]:
         st.components.v1.html("""
 <style>html,body{margin:0!important;padding:0!important;width:100%!important;background:transparent!important;overflow:hidden!important;}</style>
-<div style="box-sizing:border-box;display:flex;align-items:center;justify-content:center;width:100%;height:48px;min-height:48px;margin:0;padding:0">
-  <button id="scanner-test-sound" type="button" title="Activar y probar las alertas sonoras" style="box-sizing:border-box;display:block;width:100%;height:48px;min-height:48px;margin:0;padding:6px 3px;border-radius:11px;border:1px solid #D4A72C;background:linear-gradient(145deg,#201D14,#111419);color:#F4D778;font:600 11px system-ui;white-space:nowrap;cursor:pointer">🔔 Alertas</button>
+<div style="box-sizing:border-box;display:flex;align-items:center;justify-content:center;width:100%;height:22px;min-height:22px;margin:0;padding:0">
+  <button id="scanner-test-sound" type="button" title="Activar y probar las alertas sonoras" style="box-sizing:border-box;display:block;width:100%;height:22px;min-height:22px;margin:0;padding:0 2px;border-radius:0;border:0;background:transparent;color:#D8C27A;font:600 8px system-ui;white-space:nowrap;cursor:pointer">🔔 Alertas</button>
 </div>
 <script>
 (() => {
