@@ -530,12 +530,20 @@ st.markdown("""
     .match-action-grid {grid-template-columns:repeat(2,minmax(0,1fr));}
     .h2h-match-row {grid-template-columns:65px minmax(0,1fr) 48px minmax(0,1fr);font-size:.7rem;gap:4px;}
     /* Mantener cada partido histórico en una sola fila, compactando las seis columnas para móvil. */
-    .corner-h2h-row.corner-history-grid {grid-template-columns:46px minmax(0,1.15fr) 25px minmax(0,1.15fr) 25px 35px;gap:2px;padding:7px 2px;font-size:.58rem;line-height:1.2;min-width:0;box-sizing:border-box;}
-    .corner-h2h-row.corner-history-grid > span {min-width:0;overflow-wrap:anywhere;word-break:normal;}
-    .corner-h2h-row.corner-history-grid > span:first-child {font-size:.56rem;}
-    .corner-h2h-row.corner-history-grid .h2h-team {gap:2px;min-width:0;overflow-wrap:anywhere;}
-    .corner-h2h-row.corner-history-grid .h2h-team img {width:13px;height:13px;flex-basis:13px;flex-shrink:0;}
+    .corner-h2h-row.corner-history-grid {grid-template-columns:52px minmax(0,1fr) 22px minmax(0,1fr) 22px 30px;column-gap:3px;row-gap:0;padding:7px 4px;font-size:.62rem;line-height:1.25;min-width:0;width:100%;box-sizing:border-box;}
+    .corner-h2h-row.corner-history-grid > span {min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-sizing:border-box;}
+    .corner-h2h-row.corner-history-grid > span:first-child {font-size:.57rem;}
+    .corner-h2h-row.corner-history-grid .h2h-team {display:flex;align-items:center;gap:3px;min-width:0;overflow:hidden;white-space:nowrap;}
+    .corner-h2h-row.corner-history-grid .h2h-team img {width:13px;height:13px;flex:0 0 13px;object-fit:contain;}
     .corner-h2h-row.corner-history-grid .corner-h2h-value {text-align:center;font-size:.62rem;}
+    .corner-h2h-row.corner-history-grid.corner-history-header {font-size:.55rem;padding-left:4px;padding-right:4px;}
+    .corner-h2h-row.corner-history-grid.corner-history-header > span {overflow:visible;text-overflow:clip;white-space:normal;line-height:1.1;}
+    .corner-h2h-row.corner-history-grid.corner-history-header > span:nth-child(3),
+    .corner-h2h-row.corner-history-grid.corner-history-header > span:nth-child(5) {font-size:0;}
+    .corner-h2h-row.corner-history-grid.corner-history-header > span:nth-child(3)::after {content:"C-L";font-size:.56rem;}
+    .corner-h2h-row.corner-history-grid.corner-history-header > span:nth-child(5)::after {content:"C-V";font-size:.56rem;}
+    .corner-h2h-row.corner-history-grid.corner-history-header > span:nth-child(6) {font-size:0;}
+    .corner-h2h-row.corner-history-grid.corner-history-header > span:nth-child(6)::after {content:"Total";font-size:.56rem;}
     .corner-h2h-total-label {display:none !important;}
   }
 
@@ -2735,7 +2743,7 @@ else:
                                                     st.caption("No se pudo cargar el histórico de córners: " + str(h2h_rows["error"]))
                                                 elif isinstance(h2h_rows, list):
                                                     if h2h_rows:
-                                                        corners_html = '<div class="corner-h2h-row corner-history-grid" style="font-weight:800;color:#FACC15;border-bottom:1px solid #51451D;"><span>Fecha</span><span>Local</span><span class="corner-h2h-value">Córners L</span><span>Visitante</span><span class="corner-h2h-value">Córners V</span><span class="corner-h2h-value">Total córners</span></div>'
+                                                        corners_html = '<div class="corner-h2h-row corner-history-grid corner-history-header" style="font-weight:800;color:#FACC15;border-bottom:1px solid #51451D;"><span>Fecha</span><span>Local</span><span class="corner-h2h-value">Córners L</span><span>Visitante</span><span class="corner-h2h-value">Córners V</span><span class="corner-h2h-value">Total córners</span></div>'
                                                         for row in h2h_rows:
                                                             date_label = html.escape(str(row.get("Fecha") or "N/D"))
                                                             home_name = html.escape(str(row.get("Local") or "N/D"))
