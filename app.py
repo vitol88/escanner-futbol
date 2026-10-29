@@ -1500,12 +1500,15 @@ st.components.v1.html("""
 MODEL_DATA = load_league_baselines()
 
 def _handle_live_search_change():
-    """Respaldo: al recibir un campo vacío, limpiar el filtro activo."""
+    """Enter confirma la búsqueda; vaciar el campo restablece los partidos en vivo."""
     query = str(st.session_state.get("search_goal_matches", "") or "").strip()
     if not query:
         st.session_state.pop("live_search_query", None)
         st.session_state.pop("live_search_message", None)
         st.session_state.pop("live_search_submit_requested", None)
+    else:
+        # Streamlit ejecuta este callback cuando el usuario pulsa Enter en el campo.
+        st.session_state["live_search_submit_requested"] = True
 
 search_clicked = False
 with st.sidebar:
@@ -2609,7 +2612,7 @@ if _analysis_page_active:
         unsafe_allow_html=True,
     )
 
-# La lupa ejecuta la búsqueda; el campo nativo también actualiza al confirmar con Enter o al salir del campo.
+# La lupa y Enter ejecutan la búsqueda; el callback de Enter deja la solicitud en session_state.
 search_clicked = bool(search_clicked or st.session_state.pop("live_search_submit_requested", False))
 
 fixtures = st.session_state.live_fixtures
