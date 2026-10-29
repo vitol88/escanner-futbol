@@ -2190,6 +2190,57 @@ if _analysis_page_active:
             [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button,
             [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{ min-height:50px !important; padding:12px 14px !important; font-size:.94rem !important; }}
         }}
+
+  /* Override final: hover de partidos con un único halo difuminado, sin líneas adicionales. */
+  [class*="st-key-live_match_"] {
+    border:1px solid transparent !important;
+    outline:0 !important;
+    box-shadow:none !important;
+    background:transparent !important;
+  }
+  [class*="st-key-live_match_"]:hover,
+  [class*="st-key-live_match_"]:focus-within {
+    border-color:transparent !important;
+    outline:0 !important;
+    box-shadow:none !important;
+    background:transparent !important;
+  }
+  [class*="st-key-live_match_"] .fl-match-scoreboard,
+  [class*="st-key-live_match_"]:hover .fl-match-scoreboard,
+  [class*="st-key-live_match_"]:focus-within .fl-match-scoreboard {
+    outline:0 !important;
+    border:1px solid #343840 !important;
+    box-shadow:inset 0 0 12px rgba(250,204,21,.025) !important;
+    transition:box-shadow .22s ease,background .22s ease !important;
+  }
+  [class*="st-key-live_match_"]:hover .fl-match-scoreboard {
+    border-color:#343840 !important;
+    box-shadow:inset 0 0 12px rgba(250,204,21,.025),0 0 22px rgba(250,204,21,.14) !important;
+    background:radial-gradient(ellipse at 10% 50%,rgba(250,204,21,.075),transparent 48%),linear-gradient(145deg,#171A20,#090A0D) !important;
+  }
+  [class*="st-key-live_match_"] .fl-match-scoreboard.is-selected,
+  [class*="st-key-live_match_"]:hover .fl-match-scoreboard.is-selected {
+    border-color:rgba(250,204,21,.8) !important;
+    box-shadow:inset 0 0 10px rgba(250,204,21,.035),0 0 18px rgba(250,204,21,.12) !important;
+  }
+  [class*="st-key-select_live_match_"],
+  [class*="st-key-select_live_match_"]:hover,
+  [class*="st-key-select_live_match_"]:focus-within {
+    outline:0 !important;
+    border:0 !important;
+    box-shadow:none !important;
+    background:transparent !important;
+  }
+  [class*="st-key-select_live_match_"] button,
+  [class*="st-key-select_live_match_"] button:hover,
+  [class*="st-key-select_live_match_"] button:focus,
+  [class*="st-key-select_live_match_"] button:focus-visible,
+  [class*="st-key-select_live_match_"] button:active {
+    outline:0 !important;
+    border:0 !important;
+    box-shadow:none !important;
+    background:transparent !important;
+  }
 </style>
         """,
         unsafe_allow_html=True,
