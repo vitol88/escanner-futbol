@@ -1967,77 +1967,129 @@ if _analysis_page_active:
             font-size:.95rem !important;line-height:1.2 !important;border-radius:12px !important;border-width:1.5px !important;
           }}
         }}
-        /* BOTÓN ESCANEAR EN VIVO: usar la key real de Streamlit, no la estructura interna de columnas. */
-        [class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button {{
-            position:relative !important;display:block !important;overflow:hidden !important;
-            width:100% !important;min-width:0 !important;max-width:100% !important;
-            min-height:150px !important;height:150px !important;box-sizing:border-box !important;
-            padding:18px 12px 18px 49% !important;text-align:left !important;
-            white-space:normal !important;overflow-wrap:anywhere !important;
-            border:2px solid #FFE15A !important;border-radius:24px !important;
-            background:radial-gradient(ellipse at 18% 50%,rgba(250,204,21,.12),transparent 42%),linear-gradient(135deg,#171811 0%,#111318 70%,#19170D 100%) !important;
-            color:#FDE68A !important;font-size:clamp(.95rem,3.8vw,1.25rem) !important;
-            line-height:1.35 !important;font-weight:800 !important;
-            box-shadow:inset 0 0 24px rgba(250,204,21,.07),0 0 12px rgba(250,204,21,.08) !important;
-            isolation:isolate !important;
+        /* FILAS DE ACCIÓN: icono compacto y etiqueta separada, como pidió el diseño de inicio. */
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stHorizontalBlock"],
+        [class*="st-key-analysis_nav_scan_row"] [data-testid="stHorizontalBlock"],
+        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stHorizontalBlock"] {{
+            display:grid !important;grid-template-columns:88px minmax(0,1fr) !important;
+            align-items:center !important;gap:16px !important;width:100% !important;
         }}
-        [class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button::before {{
-            content:"" !important;position:absolute !important;z-index:0 !important;
-            left:4% !important;top:50% !important;width:min(39%,170px) !important;
-            aspect-ratio:1 / 1 !important;height:auto !important;display:block !important;
-            transform:translateY(-50%) !important;border-radius:50% !important;
-            border:4px solid #FFD21F !important;box-sizing:border-box !important;
+        [class*="st-key-analysis_nav_back_row"] [data-testid="column"],
+        [class*="st-key-analysis_nav_scan_row"] [data-testid="column"],
+        [class*="st-key-analysis_nav_refresh_row"] [data-testid="column"] {{
+            width:auto !important;min-width:0 !important;max-width:100% !important;flex:none !important;
+        }}
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"],
+        [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"],
+        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] {{
+            width:88px !important;min-width:88px !important;max-width:88px !important;
+        }}
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button,
+        [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button,
+        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{
+            position:relative !important;display:flex !important;align-items:center !important;justify-content:center !important;
+            width:82px !important;min-width:82px !important;max-width:82px !important;
+            height:78px !important;min-height:78px !important;max-height:78px !important;
+            padding:0 !important;overflow:hidden !important;box-sizing:border-box !important;
+            border:2px solid #FACC15 !important;border-radius:20px !important;
+            background:radial-gradient(ellipse at 25% 50%,rgba(250,204,21,.15),transparent 58%),linear-gradient(145deg,#201D14,#111419) !important;
+            color:#FFE978 !important;box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 4px 14px rgba(0,0,0,.24),0 0 10px rgba(250,204,21,.08) !important;
+            transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease !important;
+        }}
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button p,
+        [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button p,
+        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button p {{
+            position:relative !important;z-index:3 !important;margin:0 !important;
+            color:inherit !important;font-size:0 !important;line-height:1 !important;
+        }}
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button p {{
+            font-size:48px !important;font-weight:500 !important;animation:analysis-arrow-tilt 1.35s ease-in-out infinite !important;
+        }}
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button::before,
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button::after,
+        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button::before,
+        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button::after {{
+            content:none !important;display:none !important;animation:none !important;
+        }}
+        [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::before {{
+            content:"" !important;display:block !important;position:absolute !important;z-index:1 !important;
+            left:50% !important;top:50% !important;width:67px !important;height:67px !important;
+            transform:translate(-50%,-50%) rotate(0deg) !important;transform-origin:center !important;
+            border:3px solid #FFD21F !important;border-radius:50% !important;box-sizing:border-box !important;
             background-color:#090A0D !important;
-            background-image:radial-gradient(circle at center,#FACC15 0 5%,#17191F 6% 13%,transparent 14%),repeating-radial-gradient(circle at center,transparent 0 12px,rgba(250,204,21,.62) 13px 16px,transparent 17px 25px),conic-gradient(from 0deg,transparent 0 8%,rgba(250,204,21,.96) 15%,transparent 30% 48%,rgba(250,204,21,.52) 55%,transparent 72%) !important;
-            box-shadow:0 0 22px rgba(250,204,21,.42),inset 0 0 18px rgba(250,204,21,.22) !important;
-            transform-origin:center !important;animation:analysis-radar-rotate 3s linear infinite !important;
-            pointer-events:none !important;
+            background-image:radial-gradient(circle at center,#FACC15 0 5%,#17191F 6% 13%,transparent 14%),repeating-radial-gradient(circle at center,transparent 0 8px,rgba(250,204,21,.7) 9px 11px,transparent 12px 17px),conic-gradient(from 0deg,transparent 0 8%,rgba(250,204,21,.98) 15%,transparent 30% 48%,rgba(250,204,21,.55) 55%,transparent 72%) !important;
+            box-shadow:0 0 19px rgba(250,204,21,.55),inset 0 0 17px rgba(250,204,21,.28) !important;
+            animation:analysis-radar-rotate 2.8s linear infinite !important;pointer-events:none !important;
         }}
-        [class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button::after {{
-            content:"⚽" !important;position:absolute !important;z-index:1 !important;
-            left:23.5% !important;top:50% !important;width:48px !important;height:48px !important;
-            display:flex !important;align-items:center !important;justify-content:center !important;
-            font-size:clamp(2rem,6.2vw,2.8rem) !important;line-height:1 !important;
-            transform:translate(-50%,-50%) !important;transform-origin:center !important;
-            filter:drop-shadow(0 0 9px rgba(250,204,21,.65)) !important;
-            animation:analysis-ball-rotate .72s linear infinite !important;
-            pointer-events:none !important;
+        [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::after {{
+            content:"⚽" !important;display:flex !important;position:absolute !important;z-index:2 !important;
+            left:50% !important;top:50% !important;width:45px !important;height:45px !important;
+            align-items:center !important;justify-content:center !important;
+            transform:translate(-50%,-50%) rotate(0deg) !important;transform-origin:center !important;
+            font-size:43px !important;line-height:1 !important;filter:drop-shadow(0 0 8px rgba(250,204,21,.72)) !important;
+            animation:analysis-ball-rotate .72s linear infinite !important;pointer-events:none !important;
         }}
-        [class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button p {{
-            position:relative !important;z-index:2 !important;margin:0 !important;
+        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button p {{
+            font-size:49px !important;line-height:1 !important;display:inline-block !important;
+            animation:analysis-refresh-spin 1.35s linear infinite !important;
+        }}
+        .analysis-nav-label {{
             color:#FDE68A !important;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important;
-            font-size:inherit !important;font-weight:800 !important;line-height:1.35 !important;
-            letter-spacing:.01em !important;text-align:left !important;
+            font-size:clamp(1rem,2.8vw,1.22rem) !important;font-weight:700 !important;line-height:1.25 !important;
+            letter-spacing:.01em !important;padding:8px 0 !important;text-align:left !important;
         }}
-        [class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button:hover {{
-            border-color:#FFF09A !important;
-            background:radial-gradient(ellipse at 18% 50%,rgba(250,204,21,.16),transparent 42%),linear-gradient(135deg,#211F14 0%,#14161B 70%,#211D10 100%) !important;
-            box-shadow:inset 0 0 28px rgba(250,204,21,.10),0 0 16px rgba(250,204,21,.16) !important;
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button:hover,
+        [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button:hover,
+        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button:hover {{
+            border-color:#FFF09A !important;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 5px 18px rgba(250,204,21,.16) !important;
+            transform:translateY(-1px) !important;
         }}
         @keyframes analysis-radar-rotate {{
-            from {{ rotate:0deg; }}
-            to {{ rotate:360deg; }}
+            from {{ transform:translate(-50%,-50%) rotate(0deg); }}
+            to {{ transform:translate(-50%,-50%) rotate(360deg); }}
         }}
         @keyframes analysis-ball-rotate {{
             0% {{ transform:translate(-50%,-50%) rotate(0deg) scale(1); }}
             50% {{ transform:translate(-50%,-50%) rotate(180deg) scale(1.08); }}
             100% {{ transform:translate(-50%,-50%) rotate(360deg) scale(1); }}
         }}
+        @keyframes analysis-arrow-tilt {{
+            0%,100% {{ transform:translateX(0) rotate(0deg); }}
+            25% {{ transform:translateX(-3px) rotate(-8deg); }}
+            60% {{ transform:translateX(2px) rotate(4deg); }}
+        }}
+        @keyframes analysis-refresh-spin {{
+            from {{ transform:rotate(0deg); }}
+            to {{ transform:rotate(360deg); }}
+        }}
         @media(max-width:640px) {{
-          [class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button {{
-            min-height:150px !important;height:150px !important;padding:14px 10px 14px 49% !important;
-            font-size:.95rem !important;line-height:1.35 !important;border-radius:22px !important;
+          [class*="st-key-analysis_nav_back_row"] [data-testid="stHorizontalBlock"],
+          [class*="st-key-analysis_nav_scan_row"] [data-testid="stHorizontalBlock"],
+          [class*="st-key-analysis_nav_refresh_row"] [data-testid="stHorizontalBlock"] {{
+              grid-template-columns:76px minmax(0,1fr) !important;gap:13px !important;
           }}
-          [class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button::before {{
-            width:min(39%,145px) !important;left:4% !important;
+          [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"],
+          [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"],
+          [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] {{
+              width:76px !important;min-width:76px !important;max-width:76px !important;
           }}
-          [class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button::after {{
-            left:23.5% !important;font-size:2.15rem !important;
+          [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button,
+          [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button,
+          [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{
+              width:72px !important;min-width:72px !important;max-width:72px !important;
+              height:72px !important;min-height:72px !important;max-height:72px !important;border-radius:18px !important;
           }}
+          [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::before {{ width:59px !important;height:59px !important; }}
+          [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::after {{ font-size:37px !important;width:40px !important;height:40px !important; }}
+          [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button p {{ font-size:43px !important; }}
+          [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button p {{ font-size:43px !important; }}
+          .analysis-nav-label {{ font-size:1rem !important; }}
         }}
         @media(prefers-reduced-motion:reduce) {{
-          [class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button::before,
-          [class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button::after {{ animation-duration:2.5s !important; }}
+          [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button p,
+          [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::before,
+          [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::after,
+          [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button p {{ animation-duration:2.5s !important; }}
         }}
         </style>
         """,
@@ -2045,14 +2097,25 @@ if _analysis_page_active:
     )
     with st.container(key="analysis_page_nav"):
         _nav_market = str(_current_tool_page.get("market") or "")
-        _nav_cols = st.columns([1.0, 1.25, 1.15] if _nav_market in {"goals", "corners"} else [1.0])
-        with _nav_cols[0]:
-            _back_clicked = st.button("← Volver al partido", key="analysis_page_back", use_container_width=True)
+        with st.container(key="analysis_nav_back_row"):
+            _back_cols = st.columns([0.34, 1.66], gap="small")
+            with _back_cols[0]:
+                _back_clicked = st.button("←", key="analysis_page_back", use_container_width=True, help="Volver al partido")
+            with _back_cols[1]:
+                st.markdown('<div class="analysis-nav-label">Volver al partido</div>', unsafe_allow_html=True)
         if _nav_market in {"goals", "corners"}:
-            with _nav_cols[1]:
-                _top_scan_clicked = st.button("Escanear en vivo", key="analysis_page_scan", use_container_width=True)
-            with _nav_cols[2]:
-                _top_refresh_clicked = st.button("⟳ Actualizar escáner", key="analysis_page_refresh", use_container_width=True)
+            with st.container(key="analysis_nav_scan_row"):
+                _scan_cols = st.columns([0.34, 1.66], gap="small")
+                with _scan_cols[0]:
+                    _top_scan_clicked = st.button("⚽", key="analysis_page_scan", use_container_width=True, help="Escanear en vivo")
+                with _scan_cols[1]:
+                    st.markdown('<div class="analysis-nav-label">Escanear en vivo</div>', unsafe_allow_html=True)
+            with st.container(key="analysis_nav_refresh_row"):
+                _refresh_cols = st.columns([0.34, 1.66], gap="small")
+                with _refresh_cols[0]:
+                    _top_refresh_clicked = st.button("⟳", key="analysis_page_refresh", use_container_width=True, help="Actualizar escáner")
+                with _refresh_cols[1]:
+                    st.markdown('<div class="analysis-nav-label">Actualizar escáner</div>', unsafe_allow_html=True)
             if _top_scan_clicked or _top_refresh_clicked:
                 _requested_action = "scan" if _top_scan_clicked else "refresh"
                 st.session_state["analysis_scan_request"] = {
