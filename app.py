@@ -1317,6 +1317,60 @@ st.markdown("""
   }
 
   /* H2H: cabecera única, más visible y con menos espacio superior. */
+  /* Ocultar el cursor de texto accidental en bloques de contenido no editables. */
+  section.main [data-testid="stMarkdownContainer"],
+  section.main [data-testid="stMarkdownContainer"] * {
+    caret-color:transparent !important;
+  }
+  .h2h-page-kicker, .h2h-page-kicker * {
+    caret-color:transparent !important;
+    user-select:none !important;
+  }
+  .h2h-summary-grid {
+    display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    gap:10px !important; width:100% !important; margin:2px 0 14px !important;
+  }
+  .h2h-summary-card {
+    min-width:0 !important; box-sizing:border-box !important; padding:12px 14px !important;
+    border:1px solid #272A30 !important; border-radius:14px !important;
+    background:linear-gradient(145deg,#1B1E23,#17191E) !important;
+    box-shadow:0 4px 12px rgba(0,0,0,.12) !important;
+  }
+  .h2h-summary-label { color:#85868B !important; font-size:.73rem !important; line-height:1.3 !important; text-transform:uppercase !important; letter-spacing:.025em !important; }
+  .h2h-summary-value { color:#FFD52A !important; font-size:1.35rem !important; font-weight:850 !important; line-height:1.45 !important; margin-top:4px !important; }
+  .h2h-history-list { width:100% !important; min-width:0 !important; }
+  .h2h-match-row {
+    display:grid !important; grid-template-columns:112px minmax(0,1fr) 82px minmax(0,1fr) !important;
+    align-items:center !important; gap:12px !important; width:100% !important; min-width:0 !important;
+    box-sizing:border-box !important; padding:12px 10px !important;
+    border-bottom:1px solid #34302A !important; background:#15171C !important;
+    transition:background .18s ease !important;
+  }
+  .h2h-match-row:nth-child(even) { background:#101216 !important; }
+  .h2h-match-row:hover { background:#1B1E24 !important; }
+  .h2h-match-row .h2h-date { color:#85868B !important; font-size:.8rem !important; white-space:nowrap !important; }
+  .h2h-match-row .h2h-team { display:flex !important; align-items:center !important; gap:8px !important; min-width:0 !important; overflow:hidden !important; font-size:.88rem !important; font-weight:600 !important; line-height:1.3 !important; }
+  .h2h-match-row .h2h-team img { width:25px !important; height:25px !important; flex:0 0 25px !important; object-fit:contain !important; }
+  .h2h-match-row .h2h-team-name { overflow:hidden !important; text-overflow:ellipsis !important; white-space:nowrap !important; }
+  .h2h-match-row .h2h-score { justify-self:center !important; display:inline-flex !important; align-items:center !important; justify-content:center !important; min-width:76px !important; box-sizing:border-box !important; padding:7px 10px !important; border-radius:10px !important; background:rgba(250,204,21,.11) !important; color:#FFD52A !important; font-size:1rem !important; font-weight:900 !important; white-space:nowrap !important; }
+  @media(max-width:640px) {
+    .h2h-summary-grid { gap:6px !important; margin-bottom:10px !important; }
+    .h2h-summary-card { padding:9px 8px !important; border-radius:11px !important; }
+    .h2h-summary-label { font-size:.58rem !important; }
+    .h2h-summary-value { font-size:1.05rem !important; }
+    .h2h-match-row { grid-template-columns:72px minmax(0,1fr) 58px minmax(0,1fr) !important; gap:5px !important; padding:10px 6px !important; }
+    .h2h-match-row .h2h-date { font-size:.65rem !important; }
+    .h2h-match-row .h2h-team { gap:4px !important; font-size:.68rem !important; }
+    .h2h-match-row .h2h-team img { width:18px !important; height:18px !important; flex-basis:18px !important; }
+    .h2h-match-row .h2h-score { min-width:54px !important; padding:6px 4px !important; font-size:.82rem !important; border-radius:8px !important; }
+  }
+  @media(max-width:380px) {
+    .h2h-match-row { grid-template-columns:60px minmax(0,1fr) 48px minmax(0,1fr) !important; gap:3px !important; padding:9px 4px !important; }
+    .h2h-match-row .h2h-date { font-size:.59rem !important; }
+    .h2h-match-row .h2h-team { font-size:.61rem !important; gap:3px !important; }
+    .h2h-match-row .h2h-team img { width:15px !important; height:15px !important; flex-basis:15px !important; }
+    .h2h-match-row .h2h-score { min-width:46px !important; font-size:.74rem !important; }
+  }
   .h2h-page-kicker {
     display:block !important;
     /* La regla del contenedor no se refleja en todos los layouts de Streamlit.
@@ -2739,39 +2793,43 @@ else:
                                                 st.caption(f"Últimos {len(h2h_matches)} enfrentamientos finalizados con el equipo local actual jugando en casa; se prioriza la misma competición y se completa con otras si hace falta.")
                                             h2h_html = ""
                                             valid_goal_totals = []
+                                            draw_count = 0
                                             for past in h2h_matches:
                                                 pf, pt, pg = past.get("fixture") or {}, past.get("teams") or {}, past.get("goals") or {}
                                                 ph, pa = pt.get("home") or {}, pt.get("away") or {}
-                                                date_label = html.escape((pf.get("date") or "")[:10])
+                                                raw_date = (pf.get("date") or "")[:10]
+                                                try:
+                                                    date_label = datetime.strptime(raw_date, "%Y-%m-%d").strftime("%d %b %Y").lower()
+                                                except ValueError:
+                                                    date_label = raw_date
+                                                date_label = html.escape(date_label)
                                                 ph_name, pa_name = html.escape(str(ph.get("name") or "Local")), html.escape(str(pa.get("name") or "Visitante"))
                                                 ph_logo, pa_logo = html.escape(str(ph.get("logo") or ""), quote=True), html.escape(str(pa.get("logo") or ""), quote=True)
                                                 home_goals, away_goals = pg.get("home"), pg.get("away")
                                                 if isinstance(home_goals, (int, float)) and isinstance(away_goals, (int, float)):
                                                     valid_goal_totals.append(home_goals + away_goals)
-                                                h2h_html += f'<div class="h2h-match-row"><span>{date_label}</span><span class="h2h-team"><img src="{ph_logo}" onerror="this.style.display=\'none\'">{ph_name}</span><span class="h2h-score">{home_goals if home_goals is not None else "—"} – {away_goals if away_goals is not None else "—"}</span><span class="h2h-team"><img src="{pa_logo}" onerror="this.style.display=\'none\'">{pa_name}</span></div>'
-                                            st.markdown(h2h_html, unsafe_allow_html=True)
+                                                    if home_goals == away_goals:
+                                                        draw_count += 1
+                                                h2h_html += (
+                                                    f'<div class="h2h-match-row">'
+                                                    f'<span class="h2h-date">{date_label}</span>'
+                                                    f'<span class="h2h-team"><img src="{ph_logo}" alt="" onerror="this.style.display=\'none\'"><span class="h2h-team-name">{ph_name}</span></span>'
+                                                    f'<span class="h2h-score">{home_goals if home_goals is not None else "—"} – {away_goals if away_goals is not None else "—"}</span>'
+                                                    f'<span class="h2h-team"><img src="{pa_logo}" alt="" onerror="this.style.display=\'none\'"><span class="h2h-team-name">{pa_name}</span></span>'
+                                                    f'</div>'
+                                                )
                                             if valid_goal_totals:
                                                 average_goals = sum(valid_goal_totals) / len(valid_goal_totals)
-                                                st.markdown(
-                                                    f"""
-                                                    <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;
-                                                                margin:16px 0 18px;padding:7px 10px;
-                                                                border:1px solid #51451D;border-radius:9px;
-                                                                background:linear-gradient(135deg,#17191f,#20232b);
-                                                                width:fit-content;max-width:100%;clear:both;position:relative;">
-                                                      <span style="font-size:11px;font-weight:700;color:#FACC15;letter-spacing:.3px;">
-                                                        PROMEDIO DE GOLES
-                                                      </span>
-                                                      <span style="display:inline-block;padding:4px 9px;
-                                                                   border:1px solid #FACC15;border-radius:7px;
-                                                                   background:#FACC15;color:#111827;
-                                                                   font-size:13px;font-weight:800;line-height:1.1;">
-                                                        {average_goals:.2f}
-                                                      </span>
-                                                    </div>
-                                                    """,
-                                                    unsafe_allow_html=True,
-                                                )
+                                            else:
+                                                average_goals = 0.0
+                                            summary_html = (
+                                                '<div class="h2h-summary-grid">'
+                                                f'<div class="h2h-summary-card"><div class="h2h-summary-label">PARTIDOS</div><div class="h2h-summary-value">{len(valid_goal_totals)}</div></div>'
+                                                f'<div class="h2h-summary-card"><div class="h2h-summary-label">PROM. GOLES</div><div class="h2h-summary-value">{average_goals:.2f}</div></div>'
+                                                f'<div class="h2h-summary-card"><div class="h2h-summary-label">EMPATES</div><div class="h2h-summary-value">{draw_count}/{len(valid_goal_totals)}</div></div>'
+                                                '</div>'
+                                            )
+                                            st.markdown(summary_html + '<div class="h2h-history-list">' + h2h_html + '</div>', unsafe_allow_html=True)
                                         elif isinstance(h2h_data, list) and h2h_data:
                                             # Compatibilidad con entradas de caché creadas antes de h2h-v2.
                                             st.info("Se encontraron datos H2H antiguos en caché. Vuelve a abrir H2H para cargar el historial actualizado.")
