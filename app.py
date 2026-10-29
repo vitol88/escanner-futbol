@@ -2569,6 +2569,12 @@ if _analysis_page_active:
             [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{ min-height:50px !important; padding:12px 14px !important; font-size:.94rem !important; }}
         }}
 
+  /* Quita decoraciones nativas que pueden aparecer como puntos al extremo del buscador. */
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input::-webkit-search-decoration,
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input::-webkit-search-cancel-button,
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input::-webkit-search-results-button,
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input::-webkit-search-results-decoration {{ -webkit-appearance:none !important; appearance:none !important; display:none !important; width:0 !important; height:0 !important; }}
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input {{ background-image:none !important; }}
   /* Buscador lateral integrado: campo carbón + acción dorada. */
   [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] {{ margin:0 0 20px 0 !important; min-width:0 !important; }}
   [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] > div {{ gap:0 !important; }}
