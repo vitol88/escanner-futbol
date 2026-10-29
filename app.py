@@ -1314,34 +1314,34 @@ with st.sidebar:
             st.rerun()
     st.divider()
     st.markdown('<div style="font-size:.78rem;font-weight:900;letter-spacing:.16em;color:#FFE36A;margin-bottom:12px;text-transform:uppercase;">HERRAMIENTAS DEL PARTIDO</div>', unsafe_allow_html=True)
-        _selected_fixture_for_menu = st.session_state.get("selected_live_fixture") or {}
-        _selected_fixture_for_menu_id = str((_selected_fixture_for_menu.get("fixture") or {}).get("id") or "")
-        _selected_home_for_menu = (_selected_fixture_for_menu.get("teams") or {}).get("home") or {}
-        _selected_away_for_menu = (_selected_fixture_for_menu.get("teams") or {}).get("away") or {}
-        if _selected_fixture_for_menu_id:
-            if not _sidebar_tool_active:
-                st.markdown(f'<div style="font-size:.84rem;font-weight:750;line-height:1.35;color:#E5E7EB;margin:0 0 12px 0;">{html.escape(str(_selected_home_for_menu.get("name") or "Local"))}<span style="color:#C9A93A;"> vs </span>{html.escape(str(_selected_away_for_menu.get("name") or "Visitante"))}</div>', unsafe_allow_html=True)
-            _menu_tool_state = st.session_state.get("main_fixture_tool") or {}
-            _menu_active_tool = _menu_tool_state.get("tool") if str(_menu_tool_state.get("fixture_id")) == _selected_fixture_for_menu_id else None
-            _menu_active_market = _menu_tool_state.get("market") if str(_menu_tool_state.get("fixture_id")) == _selected_fixture_for_menu_id else None
-            _menu_stats = st.button("ESTADÍSTICAS", icon=":material/query_stats:", help="Estadísticas en vivo", key=f"main_stats_{_selected_fixture_for_menu_id}", type="primary" if _menu_active_tool == "stats" else "secondary", use_container_width=True)
-            _menu_goals = st.button("GOLES Y SEÑALES", icon=":material/sports_soccer:", help="Goles y señales", key=f"main_market_{_selected_fixture_for_menu_id}_goals", type="primary" if _menu_active_market == "goals" else "secondary", use_container_width=True)
-            _menu_corners = st.button("CÓRNERS", icon=":material/flag:", help="Córners y señales", key=f"main_market_{_selected_fixture_for_menu_id}_corners", type="primary" if _menu_active_market == "corners" else "secondary", use_container_width=True)
-            _menu_h2h = st.button("H2H", icon=":material/shield:", help="Historial de enfrentamientos (H2H)", key=f"main_h2h_{_selected_fixture_for_menu_id}", type="primary" if _menu_active_tool == "h2h" else "secondary", use_container_width=True)
-            if _menu_stats:
-                st.session_state["main_fixture_tool"] = {"fixture_id": _selected_fixture_for_menu_id, "tool": "stats"}
-                st.rerun()
-            if _menu_goals:
-                st.session_state["main_fixture_tool"] = {"fixture_id": _selected_fixture_for_menu_id, "tool": "market", "market": "goals"}
-                st.rerun()
-            if _menu_corners:
-                st.session_state["main_fixture_tool"] = {"fixture_id": _selected_fixture_for_menu_id, "tool": "market", "market": "corners"}
-                st.rerun()
-            if _menu_h2h:
-                st.session_state["main_fixture_tool"] = {"fixture_id": _selected_fixture_for_menu_id, "tool": "h2h"}
-                st.rerun()
-        else:
-            st.caption("Haz clic en la tarjeta de un partido para seleccionar el encuentro y habilitar estas herramientas.")
+    _selected_fixture_for_menu = st.session_state.get("selected_live_fixture") or {}
+    _selected_fixture_for_menu_id = str((_selected_fixture_for_menu.get("fixture") or {}).get("id") or "")
+    _selected_home_for_menu = (_selected_fixture_for_menu.get("teams") or {}).get("home") or {}
+    _selected_away_for_menu = (_selected_fixture_for_menu.get("teams") or {}).get("away") or {}
+    if _selected_fixture_for_menu_id:
+        if not _sidebar_tool_active:
+            st.markdown(f'<div style="font-size:.84rem;font-weight:750;line-height:1.35;color:#E5E7EB;margin:0 0 12px 0;">{html.escape(str(_selected_home_for_menu.get("name") or "Local"))}<span style="color:#C9A93A;"> vs </span>{html.escape(str(_selected_away_for_menu.get("name") or "Visitante"))}</div>', unsafe_allow_html=True)
+        _menu_tool_state = st.session_state.get("main_fixture_tool") or {}
+        _menu_active_tool = _menu_tool_state.get("tool") if str(_menu_tool_state.get("fixture_id")) == _selected_fixture_for_menu_id else None
+        _menu_active_market = _menu_tool_state.get("market") if str(_menu_tool_state.get("fixture_id")) == _selected_fixture_for_menu_id else None
+        _menu_stats = st.button("ESTADÍSTICAS", icon=":material/query_stats:", help="Estadísticas en vivo", key=f"main_stats_{_selected_fixture_for_menu_id}", type="primary" if _menu_active_tool == "stats" else "secondary", use_container_width=True)
+        _menu_goals = st.button("GOLES Y SEÑALES", icon=":material/sports_soccer:", help="Goles y señales", key=f"main_market_{_selected_fixture_for_menu_id}_goals", type="primary" if _menu_active_market == "goals" else "secondary", use_container_width=True)
+        _menu_corners = st.button("CÓRNERS", icon=":material/flag:", help="Córners y señales", key=f"main_market_{_selected_fixture_for_menu_id}_corners", type="primary" if _menu_active_market == "corners" else "secondary", use_container_width=True)
+        _menu_h2h = st.button("H2H", icon=":material/shield:", help="Historial de enfrentamientos (H2H)", key=f"main_h2h_{_selected_fixture_for_menu_id}", type="primary" if _menu_active_tool == "h2h" else "secondary", use_container_width=True)
+        if _menu_stats:
+            st.session_state["main_fixture_tool"] = {"fixture_id": _selected_fixture_for_menu_id, "tool": "stats"}
+            st.rerun()
+        if _menu_goals:
+            st.session_state["main_fixture_tool"] = {"fixture_id": _selected_fixture_for_menu_id, "tool": "market", "market": "goals"}
+            st.rerun()
+        if _menu_corners:
+            st.session_state["main_fixture_tool"] = {"fixture_id": _selected_fixture_for_menu_id, "tool": "market", "market": "corners"}
+            st.rerun()
+        if _menu_h2h:
+            st.session_state["main_fixture_tool"] = {"fixture_id": _selected_fixture_for_menu_id, "tool": "h2h"}
+            st.rerun()
+    else:
+        st.caption("Haz clic en la tarjeta de un partido para seleccionar el encuentro y habilitar estas herramientas.")
 
 
 def get_api_key() -> str:
