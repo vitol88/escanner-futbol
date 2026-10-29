@@ -654,15 +654,16 @@ st.markdown("""
     box-shadow:inset 0 0 12px rgba(250,204,21,.025);
   }
   .fl-match-clock {
-    display:flex; min-height:80px; flex-direction:column; align-items:center; justify-content:center; gap:7px;
+    display:flex; min-height:80px; flex-direction:column; align-items:center; justify-content:center; gap:5px;
     border:1px solid #655522; border-radius:12px; background:linear-gradient(145deg,#201E16,#111419);
     padding:5px 3px; box-sizing:border-box;
   }
-  .fl-match-minute { display:flex; align-items:baseline; justify-content:center; gap:1px; color:#FFE566; font-size:1.12rem; line-height:1.1; font-weight:850; font-variant-numeric:tabular-nums; letter-spacing:.1px; }
-  .fl-match-minute-main { font-size:1.12rem; font-weight:900; }
-  .fl-match-clock-separator { color:#FACC15; opacity:.85; font-size:.98rem; font-weight:800; }
-  .fl-match-seconds { color:#FFF0A3; font-size:.92rem; font-weight:750; }
-  .fl-match-live { color:#FFF; background:#E23D32; border-radius:5px; padding:3px 7px; font-size:.62rem; font-weight:850; letter-spacing:.7px; }
+  .fl-match-minute { display:flex; align-items:baseline; justify-content:center; gap:1px; color:#FFE566; font-size:1.22rem; line-height:1.1; font-weight:850; font-variant-numeric:tabular-nums; letter-spacing:.1px; text-shadow:0 0 12px rgba(250,204,21,.12); }
+  .fl-match-minute-main { font-size:1.22rem; font-weight:950; }
+  .fl-match-clock-separator { color:#FACC15; opacity:.9; font-size:1rem; font-weight:850; }
+  .fl-match-seconds { color:#FFF0A3; font-size:.96rem; font-weight:800; }
+  .fl-match-live { display:inline-flex; align-items:center; justify-content:center; gap:5px; color:#FFE9E7; background:rgba(226,61,50,.13); border:1px solid rgba(226,61,50,.55); border-radius:999px; padding:3px 7px; font-size:.54rem; line-height:1; font-weight:900; letter-spacing:.65px; white-space:nowrap; }
+  .fl-match-live::before { content:""; width:5px; height:5px; flex:0 0 5px; border-radius:50%; background:#F04438; box-shadow:0 0 6px rgba(240,68,56,.45); }
   .fl-match-teams { min-width:0; display:flex; flex-direction:column; gap:9px; }
   .fl-match-team {
     display:grid; grid-template-columns:34px 26px minmax(0,1fr); align-items:center; gap:8px;
@@ -714,11 +715,13 @@ st.markdown("""
   }
   @media(max-width:420px) {
     .fl-match-scoreboard { grid-template-columns:82px minmax(0,1fr); gap:10px; padding:10px 9px; border-radius:14px; }
-    .fl-match-clock { min-height:76px; }
-    .fl-match-minute { font-size:1rem; }
-    .fl-match-minute-main { font-size:1rem; }
-    .fl-match-clock-separator { font-size:.88rem; }
-    .fl-match-seconds { font-size:.82rem; }
+    .fl-match-clock { min-height:76px; gap:5px; }
+    .fl-match-minute { font-size:1.08rem; }
+    .fl-match-minute-main { font-size:1.08rem; }
+    .fl-match-clock-separator { font-size:.9rem; }
+    .fl-match-seconds { font-size:.84rem; }
+    .fl-match-live { gap:4px; padding:3px 6px; font-size:.5rem; letter-spacing:.5px; }
+    .fl-match-live::before { width:4px; height:4px; flex-basis:4px; }
     .fl-match-team { grid-template-columns:29px 21px minmax(0,1fr); gap:5px; min-height:30px; font-size:.77rem; }
     .fl-match-teams { gap:7px; }
     .fl-match-goals { min-width:27px; min-height:27px; padding:2px; border-radius:7px; font-size:1.28rem; }
