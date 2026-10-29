@@ -2091,6 +2091,46 @@ if _analysis_page_active:
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::after,
           [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button p {{ animation-duration:2.5s !important; }}
         }}
+        /* Refuerzo final por key real del botón: evita que estilos globales lo dejen blanco. */
+        div[class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button,
+        div[class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button {{
+            position:relative !important;isolation:isolate !important;overflow:hidden !important;
+            display:flex !important;align-items:center !important;justify-content:center !important;
+            width:100% !important;height:92px !important;min-height:92px !important;max-height:92px !important;
+            padding:0 !important;box-sizing:border-box !important;border:2px solid #FACC15 !important;border-radius:19px !important;
+            background-color:#090A0D !important;
+            background-image:radial-gradient(ellipse at 20% 50%,rgba(250,204,21,.14),transparent 42%),linear-gradient(135deg,#090A0D,#17191F) !important;
+            color:transparent !important;-webkit-text-fill-color:transparent !important;
+            box-shadow:inset 0 0 18px rgba(250,204,21,.12),0 0 15px rgba(250,204,21,.12) !important;
+        }}
+        div[class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button::before,
+        div[class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::before {{
+            content:"" !important;display:block !important;position:absolute !important;z-index:1 !important;
+            left:50% !important;top:50% !important;width:64px !important;height:64px !important;
+            transform:translate(-50%,-50%) !important;border:3px solid #FACC15 !important;border-radius:50% !important;box-sizing:border-box !important;
+            background-color:#090A0D !important;
+            background-image:radial-gradient(circle at center,#FACC15 0 6%,#14151A 7% 14%,transparent 15%),repeating-radial-gradient(circle at center,transparent 0 8px,rgba(250,204,21,.65) 9px 11px,transparent 12px 17px),conic-gradient(from 0deg,transparent 0 12%,rgba(250,204,21,.98) 16%,transparent 28% 48%,rgba(250,204,21,.55) 55%,transparent 72%) !important;
+            box-shadow:0 0 20px rgba(250,204,21,.55),inset 0 0 18px rgba(250,204,21,.28) !important;
+            animation:analysis-radar-rotate 3s linear infinite !important;pointer-events:none !important;
+        }}
+        div[class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button::after,
+        div[class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::after {{
+            content:"⚽" !important;display:flex !important;position:absolute !important;z-index:2 !important;
+            left:50% !important;top:50% !important;width:43px !important;height:43px !important;
+            align-items:center !important;justify-content:center !important;transform:translate(-50%,-50%) !important;
+            font-size:40px !important;line-height:1 !important;color:#FFE978 !important;-webkit-text-fill-color:#FFE978 !important;
+            filter:drop-shadow(0 0 10px rgba(250,204,21,.75)) !important;
+            animation:analysis-ball-rotate 2s ease-in-out infinite !important;pointer-events:none !important;
+        }}
+        div[class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button p {{ font-size:0 !important;opacity:0 !important; }}
+        @media(max-width:640px) {{
+          div[class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button,
+          div[class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button {{ height:86px !important;min-height:86px !important;max-height:86px !important; }}
+          div[class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button::before,
+          div[class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::before {{ width:57px !important;height:57px !important; }}
+          div[class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button::after,
+          div[class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::after {{ font-size:36px !important;width:39px !important;height:39px !important; }}
+        }}
         </style>
         """,
         unsafe_allow_html=True,
