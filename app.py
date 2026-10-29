@@ -1315,6 +1315,38 @@ st.markdown("""
     .h2h-match-row .h2h-team img { width:15px !important; height:15px !important; flex-basis:15px !important; }
     .h2h-match-row .h2h-score { font-size:.76rem !important; }
   }
+
+  /* H2H: cabecera única, más visible y con menos espacio superior. */
+  .h2h-page-kicker {
+    display:block !important;
+    margin:0 0 12px 0 !important;
+    padding:0 0 12px 0 !important;
+    color:#FFE566 !important;
+    font-size:clamp(1rem,1.35vw,1.18rem) !important;
+    font-weight:950 !important;
+    letter-spacing:.12em !important;
+    line-height:1.35 !important;
+    text-transform:uppercase !important;
+    text-shadow:0 0 16px rgba(250,204,21,.18) !important;
+    border-bottom:1px solid rgba(250,204,21,.24) !important;
+  }
+  .h2h-page-kicker span { color:#C49A20 !important; padding:0 .25em !important; }
+  section.main > div.block-container:has(.h2h-page-kicker) {
+    padding-top:92px !important;
+  }
+  @media(max-width:640px) {
+    section.main > div.block-container:has(.h2h-page-kicker) {
+      padding-top:78px !important;
+    }
+    .h2h-page-kicker {
+      font-size:.88rem !important;
+      letter-spacing:.075em !important;
+      line-height:1.45 !important;
+      margin-bottom:10px !important;
+      padding-bottom:9px !important;
+    }
+  }
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -2671,7 +2703,7 @@ else:
                                             except Exception as _h2h_exc:
                                                 st.session_state.h2h_cache[h2h_key] = {"error": str(_h2h_exc)}
                                         h2h_data = st.session_state.get("h2h_cache", {}).get(h2h_key)
-                                        st.markdown('<div class="match-analysis-kicker">Historial · enfrentamientos directos</div><div class="match-analysis-title">Enfrentamientos directos</div>', unsafe_allow_html=True)
+                                        st.markdown('<div class="h2h-page-kicker">HISTORIAL <span>·</span> ENFRENTAMIENTOS DIRECTOS</div>', unsafe_allow_html=True)
                                         if isinstance(h2h_data, dict) and h2h_data.get("error"):
                                             st.warning(f"No se pudieron consultar los enfrentamientos: {h2h_data['error']}")
                                         elif isinstance(h2h_data, dict) and h2h_data.get("matches"):
