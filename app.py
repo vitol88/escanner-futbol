@@ -1967,54 +1967,77 @@ if _analysis_page_active:
             font-size:.95rem !important;line-height:1.2 !important;border-radius:12px !important;border-width:1.5px !important;
           }}
         }}
-        /* El botón central replica la tarjeta animada del inicio, pero con texto breve. */
-        div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) [data-testid="stButton"] > button {{
+        /* BOTÓN ESCANEAR EN VIVO: usar la key real de Streamlit, no la estructura interna de columnas. */
+        [class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button {{
             position:relative !important;display:block !important;overflow:hidden !important;
             width:100% !important;min-width:0 !important;max-width:100% !important;
-            min-height:145px !important;height:145px !important;box-sizing:border-box !important;
-            padding:18px 14px 18px 49% !important;text-align:left !important;white-space:normal !important;
-            border:2px solid #FACC15 !important;border-radius:22px !important;
-            background-color:#090A0D !important;
-            background-image:radial-gradient(ellipse at 20% 50%,rgba(250,204,21,.10),transparent 42%),linear-gradient(135deg,#090A0D,#111319) !important;
-            color:#F4F4F5 !important;font-size:clamp(1rem,3.8vw,1.35rem) !important;
-            line-height:1.4 !important;font-weight:800 !important;
-            box-shadow:inset 0 0 24px rgba(250,204,21,.06),0 0 0 1px rgba(250,204,21,.08) !important;
+            min-height:150px !important;height:150px !important;box-sizing:border-box !important;
+            padding:18px 12px 18px 49% !important;text-align:left !important;
+            white-space:normal !important;overflow-wrap:anywhere !important;
+            border:2px solid #FFE15A !important;border-radius:24px !important;
+            background:radial-gradient(ellipse at 18% 50%,rgba(250,204,21,.12),transparent 42%),linear-gradient(135deg,#171811 0%,#111318 70%,#19170D 100%) !important;
+            color:#FDE68A !important;font-size:clamp(.95rem,3.8vw,1.25rem) !important;
+            line-height:1.35 !important;font-weight:800 !important;
+            box-shadow:inset 0 0 24px rgba(250,204,21,.07),0 0 12px rgba(250,204,21,.08) !important;
+            isolation:isolate !important;
         }}
-        div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) [data-testid="stButton"] > button::before {{
-            content:"" !important;position:absolute !important;left:4% !important;top:50% !important;
-            width:min(38%,170px) !important;aspect-ratio:1 !important;height:auto !important;
-            transform:translateY(-50%);border-radius:50% !important;border:3px solid #FACC15 !important;
+        [class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button::before {{
+            content:"" !important;position:absolute !important;z-index:0 !important;
+            left:4% !important;top:50% !important;width:min(39%,170px) !important;
+            aspect-ratio:1 / 1 !important;height:auto !important;display:block !important;
+            transform:translateY(-50%) !important;border-radius:50% !important;
+            border:4px solid #FFD21F !important;box-sizing:border-box !important;
             background-color:#090A0D !important;
-            background-image:radial-gradient(circle at center,#FACC15 0 6%,#14151A 7% 14%,transparent 15%),repeating-radial-gradient(circle at center,transparent 0 10px,rgba(250,204,21,.55) 11px 13px,transparent 14px 20px),conic-gradient(from 0deg,transparent 0 12%,rgba(250,204,21,.95) 16%,transparent 28% 48%,rgba(250,204,21,.45) 53%,transparent 68%) !important;
-            box-shadow:0 0 20px rgba(250,204,21,.45),inset 0 0 18px rgba(250,204,21,.25) !important;
-            animation:scanner-radar-spin 3s linear infinite !important;pointer-events:none !important;
+            background-image:radial-gradient(circle at center,#FACC15 0 5%,#17191F 6% 13%,transparent 14%),repeating-radial-gradient(circle at center,transparent 0 12px,rgba(250,204,21,.62) 13px 16px,transparent 17px 25px),conic-gradient(from 0deg,transparent 0 8%,rgba(250,204,21,.96) 15%,transparent 30% 48%,rgba(250,204,21,.52) 55%,transparent 72%) !important;
+            box-shadow:0 0 22px rgba(250,204,21,.42),inset 0 0 18px rgba(250,204,21,.22) !important;
+            transform-origin:center !important;animation:analysis-radar-rotate 3s linear infinite !important;
+            pointer-events:none !important;
         }}
-        div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) [data-testid="stButton"] > button::after {{
-            content:"⚽" !important;position:absolute !important;left:23% !important;top:50% !important;
-            transform:translate(-50%,-50%);width:40px !important;height:40px !important;
+        [class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button::after {{
+            content:"⚽" !important;position:absolute !important;z-index:1 !important;
+            left:23.5% !important;top:50% !important;width:48px !important;height:48px !important;
             display:flex !important;align-items:center !important;justify-content:center !important;
-            font-size:clamp(1.8rem,6vw,2.7rem) !important;
-            filter:drop-shadow(0 0 10px rgba(250,204,21,.75)) !important;
-            animation:scanner-ball-orbit 2s ease-in-out infinite !important;pointer-events:none !important;
+            font-size:clamp(2rem,6.2vw,2.8rem) !important;line-height:1 !important;
+            transform:translate(-50%,-50%) !important;transform-origin:center !important;
+            filter:drop-shadow(0 0 9px rgba(250,204,21,.65)) !important;
+            animation:analysis-ball-rotate .72s linear infinite !important;
+            pointer-events:none !important;
         }}
-        div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) [data-testid="stButton"] > button p {{
-            position:relative !important;z-index:2 !important;color:#F4F4F5 !important;
-            font-size:inherit !important;font-weight:800 !important;line-height:1.4 !important;
+        [class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button p {{
+            position:relative !important;z-index:2 !important;margin:0 !important;
+            color:#FDE68A !important;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important;
+            font-size:inherit !important;font-weight:800 !important;line-height:1.35 !important;
+            letter-spacing:.01em !important;text-align:left !important;
         }}
-        div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) [data-testid="stButton"] > button:hover {{
-            border-color:#FFE36A !important;
-            background-image:radial-gradient(ellipse at 20% 50%,rgba(250,204,21,.13),transparent 42%),linear-gradient(135deg,#14151A,#1A180F) !important;
-            color:#FFE36A !important;
+        [class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button:hover {{
+            border-color:#FFF09A !important;
+            background:radial-gradient(ellipse at 18% 50%,rgba(250,204,21,.16),transparent 42%),linear-gradient(135deg,#211F14 0%,#14161B 70%,#211D10 100%) !important;
+            box-shadow:inset 0 0 28px rgba(250,204,21,.10),0 0 16px rgba(250,204,21,.16) !important;
+        }}
+        @keyframes analysis-radar-rotate {{
+            from {{ rotate:0deg; }}
+            to {{ rotate:360deg; }}
+        }}
+        @keyframes analysis-ball-rotate {{
+            0% {{ transform:translate(-50%,-50%) rotate(0deg) scale(1); }}
+            50% {{ transform:translate(-50%,-50%) rotate(180deg) scale(1.08); }}
+            100% {{ transform:translate(-50%,-50%) rotate(360deg) scale(1); }}
         }}
         @media(max-width:640px) {{
-          div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) [data-testid="stButton"] > button {{
-            min-height:145px !important;height:145px !important;padding:16px 12px 16px 49% !important;
-            font-size:.95rem !important;line-height:1.4 !important;
+          [class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button {{
+            min-height:150px !important;height:150px !important;padding:14px 10px 14px 49% !important;
+            font-size:.95rem !important;line-height:1.35 !important;border-radius:22px !important;
+          }}
+          [class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button::before {{
+            width:min(39%,145px) !important;left:4% !important;
+          }}
+          [class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button::after {{
+            left:23.5% !important;font-size:2.15rem !important;
           }}
         }}
         @media(prefers-reduced-motion:reduce) {{
-          div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button::after {{ animation:none !important; }}
-          div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{ transition:none !important; }}
+          [class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button::before,
+          [class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button::after {{ animation-duration:2.5s !important; }}
         }}
         </style>
         """,
