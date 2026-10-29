@@ -1484,6 +1484,25 @@ st.markdown("""
     }
   }
 
+  /* Corrección de foco: texto sólido sobre fondo opaco mientras se escribe. */
+  html body [data-testid="stSidebar"] div[class*="st-key-search_goal_matches"] input[type="text"],
+  html body [data-testid="stSidebar"] div[class*="st-key-search_goal_matches"] input[type="text"]:focus,
+  html body [data-testid="stSidebar"] div[class*="st-key-search_goal_matches"] input[type="text"]:focus-visible,
+  html body [data-testid="stSidebar"] div[class*="st-key-search_goal_matches"] input[type="text"]:active {
+    background-color:#17191E !important;
+    background-image:none !important;
+    color:#FFFFFF !important;
+    -webkit-text-fill-color:#FFFFFF !important;
+    font-family:Arial,sans-serif !important;
+    font-size:14px !important;
+    font-weight:600 !important;
+    opacity:1 !important;
+    visibility:visible !important;
+    position:relative !important;
+    z-index:10 !important;
+    filter:none !important;
+    mix-blend-mode:normal !important;
+  }
 </style>
 """, unsafe_allow_html=True)
 
