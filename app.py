@@ -1499,6 +1499,13 @@ st.components.v1.html("""
 
 MODEL_DATA = load_league_baselines()
 
+def _clear_live_search_if_empty():
+    """Al borrar el texto del buscador, restaurar todos los partidos en vivo."""
+    if not str(st.session_state.get("search_goal_matches", "") or "").strip():
+        st.session_state.pop("live_search_query", None)
+        st.session_state.pop("live_search_message", None)
+
+
 search_clicked = False
 with st.sidebar:
     _sidebar_tool_page = st.session_state.get("main_fixture_tool") or {}
@@ -1520,7 +1527,7 @@ with st.sidebar:
         with st.form(key="sidebar_live_search_form", clear_on_submit=False, border=False):
             _search_cols = st.columns([5.2, 1.05], gap="small", vertical_alignment="center")
             with _search_cols[0]:
-                st.text_input("Buscar equipo o liga", placeholder="Ej. Argentinos Juniors, Premier League…", key="search_goal_matches", label_visibility="collapsed")
+                st.text_input("Buscar equipo o liga", placeholder="Ej. Argentinos Juniors, Premier League…", key="search_goal_matches", label_visibility="collapsed", on_change=_clear_live_search_if_empty)
             with _search_cols[1]:
                 search_clicked = st.form_submit_button(" ", icon=":material/search:", key="sidebar_search_button", help="Buscar equipo o liga", use_container_width=True)
     if _sidebar_tool_active:
