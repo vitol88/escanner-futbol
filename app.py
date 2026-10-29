@@ -940,34 +940,6 @@ st.markdown("""
   }
 
 
-  /* Tarjetas limpias: borde discreto en reposo y un único acento dorado al pasar el cursor */
-  [class*="st-key-live_match_"] {{
-    border:1px solid transparent !important;
-    border-radius:16px !important;
-    margin:0 0 5px !important;
-    padding:0 !important;
-    background:transparent !important;
-    box-shadow:none !important;
-    transition:background .2s ease,border-color .2s ease,box-shadow .2s ease !important;
-  }}
-  [class*="st-key-live_match_"]:hover {{
-    border-color:rgba(250,204,21,.72) !important;
-    background:linear-gradient(135deg,rgba(250,204,21,.045),rgba(250,204,21,.012) 70%,transparent) !important;
-    box-shadow:inset 2px 0 0 rgba(250,204,21,.62),0 2px 10px rgba(250,204,21,.045) !important;
-  }}
-  /* El marcador no duplica el borde exterior de la tarjeta. */
-  [class*="st-key-live_match_"] .fl-match-scoreboard {{
-    border-color:#343840 !important;
-    box-shadow:inset 0 0 12px rgba(250,204,21,.025) !important;
-  }}
-  [class*="st-key-live_match_"]:hover .fl-match-scoreboard {{
-    border-color:rgba(250,204,21,.45) !important;
-  }}
-  @media(prefers-reduced-motion:reduce) {{
-    [class*="st-key-live_match_"] {{ transition:none !important; }}
-  }}
-
-
   /* Ajuste final: eliminar el marco exterior duplicado y dar aire a cada liga, sin perder compacidad móvil. */
   [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] {
     border:0 !important; outline:0 !important; box-shadow:none !important;
@@ -1331,28 +1303,24 @@ with st.sidebar:
             st.text_input("Buscar equipo o liga", placeholder="Ej. Argentinos Juniors, Premier League…", key="search_goal_matches", label_visibility="collapsed")
         with _search_cols[1]:
             st.button(" ", icon=":material/search:", key="sidebar_search_button", help="Buscar equipo o liga", use_container_width=True)
-    if _sidebar_dedicated_view:
-        _side_back = st.button("←  Volver al partido", key="sidebar_analysis_back", use_container_width=True, help="Volver al partido")
-        _side_scan = st.button("⚽  Escanear en vivo", key="sidebar_analysis_scan", use_container_width=True, help="Escanear en vivo")
-        _side_refresh = st.button("⟳  Actualizar escáner", key="sidebar_analysis_refresh", use_container_width=True, help="Actualizar escáner")
-        if _side_back:
+    if _sidebar_tool_active:
+        _sidebar_selected_fixture = st.session_state.get("selected_live_fixture") or {}
+        _sidebar_home = (_sidebar_selected_fixture.get("teams") or {}).get("home") or {}
+        _sidebar_away = (_sidebar_selected_fixture.get("teams") or {}).get("away") or {}
+        _sidebar_match_label = f'{_sidebar_home.get("name") or "Local"} vs {_sidebar_away.get("name") or "Visitante"}'
+        st.caption(_sidebar_match_label)
+        if st.button("← VOLVER A PARTIDOS EN VIVO", key="sidebar_analysis_back", use_container_width=True, help="Volver a la lista de partidos"):
             st.session_state["main_fixture_tool"] = {}
             st.rerun()
-        if _side_scan or _side_refresh:
-            _side_action = "scan" if _side_scan else "refresh"
-            st.session_state["analysis_scan_request"] = {"fixture_id": _sidebar_tool_id, "market": _sidebar_tool_market, "action": _side_action}
-            st.session_state["analysis_scan_feedback"] = {"fixture_id": _sidebar_tool_id, "market": _sidebar_tool_market, "action": _side_action, "state": "running"}
-            st.rerun()
-        st.divider()
     st.divider()
-    if not _sidebar_dedicated_view:
-        st.markdown('<div style="font-size:.78rem;font-weight:900;letter-spacing:.16em;color:#FFE36A;margin-bottom:12px;text-transform:uppercase;">HERRAMIENTAS DEL PARTIDO</div>', unsafe_allow_html=True)
+    st.markdown('<div style="font-size:.78rem;font-weight:900;letter-spacing:.16em;color:#FFE36A;margin-bottom:12px;text-transform:uppercase;">HERRAMIENTAS DEL PARTIDO</div>', unsafe_allow_html=True)
         _selected_fixture_for_menu = st.session_state.get("selected_live_fixture") or {}
         _selected_fixture_for_menu_id = str((_selected_fixture_for_menu.get("fixture") or {}).get("id") or "")
         _selected_home_for_menu = (_selected_fixture_for_menu.get("teams") or {}).get("home") or {}
         _selected_away_for_menu = (_selected_fixture_for_menu.get("teams") or {}).get("away") or {}
         if _selected_fixture_for_menu_id:
-            st.markdown(f'<div style="font-size:.84rem;font-weight:750;line-height:1.35;color:#E5E7EB;margin:0 0 12px 0;">{html.escape(str(_selected_home_for_menu.get("name") or "Local"))}<span style="color:#C9A93A;"> vs </span>{html.escape(str(_selected_away_for_menu.get("name") or "Visitante"))}</div>', unsafe_allow_html=True)
+            if not _sidebar_tool_active:
+                st.markdown(f'<div style="font-size:.84rem;font-weight:750;line-height:1.35;color:#E5E7EB;margin:0 0 12px 0;">{html.escape(str(_selected_home_for_menu.get("name") or "Local"))}<span style="color:#C9A93A;"> vs </span>{html.escape(str(_selected_away_for_menu.get("name") or "Visitante"))}</div>', unsafe_allow_html=True)
             _menu_tool_state = st.session_state.get("main_fixture_tool") or {}
             _menu_active_tool = _menu_tool_state.get("tool") if str(_menu_tool_state.get("fixture_id")) == _selected_fixture_for_menu_id else None
             _menu_active_market = _menu_tool_state.get("market") if str(_menu_tool_state.get("fixture_id")) == _selected_fixture_for_menu_id else None
@@ -2244,57 +2212,6 @@ if _analysis_page_active:
             [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button,
             [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{ min-height:50px !important; padding:12px 14px !important; font-size:.94rem !important; }}
         }}
-
-  /* Override final: hover de partidos con un único halo difuminado, sin líneas adicionales. */
-  [class*="st-key-live_match_"] {{
-    border:1px solid transparent !important;
-    outline:0 !important;
-    box-shadow:none !important;
-    background:transparent !important;
-  }}
-  [class*="st-key-live_match_"]:hover,
-  [class*="st-key-live_match_"]:focus-within {{
-    border-color:transparent !important;
-    outline:0 !important;
-    box-shadow:none !important;
-    background:transparent !important;
-  }}
-  [class*="st-key-live_match_"] .fl-match-scoreboard,
-  [class*="st-key-live_match_"]:hover .fl-match-scoreboard,
-  [class*="st-key-live_match_"]:focus-within .fl-match-scoreboard {{
-    outline:0 !important;
-    border:1px solid #343840 !important;
-    box-shadow:inset 0 0 12px rgba(250,204,21,.025) !important;
-    transition:box-shadow .22s ease,background .22s ease !important;
-  }}
-  [class*="st-key-live_match_"]:hover .fl-match-scoreboard {{
-    border-color:#343840 !important;
-    box-shadow:inset 0 0 12px rgba(250,204,21,.025),0 0 22px rgba(250,204,21,.14) !important;
-    background:radial-gradient(ellipse at 10% 50%,rgba(250,204,21,.075),transparent 48%),linear-gradient(145deg,#171A20,#090A0D) !important;
-  }}
-  [class*="st-key-live_match_"] .fl-match-scoreboard.is-selected,
-  [class*="st-key-live_match_"]:hover .fl-match-scoreboard.is-selected {{
-    border-color:rgba(250,204,21,.8) !important;
-    box-shadow:inset 0 0 10px rgba(250,204,21,.035),0 0 18px rgba(250,204,21,.12) !important;
-  }}
-  [class*="st-key-select_live_match_"],
-  [class*="st-key-select_live_match_"]:hover,
-  [class*="st-key-select_live_match_"]:focus-within {{
-    outline:0 !important;
-    border:0 !important;
-    box-shadow:none !important;
-    background:transparent !important;
-  }}
-  [class*="st-key-select_live_match_"] button,
-  [class*="st-key-select_live_match_"] button:hover,
-  [class*="st-key-select_live_match_"] button:focus,
-  [class*="st-key-select_live_match_"] button:focus-visible,
-  [class*="st-key-select_live_match_"] button:active {{
-    outline:0 !important;
-    border:0 !important;
-    box-shadow:none !important;
-    background:transparent !important;
-  }}
 
   /* Buscador lateral integrado: campo carbón + acción dorada. */
   [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] {{ margin:0 0 20px 0 !important; min-width:0 !important; }}
