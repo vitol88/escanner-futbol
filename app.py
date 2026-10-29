@@ -1243,6 +1243,37 @@ MODEL_DATA = load_league_baselines()
 
 with st.sidebar:
     st.header("Configuración")
+    _sidebar_tool_page = st.session_state.get("main_fixture_tool") or {}
+    _sidebar_tool_id = str(_sidebar_tool_page.get("fixture_id") or "")
+    _sidebar_tool_market = str(_sidebar_tool_page.get("market") or "")
+    _sidebar_tool_active = bool(_sidebar_tool_id and _sidebar_tool_page.get("tool"))
+    if _sidebar_tool_active and _sidebar_tool_market in {"goals", "corners"}:
+        st.caption("ACCIONES DEL PARTIDO")
+        _side_nav_cols = st.columns(3, gap="small")
+        with _side_nav_cols[0]:
+            _side_back = st.button("← Volver", key="sidebar_analysis_back", use_container_width=True, help="Volver al partido")
+        with _side_nav_cols[1]:
+            _side_scan = st.button("⚽ Escanear", key="sidebar_analysis_scan", use_container_width=True, help="Escanear en vivo")
+        with _side_nav_cols[2]:
+            _side_refresh = st.button("⟳ Actualizar", key="sidebar_analysis_refresh", use_container_width=True, help="Actualizar escáner")
+        if _side_back:
+            st.session_state["main_fixture_tool"] = {}
+            st.rerun()
+        if _side_scan or _side_refresh:
+            _side_action = "scan" if _side_scan else "refresh"
+            st.session_state["analysis_scan_request"] = {
+                "fixture_id": _sidebar_tool_id,
+                "market": _sidebar_tool_market,
+                "action": _side_action,
+            }
+            st.session_state["analysis_scan_feedback"] = {
+                "fixture_id": _sidebar_tool_id,
+                "market": _sidebar_tool_market,
+                "action": _side_action,
+                "state": "running",
+            }
+            st.rerun()
+        st.divider()
     st.write("La clave se lee desde Secrets o desde una variable de entorno.")
     st.caption("No publiques tu clave de API en GitHub.")
     st.divider()
@@ -1899,6 +1930,13 @@ if _analysis_page_active:
           [class*="st-key-analysis_nav_back_row"] [data-testid="stHorizontalBlock"] {{ grid-template-columns:repeat(3,minmax(0,1fr)) !important; gap:6px !important; }}
           [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button {{ min-height:50px !important; padding:9px 4px !important; font-size:.72rem !important; letter-spacing:-.02em !important; }}
         }}
+        /* Los controles se muestran en la barra lateral; ocultar solo la fila principal, no el feedback. */
+        [class*="st-key-analysis_nav_back_row"] > div > [data-testid="stHorizontalBlock"] {{ display:none !important; }}
+        [data-testid="stSidebar"] [class*="st-key-sidebar_analysis_back"] button,
+        [data-testid="stSidebar"] [class*="st-key-sidebar_analysis_scan"] button,
+        [data-testid="stSidebar"] [class*="st-key-sidebar_analysis_refresh"] button {{ min-height:48px !important; padding:8px 3px !important; font-size:.76rem !important; white-space:normal !important; }}
+        [data-testid="stSidebar"] [data-testid="stButton"] > button {{ border:1px solid #80661B !important; border-radius:10px !important; background:linear-gradient(110deg,#211E14,#17191F) !important; color:#FFE36A !important; font-weight:750 !important; }}
+        [data-testid="stSidebar"] [data-testid="stButton"] > button:hover {{ border-color:#FFE566 !important; background:linear-gradient(110deg,#3A3016,#242018) !important; color:#FFF1A8 !important; }}
         /* En la vista dedicada ocultamos los controles globales para priorizar la navegación del análisis. */
         [class*="st-key-top_status_controls"] {{ display:none !important; height:0 !important; min-height:0 !important; margin:0 !important; padding:0 !important; }}
         [class*="st-key-top_status_controls"] > div {{ display:none !important; height:0 !important; margin:0 !important; padding:0 !important; }}
