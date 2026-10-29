@@ -2246,68 +2246,68 @@ if _analysis_page_active:
         }}
 
   /* Override final: hover de partidos con un único halo difuminado, sin líneas adicionales. */
-  [class*="st-key-live_match_"] {
+  [class*="st-key-live_match_"] {{
     border:1px solid transparent !important;
     outline:0 !important;
     box-shadow:none !important;
     background:transparent !important;
-  }
+  }}
   [class*="st-key-live_match_"]:hover,
-  [class*="st-key-live_match_"]:focus-within {
+  [class*="st-key-live_match_"]:focus-within {{
     border-color:transparent !important;
     outline:0 !important;
     box-shadow:none !important;
     background:transparent !important;
-  }
+  }}
   [class*="st-key-live_match_"] .fl-match-scoreboard,
   [class*="st-key-live_match_"]:hover .fl-match-scoreboard,
-  [class*="st-key-live_match_"]:focus-within .fl-match-scoreboard {
+  [class*="st-key-live_match_"]:focus-within .fl-match-scoreboard {{
     outline:0 !important;
     border:1px solid #343840 !important;
     box-shadow:inset 0 0 12px rgba(250,204,21,.025) !important;
     transition:box-shadow .22s ease,background .22s ease !important;
-  }
-  [class*="st-key-live_match_"]:hover .fl-match-scoreboard {
+  }}
+  [class*="st-key-live_match_"]:hover .fl-match-scoreboard {{
     border-color:#343840 !important;
     box-shadow:inset 0 0 12px rgba(250,204,21,.025),0 0 22px rgba(250,204,21,.14) !important;
     background:radial-gradient(ellipse at 10% 50%,rgba(250,204,21,.075),transparent 48%),linear-gradient(145deg,#171A20,#090A0D) !important;
-  }
+  }}
   [class*="st-key-live_match_"] .fl-match-scoreboard.is-selected,
-  [class*="st-key-live_match_"]:hover .fl-match-scoreboard.is-selected {
+  [class*="st-key-live_match_"]:hover .fl-match-scoreboard.is-selected {{
     border-color:rgba(250,204,21,.8) !important;
     box-shadow:inset 0 0 10px rgba(250,204,21,.035),0 0 18px rgba(250,204,21,.12) !important;
-  }
+  }}
   [class*="st-key-select_live_match_"],
   [class*="st-key-select_live_match_"]:hover,
-  [class*="st-key-select_live_match_"]:focus-within {
+  [class*="st-key-select_live_match_"]:focus-within {{
     outline:0 !important;
     border:0 !important;
     box-shadow:none !important;
     background:transparent !important;
-  }
+  }}
   [class*="st-key-select_live_match_"] button,
   [class*="st-key-select_live_match_"] button:hover,
   [class*="st-key-select_live_match_"] button:focus,
   [class*="st-key-select_live_match_"] button:focus-visible,
-  [class*="st-key-select_live_match_"] button:active {
+  [class*="st-key-select_live_match_"] button:active {{
     outline:0 !important;
     border:0 !important;
     box-shadow:none !important;
     background:transparent !important;
-  }
+  }}
 
   /* Buscador lateral integrado: campo carbón + acción dorada. */
-  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] { margin:0 0 20px 0 !important; min-width:0 !important; }
-  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] > div { gap:0 !important; }
-  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input { min-height:48px !important; height:48px !important; padding:0 13px !important; border:1.5px solid #C49A20 !important; border-right:0 !important; border-radius:11px 0 0 11px !important; background:linear-gradient(135deg,#202329,#111419) !important; color:#F5F5F5 !important; font-size:.82rem !important; font-weight:550 !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 3px 12px rgba(0,0,0,.22) !important; transition:border-color .2s ease,box-shadow .2s ease,background .2s ease !important; }
-  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input::placeholder { color:#A5AAB4 !important; opacity:1 !important; }
-  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input:hover { border-color:#FFE566 !important; background:linear-gradient(135deg,#252830,#17191E) !important; }
-  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input:focus, [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input:focus-visible { border-color:#FFE566 !important; box-shadow:inset 0 0 0 1px rgba(250,204,21,.18),0 0 15px rgba(250,204,21,.14) !important; background:#191B20 !important; }
-  [data-testid="stSidebar"] [class*="st-key-sidebar_search_button"] { margin:0 0 20px 0 !important; min-width:0 !important; }
-  [data-testid="stSidebar"] [class*="st-key-sidebar_search_button"] button { min-height:48px !important; height:48px !important; width:100% !important; padding:0 !important; border:1.5px solid #FACC15 !important; border-radius:0 11px 11px 0 !important; background:linear-gradient(145deg,#FFE566,#E6AD08) !important; color:#171717 !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 0 13px rgba(250,204,21,.16) !important; transition:background .2s ease,box-shadow .2s ease,transform .2s ease !important; }
-  [data-testid="stSidebar"] [class*="st-key-sidebar_search_button"] button:hover { background:linear-gradient(145deg,#FFF0A0,#FACC15) !important; border-color:#FFF0A0 !important; box-shadow:0 0 18px rgba(250,204,21,.28) !important; transform:translateY(-1px) !important; }
-  [data-testid="stSidebar"] [class*="st-key-sidebar_search_button"] button [data-testid="stIconMaterial"] { color:#171717 !important; font-size:1.3rem !important; }
-  [data-testid="stSidebar"] [class*="st-key-sidebar_search_button"] button:focus, [data-testid="stSidebar"] [class*="st-key-sidebar_search_button"] button:focus-visible { outline:none !important; box-shadow:0 0 0 2px rgba(250,204,21,.24),0 0 18px rgba(250,204,21,.24) !important; }
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] {{ margin:0 0 20px 0 !important; min-width:0 !important; }}
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] > div {{ gap:0 !important; }}
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input {{ min-height:48px !important; height:48px !important; padding:0 13px !important; border:1.5px solid #C49A20 !important; border-right:0 !important; border-radius:11px 0 0 11px !important; background:linear-gradient(135deg,#202329,#111419) !important; color:#F5F5F5 !important; font-size:.82rem !important; font-weight:550 !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 3px 12px rgba(0,0,0,.22) !important; transition:border-color .2s ease,box-shadow .2s ease,background .2s ease !important; }}
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input::placeholder {{ color:#A5AAB4 !important; opacity:1 !important; }}
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input:hover {{ border-color:#FFE566 !important; background:linear-gradient(135deg,#252830,#17191E) !important; }}
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input:focus, [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input:focus-visible {{ border-color:#FFE566 !important; box-shadow:inset 0 0 0 1px rgba(250,204,21,.18),0 0 15px rgba(250,204,21,.14) !important; background:#191B20 !important; }}
+  [data-testid="stSidebar"] [class*="st-key-sidebar_search_button"] {{ margin:0 0 20px 0 !important; min-width:0 !important; }}
+  [data-testid="stSidebar"] [class*="st-key-sidebar_search_button"] button {{ min-height:48px !important; height:48px !important; width:100% !important; padding:0 !important; border:1.5px solid #FACC15 !important; border-radius:0 11px 11px 0 !important; background:linear-gradient(145deg,#FFE566,#E6AD08) !important; color:#171717 !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 0 13px rgba(250,204,21,.16) !important; transition:background .2s ease,box-shadow .2s ease,transform .2s ease !important; }}
+  [data-testid="stSidebar"] [class*="st-key-sidebar_search_button"] button:hover {{ background:linear-gradient(145deg,#FFF0A0,#FACC15) !important; border-color:#FFF0A0 !important; box-shadow:0 0 18px rgba(250,204,21,.28) !important; transform:translateY(-1px) !important; }}
+  [data-testid="stSidebar"] [class*="st-key-sidebar_search_button"] button [data-testid="stIconMaterial"] {{ color:#171717 !important; font-size:1.3rem !important; }}
+  [data-testid="stSidebar"] [class*="st-key-sidebar_search_button"] button:focus, [data-testid="stSidebar"] [class*="st-key-sidebar_search_button"] button:focus-visible {{ outline:none !important; box-shadow:0 0 0 2px rgba(250,204,21,.24),0 0 18px rgba(250,204,21,.24) !important; }}
 </style>
         """,
         unsafe_allow_html=True,
