@@ -1981,6 +1981,35 @@ if _analysis_page_active:
         [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button p {{
             font-size:0 !important;opacity:0 !important;
         }}
+        /* Flotación suave y continua para los tres botones de navegación. */
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button,
+        [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button,
+        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{
+            animation:analysis-nav-float 2.8s ease-in-out infinite !important;
+            will-change:transform !important;
+        }}
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button {{ animation-delay:0s !important; }}
+        [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button {{ animation-delay:.22s !important; }}
+        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{ animation-delay:.44s !important; }}
+        @keyframes analysis-nav-float {{
+            0%,100% {{ transform:translateY(0) scale(1); }}
+            50% {{ transform:translateY(-2px) scale(1.025); }}
+        }}
+        @media(hover:hover) {{
+          [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button:hover,
+          [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button:hover,
+          [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button:hover {{
+              animation-play-state:paused !important;
+              transform:translateY(-3px) scale(1.045) !important;
+          }}
+        }}
+        @media(prefers-reduced-motion:reduce) {{
+          [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button,
+          [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button,
+          [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{
+              animation:none !important;will-change:auto !important;
+          }}
+        }}
         .analysis-nav-label {{
             display:block !important;width:100% !important;box-sizing:border-box !important;
             color:#FDE68A !important;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important;
