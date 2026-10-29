@@ -2569,12 +2569,29 @@ if _analysis_page_active:
             [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{ min-height:50px !important; padding:12px 14px !important; font-size:.94rem !important; }}
         }}
 
-  /* Quita decoraciones nativas que pueden aparecer como puntos al extremo del buscador. */
-  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input::-webkit-search-decoration,
-  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input::-webkit-search-cancel-button,
-  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input::-webkit-search-results-button,
-  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input::-webkit-search-results-decoration {{ -webkit-appearance:none !important; appearance:none !important; display:none !important; width:0 !important; height:0 !important; }}
-  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input {{ background-image:none !important; }}
+  /* Elimina adornos automáticos del navegador dentro del input de búsqueda. */
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input[type="text"] {{
+    -webkit-appearance:none !important;
+    appearance:none !important;
+    background-image:none !important;
+    padding-right:13px !important;
+  }}
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input[type="text"]::-webkit-search-decoration,
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input[type="text"]::-webkit-search-cancel-button,
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input[type="text"]::-webkit-search-results-button,
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input[type="text"]::-webkit-search-results-decoration,
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input[type="text"]::-webkit-credentials-auto-fill-button,
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input[type="text"]::-webkit-contacts-auto-fill-button,
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input[type="text"]::-ms-clear,
+  [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input[type="text"]::-ms-reveal {{
+    display:none !important;
+    -webkit-appearance:none !important;
+    appearance:none !important;
+    width:0 !important;
+    height:0 !important;
+    margin:0 !important;
+    padding:0 !important;
+  }}
   /* Buscador lateral integrado: campo carbón + acción dorada. */
   [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] {{ margin:0 0 20px 0 !important; min-width:0 !important; }}
   [data-testid="stSidebar"] [class*="st-key-search_goal_matches"] > div {{ gap:0 !important; }}
