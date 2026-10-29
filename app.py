@@ -1853,167 +1853,54 @@ if _analysis_page_active:
         [class*="st-key-main_h2h_{_analysis_page_id}"] {{ display:none !important; }}
         /* El contenido del análisis debe ocupar todo el ancho y no heredar espaciados del listado. */
         [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stVerticalBlock"] {{ gap:.35rem !important; row-gap:.35rem !important; }}
-        div[class*="st-key-analysis_page_nav"] {{ display:block !important; width:100% !important; max-width:100% !important; margin:0 0 1rem !important; overflow:visible !important; }}
-        div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{ display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)) !important; gap:.65rem !important; align-items:stretch !important; width:100% !important; }}
-        div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] > div[data-testid="column"] {{ width:auto !important; min-width:0 !important; max-width:100% !important; flex:none !important; }}
-        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"],
-        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > div {{ display:block !important; width:100% !important; min-width:0 !important; max-width:100% !important; }}
-        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{
-            display:flex !important; align-items:center !important; justify-content:center !important;
-            width:100% !important; min-width:0 !important; max-width:100% !important; min-height:68px !important; height:68px !important;
-            padding:.65rem .45rem !important; box-sizing:border-box !important; white-space:normal !important; overflow-wrap:anywhere !important;
-            border-radius:15px !important; border:2px solid #FACC15 !important;
-            background:radial-gradient(ellipse at 15% 50%,rgba(250,204,21,.12),transparent 45%),linear-gradient(145deg,#20242B,#111419) !important;
-            color:#FFE978 !important; font-size:clamp(.82rem,1vw,1rem) !important; line-height:1.2 !important; font-weight:900 !important;
-            text-shadow:0 1px 1px rgba(0,0,0,.25) !important;
-            box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 5px 18px rgba(0,0,0,.25) !important;
-        }}
-        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button p {{ margin:0 !important; }}
-        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"]:nth-of-type(2) > button,
-        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"]:nth-of-type(3) > button {{
-            background:radial-gradient(ellipse at 18% 50%,rgba(255,255,255,.28),transparent 38%),linear-gradient(135deg,#FFE978,#E0B51A) !important;
-            color:#171717 !important; border-color:#FFF09A !important;
-            box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 5px 18px rgba(250,204,21,.2) !important;
-        }}
-        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"]:nth-of-type(2) > button p,
-        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"]:nth-of-type(3) > button p {{ font-weight:900 !important; }}
-        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button:hover {{
-            border-color:#FFF09A !important; filter:brightness(1.07) !important; transform:translateY(-2px) !important;
-            box-shadow:0 7px 20px rgba(250,204,21,.22) !important;
-        }}
-        @media(max-width:640px) {{
-          div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{ display:grid !important; grid-template-columns:minmax(0,1fr) !important; gap:.45rem !important; width:100% !important; }}
-          div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] > div[data-testid="column"] {{ width:100% !important; min-width:0 !important; max-width:100% !important; }}
-          div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{
-            min-height:54px !important; height:auto !important; padding:.7rem .8rem !important;
-            font-size:.95rem !important; line-height:1.2 !important; font-weight:900 !important; border-radius:13px !important;
-            white-space:normal !important; overflow-wrap:anywhere !important;
-          }}
-        }}
-        @media(min-width:641px) and (max-width:900px) {{
-          div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{ gap:.4rem !important; }}
-          div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{ font-size:.82rem !important; padding:.5rem .25rem !important; min-height:64px !important; height:64px !important; }}
-        }}
-        /* Compactar el espaciado residual de Streamlit en la vista individual para reducir el vacío vertical en móvil. */
-        .block-container:has(div[class*="st-key-analysis_page_nav"]) [data-testid="stVerticalBlock"] {{ gap:.4rem !important; row-gap:.4rem !important; }}
-        .block-container:has(div[class*="st-key-analysis_page_nav"]) [data-testid="stElementContainer"] {{ margin-block:0 !important; }}
-        /* Acabado premium: navegación compacta, brillo sutil y barrido dorado sin tapar el texto. */
-        div[class*="st-key-analysis_page_nav"] {{ margin:0 0 .55rem !important; }}
-        div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{ gap:.45rem !important; }}
-        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{
-            position:relative !important; overflow:hidden !important;
-            min-height:62px !important; height:62px !important;
-            border-width:1.5px !important; border-radius:14px !important;
-            box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 3px 12px rgba(0,0,0,.2),0 0 9px rgba(250,204,21,.055) !important;
-            transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease !important;
-        }}
-        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button::after {{
-            content:""; position:absolute; inset:0 auto 0 -75%; width:42%;
-            background:linear-gradient(105deg,transparent,rgba(255,239,163,.12),transparent);
-            transform:skewX(-18deg); pointer-events:none;
-            animation:nav-gold-sweep 5.8s ease-in-out infinite;
-        }}
-        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button p {{
-            position:relative !important; z-index:1 !important;
-            font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important;
-            letter-spacing:.05px !important;
-        }}
-        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button:hover {{
-            transform:translateY(-1px) !important;
-            box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 5px 14px rgba(0,0,0,.25),0 0 12px rgba(250,204,21,.13) !important;
-        }}
-        .scan-running-status {{ margin:5px 2px 0 !important; padding:10px 12px !important; }}
-        .scan-running-status .scan-sweep {{ height:2px !important; opacity:.8 !important; }}
-        @keyframes nav-gold-sweep {{
-            0%,58% {{ left:-75%; opacity:0; }}
-            65% {{ opacity:1; }}
-            82% {{ left:135%; opacity:.7; }}
-            100% {{ left:135%; opacity:0; }}
-        }}
-        @media(max-width:640px) {{
-          div[class*="st-key-analysis_page_nav"] {{ margin:0 0 .4rem !important; }}
-          div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{ gap:.35rem !important; }}
-          div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{
-            min-height:49px !important; height:49px !important; padding:.5rem .65rem !important;
-            font-size:.9rem !important; line-height:1.15 !important; border-radius:12px !important;
-          }}
-        }}
-        /* Corrección: los botones de esta pantalla deben conservar el mismo diseño oscuro/dorado del inicio. */
-        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button,
-        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button[kind="primary"],
-        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button[kind="secondary"] {{
-            background:radial-gradient(ellipse at 15% 50%,rgba(250,204,21,.10),transparent 45%),linear-gradient(145deg,#201D14,#111419) !important;
-            background-color:#111419 !important;color:#FDE68A !important;
-            border:1.5px solid #D4A72C !important;border-radius:13px !important;
-            box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 3px 12px rgba(0,0,0,.22),0 0 8px rgba(250,204,21,.055) !important;
-            text-shadow:none !important;filter:none !important;
-            transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease !important;
-        }}
-        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button p {{
-            color:#FDE68A !important;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important;
-            font-weight:800 !important;letter-spacing:.01em !important;
-        }}
-        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button:hover {{
-            background:radial-gradient(ellipse at 15% 50%,rgba(250,204,21,.16),transparent 45%),linear-gradient(145deg,#292516,#17191F) !important;
-            border-color:#FFE566 !important;color:#FFF1A8 !important;
-            box-shadow:inset 0 1px 0 rgba(255,255,255,.075),0 4px 14px rgba(0,0,0,.25),0 0 13px rgba(250,204,21,.13) !important;
-            transform:translateY(-1px) !important;filter:none !important;
-        }}
-        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button:hover p {{ color:#FFF1A8 !important; }}
-        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button:active {{ transform:scale(.99) !important; }}
-        @media(max-width:640px) {{
-          div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{
-            min-height:54px !important;height:auto !important;padding:.7rem .8rem !important;
-            font-size:.95rem !important;line-height:1.2 !important;border-radius:12px !important;border-width:1.5px !important;
-          }}
-        }}
-        /* FILAS DE ACCIÓN: icono compacto y etiqueta separada, como pidió el diseño de inicio. */
-        [class*="st-key-analysis_nav_back_row"] [data-testid="stHorizontalBlock"],
-        [class*="st-key-analysis_nav_scan_row"] [data-testid="stHorizontalBlock"],
-        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stHorizontalBlock"] {{
-            display:grid !important;grid-template-columns:88px minmax(0,1fr) !important;
-            align-items:center !important;gap:16px !important;width:100% !important;
+        /* Navegación individual: reglas aisladas por fila para evitar duplicados y saltos de etiqueta. */
+        div[class*="st-key-analysis_page_nav"] {{ display:block !important;width:100% !important;max-width:100% !important;margin:0 0 .75rem !important;overflow:visible !important; }}
+        [class*="st-key-analysis_nav_back_row"] > [data-testid="stHorizontalBlock"],
+        [class*="st-key-analysis_nav_scan_row"] > [data-testid="stHorizontalBlock"],
+        [class*="st-key-analysis_nav_refresh_row"] > [data-testid="stHorizontalBlock"] {{
+            display:grid !important;grid-template-columns:76px minmax(0,1fr) !important;
+            align-items:center !important;column-gap:14px !important;width:100% !important;
         }}
         [class*="st-key-analysis_nav_back_row"] [data-testid="column"],
         [class*="st-key-analysis_nav_scan_row"] [data-testid="column"],
         [class*="st-key-analysis_nav_refresh_row"] [data-testid="column"] {{
-            width:auto !important;min-width:0 !important;max-width:100% !important;flex:none !important;
+            display:block !important;width:auto !important;min-width:0 !important;max-width:100% !important;flex:none !important;
         }}
         [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"],
         [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"],
         [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] {{
-            width:88px !important;min-width:88px !important;max-width:88px !important;
+            display:block !important;width:76px !important;min-width:76px !important;max-width:76px !important;
+        }}
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > div,
+        [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > div,
+        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > div {{
+            width:100% !important;min-width:0 !important;max-width:100% !important;
         }}
         [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button,
         [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button,
         [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{
             position:relative !important;display:flex !important;align-items:center !important;justify-content:center !important;
-            width:82px !important;min-width:82px !important;max-width:82px !important;
-            height:78px !important;min-height:78px !important;max-height:78px !important;
+            width:72px !important;min-width:72px !important;max-width:72px !important;
+            height:72px !important;min-height:72px !important;max-height:72px !important;
             padding:0 !important;overflow:hidden !important;box-sizing:border-box !important;
-            border:2px solid #FACC15 !important;border-radius:20px !important;
-            background:radial-gradient(ellipse at 25% 50%,rgba(250,204,21,.15),transparent 58%),linear-gradient(145deg,#201D14,#111419) !important;
-            color:#FFE978 !important;box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 4px 14px rgba(0,0,0,.24),0 0 10px rgba(250,204,21,.08) !important;
+            border:2px solid #FACC15 !important;border-radius:19px !important;
+            background:radial-gradient(ellipse at 25% 50%,rgba(250,204,21,.14),transparent 58%),linear-gradient(145deg,#201D14,#111419) !important;
+            color:#FFE978 !important;font-size:44px !important;line-height:1 !important;font-weight:500 !important;
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 4px 14px rgba(0,0,0,.24),0 0 10px rgba(250,204,21,.08) !important;
             transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease !important;
         }}
         [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button p,
         [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button p,
         [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button p {{
-            position:relative !important;z-index:3 !important;margin:0 !important;
+            position:relative !important;z-index:3 !important;display:block !important;margin:0 !important;
             color:inherit !important;font-size:0 !important;line-height:1 !important;
         }}
         [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button p {{
-            font-size:48px !important;font-weight:500 !important;animation:analysis-arrow-tilt 1.35s ease-in-out infinite !important;
-        }}
-        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button::before,
-        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button::after,
-        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button::before,
-        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button::after {{
-            content:none !important;display:none !important;animation:none !important;
+            font-size:43px !important;animation:analysis-arrow-tilt 1.35s ease-in-out infinite !important;
         }}
         [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::before {{
             content:"" !important;display:block !important;position:absolute !important;z-index:1 !important;
-            left:50% !important;top:50% !important;width:67px !important;height:67px !important;
+            left:50% !important;top:50% !important;width:61px !important;height:61px !important;
             transform:translate(-50%,-50%) rotate(0deg) !important;transform-origin:center !important;
             border:3px solid #FFD21F !important;border-radius:50% !important;box-sizing:border-box !important;
             background-color:#090A0D !important;
@@ -2023,17 +1910,17 @@ if _analysis_page_active:
         }}
         [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::after {{
             content:"⚽" !important;display:flex !important;position:absolute !important;z-index:2 !important;
-            left:50% !important;top:50% !important;width:45px !important;height:45px !important;
+            left:50% !important;top:50% !important;width:43px !important;height:43px !important;
             align-items:center !important;justify-content:center !important;
             transform:translate(-50%,-50%) rotate(0deg) !important;transform-origin:center !important;
-            font-size:43px !important;line-height:1 !important;filter:drop-shadow(0 0 8px rgba(250,204,21,.72)) !important;
+            font-size:40px !important;line-height:1 !important;filter:drop-shadow(0 0 8px rgba(250,204,21,.72)) !important;
             animation:analysis-ball-rotate .72s linear infinite !important;pointer-events:none !important;
         }}
         [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button p {{
-            font-size:49px !important;line-height:1 !important;display:inline-block !important;
-            animation:analysis-refresh-spin 1.35s linear infinite !important;
+            font-size:43px !important;animation:analysis-refresh-spin 1.35s linear infinite !important;
         }}
         .analysis-nav-label {{
+            display:block !important;width:100% !important;box-sizing:border-box !important;
             color:#FDE68A !important;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important;
             font-size:clamp(1rem,2.8vw,1.22rem) !important;font-weight:700 !important;line-height:1.25 !important;
             letter-spacing:.01em !important;padding:8px 0 !important;text-align:left !important;
@@ -2062,27 +1949,29 @@ if _analysis_page_active:
             from {{ transform:rotate(0deg); }}
             to {{ transform:rotate(360deg); }}
         }}
+        .scan-running-status {{ margin:5px 2px 0 !important;padding:10px 12px !important; }}
+        .scan-running-status .scan-sweep {{ height:2px !important;opacity:.8 !important; }}
         @media(max-width:640px) {{
-          [class*="st-key-analysis_nav_back_row"] [data-testid="stHorizontalBlock"],
-          [class*="st-key-analysis_nav_scan_row"] [data-testid="stHorizontalBlock"],
-          [class*="st-key-analysis_nav_refresh_row"] [data-testid="stHorizontalBlock"] {{
-              grid-template-columns:76px minmax(0,1fr) !important;gap:13px !important;
+          [class*="st-key-analysis_nav_back_row"] > [data-testid="stHorizontalBlock"],
+          [class*="st-key-analysis_nav_scan_row"] > [data-testid="stHorizontalBlock"],
+          [class*="st-key-analysis_nav_refresh_row"] > [data-testid="stHorizontalBlock"] {{
+              grid-template-columns:72px minmax(0,1fr) !important;column-gap:12px !important;
           }}
           [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"],
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"],
           [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] {{
-              width:76px !important;min-width:76px !important;max-width:76px !important;
+              width:72px !important;min-width:72px !important;max-width:72px !important;
           }}
           [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button,
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button,
           [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{
-              width:72px !important;min-width:72px !important;max-width:72px !important;
-              height:72px !important;min-height:72px !important;max-height:72px !important;border-radius:18px !important;
+              width:68px !important;min-width:68px !important;max-width:68px !important;
+              height:68px !important;min-height:68px !important;max-height:68px !important;border-radius:17px !important;
           }}
-          [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::before {{ width:59px !important;height:59px !important; }}
-          [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::after {{ font-size:37px !important;width:40px !important;height:40px !important; }}
-          [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button p {{ font-size:43px !important; }}
-          [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button p {{ font-size:43px !important; }}
+          [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::before {{ width:57px !important;height:57px !important; }}
+          [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::after {{ font-size:36px !important;width:39px !important;height:39px !important; }}
+          [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button p {{ font-size:40px !important; }}
+          [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button p {{ font-size:40px !important; }}
           .analysis-nav-label {{ font-size:1rem !important; }}
         }}
         @media(prefers-reduced-motion:reduce) {{
