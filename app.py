@@ -2050,7 +2050,7 @@ with st.container(key="top_status_controls"):
         st.components.v1.html("""
 <style>html,body{margin:0!important;padding:0!important;width:100%!important;background:transparent!important;overflow:hidden!important;}</style>
 <div style="box-sizing:border-box;display:flex;align-items:center;justify-content:center;width:100%;height:22px;min-height:22px;margin:0;padding:0">
-  <button id="scanner-test-sound" type="button" role="switch" aria-checked="false" title="Activar/desactivar y probar alertas sonoras" style="box-sizing:border-box;position:relative;top:5px;display:flex;align-items:center;justify-content:center;gap:3px;width:100%;height:22px;min-height:22px;margin:0;padding:0;border-radius:0;border:0;background:transparent;color:#D8C27A;font:600 8px system-ui;white-space:nowrap;cursor:pointer"><span id="scanner-alert-switch" style="display:inline-block;position:relative;width:18px;height:9px;border-radius:8px;background:#D94A4A;flex:0 0 18px"><span id="scanner-alert-knob" style="position:absolute;left:1px;top:1px;width:7px;height:7px;border-radius:50%;background:#FFF;transition:left .15s"></span></span><span>Alertas</span></button>
+  <button id="scanner-test-sound" type="button" role="switch" aria-checked="false" title="Activar/desactivar y probar alertas sonoras" style="box-sizing:border-box;position:relative;top:0;display:flex;align-items:center;justify-content:center;gap:3px;width:100%;height:22px;min-height:22px;margin:0;padding:0;border-radius:0;border:0;background:transparent;color:#D8C27A;font:600 8px system-ui;white-space:nowrap;cursor:pointer"><span id="scanner-alert-switch" style="display:inline-block;position:relative;width:20px;height:10px;border-radius:8px;background:#D94A4A;flex:0 0 20px"><span id="scanner-alert-knob" style="position:absolute;left:1px;top:1px;width:8px;height:8px;border-radius:50%;background:#FFF;transition:left .15s"></span></span><span>Alertas</span></button>
 </div>
 <script>
 (() => {
@@ -2059,7 +2059,7 @@ with st.container(key="top_status_controls"):
  b.dataset.bound='1';
  let alertOn = localStorage.getItem('football-lab-alerts-enabled') === 'true';
   const track=document.getElementById('scanner-alert-switch'), knob=document.getElementById('scanner-alert-knob');
-  const paint=()=>{b.setAttribute('aria-checked',String(alertOn)); track.style.background=alertOn?'#22A06B':'#D94A4A'; knob.style.left=alertOn?'10px':'1px';};
+  const paint=()=>{b.setAttribute('aria-checked',String(alertOn)); track.style.background=alertOn?'#22A06B':'#D94A4A'; knob.style.left=alertOn?'11px':'1px';};
   paint();
   b.addEventListener('click', () => {
     alertOn=!alertOn;
@@ -2085,7 +2085,7 @@ with st.container(key="top_status_controls"):
  });
 })();
 </script>
-""", height=56, scrolling=False)
+""", height=24, scrolling=False)
 
 with st.container(key="control_row"):
     refresh = st.button(
