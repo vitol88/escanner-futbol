@@ -805,6 +805,29 @@ st.markdown("""
     }
   }
 
+
+  /* Estado seleccionado: contraste claro sin cambiar el tamaño ni la acción de los botones. */
+  [class*="st-key-main_stats_"] [data-testid="stButton"] > button[kind="primary"],
+  [class*="st-key-main_market_"] [data-testid="stButton"] > button[kind="primary"],
+  [class*="st-key-main_h2h_"] [data-testid="stButton"] > button[kind="primary"] {
+    background:linear-gradient(145deg,#FDE36A,#D6AE20) !important;
+    color:#111419 !important;
+    border:1px solid #FFE98A !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 0 0 1px rgba(250,204,21,.22),0 0 13px rgba(250,204,21,.18) !important;
+    transform:translateY(-1px) !important;
+  }
+  [class*="st-key-main_stats_"] [data-testid="stButton"] > button[kind="primary"] svg,
+  [class*="st-key-main_market_"] [data-testid="stButton"] > button[kind="primary"] svg,
+  [class*="st-key-main_h2h_"] [data-testid="stButton"] > button[kind="primary"] svg {
+    color:#111419 !important; fill:#111419 !important; stroke:#111419 !important;
+  }
+  [class*="st-key-main_stats_"] [data-testid="stButton"] > button[kind="secondary"],
+  [class*="st-key-main_market_"] [data-testid="stButton"] > button[kind="secondary"],
+  [class*="st-key-main_h2h_"] [data-testid="stButton"] > button[kind="secondary"] {
+    background:linear-gradient(145deg,#20232A,#111318) !important;
+    color:#D8C16A !important; border-color:#41434A !important; box-shadow:none !important;
+  }
+
 </style>
 """, unsafe_allow_html=True)
 
