@@ -526,7 +526,21 @@ st.markdown("""
   .corner-h2h-value { color:#FACC15; font-weight:850; text-align:center; white-space:nowrap; }
   .h2h-score { text-align:center; color:#FACC15; font-weight:900; white-space:nowrap; }
   @keyframes matchFlipIn { from {opacity:0; transform:perspective(900px) rotateX(-8deg) translateY(-7px)} to {opacity:1; transform:perspective(900px) rotateX(0) translateY(0)} }
-  @media(max-width:620px) { .match-action-grid {grid-template-columns:repeat(2,minmax(0,1fr));} .h2h-match-row {grid-template-columns:65px minmax(0,1fr) 48px minmax(0,1fr);font-size:.7rem;gap:4px;} .corner-h2h-row {grid-template-columns:56px minmax(0,1fr) 42px minmax(0,1fr) 58px;font-size:.64rem;gap:3px;padding:8px 2px;} .h2h-team img {width:18px;height:18px;flex-basis:18px;} }
+  @media(max-width:620px) {
+    .match-action-grid {grid-template-columns:repeat(2,minmax(0,1fr));}
+    .h2h-match-row {grid-template-columns:65px minmax(0,1fr) 48px minmax(0,1fr);font-size:.7rem;gap:4px;}
+    .corner-h2h-row.corner-history-grid {grid-template-columns:minmax(0,1fr) 48px;gap:4px;padding:8px 7px;font-size:.75rem;min-width:0;box-sizing:border-box;}
+    .corner-h2h-row.corner-history-grid:first-child {display:none;}
+    .corner-h2h-row.corner-history-grid > span:first-child {grid-column:1 / -1;color:#B8B8B8;font-size:.68rem;padding-bottom:3px;}
+    .corner-h2h-row.corner-history-grid > span:nth-child(2) {grid-column:1;grid-row:auto;min-width:0;}
+    .corner-h2h-row.corner-history-grid > span:nth-child(3) {grid-column:2;grid-row:auto;}
+    .corner-h2h-row.corner-history-grid > span:nth-child(4) {grid-column:1;grid-row:auto;min-width:0;}
+    .corner-h2h-row.corner-history-grid > span:nth-child(5) {grid-column:2;grid-row:auto;}
+    .corner-h2h-row.corner-history-grid > span:nth-child(6) {grid-column:1 / -1;text-align:right;border-top:1px solid #51451D;padding-top:5px;margin-top:2px;font-size:.76rem;}
+    .corner-h2h-total-label {display:inline !important;color:#B8B8B8;font-weight:600;margin-right:6px;}
+    .h2h-team {min-width:0;overflow-wrap:anywhere;}
+    .h2h-team img {width:18px;height:18px;flex-basis:18px;}
+  }
 
   @media (max-width: 420px) { .fixture-hero-team {font-size:.72rem;} .fixture-hero-team img {width:31px;height:31px;} .fixture-hero-score {font-size:1.25rem;padding:6px 9px;} }
 
@@ -2739,7 +2753,7 @@ else:
                                                                 f'<span class="corner-h2h-value">{html.escape(str(home_corner))}</span>'
                                                                 f'<span class="h2h-team"><img src="{away_logo}" onerror="this.style.display=\'none\'">{away_name}</span>'
                                                                 f'<span class="corner-h2h-value">{html.escape(str(away_corner))}</span>'
-                                                                f'<span class="corner-h2h-value">{html.escape(str(row.get("Total") if row.get("Total") is not None else "N/D"))}</span></div>'
+                                                                f'<span class="corner-h2h-value corner-h2h-total"><span class="corner-h2h-total-label" style="display:none;">Total córners</span>{html.escape(str(row.get("Total") if row.get("Total") is not None else "N/D"))}</span></div>'
                                                             )
                                                         st.markdown(corners_html, unsafe_allow_html=True)
                                                         valid_totals = [row["Total"] for row in h2h_rows if isinstance(row.get("Total"), (int, float))]
