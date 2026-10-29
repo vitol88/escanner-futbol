@@ -2357,6 +2357,14 @@ else:
                                     if tool_name != "stats" and not _analysis_page_active:
                                         st.markdown('<div class="match-analysis-kicker">PARTIDO SELECCIONADO</div>', unsafe_allow_html=True)
                                     if tool_name == "stats":
+                                        if str(match_id) not in st.session_state.stats_cache or str(match_id) in st.session_state.get("stats_errors", {}):
+                                            try:
+                                                _stats_payload = api_get("fixtures/statistics", {"fixture": match_id})
+                                                st.session_state.stats_cache[str(match_id)] = _stats_payload.get("response") or []
+                                                st.session_state.setdefault("stats_errors", {}).pop(str(match_id), None)
+                                            except Exception as _stats_exc:
+                                                st.session_state.stats_cache[str(match_id)] = []
+                                                st.session_state.setdefault("stats_errors", {})[str(match_id)] = str(_stats_exc)
                                         stat_data = st.session_state.stats_cache.get(str(match_id), [])
                                         stats_error = st.session_state.get("stats_errors", {}).get(str(match_id))
                                         if stats_error:
@@ -2422,6 +2430,24 @@ else:
                                     elif tool_name == "h2h":
                                         _match_league = match.get("league") or {}
                                         h2h_key = f"h2h-v3-home-{match_home_id}-{match_away_id}-{_match_league.get('id') or 'all'}"
+                                        if "h2h_cache" not in st.session_state:
+                                            st.session_state.h2h_cache = {}
+                                        if h2h_key not in st.session_state.h2h_cache:
+                                            try:
+                                                _h2h_payload = api_get("fixtures/headtohead", {"h2h": f"{match_home_id}-{match_away_id}", "last": 50})
+                                                _all_h2h_matches = _h2h_payload.get("response") or []
+                                                _finished_h2h = [past for past in _all_h2h_matches if ((past.get("fixture") or {}).get("status") or {}).get("short") in {"FT", "AET", "PEN"}]
+                                                _same_home_h2h = [past for past in _finished_h2h if str((((past.get("teams") or {}).get("home") or {}).get("id"))) == str(match_home_id)]
+                                                _same_home_h2h.sort(key=lambda past: ((past.get("fixture") or {}).get("date") or ""), reverse=True)
+                                                _same_league_home_h2h = [past for past in _same_home_h2h if (past.get("league") or {}).get("id") == _match_league.get("id")] if _match_league.get("id") else _same_home_h2h
+                                                _selected_h2h = _same_league_home_h2h[:10]
+                                                if len(_selected_h2h) < 10:
+                                                    _selected_ids = {(past.get("fixture") or {}).get("id") for past in _selected_h2h}
+                                                    _extras = [past for past in _same_home_h2h if (past.get("fixture") or {}).get("id") not in _selected_ids]
+                                                    _selected_h2h.extend(_extras[:10-len(_selected_h2h)])
+                                                st.session_state.h2h_cache[h2h_key] = {"matches": _selected_h2h[:10], "scope": "league" if _selected_h2h and all((past.get("league") or {}).get("id") == _match_league.get("id") for past in _selected_h2h) else "home_all"}
+                                            except Exception as _h2h_exc:
+                                                st.session_state.h2h_cache[h2h_key] = {"error": str(_h2h_exc)}
                                         h2h_data = st.session_state.get("h2h_cache", {}).get(h2h_key)
                                         st.markdown('<div class="match-analysis-kicker">Historial · enfrentamientos directos</div><div class="match-analysis-title">Enfrentamientos directos</div>', unsafe_allow_html=True)
                                         if isinstance(h2h_data, dict) and h2h_data.get("error"):
