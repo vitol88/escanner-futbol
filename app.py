@@ -350,6 +350,15 @@ st.markdown("""
    }
    /* Tarjeta compacta de acción principal del escáner */
   [class*="st-key-scan_cta_card"] { margin-top:10px !important; margin-bottom:0 !important; }
+  /* En móvil, separar la fila completa del encabezado fijo para que no tape el escáner. */
+  @media(max-width:640px) {
+    [class*="st-key-scan_actions_row"] {
+      padding-top:30px !important; box-sizing:border-box !important;
+    }
+    [class*="st-key-scan_actions_row"] [data-testid="stHorizontalBlock"] {
+      margin-top:0 !important;
+    }
+  }
   [class*="st-key-analysis_scan_cta"] { margin:.35rem 0 .65rem !important; }
   /* Botones grandes y llamativos dentro de las secciones de goles y córners. */
   [class*="st-key-analysis_scan_cta"] [data-testid="stButton"] > button {
