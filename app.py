@@ -1853,8 +1853,7 @@ if _analysis_page_active:
         [class*="st-key-main_h2h_{_analysis_page_id}"] {{ display:none !important; }}
         /* El contenido del análisis debe ocupar todo el ancho y no heredar espaciados del listado. */
         [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stVerticalBlock"] {{ gap:.35rem !important; row-gap:.35rem !important; }}
-        /* Navegación individual: reglas aisladas por fila para evitar duplicados y saltos de etiqueta. */
-        div[class*="st-key-analysis_page_nav"] {{ display:block !important;width:100% !important;max-width:100% !important;margin:0 0 .75rem !important;overflow:visible !important; }}
+        /* Navegación compacta con el mismo lenguaje visual de las tarjetas profesionales de Football Lab. */
         [class*="st-key-analysis_nav_back_row"] [data-testid="stHorizontalBlock"],
         [class*="st-key-analysis_nav_scan_row"] [data-testid="stHorizontalBlock"],
         [class*="st-key-analysis_nav_refresh_row"] [data-testid="stHorizontalBlock"] {{
@@ -1869,169 +1868,88 @@ if _analysis_page_active:
         [class*="st-key-analysis_nav_back_row"] [data-testid="column"]:first-child,
         [class*="st-key-analysis_nav_scan_row"] [data-testid="column"]:first-child,
         [class*="st-key-analysis_nav_refresh_row"] [data-testid="column"]:first-child {{
-            width:92px !important;min-width:92px !important;max-width:92px !important;
-            flex:0 0 92px !important;align-self:center !important;overflow:visible !important;
+            width:92px !important;min-width:92px !important;max-width:92px !important;flex:0 0 92px !important;
+            align-self:center !important;overflow:visible !important;
         }}
         [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"],
         [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"],
         [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] {{
-            display:block !important;width:100% !important;min-width:0 !important;max-width:100% !important;
-            position:relative !important;z-index:5 !important;pointer-events:auto !important;
+            display:block !important;width:100% !important;min-width:0 !important;max-width:100% !important;position:relative !important;z-index:5 !important;
         }}
         [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > div,
         [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > div,
         [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > div {{
-            width:100% !important;min-width:0 !important;max-width:100% !important;pointer-events:auto !important;
+            width:100% !important;min-width:0 !important;max-width:100% !important;
         }}
         [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button,
         [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button,
         [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{
-            position:relative !important;z-index:6 !important;pointer-events:auto !important;
             display:flex !important;align-items:center !important;justify-content:center !important;
-            width:100% !important;min-width:0 !important;max-width:100% !important;
-            height:92px !important;min-height:92px !important;max-height:92px !important;
-            padding:0 !important;overflow:hidden !important;box-sizing:border-box !important;
-            border:2px solid #FACC15 !important;border-radius:19px !important;
-            background:radial-gradient(ellipse at 25% 50%,rgba(250,204,21,.14),transparent 58%),linear-gradient(145deg,#201D14,#111419) !important;
-            color:#FFE978 !important;font-size:44px !important;line-height:1 !important;font-weight:500 !important;
-            box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 4px 14px rgba(0,0,0,.24),0 0 10px rgba(250,204,21,.08) !important;
-            transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease !important;
+            position:relative !important;isolation:isolate !important;overflow:hidden !important;
+            width:100% !important;min-width:0 !important;max-width:100% !important;height:92px !important;min-height:92px !important;max-height:92px !important;
+            padding:0 !important;box-sizing:border-box !important;border:2px solid #FACC15 !important;border-radius:19px !important;
+            background-color:#090A0D !important;
+            background-image:radial-gradient(ellipse at 50% 50%,rgba(250,204,21,.15),transparent 68%),linear-gradient(145deg,#201D14,#111419) !important;
+            color:transparent !important;-webkit-text-fill-color:transparent !important;
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.07),inset 0 0 15px rgba(250,204,21,.09),0 4px 14px rgba(0,0,0,.28) !important;
+            transition:border-color .2s ease,background .2s ease,box-shadow .2s ease,transform .2s ease !important;
         }}
         [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button p,
         [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button p,
         [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button p {{
             position:relative !important;z-index:3 !important;display:block !important;margin:0 !important;
-            color:inherit !important;font-size:0 !important;line-height:1 !important;
+            font-size:0 !important;line-height:1 !important;color:transparent !important;-webkit-text-fill-color:transparent !important;
         }}
-        /* Botón Volver: borde dorado nítido y flecha tecnológica con pulso sutil. */
-        div[class*="st-key-analysis_nav_back_row"] div[data-testid="stButton"] button,
-        div[class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button {{
-            position:relative !important;isolation:isolate !important;
-            border:2px solid #FACC15 !important;
-            background:radial-gradient(ellipse at 50% 50%,rgba(250,204,21,.2),transparent 68%),linear-gradient(145deg,#24221A,#111419) !important;
-            color:transparent !important;-webkit-text-fill-color:transparent !important;
-            box-shadow:inset 0 0 13px rgba(250,204,21,.12),0 0 0 1px rgba(250,204,21,.25),0 0 15px rgba(250,204,21,.15),0 4px 14px rgba(0,0,0,.28) !important;
-        }}
-        /* Flecha geométrica compacta: sus piezas se animan sin desbordar el marco. */
-        div[class*="st-key-analysis_nav_back_row"] div[data-testid="stButton"] button::before,
-        div[class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button::before {{
+        /* Volver: flecha compacta centrada, sin tocar los bordes. */
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button::before {{
             content:"" !important;position:absolute !important;left:50% !important;top:50% !important;
-            width:30px !important;height:4px !important;border:0 !important;border-radius:4px !important;
-            background:#FFE978 !important;box-shadow:0 0 5px rgba(250,204,21,.6),0 0 10px rgba(250,204,21,.22) !important;
-            transform:translate(-35%,-50%) !important;transform-origin:center !important;
-            animation:analysis-arrow-line-pulse 1.65s ease-in-out infinite !important;max-width:30px !important;
-            pointer-events:none !important;z-index:5 !important;
+            width:30px !important;height:4px !important;border-radius:4px !important;background:#FFE978 !important;
+            transform:translate(-35%,-50%) !important;box-shadow:0 0 7px rgba(250,204,21,.65) !important;
+            animation:analysis-arrow-line-pulse 1.65s ease-in-out infinite !important;pointer-events:none !important;z-index:5 !important;
         }}
-        div[class*="st-key-analysis_nav_back_row"] div[data-testid="stButton"] button::after,
-        div[class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button::after {{
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button::after {{
             content:"" !important;position:absolute !important;left:calc(50% - 15px) !important;top:50% !important;
             width:12px !important;height:12px !important;box-sizing:border-box !important;
             border-left:4px solid #FFE978 !important;border-bottom:4px solid #FFE978 !important;
-            border-radius:1px !important;background:transparent !important;
-            transform:translateY(-50%) rotate(45deg) !important;transform-origin:center !important;
-            animation:analysis-arrow-head-pulse 1.65s ease-in-out infinite !important;max-width:12px !important;
-            pointer-events:none !important;z-index:6 !important;
+            transform:translateY(-50%) rotate(45deg) !important;box-shadow:-2px 2px 5px rgba(250,204,21,.2) !important;
+            animation:analysis-arrow-head-pulse 1.65s ease-in-out infinite !important;pointer-events:none !important;z-index:6 !important;
         }}
-        div[class*="st-key-analysis_nav_back_row"] div[data-testid="stButton"] button:hover,
-        div[class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button:hover {{
-            border-color:#FFF09A !important;box-shadow:inset 0 0 16px rgba(250,204,21,.16),0 0 18px rgba(250,204,21,.25) !important;
-        }}
-        /* Copia visual del escáner principal: radar en espiral y balón animado, dentro del botón compacto. */
-        [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button {{
-            background-color:#090A0D !important;
-            background-image:radial-gradient(ellipse at 20% 50%,rgba(250,204,21,.10),transparent 42%),linear-gradient(135deg,#090A0D,#111319) !important;
-            border:2px solid #FACC15 !important;
-            color:transparent !important;-webkit-text-fill-color:transparent !important;
-        }}
+        /* Escanear: radar espiral y balón animado, replicando la tarjeta principal. */
         [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::before {{
-            content:"" !important;display:block !important;position:absolute !important;z-index:1 !important;
-            left:50% !important;top:50% !important;width:64px !important;height:64px !important;
-            transform:translate(-50%,-50%) rotate(0deg) !important;transform-origin:center !important;
-            border:3px solid #FACC15 !important;border-radius:50% !important;box-sizing:border-box !important;
+            content:"" !important;position:absolute !important;left:50% !important;top:50% !important;width:64px !important;height:64px !important;
+            transform:translate(-50%,-50%) !important;border:3px solid #FACC15 !important;border-radius:50% !important;box-sizing:border-box !important;
             background-color:#090A0D !important;
             background-image:radial-gradient(circle at center,#FACC15 0 6%,#14151A 7% 14%,transparent 15%),repeating-radial-gradient(circle at center,transparent 0 8px,rgba(250,204,21,.65) 9px 11px,transparent 12px 17px),conic-gradient(from 0deg,transparent 0 12%,rgba(250,204,21,.98) 16%,transparent 28% 48%,rgba(250,204,21,.55) 55%,transparent 72%) !important;
             box-shadow:0 0 20px rgba(250,204,21,.55),inset 0 0 18px rgba(250,204,21,.28) !important;
-            animation:analysis-radar-rotate 3s linear infinite !important;pointer-events:none !important;
+            animation:analysis-radar-rotate 3s linear infinite !important;pointer-events:none !important;z-index:1 !important;
         }}
         [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::after {{
-            content:"⚽" !important;display:flex !important;position:absolute !important;z-index:2 !important;
-            left:50% !important;top:50% !important;width:43px !important;height:43px !important;
-            align-items:center !important;justify-content:center !important;
-            transform:translate(-50%,-50%) rotate(0deg) !important;transform-origin:center !important;
-            font-size:40px !important;line-height:1 !important;filter:drop-shadow(0 0 10px rgba(250,204,21,.75)) !important;
-            animation:analysis-ball-rotate 2s ease-in-out infinite !important;pointer-events:none !important;
+            content:"⚽" !important;position:absolute !important;display:flex !important;left:50% !important;top:50% !important;width:43px !important;height:43px !important;
+            align-items:center !important;justify-content:center !important;transform:translate(-50%,-50%) !important;
+            font-size:40px !important;line-height:1 !important;color:#FFE978 !important;-webkit-text-fill-color:#FFE978 !important;
+            filter:drop-shadow(0 0 10px rgba(250,204,21,.75)) !important;animation:analysis-ball-rotate 2s ease-in-out infinite !important;
+            pointer-events:none !important;z-index:2 !important;
         }}
-        /* Actualizar escáner: mismo acabado dorado del botón Volver, con icono de recarga visible. */
-        div[class*="st-key-analysis_nav_refresh_row"] div[data-testid="stButton"] button,
-        div[class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{
-            position:relative !important;isolation:isolate !important;
-            border:2px solid #FACC15 !important;
-            background:radial-gradient(ellipse at 50% 50%,rgba(250,204,21,.2),transparent 68%),linear-gradient(145deg,#24221A,#111419) !important;
-            color:transparent !important;-webkit-text-fill-color:transparent !important;
-            box-shadow:inset 0 0 13px rgba(250,204,21,.12),0 0 0 1px rgba(250,204,21,.25),0 0 15px rgba(250,204,21,.15),0 4px 14px rgba(0,0,0,.28) !important;
-        }}
-        div[class*="st-key-analysis_nav_refresh_row"] div[data-testid="stButton"] button::before,
-        div[class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button::before {{
-            content:"⟳" !important;position:absolute !important;display:flex !important;
-            left:50% !important;top:50% !important;width:58px !important;height:58px !important;
-            align-items:center !important;justify-content:center !important;
-            transform:translate(-50%,-50%) !important;transform-origin:center !important;
-            color:#FFE978 !important;-webkit-text-fill-color:#FFE978 !important;
-            font-family:system-ui,sans-serif !important;font-size:62px !important;font-weight:500 !important;line-height:1 !important;
-            text-shadow:0 0 7px rgba(250,204,21,.65),0 0 14px rgba(250,204,21,.25) !important;
+        /* Actualizar: símbolo de recarga giratorio con halo dorado. */
+        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button::before {{
+            content:"⟳" !important;position:absolute !important;display:flex !important;left:50% !important;top:50% !important;width:58px !important;height:58px !important;
+            align-items:center !important;justify-content:center !important;transform:translate(-50%,-50%) !important;
+            color:#FFE978 !important;-webkit-text-fill-color:#FFE978 !important;font-family:system-ui,sans-serif !important;
+            font-size:62px !important;font-weight:500 !important;line-height:1 !important;text-shadow:0 0 7px rgba(250,204,21,.65),0 0 14px rgba(250,204,21,.25) !important;
             animation:analysis-refresh-spin 2.4s linear infinite !important;pointer-events:none !important;z-index:5 !important;
         }}
-        div[class*="st-key-analysis_nav_refresh_row"] div[data-testid="stButton"] button:hover,
-        div[class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button:hover {{
-            border-color:#FFF09A !important;box-shadow:inset 0 0 16px rgba(250,204,21,.16),0 0 18px rgba(250,204,21,.25) !important;
-        }}
-        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button p {{
-            font-size:0 !important;opacity:0 !important;
-        }}
-        /* Flotación suave y continua para los tres botones de navegación. */
-        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button,
-        [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button,
-        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{
-            animation:analysis-nav-float 2.8s ease-in-out infinite !important;
-            will-change:transform !important;
-        }}
-        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button {{ animation-delay:0s !important; }}
-        [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button {{ animation-delay:.22s !important; }}
-        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{ animation-delay:.44s !important; }}
-        @keyframes analysis-nav-float {{
-            0%,100% {{ transform:translateY(0) scale(1); }}
-            50% {{ transform:translateY(-2px) scale(1.025); }}
-        }}
-        @media(hover:hover) {{
-          [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button:hover,
-          [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button:hover,
-          [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button:hover {{
-              animation-play-state:paused !important;
-              transform:translateY(-3px) scale(1.045) !important;
-          }}
-        }}
-        @media(prefers-reduced-motion:reduce) {{
-          [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button,
-          [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button,
-          [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{
-              animation:none !important;will-change:auto !important;
-          }}
+        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button:hover,
+        [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button:hover,
+        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button:hover {{
+            border-color:#FFF09A !important;background-image:radial-gradient(ellipse at 50% 50%,rgba(250,204,21,.27),transparent 70%),linear-gradient(145deg,#302916,#17191F) !important;
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 0 18px rgba(250,204,21,.24) !important;
+            transform:translateY(-2px) scale(1.035) !important;z-index:10 !important;
         }}
         .analysis-nav-label {{
             display:block !important;width:100% !important;box-sizing:border-box !important;
             color:#FDE68A !important;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important;
             font-size:clamp(1rem,2.8vw,1.22rem) !important;font-weight:700 !important;line-height:1.25 !important;
             letter-spacing:.01em !important;padding:8px 0 !important;text-align:left !important;
-        }}
-        [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button:hover,
-        [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button:hover,
-        [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button:hover {{
-            border-color:#FFF09A !important;
-            background:radial-gradient(ellipse at 50% 50%,rgba(250,204,21,.24),transparent 70%),linear-gradient(145deg,#302916,#17191F) !important;
-            color:#FFE566 !important;
-            box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 5px 18px rgba(250,204,21,.2) !important;
-            transform:translateY(-1px) scale(1.035) !important;
-            z-index:10 !important;
         }}
         @keyframes analysis-radar-rotate {{
             from {{ transform:translate(-50%,-50%) rotate(0deg); }}
@@ -2042,11 +1960,6 @@ if _analysis_page_active:
             50% {{ transform:translate(-50%,-50%) rotate(180deg) scale(1.08); }}
             100% {{ transform:translate(-50%,-50%) rotate(360deg) scale(1); }}
         }}
-        @keyframes analysis-arrow-tilt {{
-            0%,100% {{ transform:translateX(0) rotate(0deg); }}
-            25% {{ transform:translateX(-3px) rotate(-8deg); }}
-            60% {{ transform:translateX(2px) rotate(4deg); }}
-        }}
         @keyframes analysis-arrow-line-pulse {{
             0%,100% {{ transform:translate(-35%,-50%) scaleX(.94);opacity:.86; }}
             50% {{ transform:translate(-35%,-50%) scaleX(1.04);opacity:1; }}
@@ -2056,11 +1969,9 @@ if _analysis_page_active:
             50% {{ transform:translateY(-50%) rotate(45deg) scale(1.04);opacity:1; }}
         }}
         @keyframes analysis-refresh-spin {{
-            from {{ transform:rotate(0deg); }}
-            to {{ transform:rotate(360deg); }}
+            from {{ transform:translate(-50%,-50%) rotate(0deg); }}
+            to {{ transform:translate(-50%,-50%) rotate(360deg); }}
         }}
-        .scan-running-status {{ margin:5px 2px 0 !important;padding:10px 12px !important; }}
-        .scan-running-status .scan-sweep {{ height:2px !important;opacity:.8 !important; }}
         @media(max-width:640px) {{
           [class*="st-key-analysis_nav_back_row"] [data-testid="stHorizontalBlock"],
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stHorizontalBlock"],
@@ -2075,12 +1986,10 @@ if _analysis_page_active:
           [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button,
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button,
           [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{
-              width:100% !important;min-width:0 !important;max-width:100% !important;
               height:86px !important;min-height:86px !important;max-height:86px !important;border-radius:17px !important;
           }}
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::before {{ width:57px !important;height:57px !important; }}
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::after {{ font-size:36px !important;width:39px !important;height:39px !important; }}
-          [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button p {{ font-size:40px !important; }}
           [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button::before {{ font-size:56px !important;width:52px !important;height:52px !important; }}
           .analysis-nav-label {{ font-size:1rem !important; }}
         }}
@@ -2089,47 +1998,7 @@ if _analysis_page_active:
           [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button::after,
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::before,
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::after,
-          [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button p {{ animation-duration:2.5s !important; }}
-        }}
-        /* Refuerzo final por key real del botón: evita que estilos globales lo dejen blanco. */
-        div[class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button,
-        div[class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button {{
-            position:relative !important;isolation:isolate !important;overflow:hidden !important;
-            display:flex !important;align-items:center !important;justify-content:center !important;
-            width:100% !important;height:92px !important;min-height:92px !important;max-height:92px !important;
-            padding:0 !important;box-sizing:border-box !important;border:2px solid #FACC15 !important;border-radius:19px !important;
-            background-color:#090A0D !important;
-            background-image:radial-gradient(ellipse at 20% 50%,rgba(250,204,21,.14),transparent 42%),linear-gradient(135deg,#090A0D,#17191F) !important;
-            color:transparent !important;-webkit-text-fill-color:transparent !important;
-            box-shadow:inset 0 0 18px rgba(250,204,21,.12),0 0 15px rgba(250,204,21,.12) !important;
-        }}
-        div[class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button::before,
-        div[class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::before {{
-            content:"" !important;display:block !important;position:absolute !important;z-index:1 !important;
-            left:50% !important;top:50% !important;width:64px !important;height:64px !important;
-            transform:translate(-50%,-50%) !important;border:3px solid #FACC15 !important;border-radius:50% !important;box-sizing:border-box !important;
-            background-color:#090A0D !important;
-            background-image:radial-gradient(circle at center,#FACC15 0 6%,#14151A 7% 14%,transparent 15%),repeating-radial-gradient(circle at center,transparent 0 8px,rgba(250,204,21,.65) 9px 11px,transparent 12px 17px),conic-gradient(from 0deg,transparent 0 12%,rgba(250,204,21,.98) 16%,transparent 28% 48%,rgba(250,204,21,.55) 55%,transparent 72%) !important;
-            box-shadow:0 0 20px rgba(250,204,21,.55),inset 0 0 18px rgba(250,204,21,.28) !important;
-            animation:analysis-radar-rotate 3s linear infinite !important;pointer-events:none !important;
-        }}
-        div[class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button::after,
-        div[class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::after {{
-            content:"⚽" !important;display:flex !important;position:absolute !important;z-index:2 !important;
-            left:50% !important;top:50% !important;width:43px !important;height:43px !important;
-            align-items:center !important;justify-content:center !important;transform:translate(-50%,-50%) !important;
-            font-size:40px !important;line-height:1 !important;color:#FFE978 !important;-webkit-text-fill-color:#FFE978 !important;
-            filter:drop-shadow(0 0 10px rgba(250,204,21,.75)) !important;
-            animation:analysis-ball-rotate 2s ease-in-out infinite !important;pointer-events:none !important;
-        }}
-        div[class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button p {{ font-size:0 !important;opacity:0 !important; }}
-        @media(max-width:640px) {{
-          div[class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button,
-          div[class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button {{ height:86px !important;min-height:86px !important;max-height:86px !important; }}
-          div[class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button::before,
-          div[class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::before {{ width:57px !important;height:57px !important; }}
-          div[class*="st-key-analysis_page_scan"] [data-testid="stButton"] > button::after,
-          div[class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::after {{ font-size:36px !important;width:39px !important;height:39px !important; }}
+          [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button::before {{ animation-duration:2.5s !important; }}
         }}
         </style>
         """,
