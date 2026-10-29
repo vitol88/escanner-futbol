@@ -454,39 +454,39 @@ st.markdown("""
   /* Cabecera global: siempre por encima del menú lateral, sin quedar recortada. */
   .brand-header {
     position:fixed !important;
-    top:42px !important;
+    top:54px !important;
     left:0 !important;
     right:0 !important;
     z-index:1000000 !important;
     width:100vw !important;
     max-width:none !important;
-    min-height:104px !important;
+    min-height:96px !important;
     box-sizing:border-box !important;
     margin:0 !important;
-    padding:14px clamp(18px,3.2vw,48px) !important;
+    padding:10px clamp(18px,3.2vw,48px) !important;
     border:0 !important;
-    border-top:1px solid rgba(250,204,21,.38) !important;
-    border-bottom:1px solid rgba(250,204,21,.58) !important;
+    border-top:1px solid rgba(250,204,21,.42) !important;
+    border-bottom:1px solid rgba(250,204,21,.62) !important;
     border-radius:0 !important;
     background:linear-gradient(105deg,#0B0D10 0%,#15171B 48%,#0B0D10 100%) !important;
-    box-shadow:0 8px 30px rgba(0,0,0,.46),inset 0 1px 0 rgba(250,204,21,.08),inset 0 -1px 0 rgba(250,204,21,.12) !important;
+    box-shadow:0 10px 28px rgba(0,0,0,.42),inset 0 1px 0 rgba(250,204,21,.08),inset 0 -1px 0 rgba(250,204,21,.12) !important;
     backdrop-filter:blur(12px) !important;
     overflow:visible !important;
   }
-  .brand-header-main { max-width:none !important; width:100% !important; min-height:74px !important; }
+  .brand-header-main { max-width:none !important; width:100% !important; min-height:72px !important; }
   .brand-mark { box-shadow:0 0 22px rgba(250,204,21,.16) !important; }
   [data-testid="stSidebar"] > div:first-child { padding-top:126px !important; }
-  section.main > div.block-container { padding-top:132px !important; }
+  section.main > div.block-container { padding-top:144px !important; }
   @media(max-width:640px) {
-    .brand-header { top:38px !important; min-height:76px !important; padding:8px 10px !important; }
-    .brand-header-main { min-height:58px !important; gap:8px !important; }
+    .brand-header { top:44px !important; min-height:68px !important; padding:7px 10px !important; }
+    .brand-header-main { min-height:54px !important; gap:8px !important; }
     .brand-mark { width:42px !important; height:42px !important; flex:0 0 42px !important; border-radius:12px !important; }
     .brand-mark svg { width:25px !important; height:25px !important; }
     .brand-title { font-size:clamp(1.05rem,4.8vw,1.45rem) !important; letter-spacing:0 !important; }
     .brand-subtitle { font-size:.62rem !important; letter-spacing:.7px !important; margin-top:2px !important; }
     .brand-pill { padding:4px 7px !important; font-size:.62rem !important; }
     [data-testid="stSidebar"] > div:first-child { padding-top:96px !important; }
-    section.main > div.block-container { padding-top:102px !important; }
+    section.main > div.block-container { padding-top:112px !important; }
   }
   @media(max-width:360px) {
     .brand-header-main { gap:6px !important; }
