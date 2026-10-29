@@ -1063,6 +1063,65 @@ st.markdown("""
     background:none !important; box-shadow:none !important; animation:none !important;
     content:"◉" !important; color:#FACC15 !important; font-size:1.35rem !important;
   }
+  /* SISTEMA VISUAL UNIFICADO: acciones y escáneres en Goles, Córners, Empates y Ambos marcan. */
+  [class*="st-key-analysis_scan_cta"] [data-testid="stButton"] > button,
+  [class*="st-key-analysis_scan_radar_goals_"] [data-testid="stButton"] > button,
+  [class*="st-key-analysis_scan_goals_"] [data-testid="stButton"] > button,
+  [class*="st-key-analysis_scan_radar_corners_"] [data-testid="stButton"] > button,
+  [class*="st-key-analysis_scan_corners_"] [data-testid="stButton"] > button,
+  [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button {
+    border:1.5px solid #D6B84C !important;
+    border-radius:14px !important;
+    background:linear-gradient(145deg,#1A1C22 0%,#111318 72%,#17160F 100%) !important;
+    color:#FDE68A !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 3px 12px rgba(0,0,0,.22),0 0 8px rgba(250,204,21,.045) !important;
+    transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease !important;
+  }
+  [class*="st-key-analysis_scan_cta"] [data-testid="stButton"] > button:hover,
+  [class*="st-key-analysis_scan_radar_goals_"] [data-testid="stButton"] > button:hover,
+  [class*="st-key-analysis_scan_goals_"] [data-testid="stButton"] > button:hover,
+  [class*="st-key-analysis_scan_radar_corners_"] [data-testid="stButton"] > button:hover,
+  [class*="st-key-analysis_scan_corners_"] [data-testid="stButton"] > button:hover,
+  [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button:hover {
+    background:linear-gradient(145deg,#292516 0%,#17191F 76%,#211D11 100%) !important;
+    border-color:#FFE566 !important;color:#FFF1A8 !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.075),0 4px 14px rgba(0,0,0,.25),0 0 13px rgba(250,204,21,.13) !important;
+    transform:translateY(-1px) !important;
+  }
+  [class*="st-key-analysis_scan_cta"] [data-testid="stButton"] > button:active,
+  [class*="st-key-analysis_scan_radar_goals_"] [data-testid="stButton"] > button:active,
+  [class*="st-key-analysis_scan_goals_"] [data-testid="stButton"] > button:active,
+  [class*="st-key-analysis_scan_radar_corners_"] [data-testid="stButton"] > button:active,
+  [class*="st-key-analysis_scan_corners_"] [data-testid="stButton"] > button:active,
+  [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button:active {
+    transform:scale(.99) !important;box-shadow:inset 0 1px 4px rgba(0,0,0,.25),0 0 9px rgba(250,204,21,.12) !important;
+  }
+  [class*="st-key-analysis_scan_cta"] [data-testid="stButton"] > button p,
+  [class*="st-key-analysis_scan_radar_goals_"] [data-testid="stButton"] > button p,
+  [class*="st-key-analysis_scan_goals_"] [data-testid="stButton"] > button p,
+  [class*="st-key-analysis_scan_radar_corners_"] [data-testid="stButton"] > button p,
+  [class*="st-key-analysis_scan_corners_"] [data-testid="stButton"] > button p,
+  [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button p {
+    color:inherit !important;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important;
+    font-weight:800 !important;letter-spacing:.01em !important;
+  }
+  @media(max-width:640px) {
+    [class*="st-key-analysis_scan_cta"] [data-testid="stButton"] > button { border-radius:13px !important; }
+    [class*="st-key-analysis_scan_radar_goals_"] [data-testid="stButton"] > button,
+    [class*="st-key-analysis_scan_goals_"] [data-testid="stButton"] > button,
+    [class*="st-key-analysis_scan_radar_corners_"] [data-testid="stButton"] > button,
+    [class*="st-key-analysis_scan_corners_"] [data-testid="stButton"] > button {
+      border-radius:13px !important; border-width:1.5px !important;
+    }
+  }
+  @media(prefers-reduced-motion:reduce) {
+    [class*="st-key-analysis_scan_cta"] [data-testid="stButton"] > button,
+    [class*="st-key-analysis_scan_radar_goals_"] [data-testid="stButton"] > button,
+    [class*="st-key-analysis_scan_goals_"] [data-testid="stButton"] > button,
+    [class*="st-key-analysis_scan_radar_corners_"] [data-testid="stButton"] > button,
+    [class*="st-key-analysis_scan_corners_"] [data-testid="stButton"] > button,
+    [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button { transition:none !important; }
+  }
   /* El estilo de los botones superiores se define en la vista de análisis para evitar anchos automáticos conflictivos. */
 </style>
 """, unsafe_allow_html=True)
