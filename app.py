@@ -132,45 +132,8 @@ st.markdown("""
     [class*="st-key-search_goal_matches"] [data-testid="stTextInput"] > div { min-height:46px !important; }
   }
   /* Tres controles compactos, completos y con acabado dorado uniforme */
-  /* Controles globales compactos: siempre visibles sobre la cabecera de Football Lab. */
-  [class*="st-key-top_status_controls"] {
-    position:fixed !important;
-    top:8px !important;
-    right:14px !important;
-    z-index:10050 !important;
-    width:232px !important;
-    max-width:calc(100vw - 28px) !important;
-    margin:0 !important;
-    padding:0 !important;
-    overflow:visible !important;
-    background:transparent !important;
-  }
-  [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { align-items:center !important; gap:5px !important; flex-wrap:nowrap !important; overflow:visible !important; }
-  [class*="st-key-top_status_controls"] [data-testid="stColumn"] { min-width:0 !important; padding:0 !important; overflow:visible !important; }
-  [class*="st-key-auto_refresh_control_card"], [class*="st-key-sound_control_card"] {
-    box-sizing:border-box !important; width:100% !important; min-height:31px !important;
-    display:flex !important; align-items:center !important; justify-content:center !important;
-    padding:1px 3px !important; border:1px solid rgba(212,167,44,.55) !important;
-    border-radius:8px !important; background:rgba(17,20,25,.88) !important; overflow:visible !important;
-    box-shadow:0 2px 8px rgba(0,0,0,.12) !important;
-  }
-  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"],
-  [class*="st-key-sound_control_card"] [data-testid="stToggle"] { min-height:25px !important; padding:0 !important; }
-  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label,
-  [class*="st-key-sound_control_card"] [data-testid="stToggle"] label { gap:3px !important; }
-  [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label p,
-  [class*="st-key-sound_control_card"] [data-testid="stToggle"] label p { font-size:9px !important; line-height:1 !important; }
-  [class*="st-key-auto_refresh_control_card"] [role="switch"],
-  [class*="st-key-sound_control_card"] [role="switch"] { transform:scale(.58) !important; transform-origin:center !important; }
-  [class*="st-key-top_status_controls"] iframe { display:block !important; box-sizing:border-box !important; width:100% !important; height:34px !important; min-height:34px !important; margin:0 !important; padding:0 !important; border:0 !important; overflow:visible !important; }
-  @media(max-width:640px) {
-    [class*="st-key-top_status_controls"] { top:5px !important; right:6px !important; width:196px !important; max-width:calc(100vw - 12px) !important; }
-    [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { gap:3px !important; }
-    [class*="st-key-auto_refresh_control_card"], [class*="st-key-sound_control_card"] { min-height:28px !important; padding:0 2px !important; }
-    [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label p,
-    [class*="st-key-sound_control_card"] [data-testid="stToggle"] label p { font-size:8px !important; }
-    [class*="st-key-top_status_controls"] iframe { height:30px !important; min-height:30px !important; }
-  }
+  /* Controles compactos en el flujo normal: no cubrir ni desplazar el botón de escaneo. */
+  [class*="st-key-top_status_controls"] { position:relative !important; top:auto !important; right:auto !important; z-index:20 !important; width:100% !important; max-width:100% !important; margin:0 0 10px 0 !important; padding:0 !important; overflow:visible !important; }
   [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { align-items:stretch !important; gap:.45rem !important; flex-wrap:nowrap !important; overflow:visible !important; }
   [class*="st-key-top_status_controls"] [data-testid="stColumn"] { min-width:0 !important; padding:0 !important; overflow:visible !important; }
   [class*="st-key-auto_refresh_control_card"], [class*="st-key-sound_control_card"] { box-sizing:border-box !important; width:100% !important; min-height:48px !important; display:flex !important; align-items:center !important; justify-content:center !important; padding:4px 5px !important; border:1px solid #D4A72C !important; border-radius:11px !important; background:linear-gradient(145deg,#201D14,#111419) !important; overflow:visible !important; }
