@@ -102,10 +102,37 @@ st.markdown("""
   [class*="st-key-control_row"] button[kind="primary"] p {
     color:#090A0D !important; font-weight:800 !important;
   }
-  [class*="st-key-scan-progress"] [data-testid="stProgress"] { margin:2px 0 0 !important; height:7px !important; }
-  [class*="st-key-scan-progress"] [data-testid="stProgress"] > div { height:7px !important; border-radius:8px !important; background:#25231B !important; }
-  [class*="st-key-scan-progress"] [data-testid="stProgress"] > div > div { background:repeating-linear-gradient(90deg,#FACC15 0 5px,#8A6A0A 5px 7px) !important; border-radius:8px !important; }
-  [class*="st-key-scan-progress"] [data-testid="stCaptionContainer"] p { font-size:10px !important; line-height:1.1 !important; color:#A1A1AA !important; margin:2px 0 0 !important; }
+  /* Barra de escaneo premium: pista oscura, progreso dorado y brillo móvil. */
+  [class*="st-key-scan-progress"] { margin:2px 0 10px !important; padding:0 !important; }
+  [class*="st-key-scan-progress"] [data-testid="stProgress"] { margin:5px 0 0 !important; padding:0 !important; }
+  [class*="st-key-scan-progress"] [data-testid="stProgress"] > div,
+  [class*="st-key-scan-progress"] [data-testid="stProgress"] [role="progressbar"] {
+    height:10px !important; min-height:10px !important; border-radius:999px !important;
+    overflow:hidden !important; background:#25231B !important; border:1px solid #3C3212 !important;
+    box-shadow:inset 0 1px 3px rgba(0,0,0,.65),0 0 10px rgba(250,204,21,.06) !important;
+  }
+  [class*="st-key-scan-progress"] [data-testid="stProgress"] > div > div,
+  [class*="st-key-scan-progress"] [data-testid="stProgress"] [role="progressbar"] > div,
+  [class*="st-key-scan-progress"] [data-testid="stProgress"] [role="progressbar"] > div > div {
+    height:100% !important; border-radius:999px !important;
+    background:linear-gradient(90deg,#8A6A0A 0%,#D4A72C 28%,#FFE566 58%,#FACC15 82%,#FFF2A6 100%) !important;
+    background-size:220% 100% !important; animation:fl-progress-shimmer 1.8s linear infinite !important;
+    box-shadow:0 0 9px rgba(250,204,21,.45) !important;
+  }
+  .fl-scan-progress-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:7px 0 0; font-family:system-ui,-apple-system,sans-serif; }
+  .fl-scan-progress-title { color:#FDE68A; font-size:11px; line-height:1.25; font-weight:850; letter-spacing:.12em; text-transform:uppercase; }
+  .fl-scan-progress-percent { color:#FACC15; font-size:12px; line-height:1.25; font-weight:900; font-variant-numeric:tabular-nums; text-shadow:0 0 10px rgba(250,204,21,.24); }
+  .fl-scan-progress-caption { display:flex; align-items:center; gap:6px; color:#8E929B; font-size:10px; line-height:1.35; margin:4px 0 0; }
+  .fl-scan-progress-caption .fl-live-dot { width:5px; height:5px; flex:0 0 5px; border-radius:50%; background:#FACC15; box-shadow:0 0 8px #FACC15; animation:fl-live-pulse 1.2s ease-in-out infinite; }
+  .fl-scan-progress-caption.is-done { color:#D6D3B8; }
+  .fl-scan-progress-caption.is-done .fl-live-dot { background:#86EFAC; box-shadow:0 0 7px #86EFAC; animation:none; }
+  @keyframes fl-progress-shimmer { from { background-position:100% 0; } to { background-position:-120% 0; } }
+  @keyframes fl-live-pulse { 0%,100% { opacity:.45; transform:scale(.85); } 50% { opacity:1; transform:scale(1.15); } }
+  @media(prefers-reduced-motion:reduce) {
+    [class*="st-key-scan-progress"] [data-testid="stProgress"] [role="progressbar"] > div,
+    [class*="st-key-scan-progress"] [data-testid="stProgress"] [role="progressbar"] > div > div { animation:none !important; }
+    .fl-scan-progress-caption .fl-live-dot { animation:none !important; }
+  }
   [class*="st-key-control_row"] button { min-height:2.45rem !important; padding:.35rem .65rem !important; border-radius:10px !important; font-size:.88rem !important; white-space:nowrap; }
   @media(max-width:640px) {
     [class*="st-key-control_row"] { gap:.45rem !important; }
@@ -1475,11 +1502,27 @@ with st.container(key="control_row"):
         help="Actualiza el listado de partidos y ejecuta el escaneo disponible."
     )
 with st.container(key="scan-progress"):
+    scan_progress_label = st.empty()
     scan_progress = st.empty()
     scan_progress_caption = st.empty()
-    if refresh:
-        scan_progress.progress(0)
-        scan_progress_caption.caption("Actualizando scan")
+
+def update_scan_progress(value, title, detail, done=False):
+    """Actualizar porcentaje real y estado visual de la barra de Football Lab."""
+    value = max(0, min(100, int(value)))
+    scan_progress.progress(value)
+    scan_progress_label.markdown(
+        f'<div class="fl-scan-progress-head"><span class="fl-scan-progress-title">{title}</span><span class="fl-scan-progress-percent">{value}%</span></div>',
+        unsafe_allow_html=True,
+    )
+    status_class = "fl-scan-progress-caption is-done" if done else "fl-scan-progress-caption"
+    dot = "✓" if done else '<span class="fl-live-dot"></span>'
+    scan_progress_caption.markdown(
+        f'<div class="{status_class}">{dot}<span>{detail}</span></div>',
+        unsafe_allow_html=True,
+    )
+
+if refresh:
+    update_scan_progress(0, "Iniciando escáner", "Preparando conexión con partidos en vivo")
 
 with st.container(key="scan_cta_card"):
     manual_scan = st.button(
@@ -1533,12 +1576,11 @@ if auto_tick is not None:
 if should_refresh:
     try:
         if refresh:
-            scan_progress.progress(12)
-            scan_progress_caption.caption("Actualizando scan")
+            update_scan_progress(12, "Conectando con partidos", "Consultando encuentros en vivo")
         data = api_get("fixtures", {"live": "all"})
         new_fixtures = data.get("response", [])
         if refresh:
-            scan_progress.progress(28)
+            update_scan_progress(28, "Partidos detectados", f"{len(new_fixtures)} encuentros recibidos de la API")
         old_snapshot = st.session_state.score_snapshot
         current_snapshot = {}
         new_events = []
@@ -1570,7 +1612,7 @@ if should_refresh:
         # Una sola llamada cubre todos los fixtures disponibles; intervalo de 120 s
         # para vigilar cambios sin generar una llamada por partido.
         if refresh:
-            scan_progress.progress(40)
+            update_scan_progress(40, "Evaluando mercados", "Actualizando cuotas disponibles")
         odds_now_epoch = int(datetime.now().timestamp())
         if odds_now_epoch - int(st.session_state.get("live_odds_last_fetch_epoch", 0)) >= 120:
             try:
@@ -1599,7 +1641,7 @@ if should_refresh:
             rotated = live_for_corners[offset:] + live_for_corners[:offset]
             for corner_idx, match in enumerate(rotated[:batch_size]):
                 if refresh:
-                    scan_progress.progress(45 + int(45 * (corner_idx / max(1, batch_size))))
+                    update_scan_progress(45 + int(45 * ((corner_idx + 1) / max(1, batch_size))), "Analizando estadísticas", f"Revisando actividad y córners · partido {corner_idx + 1} de {batch_size}")
                 fixture_data = match.get("fixture") or {}
                 fixture_id = str(fixture_data.get("id"))
                 try:
@@ -1640,12 +1682,11 @@ if should_refresh:
             "last_auto_scan": st.session_state.last_refresh,
         }
         if refresh:
-            scan_progress.progress(100)
-            scan_progress_caption.caption("Actualización completada")
+            update_scan_progress(100, "Escaneo completado", f"Actualización finalizada · {len(new_fixtures)} partidos en vivo detectados", done=True)
     except Exception as exc:
         st.session_state.last_auto_refresh_error = str(exc)
         if refresh:
-            scan_progress_caption.caption("No se pudo completar la actualización")
+            update_scan_progress(100, "Escaneo interrumpido", "No se pudo completar la actualización; revisa el aviso de error", done=True)
 
 if st.session_state.last_auto_refresh_error:
     st.warning(f"No se pudo actualizar el listado en vivo: {st.session_state.last_auto_refresh_error}")
