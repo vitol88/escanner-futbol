@@ -284,6 +284,9 @@ st.markdown("""
   .scan-refresh-feedback:not(.is-done) .scan-refresh-fill { animation:scan-refresh-progress 1.8s ease-in-out infinite alternate; }
   @keyframes scan-refresh-spin { to { transform:rotate(360deg); } }
   @keyframes scan-refresh-progress { from { width:24% !important; } to { width:82% !important; } }
+  /* Fallback directo para botones secundarios: algunos wrappers de Streamlit no conservan el selector por key */
+  [data-testid="stBaseButton-secondary"] { background:linear-gradient(135deg,#292416,#17191F) !important; background-color:#17191F !important; color:#FFE36A !important; border:1px solid #D6B84C !important; }
+  [data-testid="stBaseButton-secondary"]:hover { background:linear-gradient(135deg,#443819,#242018) !important; background-color:#242018 !important; color:#FFF1A8 !important; border-color:#FFE566 !important; }
   [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button { width:100% !important; min-height:44px !important; padding:8px 12px !important; border:1px solid #D6B84C !important; border-radius:11px !important; background:linear-gradient(135deg,#292416,#17191F) !important; color:#FFE36A !important; font-size:.88rem !important; font-weight:850 !important; line-height:1.2 !important; white-space:normal !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 2px 8px rgba(0,0,0,.2) !important; }
   [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button:hover { border-color:#FFE566 !important; background:linear-gradient(135deg,#443819,#242018) !important; color:#FFF1A8 !important; box-shadow:0 0 14px rgba(250,204,21,.2) !important; }
   .scan-running-status { position:relative; display:flex; align-items:center; gap:12px; overflow:hidden; color:#FACC15; margin:8px 2px 0; padding:12px 14px; border:1px solid rgba(250,204,21,.35); border-radius:14px; background:linear-gradient(110deg,#17191F,#0B0D10); font-size:.92rem; font-weight:700; }
