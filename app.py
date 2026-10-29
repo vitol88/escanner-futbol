@@ -1499,6 +1499,7 @@ st.components.v1.html("""
 
 MODEL_DATA = load_league_baselines()
 
+search_clicked = False
 with st.sidebar:
     _sidebar_tool_page = st.session_state.get("main_fixture_tool") or {}
     _sidebar_tool_id = str(_sidebar_tool_page.get("fixture_id") or "")
@@ -1519,7 +1520,7 @@ with st.sidebar:
         with _search_cols[0]:
             st.text_input("Buscar equipo o liga", placeholder="Ej. Argentinos Juniors, Premier League…", key="search_goal_matches", label_visibility="collapsed")
         with _search_cols[1]:
-            st.button(" ", icon=":material/search:", key="sidebar_search_button", help="Buscar equipo o liga", use_container_width=True)
+            search_clicked = st.button(" ", icon=":material/search:", key="sidebar_search_button", help="Buscar equipo o liga", use_container_width=True)
     if _sidebar_tool_active:
         _sidebar_selected_fixture = st.session_state.get("selected_live_fixture") or {}
         _sidebar_home = (_sidebar_selected_fixture.get("teams") or {}).get("home") or {}
@@ -2590,6 +2591,61 @@ if _analysis_page_active:
     )
 
 fixtures = st.session_state.live_fixtures
+
+# Buscar partidos o ligas desde la barra lateral y navegar directamente al resultado.
+if search_clicked:
+    _query = str(st.session_state.get("search_goal_matches", "") or "").strip().casefold()
+    if not _query:
+        st.session_state["live_search_message"] = "Escribe el nombre de un equipo o una liga para buscar."
+        st.session_state.pop("live_search_query", None)
+    else:
+        st.session_state["live_search_query"] = _query
+        st.session_state.pop("live_search_message", None)
+        _team_matches = []
+        _league_matches = []
+        for _fixture_item in fixtures:
+            _teams_item = _fixture_item.get("teams") or {}
+            _home_item = _teams_item.get("home") or {}
+            _away_item = _teams_item.get("away") or {}
+            _league_item = _fixture_item.get("league") or {}
+            _home_name_item = str(_home_item.get("name") or "").casefold()
+            _away_name_item = str(_away_item.get("name") or "").casefold()
+            _league_name_item = str(_league_item.get("name") or "").casefold()
+            _country_name_item = str(_league_item.get("country") or "").casefold()
+            if _query in _home_name_item or _query in _away_name_item:
+                _team_matches.append(_fixture_item)
+            if _query in _league_name_item or _query in _country_name_item:
+                _league_matches.append(_fixture_item)
+        if _team_matches:
+            _chosen_fixture = _team_matches[0]
+            _chosen_id = str((_chosen_fixture.get("fixture") or {}).get("id") or "")
+            _chosen_league = _chosen_fixture.get("league") or {}
+            _chosen_country = _chosen_league.get("country") or "Otros países"
+            _chosen_league_name = _chosen_league.get("name") or "Liga sin nombre"
+            st.session_state["selected_live_fixture_id"] = _chosen_id
+            st.session_state["selected_live_fixture"] = _chosen_fixture
+            st.session_state["main_fixture_tool"] = {}
+            st.session_state["live_now_expander"] = True
+            st.session_state[f"live_league_{_chosen_country}_{_chosen_league_name}"] = True
+            st.session_state["live_search_query"] = _query
+            st.session_state["live_search_message"] = f"Partido encontrado: {(_chosen_fixture.get('teams') or {}).get('home', {}).get('name', 'Local')} vs {(_chosen_fixture.get('teams') or {}).get('away', {}).get('name', 'Visitante')}."
+        elif _league_matches:
+            st.session_state["live_search_query"] = _query
+            st.session_state["live_now_expander"] = True
+            for _league_fixture in _league_matches:
+                _league_info = _league_fixture.get("league") or {}
+                _country_info = _league_info.get("country") or "Otros países"
+                _league_name_info = _league_info.get("name") or "Liga sin nombre"
+                st.session_state[f"live_league_{_country_info}_{_league_name_info}"] = True
+            st.session_state["live_search_message"] = f"Se encontraron {len(_league_matches)} partidos en la liga o país indicado."
+        else:
+            st.session_state.pop("live_search_query", None)
+            st.session_state["live_search_message"] = f"No se encontraron partidos en vivo para «{st.session_state.get('search_goal_matches', '').strip()}». Prueba con otro nombre."
+    st.rerun()
+
+if st.session_state.get("live_search_message") and not _sidebar_dedicated_view:
+    st.sidebar.info(st.session_state["live_search_message"])
+
 if not fixtures:
     st.markdown("### Tu centro de análisis")
     st.info("Pulsa «Actualizar partidos» para cargar los encuentros en vivo. Después podrás escanear goles, córners, empate y ambos equipos marcan.")
@@ -2602,10 +2658,24 @@ if not fixtures:
     </div>
     """, unsafe_allow_html=True)
 else:
-    # Mostrar todos los partidos en vivo; se oculta el filtro de ligas para simplificar la pantalla.
+    # Mostrar partidos en vivo; si se envió una búsqueda, priorizar sus resultados.
     filtered = list(fixtures)
+    _submitted_query = str(st.session_state.get("live_search_query", "") or "").strip().casefold()
+    if _submitted_query:
+        _team_filtered = []
+        _league_filtered = []
+        for _item in filtered:
+            _teams = _item.get("teams") or {}
+            _home = _teams.get("home") or {}
+            _away = _teams.get("away") or {}
+            _league = _item.get("league") or {}
+            if _submitted_query in str(_home.get("name") or "").casefold() or _submitted_query in str(_away.get("name") or "").casefold():
+                _team_filtered.append(_item)
+            if _submitted_query in str(_league.get("name") or "").casefold() or _submitted_query in str(_league.get("country") or "").casefold():
+                _league_filtered.append(_item)
+        filtered = _team_filtered[:1] if _team_filtered else _league_filtered
     with st.container(key="live_now_section"):
-        with st.expander(f"En vivo ahora ({len(filtered)})", expanded=st.session_state.get("live_now_expander", False), key="live_now_expander", on_change="rerun"):
+        with st.expander(f"En vivo ahora ({len(filtered)})", expanded=st.session_state.get("live_now_expander", False) or bool(_submitted_query), key="live_now_expander", on_change="rerun"):
             if filtered:
                 grouped = {}
                 for match in filtered:
