@@ -27,6 +27,6 @@ input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();send
 document.getElementById('go').addEventListener('click',()=>send(true));
 window.addEventListener('message',e=>{const d=e.data;if(d && d.type==='streamlit:render'){const a=d.args||{};if(typeof a.value==='string'&&a.value!==input.value){input.value=a.value;lastValue=a.value;}if(window.Streamlit)window.Streamlit.setFrameHeight(50);}});
 function ready(){if(window.Streamlit){window.Streamlit.setFrameHeight(50);window.Streamlit.setComponentReady();}}
-const s=document.createElement('script');s.src='https://unpkg.com/streamlit-component-lib@1.4.0/dist/streamlit-component-lib.js';s.onload=ready;document.head.appendChild(s);
+const s=document.createElement('script');s.src='https://unpkg.com/streamlit-component-lib@1.4.0/dist/streamlit.js';s.onload=ready;document.head.appendChild(s);
 </script>
 </body></html>
