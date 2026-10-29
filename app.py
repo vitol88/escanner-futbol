@@ -2794,6 +2794,7 @@ else:
                                             h2h_html = ""
                                             valid_goal_totals = []
                                             draw_count = 0
+                                            both_score_count = 0
                                             for past in h2h_matches:
                                                 pf, pt, pg = past.get("fixture") or {}, past.get("teams") or {}, past.get("goals") or {}
                                                 ph, pa = pt.get("home") or {}, pt.get("away") or {}
@@ -2810,6 +2811,8 @@ else:
                                                     valid_goal_totals.append(home_goals + away_goals)
                                                     if home_goals == away_goals:
                                                         draw_count += 1
+                                                    if home_goals > 0 and away_goals > 0:
+                                                        both_score_count += 1
                                                 h2h_html += (
                                                     f'<div class="h2h-match-row">'
                                                     f'<span class="h2h-date">{date_label}</span>'
@@ -2824,7 +2827,7 @@ else:
                                                 average_goals = 0.0
                                             summary_html = (
                                                 '<div class="h2h-summary-grid">'
-                                                f'<div class="h2h-summary-card"><div class="h2h-summary-label">PARTIDOS</div><div class="h2h-summary-value">{len(valid_goal_totals)}</div></div>'
+                                                f'<div class="h2h-summary-card"><div class="h2h-summary-label">AMBOS MARCAN</div><div class="h2h-summary-value">{both_score_count}/{len(valid_goal_totals)}</div></div>'
                                                 f'<div class="h2h-summary-card"><div class="h2h-summary-label">PROM. GOLES</div><div class="h2h-summary-value">{average_goals:.2f}</div></div>'
                                                 f'<div class="h2h-summary-card"><div class="h2h-summary-label">EMPATES</div><div class="h2h-summary-value">{draw_count}/{len(valid_goal_totals)}</div></div>'
                                                 '</div>'
