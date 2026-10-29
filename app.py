@@ -2024,13 +2024,13 @@ with st.container(key="top_status_controls"):
        window.speechSynthesis.speak(u);
      }
      const C=window.AudioContext||window.webkitAudioContext;
-     if(!C) { b.textContent='✓ Alertas'; return; }
+     if(!C) { b.title='Alertas activadas'; return; }
      const c=new C(), o=c.createOscillator(), g=c.createGain();
      o.type='sine'; o.frequency.value=880; g.gain.value=0.08;
      o.connect(g); g.connect(c.destination);
      Promise.resolve(c.resume()).then(()=>{o.start();setTimeout(()=>{try{o.stop();}catch(e){} c.close();},220);});
-     b.textContent='✓ Alertas';
-   } catch(e) { b.textContent='⚠ Sin audio'; }
+     b.title='Alertas activadas';
+   } catch(e) { b.title='Alertas activadas (audio no disponible)'; }
  });
 })();
 </script>
