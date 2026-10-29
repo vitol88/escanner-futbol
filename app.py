@@ -1890,6 +1890,14 @@ if _analysis_page_active:
         [class*="st-key-main_h2h_{_analysis_page_id}"] {{ display:none !important; }}
         /* El contenido del análisis debe ocupar todo el ancho y no heredar espaciados del listado. */
         [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stVerticalBlock"] {{ gap:.35rem !important; row-gap:.35rem !important; }}
+        /* En la vista dedicada ocultamos los controles globales para priorizar la navegación del análisis. */
+        [class*="st-key-top_status_controls"] {{ display:none !important; height:0 !important; min-height:0 !important; margin:0 !important; padding:0 !important; }}
+        [class*="st-key-top_status_controls"] > div {{ display:none !important; height:0 !important; margin:0 !important; padding:0 !important; }}
+        /* Subir la navegación y reducir el espacio vacío superior de la sección. */
+        [class*="st-key-analysis_nav_back_row"] {{ margin-top:0 !important; }}
+        [class*="st-key-analysis_nav_back_row"],
+        [class*="st-key-analysis_nav_scan_row"],
+        [class*="st-key-analysis_nav_refresh_row"] {{ margin-bottom:7px !important; }}
         /* Navegación compacta con el mismo lenguaje visual de las tarjetas profesionales de Football Lab. */
         [class*="st-key-analysis_nav_back_row"] [data-testid="stHorizontalBlock"],
         [class*="st-key-analysis_nav_scan_row"] [data-testid="stHorizontalBlock"],
