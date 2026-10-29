@@ -782,6 +782,12 @@ st.markdown("""
   }
 
 
+  /* Selección directa de la tarjeta del marcador; el botón transparente no cambia el diseño visible. */
+  [class*="st-key-live_match_"] { position:relative !important; }
+  [class*="st-key-select_live_match_"] { position:absolute !important; top:0 !important; left:0 !important; right:0 !important; height:132px !important; min-height:132px !important; z-index:8 !important; opacity:0 !important; margin:0 !important; padding:0 !important; }
+  [class*="st-key-select_live_match_"] [data-testid="stButton"], [class*="st-key-select_live_match_"] [data-testid="stButton"] > button { width:100% !important; height:132px !important; min-height:132px !important; max-height:132px !important; opacity:0 !important; background:transparent !important; border:0 !important; box-shadow:none !important; cursor:pointer !important; }
+  .fl-match-scoreboard.is-selected { border-color:#FACC15 !important; box-shadow:inset 0 0 0 1px rgba(250,204,21,.16),0 0 15px rgba(250,204,21,.09) !important; }
+  [data-testid="stSidebar"] [class*="st-key-main_stats_"] button, [data-testid="stSidebar"] [class*="st-key-main_market_"] button, [data-testid="stSidebar"] [class*="st-key-main_h2h_"] button { min-height:48px !important; height:48px !important; }
   /* Marcador premium al abrir un partido */
   .fl-match-scoreboard {
     display:grid; grid-template-columns:100px minmax(0,1fr); gap:13px; align-items:center;
@@ -2328,8 +2334,10 @@ else:
                                 _away_crest = f'<img class="fl-match-crest" src="{html.escape(match_away_logo, quote=True)}" alt="">' if match_away_logo else '<span class="fl-match-crest-empty">⚽</span>'
                                 _status_short = str((match_fixture.get("status") or {}).get("short") or "")
                                 _live_badge = '<span class="fl-match-live">EN VIVO</span>' if _status_short in {"1H", "HT", "2H", "ET", "BT", "P", "LIVE"} or match_minute is not None else ""
+                                _is_selected_fixture = str(st.session_state.get("selected_live_fixture_id") or "") == str(match_id)
+                                _scoreboard_class = "fl-match-scoreboard is-selected" if _is_selected_fixture else "fl-match-scoreboard"
                                 st.markdown(
-                                    f'<div class="fl-match-scoreboard">'
+                                    f'<div class="{_scoreboard_class}">'
                                     f'<div class="fl-match-clock"><div class="fl-match-minute"{_clock_data_attr}>{html.escape(_clock_text)}</div>{_live_badge}</div>'
                                     f'<div class="fl-match-teams">'
                                     f'<div class="fl-match-team"><span class="fl-match-goals">{html.escape(str(_home_score))}</span>{_home_crest}<span class="fl-match-team-name">{html.escape(match_home_name)}</span></div>'
@@ -2337,91 +2345,11 @@ else:
                                     f'</div></div>',
                                     unsafe_allow_html=True,
                                 )
-                                current_tool = st.session_state.get("main_fixture_tool") or {}
-                                active_market = current_tool.get("market") if str(current_tool.get("fixture_id")) == str(match_id) else None
-                                active_tool = current_tool.get("tool") if str(current_tool.get("fixture_id")) == str(match_id) else None
-                                # Iconografía Material uniforme: trazos consistentes y ayuda accesible en cada botón.
-                                action_cols = st.columns(4, gap="small")
-                                with action_cols[0]:
-                                    show_stats = st.button(" ", icon=":material/query_stats:", help="Estadísticas en vivo", key=f"main_stats_{match_id}", type="primary" if active_tool == "stats" else "secondary", use_container_width=True)
-                                with action_cols[1]:
-                                    show_goals = st.button(" ", icon=":material/sports_soccer:", help="Goles y señales", key=f"main_market_{match_id}_goals", type="primary" if active_market == "goals" else "secondary", use_container_width=True)
-                                with action_cols[2]:
-                                    show_corners = st.button(" ", icon=":material/flag:", help="Córners y señales", key=f"main_market_{match_id}_corners", type="primary" if active_market == "corners" else "secondary", use_container_width=True)
-                                with action_cols[3]:
-                                    show_h2h = st.button(" ", icon=":material/shield:", help="Historial de enfrentamientos (H2H)", key=f"main_h2h_{match_id}", type="primary" if active_tool == "h2h" else "secondary", use_container_width=True)
-                                if show_stats:
-                                    stats_key = str(match_id)
-                                    if stats_key not in st.session_state.stats_cache or stats_key in st.session_state.get("stats_errors", {}):
-                                        try:
-                                            stats_payload = api_get("fixtures/statistics", {"fixture": match_id})
-                                            st.session_state.stats_cache[stats_key] = stats_payload.get("response") or []
-                                            st.session_state.setdefault("stats_errors", {}).pop(stats_key, None)
-                                        except Exception as stats_exc:
-                                            st.session_state.stats_cache[stats_key] = []
-                                            st.session_state.setdefault("stats_errors", {})[stats_key] = str(stats_exc)
-                                    st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "stats"}
-                                    st.rerun()
-                                if show_h2h:
-                                    if "h2h_cache" not in st.session_state:
-                                        st.session_state.h2h_cache = {}
-                                    _match_league = match.get("league") or {}
-                                    league_id = _match_league.get("id")
-                                    # v3: el historial respeta la localía del equipo que juega como local en el partido actual.
-                                    h2h_key = f"h2h-v3-home-{match_home_id}-{match_away_id}-{league_id or 'all'}"
-                                    if not match_home_id or not match_away_id:
-                                        st.warning("La API no entregó los identificadores de ambos equipos.")
-                                    elif h2h_key not in st.session_state.h2h_cache:
-                                        try:
-                                            # Consultar suficientes enfrentamientos históricos y filtrar por localía antes de limitar a 10.
-                                            h2h_payload = api_get("fixtures/headtohead", {"h2h": f"{match_home_id}-{match_away_id}", "last": 50})
-                                            all_h2h_matches = h2h_payload.get("response") or []
-                                            finished_h2h = [
-                                                past for past in all_h2h_matches
-                                                if ((past.get("fixture") or {}).get("status") or {}).get("short") in {"FT", "AET", "PEN"}
-                                            ]
-                                            # Solo enfrentamientos en los que el equipo local del partido actual también fue local.
-                                            same_home_h2h = [
-                                                past for past in finished_h2h
-                                                if str((((past.get("teams") or {}).get("home") or {}).get("id"))) == str(match_home_id)
-                                            ]
-                                            # Preferir la misma competición; si hay menos de 10, completar con otras competiciones
-                                            # manteniendo siempre la condición de que el equipo actual sea local.
-                                            same_home_h2h.sort(
-                                                key=lambda past: ((past.get("fixture") or {}).get("date") or ""),
-                                                reverse=True,
-                                            )
-                                            same_league_home_h2h = [
-                                                past for past in same_home_h2h
-                                                if (past.get("league") or {}).get("id") == league_id
-                                            ] if league_id else same_home_h2h
-                                            selected_h2h = same_league_home_h2h[:10]
-                                            if len(selected_h2h) < 10:
-                                                selected_ids = {
-                                                    (past.get("fixture") or {}).get("id")
-                                                    for past in selected_h2h
-                                                }
-                                                extras = [
-                                                    past for past in same_home_h2h
-                                                    if (past.get("fixture") or {}).get("id") not in selected_ids
-                                                ]
-                                                selected_h2h.extend(extras[:10 - len(selected_h2h)])
-                                            st.session_state.h2h_cache[h2h_key] = {
-                                                "matches": selected_h2h[:10],
-                                                "scope": "league" if selected_h2h and all(
-                                                    (past.get("league") or {}).get("id") == league_id
-                                                    for past in selected_h2h
-                                                ) else "home_all",
-                                            }
-                                        except Exception as h2h_exc:
-                                            st.session_state.h2h_cache[h2h_key] = {"error": str(h2h_exc)}
-                                    st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "h2h"}
-                                    st.rerun()
-                                if show_goals:
-                                    st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "market", "market": "goals"}
-                                    st.rerun()
-                                if show_corners:
-                                    st.session_state["main_fixture_tool"] = {"fixture_id": match_id, "tool": "market", "market": "corners"}
+                                _select_this_fixture = st.button(" ", key=f"select_live_match_{match_id}", help=f"Seleccionar {match_label}", use_container_width=True)
+                                if _select_this_fixture:
+                                    st.session_state["selected_live_fixture_id"] = str(match_id)
+                                    st.session_state["selected_live_fixture"] = match
+                                    st.session_state["main_fixture_tool"] = {}
                                     st.rerun()
                                 selected_tool = st.session_state.get("main_fixture_tool") or {}
                                 if str(selected_tool.get("fixture_id")) == str(match_id):
