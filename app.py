@@ -1858,7 +1858,7 @@ if _analysis_page_active:
         [class*="st-key-analysis_nav_back_row"] [data-testid="stHorizontalBlock"],
         [class*="st-key-analysis_nav_scan_row"] [data-testid="stHorizontalBlock"],
         [class*="st-key-analysis_nav_refresh_row"] [data-testid="stHorizontalBlock"] {{
-            display:grid !important;grid-template-columns:84px minmax(0,1fr) !important;
+            display:grid !important;grid-template-columns:92px minmax(0,1fr) !important;
             align-items:center !important;column-gap:14px !important;width:100% !important;
         }}
         [class*="st-key-analysis_nav_back_row"] [data-testid="column"],
@@ -1869,8 +1869,8 @@ if _analysis_page_active:
         [class*="st-key-analysis_nav_back_row"] [data-testid="column"]:first-child,
         [class*="st-key-analysis_nav_scan_row"] [data-testid="column"]:first-child,
         [class*="st-key-analysis_nav_refresh_row"] [data-testid="column"]:first-child {{
-            width:84px !important;min-width:84px !important;max-width:84px !important;
-            flex:0 0 84px !important;align-self:center !important;overflow:visible !important;
+            width:92px !important;min-width:92px !important;max-width:92px !important;
+            flex:0 0 92px !important;align-self:center !important;overflow:visible !important;
         }}
         [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"],
         [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"],
@@ -1889,7 +1889,7 @@ if _analysis_page_active:
             position:relative !important;z-index:6 !important;pointer-events:auto !important;
             display:flex !important;align-items:center !important;justify-content:center !important;
             width:100% !important;min-width:0 !important;max-width:100% !important;
-            height:84px !important;min-height:84px !important;max-height:84px !important;
+            height:92px !important;min-height:92px !important;max-height:92px !important;
             padding:0 !important;overflow:hidden !important;box-sizing:border-box !important;
             border:2px solid #FACC15 !important;border-radius:19px !important;
             background:radial-gradient(ellipse at 25% 50%,rgba(250,204,21,.14),transparent 58%),linear-gradient(145deg,#201D14,#111419) !important;
@@ -1919,7 +1919,7 @@ if _analysis_page_active:
             width:30px !important;height:4px !important;border:0 !important;border-radius:4px !important;
             background:#FFE978 !important;box-shadow:0 0 5px rgba(250,204,21,.6),0 0 10px rgba(250,204,21,.22) !important;
             transform:translate(-35%,-50%) !important;transform-origin:center !important;
-            animation:analysis-arrow-line-pulse 1.65s ease-in-out infinite !important;
+            animation:analysis-arrow-line-pulse 1.65s ease-in-out infinite !important;max-width:30px !important;
             pointer-events:none !important;z-index:5 !important;
         }}
         div[class*="st-key-analysis_nav_back_row"] div[data-testid="stButton"] button::after,
@@ -1929,7 +1929,7 @@ if _analysis_page_active:
             border-left:4px solid #FFE978 !important;border-bottom:4px solid #FFE978 !important;
             border-radius:1px !important;background:transparent !important;
             transform:translateY(-50%) rotate(45deg) !important;transform-origin:center !important;
-            animation:analysis-arrow-head-pulse 1.65s ease-in-out infinite !important;
+            animation:analysis-arrow-head-pulse 1.65s ease-in-out infinite !important;max-width:12px !important;
             pointer-events:none !important;z-index:6 !important;
         }}
         div[class*="st-key-analysis_nav_back_row"] div[data-testid="stButton"] button:hover,
@@ -1966,8 +1966,12 @@ if _analysis_page_active:
         [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button:hover,
         [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button:hover,
         [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button:hover {{
-            border-color:#FFF09A !important;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 5px 18px rgba(250,204,21,.16) !important;
-            transform:translateY(-1px) !important;
+            border-color:#FFF09A !important;
+            background:radial-gradient(ellipse at 50% 50%,rgba(250,204,21,.24),transparent 70%),linear-gradient(145deg,#302916,#17191F) !important;
+            color:#FFE566 !important;
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 5px 18px rgba(250,204,21,.2) !important;
+            transform:translateY(-1px) scale(1.035) !important;
+            z-index:10 !important;
         }}
         @keyframes analysis-radar-rotate {{
             from {{ transform:translate(-50%,-50%) rotate(0deg); }}
@@ -2001,18 +2005,18 @@ if _analysis_page_active:
           [class*="st-key-analysis_nav_back_row"] [data-testid="stHorizontalBlock"],
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stHorizontalBlock"],
           [class*="st-key-analysis_nav_refresh_row"] [data-testid="stHorizontalBlock"] {{
-              grid-template-columns:80px minmax(0,1fr) !important;column-gap:12px !important;
+              grid-template-columns:88px minmax(0,1fr) !important;column-gap:12px !important;
           }}
           [class*="st-key-analysis_nav_back_row"] [data-testid="column"]:first-child,
           [class*="st-key-analysis_nav_scan_row"] [data-testid="column"]:first-child,
           [class*="st-key-analysis_nav_refresh_row"] [data-testid="column"]:first-child {{
-              width:80px !important;min-width:80px !important;max-width:80px !important;flex:0 0 80px !important;
+              width:88px !important;min-width:88px !important;max-width:88px !important;flex:0 0 88px !important;
           }}
           [class*="st-key-analysis_nav_back_row"] [data-testid="stButton"] > button,
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button,
           [class*="st-key-analysis_nav_refresh_row"] [data-testid="stButton"] > button {{
               width:100% !important;min-width:0 !important;max-width:100% !important;
-              height:80px !important;min-height:80px !important;max-height:80px !important;border-radius:17px !important;
+              height:86px !important;min-height:86px !important;max-height:86px !important;border-radius:17px !important;
           }}
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::before {{ width:57px !important;height:57px !important; }}
           [class*="st-key-analysis_nav_scan_row"] [data-testid="stButton"] > button::after {{ font-size:36px !important;width:39px !important;height:39px !important; }}
