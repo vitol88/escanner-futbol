@@ -2120,6 +2120,13 @@ if _analysis_page_active:
     st.markdown(
         f"""
         <style>
+        /* En las vistas dedicadas no se muestra la cabecera global: recuperar ese espacio y subir el análisis. */
+        section.main > div.block-container {{ padding-top: 18px !important; }}
+        [data-testid="stSidebar"] > div:first-child {{ padding-top: 18px !important; }}
+        @media (max-width: 640px) {{
+          section.main > div.block-container {{ padding-top: 10px !important; padding-left: .65rem !important; padding-right: .65rem !important; }}
+          [data-testid="stSidebar"] > div:first-child {{ padding-top: 12px !important; }}
+        }}
         /* Pantalla dedicada: dejar únicamente el botón de regreso y el contenido del análisis elegido. */
         [class*="st-key-control_row"], [class*="st-key-scan_cta_card"],
         [class*="st-key-scan-progress"], .brand-header, .match-analysis-panel {{ display:none !important; }}
