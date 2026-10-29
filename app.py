@@ -1691,17 +1691,17 @@ if _analysis_page_active:
         /* El contenido del análisis debe ocupar todo el ancho y no heredar espaciados del listado. */
         [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stVerticalBlock"] {{ gap:.35rem !important; row-gap:.35rem !important; }}
         div[class*="st-key-analysis_page_nav"] {{ display:block !important; width:100% !important; max-width:100% !important; margin:0 0 1rem !important; overflow:visible !important; }}
-        div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{ display:flex !important; flex-flow:row nowrap !important; gap:.65rem !important; align-items:stretch !important; width:100% !important; }}
-        div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] > div[data-testid="column"] {{ flex:1 1 0 !important; width:0 !important; min-width:0 !important; max-width:none !important; }}
+        div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{ display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)) !important; gap:.65rem !important; align-items:stretch !important; width:100% !important; }}
+        div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] > div[data-testid="column"] {{ width:auto !important; min-width:0 !important; max-width:100% !important; flex:none !important; }}
         div[class*="st-key-analysis_page_nav"] [data-testid="stButton"],
-        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > div {{ display:block !important; width:100% !important; min-width:0 !important; max-width:none !important; }}
+        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > div {{ display:block !important; width:100% !important; min-width:0 !important; max-width:100% !important; }}
         div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{
             display:flex !important; align-items:center !important; justify-content:center !important;
-            width:100% !important; min-width:0 !important; max-width:none !important; min-height:78px !important; height:78px !important;
-            padding:.8rem .55rem !important; box-sizing:border-box !important; white-space:normal !important; overflow-wrap:anywhere !important;
-            border-radius:17px !important; border:2px solid #FACC15 !important;
+            width:100% !important; min-width:0 !important; max-width:100% !important; min-height:68px !important; height:68px !important;
+            padding:.65rem .45rem !important; box-sizing:border-box !important; white-space:normal !important; overflow-wrap:anywhere !important;
+            border-radius:15px !important; border:2px solid #FACC15 !important;
             background:radial-gradient(ellipse at 15% 50%,rgba(250,204,21,.12),transparent 45%),linear-gradient(145deg,#20242B,#111419) !important;
-            color:#FFE978 !important; font-size:clamp(.95rem,1.25vw,1.12rem) !important; line-height:1.25 !important; font-weight:950 !important;
+            color:#FFE978 !important; font-size:clamp(.82rem,1vw,1rem) !important; line-height:1.2 !important; font-weight:900 !important;
             text-shadow:0 1px 1px rgba(0,0,0,.25) !important;
             box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 5px 18px rgba(0,0,0,.25) !important;
         }}
@@ -1719,11 +1719,17 @@ if _analysis_page_active:
             box-shadow:0 7px 20px rgba(250,204,21,.22) !important;
         }}
         @media(max-width:640px) {{
-          div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{ gap:.35rem !important; }}
+          div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{ display:grid !important; grid-template-columns:minmax(0,1fr) !important; gap:.45rem !important; width:100% !important; }}
+          div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] > div[data-testid="column"] {{ width:100% !important; min-width:0 !important; max-width:100% !important; }}
           div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{
-            min-height:76px !important; height:76px !important; padding:.5rem .25rem !important;
-            font-size:.78rem !important; line-height:1.2 !important; font-weight:950 !important; border-radius:14px !important;
+            min-height:54px !important; height:auto !important; padding:.7rem .8rem !important;
+            font-size:.95rem !important; line-height:1.2 !important; font-weight:900 !important; border-radius:13px !important;
+            white-space:normal !important; overflow-wrap:anywhere !important;
           }}
+        }}
+        @media(min-width:641px) and (max-width:900px) {{
+          div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{ gap:.4rem !important; }}
+          div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{ font-size:.82rem !important; padding:.5rem .25rem !important; min-height:64px !important; height:64px !important; }}
         }}
         </style>
         """,
