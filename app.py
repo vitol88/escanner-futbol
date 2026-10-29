@@ -287,8 +287,36 @@ st.markdown("""
   /* Fallback directo para botones secundarios: algunos wrappers de Streamlit no conservan el selector por key */
   [data-testid="stBaseButton-secondary"] { background:linear-gradient(135deg,#292416,#17191F) !important; background-color:#17191F !important; color:#FFE36A !important; border:1px solid #D6B84C !important; }
   [data-testid="stBaseButton-secondary"]:hover { background:linear-gradient(135deg,#443819,#242018) !important; background-color:#242018 !important; color:#FFF1A8 !important; border-color:#FFE566 !important; }
-  [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button { width:100% !important; min-height:44px !important; padding:8px 12px !important; border:1px solid #D6B84C !important; border-radius:11px !important; background:linear-gradient(135deg,#292416,#17191F) !important; color:#FFE36A !important; font-size:.88rem !important; font-weight:850 !important; line-height:1.2 !important; white-space:normal !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 2px 8px rgba(0,0,0,.2) !important; }
-  [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button:hover { border-color:#FFE566 !important; background:linear-gradient(135deg,#443819,#242018) !important; color:#FFF1A8 !important; box-shadow:0 0 14px rgba(250,204,21,.2) !important; }
+  /* Botón Histórico de córners: compacto, premium y coherente con Football Lab */
+  [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button {
+     position:relative !important; display:flex !important; align-items:center !important; justify-content:flex-start !important;
+     gap:10px !important; width:100% !important; min-height:52px !important; padding:10px 42px 10px 14px !important;
+     border:1px solid #80661B !important; border-radius:13px !important;
+     background:linear-gradient(110deg,#211E14 0%,#17191F 58%,#101115 100%) !important; background-color:#17191F !important;
+     color:#FFE36A !important; font-size:.88rem !important; font-weight:900 !important; letter-spacing:.045em !important;
+     line-height:1.2 !important; text-align:left !important; white-space:normal !important;
+     box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 3px 10px rgba(0,0,0,.22) !important;
+     transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .14s ease !important;
+  }
+  [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button::before {
+     content:"▥" !important; display:inline-flex !important; flex:0 0 30px !important; align-items:center !important; justify-content:center !important;
+     width:30px !important; height:30px !important; border:1px solid rgba(250,204,21,.32) !important; border-radius:8px !important;
+     background:linear-gradient(145deg,#332B12,#1A1B20) !important; color:#FACC15 !important;
+     font-size:1.15rem !important; line-height:1 !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.05) !important;
+  }
+  [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button::after {
+     content:"↗" !important; position:absolute !important; right:14px !important; top:50% !important;
+     transform:translateY(-50%) !important; color:#C9A93A !important; font-size:1.05rem !important; font-weight:800 !important;
+     transition:transform .18s ease,color .18s ease !important;
+  }
+  [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button:hover {
+     border-color:#FFE566 !important; background:linear-gradient(110deg,#3A3016 0%,#242018 58%,#17191F 100%) !important;
+     background-color:#242018 !important; color:#FFF1A8 !important;
+     box-shadow:0 0 0 1px rgba(250,204,21,.08),0 0 16px rgba(250,204,21,.16) !important;
+  }
+  [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button:hover::after { color:#FFE566 !important; transform:translate(2px,-50%) !important; }
+  [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button:active { transform:scale(.985) !important; }
+  @media(prefers-reduced-motion:reduce) { [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button { transition:none !important; } }
   .scan-running-status { position:relative; display:flex; align-items:center; gap:12px; overflow:hidden; color:#FACC15; margin:8px 2px 0; padding:12px 14px; border:1px solid rgba(250,204,21,.35); border-radius:14px; background:linear-gradient(110deg,#17191F,#0B0D10); font-size:.92rem; font-weight:700; }
   .scan-code-icon { display:inline-block; flex:0 0 auto; font-size:2rem; transform-origin:center; animation:scanner-spiral-spin .8s linear infinite; text-shadow:0 0 12px rgba(250,204,21,.8); }
   .scan-running-subtitle { color:#A1A1AA; font-size:.82rem; font-weight:500; margin-top:3px; }
@@ -2945,7 +2973,7 @@ else:
                                                     st.session_state.corner_h2h_cache = {}
                                                 with history_button_col:
                                                     show_corner_history = st.button(
-                                                        "📊 Ver histórico",
+                                                        "VER HISTÓRICO",
                                                         key=f"corner_h2h_{match_id}",
                                                         help="Pulsa para consultar los últimos enfrentamientos y sus córners.",
                                                         use_container_width=True,
