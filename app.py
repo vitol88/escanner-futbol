@@ -308,7 +308,46 @@ st.markdown("""
   [class*="st-key-auto_refresh_control_card"] [role="switch"][aria-checked="false"] > div,
   [class*="st-key-sound_control_card"] [role="switch"][aria-checked="false"] > div { background:#D4A72C !important; }
   [class*="st-key-top_status_controls"] iframe body { margin:0 !important; padding:0 !important; }
-    /* Tarjeta compacta de acción principal del escáner */
+ 
+   /* Acciones principales en una sola fila: escáner a la izquierda y actualizar a la derecha. */
+   [class*="st-key-scan_actions_row"] [data-testid="stHorizontalBlock"] {
+     display:grid !important; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) !important;
+     align-items:stretch !important; gap:12px !important;
+   }
+   [class*="st-key-scan_actions_row"] [data-testid="column"] {
+     min-width:0 !important; width:auto !important; flex:none !important;
+   }
+   [class*="st-key-scan_actions_row"] [data-testid="stButton"] { width:100% !important; }
+   [class*="st-key-scan_actions_row"] [data-testid="stButton"] > button {
+     width:100% !important; box-sizing:border-box !important; min-width:0 !important;
+   }
+   [class*="st-key-control_row"] { margin:0 !important; width:100% !important; }
+   [class*="st-key-control_row"] [data-testid="stButton"] > button {
+     min-height:145px !important; height:145px !important; white-space:normal !important;
+     padding:12px !important; font-size:clamp(.9rem,2vw,1.05rem) !important;
+   }
+   @media(max-width:640px) {
+     [class*="st-key-scan_actions_row"] [data-testid="stHorizontalBlock"] {
+       grid-template-columns:minmax(0,1.25fr) minmax(0,.9fr) !important; gap:8px !important;
+     }
+     [class*="st-key-scan_cta_card"] [data-testid="stButton"] button,
+     [class*="st-key-scan_cta_card"] button[kind="primary"] {
+       min-height:126px !important; height:126px !important; padding:10px 7px 10px 43% !important;
+       border-radius:16px !important; font-size:.78rem !important; line-height:1.35 !important;
+     }
+     [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before {
+       left:4% !important; width:34% !important; border-width:2px !important;
+     }
+     [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::after {
+       left:21% !important; width:28px !important; height:28px !important; font-size:1.65rem !important;
+     }
+     [class*="st-key-control_row"] [data-testid="stButton"] > button {
+       min-height:126px !important; height:126px !important; padding:8px 6px !important;
+       border-radius:14px !important; font-size:.86rem !important; white-space:normal !important;
+       line-height:1.25 !important;
+     }
+   }
+   /* Tarjeta compacta de acción principal del escáner */
   [class*="st-key-scan_cta_card"] { margin-top:10px !important; margin-bottom:0 !important; }
   [class*="st-key-analysis_scan_cta"] { margin:.35rem 0 .65rem !important; }
   /* Botones grandes y llamativos dentro de las secciones de goles y córners. */
@@ -2087,17 +2126,6 @@ with st.container(key="top_status_controls"):
 </script>
 """, height=24, scrolling=False)
 
-with st.container(key="control_row"):
-    refresh = st.button(
-        "Actualizar scan",
-        type="primary",
-        help="Actualiza el listado de partidos y ejecuta el escaneo disponible."
-    )
-with st.container(key="scan-progress"):
-    scan_progress_label = st.empty()
-    scan_progress = st.empty()
-    scan_progress_caption = st.empty()
-
 def update_scan_progress(value, title, detail, done=False):
     """Actualizar porcentaje real y estado visual de la barra de Football Lab."""
     value = max(0, min(100, int(value)))
@@ -2113,44 +2141,60 @@ def update_scan_progress(value, title, detail, done=False):
         unsafe_allow_html=True,
     )
 
+with st.container(key="scan_actions_row"):
+    scan_action_cols = st.columns([1.35, 1], gap="small", vertical_alignment="center")
+    with scan_action_cols[0]:
+        with st.container(key="scan_cta_card"):
+            manual_scan = st.button(
+                "FOOTBALL LAB\\nESCÁNER EN VIVO\\nPulsa para escanear oportunidades en directo",
+                type="primary",
+                key="scan_all_live",
+            )
+    with scan_action_cols[1]:
+        with st.container(key="control_row"):
+            refresh = st.button(
+                "Actualizar scan",
+                type="primary",
+                help="Actualiza el listado de partidos y ejecuta el escaneo disponible."
+            )
+
+with st.container(key="scan-progress"):
+    scan_progress_label = st.empty()
+    scan_progress = st.empty()
+    scan_progress_caption = st.empty()
+
 if refresh:
     update_scan_progress(0, "Iniciando escáner", "Preparando conexión con partidos en vivo")
 
-with st.container(key="scan_cta_card"):
-    manual_scan = st.button(
-        "FOOTBALL LAB\nESCÁNER EN VIVO\nPulsa para escanear oportunidades en directo",
-        type="primary",
-        key="scan_all_live",
-    )
-    if manual_scan:
-        # Mantener el balón girando mientras se ejecuta este escaneo, no solo mientras se pulsa.
-        st.markdown("""
-        <style>
-          [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::after {
-            animation: football-lab-ball-spin .62s linear infinite !important;
-            transform-origin:center !important;
-          }
-          [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before {
-            animation: scanner-radar-spin 1.05s linear infinite !important;
-            box-shadow:0 0 26px rgba(250,204,21,.72),inset 0 0 22px rgba(250,204,21,.38) !important;
-          }
-          @keyframes football-lab-ball-spin {
-            0% { transform:translate(-50%,-50%) rotate(0deg) scale(1); }
-            50% { transform:translate(-50%,-50%) rotate(180deg) scale(1.08); }
-            100% { transform:translate(-50%,-50%) rotate(360deg) scale(1); }
-          }
-          @keyframes scanner-ball-orbit {
-            0% { transform:translate(-50%,-50%) rotate(0deg) scale(1); }
-            50% { transform:translate(-50%,-50%) rotate(180deg) scale(1.08); }
-            100% { transform:translate(-50%,-50%) rotate(360deg) scale(1); }
-          }
-          @media(prefers-reduced-motion:reduce) {
-            [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::after,
-            [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before { animation-duration:1.5s !important; }
-          }
-        </style>
-        """, unsafe_allow_html=True)
-        st.markdown('<div class="scan-running-status"><span class="scan-code-icon">⟳</span><div><strong>ESCANEANDO…</strong><div class="scan-running-subtitle">Analizando partidos y mercados</div></div><span class="scan-sweep"></span></div>', unsafe_allow_html=True)
+if manual_scan:
+    # Mantener el balón girando mientras se ejecuta este escaneo, no solo mientras se pulsa.
+    st.markdown("""
+    <style>
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::after {
+        animation: football-lab-ball-spin .62s linear infinite !important;
+        transform-origin:center !important;
+      }
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before {
+        animation: scanner-radar-spin 1.05s linear infinite !important;
+        box-shadow:0 0 26px rgba(250,204,21,.72),inset 0 0 22px rgba(250,204,21,.38) !important;
+      }
+      @keyframes football-lab-ball-spin {
+        0% { transform:translate(-50%,-50%) rotate(0deg) scale(1); }
+        50% { transform:translate(-50%,-50%) rotate(180deg) scale(1.08); }
+        100% { transform:translate(-50%,-50%) rotate(360deg) scale(1); }
+      }
+      @keyframes scanner-ball-orbit {
+        0% { transform:translate(-50%,-50%) rotate(0deg) scale(1); }
+        50% { transform:translate(-50%,-50%) rotate(180deg) scale(1.08); }
+        100% { transform:translate(-50%,-50%) rotate(360deg) scale(1); }
+      }
+      @media(prefers-reduced-motion:reduce) {
+        [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::after,
+        [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before { animation-duration:1.5s !important; }
+      }
+    </style>
+    """, unsafe_allow_html=True)
+    st.markdown('<div class="scan-running-status"><span class="scan-code-icon">⟳</span><div><strong>ESCANEANDO…</strong><div class="scan-running-subtitle">Analizando partidos y mercados</div></div><span class="scan-sweep"></span></div>', unsafe_allow_html=True)
 
 internal_scan_requested = False
 auto_tick = None
