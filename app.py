@@ -1938,8 +1938,38 @@ if _analysis_page_active:
             font-size:.9rem !important; line-height:1.15 !important; border-radius:12px !important;
           }}
         }}
+        /* Corrección: los botones de esta pantalla deben conservar el mismo diseño oscuro/dorado del inicio. */
+        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button,
+        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button[kind="primary"],
+        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button[kind="secondary"] {{
+            background:radial-gradient(ellipse at 15% 50%,rgba(250,204,21,.10),transparent 45%),linear-gradient(145deg,#201D14,#111419) !important;
+            background-color:#111419 !important;color:#FDE68A !important;
+            border:1.5px solid #D4A72C !important;border-radius:13px !important;
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 3px 12px rgba(0,0,0,.22),0 0 8px rgba(250,204,21,.055) !important;
+            text-shadow:none !important;filter:none !important;
+            transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease !important;
+        }}
+        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button p {{
+            color:#FDE68A !important;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important;
+            font-weight:800 !important;letter-spacing:.01em !important;
+        }}
+        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button:hover {{
+            background:radial-gradient(ellipse at 15% 50%,rgba(250,204,21,.16),transparent 45%),linear-gradient(145deg,#292516,#17191F) !important;
+            border-color:#FFE566 !important;color:#FFF1A8 !important;
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.075),0 4px 14px rgba(0,0,0,.25),0 0 13px rgba(250,204,21,.13) !important;
+            transform:translateY(-1px) !important;filter:none !important;
+        }}
+        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button:hover p {{ color:#FFF1A8 !important; }}
+        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button:active {{ transform:scale(.99) !important; }}
+        @media(max-width:640px) {{
+          div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{
+            min-height:54px !important;height:auto !important;padding:.7rem .8rem !important;
+            font-size:.95rem !important;line-height:1.2 !important;border-radius:12px !important;border-width:1.5px !important;
+          }}
+        }}
         @media(prefers-reduced-motion:reduce) {{
           div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button::after {{ animation:none !important; }}
+          div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{ transition:none !important; }}
         }}
         </style>
         """,
