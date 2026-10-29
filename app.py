@@ -1758,6 +1758,50 @@ if _analysis_page_active:
           div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{ gap:.4rem !important; }}
           div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{ font-size:.82rem !important; padding:.5rem .25rem !important; min-height:64px !important; height:64px !important; }}
         }}
+        /* Acabado premium: navegación compacta, brillo sutil y barrido dorado sin tapar el texto. */
+        div[class*="st-key-analysis_page_nav"] {{ margin:0 0 .55rem !important; }}
+        div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{ gap:.45rem !important; }}
+        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{
+            position:relative !important; overflow:hidden !important;
+            min-height:62px !important; height:62px !important;
+            border-width:1.5px !important; border-radius:14px !important;
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 3px 12px rgba(0,0,0,.2),0 0 9px rgba(250,204,21,.055) !important;
+            transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease !important;
+        }}
+        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button::after {{
+            content:""; position:absolute; inset:0 auto 0 -75%; width:42%;
+            background:linear-gradient(105deg,transparent,rgba(255,239,163,.12),transparent);
+            transform:skewX(-18deg); pointer-events:none;
+            animation:nav-gold-sweep 5.8s ease-in-out infinite;
+        }}
+        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button p {{
+            position:relative !important; z-index:1 !important;
+            font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important;
+            letter-spacing:.05px !important;
+        }}
+        div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button:hover {{
+            transform:translateY(-1px) !important;
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 5px 14px rgba(0,0,0,.25),0 0 12px rgba(250,204,21,.13) !important;
+        }}
+        .scan-running-status {{ margin:5px 2px 0 !important; padding:10px 12px !important; }}
+        .scan-running-status .scan-sweep {{ height:2px !important; opacity:.8 !important; }}
+        @keyframes nav-gold-sweep {{
+            0%,58% {{ left:-75%; opacity:0; }}
+            65% {{ opacity:1; }}
+            82% {{ left:135%; opacity:.7; }}
+            100% {{ left:135%; opacity:0; }}
+        }}
+        @media(max-width:640px) {{
+          div[class*="st-key-analysis_page_nav"] {{ margin:0 0 .4rem !important; }}
+          div[class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{ gap:.35rem !important; }}
+          div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button {{
+            min-height:49px !important; height:49px !important; padding:.5rem .65rem !important;
+            font-size:.9rem !important; line-height:1.15 !important; border-radius:12px !important;
+          }}
+        }}
+        @media(prefers-reduced-motion:reduce) {{
+          div[class*="st-key-analysis_page_nav"] [data-testid="stButton"] > button::after {{ animation:none !important; }}
+        }}
         </style>
         """,
         unsafe_allow_html=True,
