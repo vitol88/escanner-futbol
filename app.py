@@ -1309,9 +1309,6 @@ with st.sidebar:
         _sidebar_away = (_sidebar_selected_fixture.get("teams") or {}).get("away") or {}
         _sidebar_match_label = f'{_sidebar_home.get("name") or "Local"} vs {_sidebar_away.get("name") or "Visitante"}'
         st.caption(_sidebar_match_label)
-        if st.button("← VOLVER A PARTIDOS EN VIVO", key="sidebar_analysis_back", use_container_width=True, help="Volver a la lista de partidos"):
-            st.session_state["main_fixture_tool"] = {}
-            st.rerun()
     st.divider()
     st.markdown('<div style="font-size:.78rem;font-weight:900;letter-spacing:.16em;color:#FFE36A;margin-bottom:12px;text-transform:uppercase;">HERRAMIENTAS DEL PARTIDO</div>', unsafe_allow_html=True)
     _selected_fixture_for_menu = st.session_state.get("selected_live_fixture") or {}
@@ -1340,6 +1337,11 @@ with st.sidebar:
         if _menu_h2h:
             st.session_state["main_fixture_tool"] = {"fixture_id": _selected_fixture_for_menu_id, "tool": "h2h"}
             st.rerun()
+        if _sidebar_tool_active:
+            st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
+            if st.button("← VOLVER A PARTIDOS EN VIVO", key="sidebar_analysis_back", use_container_width=True, help="Volver a la lista de partidos"):
+                st.session_state["main_fixture_tool"] = {}
+                st.rerun()
     else:
         st.caption("Haz clic en la tarjeta de un partido para seleccionar el encuentro y habilitar estas herramientas.")
 
