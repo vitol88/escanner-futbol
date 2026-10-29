@@ -3702,13 +3702,19 @@ else:
                                                     {"Indicador": f"{corner_away_name} · córners a favor fuera", "Promedio": history.get("away_corners_for"), "Muestra": history.get("away_corner_sample", 0)},
                                                     {"Indicador": f"{corner_away_name} · córners concedidos fuera", "Promedio": history.get("away_corners_against"), "Muestra": history.get("away_corner_sample", 0)},
                                                 ]
-                                                history_html = '<div class="goal-history-wrap"><div class="goal-history-heading">📊 Promedios de córners en la competición actual <span>Promedio</span></div><table class="goal-history-table"><thead><tr><th>Indicador</th><th>Prom.</th></tr></thead><tbody>'
+                                                history_html = '<div class="goal-history-wrap"><div class="goal-history-heading">📊 Promedios de córners en la competición actual <span>Promedio · muestra</span></div><table class="goal-history-table"><thead><tr><th>Indicador</th><th>Prom. · n</th></tr></thead><tbody>'
                                                 for row in history_rows:
                                                     avg = row["Promedio"]
                                                     avg_text = f"{avg:.2f}".rstrip("0").rstrip(".") if isinstance(avg, (int, float)) else "N/D"
-                                                    history_html += f"<tr><td>{html.escape(row['Indicador'])}</td><td>{avg_text}</td></tr>"
+                                                    sample_text = int(row.get("Muestra") or 0)
+                                                    history_html += f"<tr><td>{html.escape(row['Indicador'])}</td><td>{avg_text} <span style='color:#9CA3AF;font-size:.82em;'>({sample_text})</span></td></tr>"
                                                 history_html += "</tbody></table></div>"
                                                 st.markdown(history_html, unsafe_allow_html=True)
+                                                st.caption(
+                                                    f"Muestra histórica: {int(history.get('home_corner_sample') or 0)} partidos como local · "
+                                                    f"{int(history.get('away_corner_sample') or 0)} como visitante. "
+                                                    "Solo se cuentan encuentros con estadísticas de córners disponibles."
+                                                )
 
                                                 # Proyección total estimada a partir de los cuatro promedios de localía.
                                                 # Para cada equipo se promedian sus córners a favor y los concedidos por el rival.
