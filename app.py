@@ -1516,11 +1516,13 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
     if not _sidebar_dedicated_view:
-        _search_cols = st.columns([5.2, 1.05], gap="small", vertical_alignment="center")
-        with _search_cols[0]:
-            st.text_input("Buscar equipo o liga", placeholder="Ej. Argentinos Juniors, Premier League…", key="search_goal_matches", label_visibility="collapsed")
-        with _search_cols[1]:
-            search_clicked = st.button(" ", icon=":material/search:", key="sidebar_search_button", help="Buscar equipo o liga", use_container_width=True)
+        # Formulario para que Enter y el botón de lupa ejecuten la misma búsqueda.
+        with st.form(key="sidebar_live_search_form", clear_on_submit=False, border=False):
+            _search_cols = st.columns([5.2, 1.05], gap="small", vertical_alignment="center")
+            with _search_cols[0]:
+                st.text_input("Buscar equipo o liga", placeholder="Ej. Argentinos Juniors, Premier League…", key="search_goal_matches", label_visibility="collapsed")
+            with _search_cols[1]:
+                search_clicked = st.form_submit_button(" ", icon=":material/search:", key="sidebar_search_button", help="Buscar equipo o liga", use_container_width=True)
     if _sidebar_tool_active:
         _sidebar_selected_fixture = st.session_state.get("selected_live_fixture") or {}
         _sidebar_home = (_sidebar_selected_fixture.get("teams") or {}).get("home") or {}
