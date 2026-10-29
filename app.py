@@ -457,7 +457,7 @@ st.markdown("""
     top:54px !important;
     left:0 !important;
     right:0 !important;
-    z-index:1000000 !important;
+    z-index:2147483000 !important;
     width:100vw !important;
     max-width:none !important;
     min-height:96px !important;
@@ -475,7 +475,7 @@ st.markdown("""
   }
   .brand-header-main { max-width:none !important; width:100% !important; min-height:72px !important; }
   .brand-mark { box-shadow:0 0 22px rgba(250,204,21,.16) !important; }
-  [data-testid="stSidebar"] > div:first-child { padding-top:126px !important; }
+  [data-testid="stSidebar"] { z-index:1000 !important; }\n  [data-testid="stSidebar"] > div:first-child { padding-top:126px !important; }
   section.main > div.block-container { padding-top:144px !important; }
   @media(max-width:640px) {
     .brand-header { top:44px !important; min-height:68px !important; padding:7px 10px !important; }
@@ -485,7 +485,7 @@ st.markdown("""
     .brand-title { font-size:clamp(1.05rem,4.8vw,1.45rem) !important; letter-spacing:0 !important; }
     .brand-subtitle { font-size:.62rem !important; letter-spacing:.7px !important; margin-top:2px !important; }
     .brand-pill { padding:4px 7px !important; font-size:.62rem !important; }
-    [data-testid="stSidebar"] > div:first-child { padding-top:96px !important; }
+    [data-testid="stSidebar"] { z-index:1000 !important; }\n    [data-testid="stSidebar"] > div:first-child { padding-top:96px !important; }
     section.main > div.block-container { padding-top:112px !important; }
   }
   @media(max-width:360px) {
@@ -839,6 +839,11 @@ st.markdown("""
   [data-testid="stSidebar"] [class*="st-key-main_stats_"] button [data-testid="stIconMaterial"], [data-testid="stSidebar"] [class*="st-key-main_market_"] button [data-testid="stIconMaterial"], [data-testid="stSidebar"] [class*="st-key-main_h2h_"] button [data-testid="stIconMaterial"] { color:#FACC15 !important; font-size:1.35rem !important; }
   [data-testid="stSidebar"] [class*="st-key-main_stats_"] button:hover, [data-testid="stSidebar"] [class*="st-key-main_market_"] button:hover, [data-testid="stSidebar"] [class*="st-key-main_h2h_"] button:hover { transform:translateY(-1px) !important; background:linear-gradient(145deg,#3B3216,#211D12) !important; border-color:#FFE566 !important; box-shadow:0 5px 16px #0006,0 0 14px #FACC1522 !important; }
   [data-testid="stSidebar"] [class*="st-key-main_stats_"] button[kind="primary"], [data-testid="stSidebar"] [class*="st-key-main_market_"] button[kind="primary"], [data-testid="stSidebar"] [class*="st-key-main_h2h_"] button[kind="primary"] { background:linear-gradient(135deg,#FACC15,#FFE566) !important; color:#101216 !important; border-color:#FFE566 !important; box-shadow:0 0 0 1px #FACC1544,0 5px 18px #FACC1520 !important; }
+  [data-testid="stSidebar"] [class*="st-key-main_stats_"] button[kind="primary"] [data-testid="stIconMaterial"],
+  [data-testid="stSidebar"] [class*="st-key-main_market_"] button[kind="primary"] [data-testid="stIconMaterial"],
+  [data-testid="stSidebar"] [class*="st-key-main_h2h_"] button[kind="primary"] [data-testid="stIconMaterial"] {
+    color:#111419 !important;
+  }
   /* Marcador premium al abrir un partido */
   .fl-match-scoreboard {
     display:grid; grid-template-columns:100px minmax(0,1fr); gap:13px; align-items:center;
@@ -936,7 +941,7 @@ st.markdown("""
 
 
   /* Tarjetas limpias: borde discreto en reposo y un único acento dorado al pasar el cursor */
-  [class*="st-key-live_match_"] {
+  [class*="st-key-live_match_"] {{
     border:1px solid transparent !important;
     border-radius:16px !important;
     margin:0 0 5px !important;
@@ -944,23 +949,23 @@ st.markdown("""
     background:transparent !important;
     box-shadow:none !important;
     transition:background .2s ease,border-color .2s ease,box-shadow .2s ease !important;
-  }
-  [class*="st-key-live_match_"]:hover {
+  }}
+  [class*="st-key-live_match_"]:hover {{
     border-color:rgba(250,204,21,.72) !important;
     background:linear-gradient(135deg,rgba(250,204,21,.045),rgba(250,204,21,.012) 70%,transparent) !important;
     box-shadow:inset 2px 0 0 rgba(250,204,21,.62),0 2px 10px rgba(250,204,21,.045) !important;
-  }
+  }}
   /* El marcador no duplica el borde exterior de la tarjeta. */
-  [class*="st-key-live_match_"] .fl-match-scoreboard {
+  [class*="st-key-live_match_"] .fl-match-scoreboard {{
     border-color:#343840 !important;
     box-shadow:inset 0 0 12px rgba(250,204,21,.025) !important;
-  }
-  [class*="st-key-live_match_"]:hover .fl-match-scoreboard {
+  }}
+  [class*="st-key-live_match_"]:hover .fl-match-scoreboard {{
     border-color:rgba(250,204,21,.45) !important;
-  }
-  @media(prefers-reduced-motion:reduce) {
-    [class*="st-key-live_match_"] { transition:none !important; }
-  }
+  }}
+  @media(prefers-reduced-motion:reduce) {{
+    [class*="st-key-live_match_"] {{ transition:none !important; }}
+  }}
 
 
   /* Ajuste final: eliminar el marco exterior duplicado y dar aire a cada liga, sin perder compacidad móvil. */
