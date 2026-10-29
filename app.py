@@ -1250,7 +1250,15 @@ with st.sidebar:
         "goals": "Goles y señales",
         "corners": "Córners y señales",
     }.get(_sidebar_tool_market, "Configuración")
-    st.header(_sidebar_section_title)
+    _sidebar_section_icon = "⚽" if _sidebar_tool_market == "goals" else "🚩" if _sidebar_tool_market == "corners" else "⚙"
+    st.markdown(
+        f'<div style="margin:0 0 18px 0;padding:4px 0 12px 0;border-bottom:1px solid rgba(250,204,21,.32);">'
+        f'<div style="font-size:.68rem;font-weight:850;letter-spacing:.19em;text-transform:uppercase;color:#B9A35A;margin-bottom:7px;">FOOTBALL LAB <span style="color:#FACC15;">/ ANÁLISIS</span></div>'
+        f'<div style="font-size:clamp(1.25rem,2vw,1.55rem);font-weight:900;letter-spacing:-.035em;line-height:1.15;color:#FFE36A;text-shadow:0 0 18px rgba(250,204,21,.12);">{_sidebar_section_icon} {_sidebar_section_title}</div>'
+        f'<div style="width:46px;height:3px;border-radius:99px;background:linear-gradient(90deg,#FFE566,#A87909);margin-top:11px;box-shadow:0 0 10px rgba(250,204,21,.22);"></div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
     if _sidebar_tool_active and _sidebar_tool_market in {"goals", "corners"}:
         _side_back = st.button("←  Volver al partido", key="sidebar_analysis_back", use_container_width=True, help="Volver al partido")
         _side_scan = st.button("⚽  Escanear en vivo", key="sidebar_analysis_scan", use_container_width=True, help="Escanear en vivo")
