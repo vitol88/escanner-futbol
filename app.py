@@ -1313,6 +1313,17 @@ with st.sidebar:
     st.markdown('<div style="font-size:.78rem;font-weight:900;letter-spacing:.16em;color:#FFE36A;margin-bottom:12px;text-transform:uppercase;">HERRAMIENTAS DEL PARTIDO</div>', unsafe_allow_html=True)
     _selected_fixture_for_menu = st.session_state.get("selected_live_fixture") or {}
     _selected_fixture_for_menu_id = str((_selected_fixture_for_menu.get("fixture") or {}).get("id") or "")
+    # En las vistas dedicadas, recuperar el partido seleccionado desde el ID de navegación
+    # si el objeto de selección no sobrevivió al rerun de Streamlit.
+    if not _selected_fixture_for_menu_id and _sidebar_tool_id:
+        for _candidate_fixture in st.session_state.get("live_fixtures", []):
+            _candidate_id = str((_candidate_fixture.get("fixture") or {}).get("id") or "")
+            if _candidate_id == _sidebar_tool_id:
+                _selected_fixture_for_menu = _candidate_fixture
+                _selected_fixture_for_menu_id = _candidate_id
+                st.session_state["selected_live_fixture"] = _candidate_fixture
+                st.session_state["selected_live_fixture_id"] = _candidate_id
+                break
     _selected_home_for_menu = (_selected_fixture_for_menu.get("teams") or {}).get("home") or {}
     _selected_away_for_menu = (_selected_fixture_for_menu.get("teams") or {}).get("away") or {}
     if _selected_fixture_for_menu_id:
@@ -1340,7 +1351,11 @@ with st.sidebar:
         if _sidebar_tool_active:
             st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
             if st.button("← VOLVER A PARTIDOS EN VIVO", key="sidebar_analysis_back", use_container_width=True, help="Volver a la lista de partidos"):
+                # Conservar el partido y la liga seleccionados para regresar al mismo punto.
+                st.session_state["selected_live_fixture_id"] = _sidebar_tool_id
+                st.session_state["return_to_fixture_id"] = _sidebar_tool_id
                 st.session_state["main_fixture_tool"] = {}
+                st.session_state["live_now_expander"] = True
                 st.rerun()
     else:
         st.caption("Haz clic en la tarjeta de un partido para seleccionar el encuentro y habilitar estas herramientas.")
