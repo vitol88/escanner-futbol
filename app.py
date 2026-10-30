@@ -1591,18 +1591,23 @@ st.markdown("""
       line-height:1.35 !important; margin-bottom:12px !important; padding:11px 10px !important;
       gap:7px !important; border-radius:9px !important;
     }
+    .h2h-page-kicker + div {
+      box-sizing:border-box !important; width:100% !important; max-width:100% !important;
+      padding:0 8px !important; margin-left:0 !important; margin-right:0 !important;
+      overflow-wrap:anywhere !important; word-break:normal !important;
+    }
     .h2h-summary-grid {
-      grid-template-columns:repeat(3,minmax(0,1fr)) !important; gap:6px !important;
-      width:100% !important; max-width:100% !important; margin:2px 0 10px !important;
+      grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:8px !important;
+      width:100% !important; max-width:100% !important; margin:2px 0 12px !important;
     }
     .h2h-summary-card {
-      min-width:0 !important; padding:9px 6px !important; border-radius:10px !important;
-      overflow:hidden !important;
+      min-width:0 !important; padding:11px 10px !important; border-radius:10px !important;
+      overflow:visible !important; text-align:left !important;
     }
-    .h2h-summary-label { font-size:clamp(.48rem,1.75vw,.60rem) !important; line-height:1.25 !important; overflow-wrap:anywhere !important; }
-    .h2h-summary-value { font-size:clamp(.88rem,3.5vw,1.05rem) !important; line-height:1.3 !important; overflow-wrap:anywhere !important; }
-    .h2h-summary-card:nth-child(6) .h2h-summary-value { font-size:clamp(.72rem,2.8vw,.9rem) !important; }
-    .h2h-history-list { max-width:100% !important; overflow:hidden !important; }
+    .h2h-summary-label { font-size:.66rem !important; line-height:1.3 !important; overflow-wrap:normal !important; white-space:normal !important; }
+    .h2h-summary-value { font-size:1.08rem !important; line-height:1.35 !important; overflow-wrap:normal !important; white-space:normal !important; }
+    .h2h-summary-card:nth-child(6) .h2h-summary-value { font-size:.92rem !important; }
+    .h2h-history-list { width:100% !important; max-width:100% !important; overflow:hidden !important; }
     .h2h-match-row { grid-template-columns:64px minmax(0,1fr) 52px minmax(0,1fr) !important; gap:4px !important; padding:9px 5px !important; max-width:100% !important; overflow:hidden !important; }
     .h2h-match-row .h2h-date { font-size:.62rem !important; }
     .h2h-match-row .h2h-team { min-width:0 !important; gap:3px !important; font-size:.65rem !important; }
