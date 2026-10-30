@@ -1670,67 +1670,45 @@ st.markdown(f"""
 
 st.markdown("""
 <style>
-  [class*="st-key-home_nav_bar"] [data-testid="stHorizontalBlock"] {
-    display:flex !important; flex-direction:row !important; flex-wrap:nowrap !important;
-    align-items:stretch !important; gap:0 !important; width:100% !important;
-  }
-  [class*="st-key-home_nav_bar"] [data-testid="column"] {
-    display:block !important; flex:1 1 25% !important; width:25% !important;
-    min-width:0 !important; max-width:25% !important; padding:0 2px !important;
-  }
-  [class*="st-key-home_nav_stats"], [class*="st-key-home_nav_goals"],
-  [class*="st-key-home_nav_corners"], [class*="st-key-home_nav_h2h"] {
-    min-width:0 !important; width:100% !important;
-  }
-  [class*="st-key-home_nav_stats"] button, [class*="st-key-home_nav_goals"] button,
-  [class*="st-key-home_nav_corners"] button, [class*="st-key-home_nav_h2h"] button {
-    display:flex !important; align-items:center !important; justify-content:center !important;
-    width:100% !important; min-width:0 !important; min-height:82px !important; height:82px !important;
-    padding:8px 4px !important; border:1px solid transparent !important; border-radius:0 !important;
-    background:transparent !important; color:#E5E7EB !important;
-    font-size:clamp(.62rem,1.1vw,.92rem) !important; font-weight:600 !important;
-    white-space:normal !important; line-height:1.2 !important; box-shadow:none !important;
-  }
-  [class*="st-key-home_nav_stats"] button p, [class*="st-key-home_nav_goals"] button p,
-  [class*="st-key-home_nav_corners"] button p, [class*="st-key-home_nav_h2h"] button p {
-    margin:0 !important; white-space:normal !important; line-height:1.2 !important;
-  }
-  [class*="st-key-home_nav_stats"] button[kind="primary"],
-  [class*="st-key-home_nav_goals"] button[kind="primary"],
-  [class*="st-key-home_nav_corners"] button[kind="primary"],
-  [class*="st-key-home_nav_h2h"] button[kind="primary"] {
-    border:2px solid #D5A91E !important; border-radius:13px !important;
-    background:linear-gradient(145deg,#1B1B18,#101114) !important;
-    color:#FFFFFF !important; box-shadow:0 0 12px rgba(250,204,21,.10) !important;
-  }
-  [class*="st-key-home_nav_bar"] { width:100% !important; max-width:100% !important; margin:0 0 8px !important; }
-  @media(max-width:640px) {
-    [class*="st-key-home_nav_bar"] [data-testid="stHorizontalBlock"] {
-      display:flex !important; flex-direction:row !important; flex-wrap:nowrap !important;
-      width:100% !important; gap:2px !important; align-items:center !important;
-    }
-    [class*="st-key-home_nav_bar"] [data-testid="column"] {
-      flex:0 0 25% !important; width:25% !important; max-width:25% !important; min-width:0 !important;
-      padding:0 1px !important; margin:0 !important;
-    }
-    [class*="st-key-home_nav_stats"], [class*="st-key-home_nav_goals"],
-    [class*="st-key-home_nav_corners"], [class*="st-key-home_nav_h2h"] {
-      width:100% !important; min-width:0 !important; margin:0 !important;
-    }
-    [class*="st-key-home_nav_stats"] button, [class*="st-key-home_nav_goals"] button,
-    [class*="st-key-home_nav_corners"] button, [class*="st-key-home_nav_h2h"] button {
-      display:flex !important; flex-direction:column !important; align-items:center !important; justify-content:center !important;
-      width:100% !important; min-width:0 !important; min-height:52px !important; height:52px !important;
-      padding:3px 1px !important; margin:0 !important; border-radius:8px !important;
-      font-size:clamp(.48rem,1.9vw,.62rem) !important; letter-spacing:-.045em !important;
-      line-height:1.08 !important; white-space:normal !important; overflow:hidden !important;
-    }
-    [class*="st-key-home_nav_stats"] button p, [class*="st-key-home_nav_goals"] button p,
-    [class*="st-key-home_nav_corners"] button p, [class*="st-key-home_nav_h2h"] button p {
-      font-size:inherit !important; line-height:1.08 !important; margin:0 !important;
-      text-align:center !important; overflow-wrap:anywhere !important;
-    }
-  }
+div[data-testid="stHorizontalBlock"]:has([class*="st-key-home_nav_stats"]) {
+ display:flex !important; flex-flow:row nowrap !important; gap:4px !important;
+ width:100% !important; min-width:0 !important; align-items:stretch !important;
+}
+div[data-testid="stHorizontalBlock"]:has([class*="st-key-home_nav_stats"]) > div[data-testid="column"] {
+ flex:0 0 calc(25% - 3px) !important; width:calc(25% - 3px) !important;
+ max-width:calc(25% - 3px) !important; min-width:0 !important; padding:0 !important;
+}
+div[data-testid="stHorizontalBlock"]:has([class*="st-key-home_nav_stats"]) button {
+ display:flex !important; align-items:center !important; justify-content:center !important;
+ width:100% !important; min-width:0 !important; height:60px !important; min-height:60px !important;
+ padding:5px 2px !important; border:1px solid rgba(213,169,30,.5) !important;
+ border-radius:10px !important; background:linear-gradient(145deg,#191B20,#101216) !important;
+ color:#E7E8EB !important; font-size:clamp(.62rem,.9vw,.82rem) !important;
+ font-weight:700 !important; line-height:1.12 !important; white-space:normal !important;
+ overflow:hidden !important;
+}
+div[data-testid="stHorizontalBlock"]:has([class*="st-key-home_nav_stats"]) button p {
+ margin:0 !important; text-align:center !important; font-size:inherit !important;
+ line-height:inherit !important; overflow-wrap:anywhere !important;
+}
+div[data-testid="stHorizontalBlock"]:has([class*="st-key-home_nav_stats"]) button[kind="primary"] {
+ border:2px solid #FACC15 !important; color:#FFD52A !important;
+ background:linear-gradient(145deg,#302713,#17140D) !important;
+}
+@media(max-width:640px) {
+ div[data-testid="stHorizontalBlock"]:has([class*="st-key-home_nav_stats"]) {
+  flex-wrap:nowrap !important; gap:3px !important;
+ }
+ div[data-testid="stHorizontalBlock"]:has([class*="st-key-home_nav_stats"]) > div[data-testid="column"] {
+  flex:0 0 calc(25% - 2.25px) !important; width:calc(25% - 2.25px) !important;
+  max-width:calc(25% - 2.25px) !important; min-width:0 !important;
+ }
+ div[data-testid="stHorizontalBlock"]:has([class*="st-key-home_nav_stats"]) button {
+  height:52px !important; min-height:52px !important; padding:3px 1px !important;
+  border-radius:8px !important; font-size:clamp(.48rem,1.9vw,.60rem) !important;
+  line-height:1.05 !important; letter-spacing:-.04em !important;
+ }
+}
 </style>
 """, unsafe_allow_html=True)
 _home_selected_fixture = st.session_state.get("selected_live_fixture") or {}
