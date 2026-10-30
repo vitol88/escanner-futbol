@@ -1703,18 +1703,32 @@ st.markdown("""
     background:linear-gradient(145deg,#1B1B18,#101114) !important;
     color:#FFFFFF !important; box-shadow:0 0 12px rgba(250,204,21,.10) !important;
   }
+  [class*="st-key-home_nav_bar"] { width:100% !important; max-width:100% !important; margin:0 0 8px !important; }
   @media(max-width:640px) {
     [class*="st-key-home_nav_bar"] [data-testid="stHorizontalBlock"] {
       display:flex !important; flex-direction:row !important; flex-wrap:nowrap !important;
+      width:100% !important; gap:2px !important; align-items:center !important;
     }
     [class*="st-key-home_nav_bar"] [data-testid="column"] {
-      flex:1 1 25% !important; width:25% !important; max-width:25% !important; min-width:0 !important;
-      padding:0 1px !important;
+      flex:0 0 25% !important; width:25% !important; max-width:25% !important; min-width:0 !important;
+      padding:0 1px !important; margin:0 !important;
+    }
+    [class*="st-key-home_nav_stats"], [class*="st-key-home_nav_goals"],
+    [class*="st-key-home_nav_corners"], [class*="st-key-home_nav_h2h"] {
+      width:100% !important; min-width:0 !important; margin:0 !important;
     }
     [class*="st-key-home_nav_stats"] button, [class*="st-key-home_nav_goals"] button,
     [class*="st-key-home_nav_corners"] button, [class*="st-key-home_nav_h2h"] button {
-      min-height:76px !important; height:76px !important; padding:6px 1px !important;
-      font-size:clamp(.52rem,2.15vw,.68rem) !important; letter-spacing:-.04em !important;
+      display:flex !important; flex-direction:column !important; align-items:center !important; justify-content:center !important;
+      width:100% !important; min-width:0 !important; min-height:52px !important; height:52px !important;
+      padding:3px 1px !important; margin:0 !important; border-radius:8px !important;
+      font-size:clamp(.48rem,1.9vw,.62rem) !important; letter-spacing:-.045em !important;
+      line-height:1.08 !important; white-space:normal !important; overflow:hidden !important;
+    }
+    [class*="st-key-home_nav_stats"] button p, [class*="st-key-home_nav_goals"] button p,
+    [class*="st-key-home_nav_corners"] button p, [class*="st-key-home_nav_h2h"] button p {
+      font-size:inherit !important; line-height:1.08 !important; margin:0 !important;
+      text-align:center !important; overflow-wrap:anywhere !important;
     }
   }
 </style>
