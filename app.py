@@ -1595,7 +1595,7 @@ st.markdown("""
   .h2h-distribution-home { background:#E8CC70 !important; }
   .h2h-distribution-draw { background:#858B98 !important; }
   .h2h-distribution-away { background:#75A9D6 !important; }
-  .h2h-distribution-legend { display:flex !important; justify-content:space-between !important; flex-wrap:wrap !important; gap:4px 8px !important; color:#AEB3BC !important; font-size:.62rem !important; }
+  .h2h-distribution-legend { display:flex !important; justify-content:space-between !important; flex-wrap:wrap !important; gap:6px 10px !important; color:#C3C7CF !important; font-size:.76rem !important; font-weight:650 !important; line-height:1.45 !important; }
   .h2h-secondary-grid { display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:9px !important; width:100% !important; min-width:0 !important; }
   .h2h-secondary-card { padding:12px 13px !important; }
   .h2h-secondary-value { color:#E8CC70 !important; font-size:1.3rem !important; font-weight:900 !important; line-height:1.35 !important; margin-top:5px !important; }
@@ -1605,7 +1605,7 @@ st.markdown("""
     .h2h-result-card .h2h-summary-label { font-size:.59rem !important; }
     .h2h-result-count { font-size:1.05rem !important; }
     .h2h-result-pct { font-size:1.12rem !important; }
-    .h2h-distribution-legend { font-size:.57rem !important; }
+    .h2h-distribution-legend { font-size:.68rem !important; gap:5px 7px !important; }
   }
   .h2h-summary-grid {
     display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)) !important;
