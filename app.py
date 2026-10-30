@@ -740,7 +740,7 @@ st.markdown("""
     .brand-subtitle { font-size:.62rem !important; letter-spacing:.7px !important; margin-top:2px !important; }
     .brand-pill { padding:4px 7px !important; font-size:.62rem !important; }
     [data-testid="stSidebar"] { z-index:1000 !important; }\n    [data-testid="stSidebar"] > div:first-child { padding-top:96px !important; }
-    section.main > div.block-container { padding-top:112px !important; }
+    section.main > div.block-container { padding-top:214px !important; }
   }
   @media(max-width:360px) {
     .brand-header-main { gap:6px !important; }
@@ -1872,7 +1872,7 @@ div[class*="st-key-home_nav_bar"] {
  box-shadow:0 8px 18px rgba(0,0,0,.28) !important;
 }
 @media(max-width:640px) {
- div[class*="st-key-home_nav_bar"] { top:112px !important; padding:0 10px !important; }
+ div[class*="st-key-home_nav_bar"] { top:154px !important; padding:0 10px !important; }
 }
 div[class*="st-key-home_nav_bar"] [data-testid="stHorizontalBlock"] { display:grid !important; grid-template-columns:repeat(4,minmax(0,1fr)) !important; grid-auto-flow:column !important; gap:0 !important; column-gap:0 !important; width:100% !important; min-width:0 !important; margin:0 !important; padding:0 !important; box-sizing:border-box !important; overflow:visible !important; }
 div[class*="st-key-home_nav_bar"] [data-testid="column"] { display:block !important; flex:none !important; width:100% !important; max-width:100% !important; min-width:0 !important; padding:0 !important; margin:0 !important; box-sizing:border-box !important; }
@@ -1940,9 +1940,10 @@ div[class*="st-key-home_topnav_h2h"] button[kind="primary"]:hover {
  color:#111419 !important; box-shadow:0 0 15px rgba(232,204,112,.28) !important;
 }
 @media(max-width:640px) {
- div[class*="st-key-home_nav_bar"] [data-testid="stHorizontalBlock"] { grid-template-columns:repeat(4,minmax(0,1fr)) !important; gap:0 !important; column-gap:0 !important; }
+ div[class*="st-key-home_nav_bar"] [data-testid="stHorizontalBlock"] { grid-template-columns:repeat(4,minmax(0,1fr)) !important; gap:7px !important; column-gap:7px !important; }
  div[class*="st-key-home_topnav_stats"] button, div[class*="st-key-home_topnav_goals"] button, div[class*="st-key-home_topnav_corners"] button, div[class*="st-key-home_topnav_h2h"] button {
-  height:40px !important; min-height:40px !important; padding:2px 1px !important; font-size:1rem !important; letter-spacing:0 !important; border-radius:8px !important;
+  height:54px !important; min-height:54px !important; padding:4px 2px !important; font-size:1rem !important; letter-spacing:0 !important; border-radius:13px !important;
+  box-shadow:0 3px 10px rgba(15,23,42,.10),inset 0 1px 0 rgba(255,255,255,.12) !important;
  }
 }
 </style>
@@ -2346,7 +2347,7 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       }
       .fl-match-live { color:#B42318 !important; background:#FEECEB !important; border-color:#F3B7B2 !important; }
       .fl-match-live::before { background:#DC3D35 !important; box-shadow:none !important; }
-      [class*="st-key-appearance_switch"] { position:fixed !important; top:22px !important; right:96px !important; z-index:2147483002 !important; display:flex !important; justify-content:flex-end !important; width:auto !important; margin:0 !important; }
+      [class*="st-key-appearance_switch"] { position:fixed !important; top:116px !important; right:12px !important; z-index:2147483002 !important; display:flex !important; justify-content:flex-end !important; width:auto !important; margin:0 !important; }
       [class*="st-key-appearance_switch"] [role="radiogroup"] {
         display:inline-flex !important; align-items:center !important; gap:3px !important; padding:3px !important;
         border:1px solid #D6B84C !important; border-radius:999px !important; background:#FFFFFF !important;
@@ -2356,7 +2357,7 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       [class*="st-key-appearance_switch"] [role="radio"][aria-checked="true"] { background:#F6E6A8 !important; color:#493800 !important; }
       [class*="st-key-appearance_switch"] [data-testid="stMarkdownContainer"] p { color:#596273 !important; }
       @media(max-width:640px) {
-        [class*="st-key-appearance_switch"] { top:22px !important; right:96px !important; }
+        [class*="st-key-appearance_switch"] { top:116px !important; right:12px !important; }
         [class*="st-key-appearance_switch"] [role="radio"] { padding:3px 6px !important; min-width:27px !important; font-size:.9rem !important; }
       }
     </style>
@@ -2365,7 +2366,7 @@ else:
     st.markdown("""
     <style>
       /* Selector compacto para el tema oscuro original. */
-      [class*="st-key-appearance_switch"] { position:fixed !important; top:22px !important; right:96px !important; z-index:2147483002 !important; display:flex !important; justify-content:flex-end !important; width:auto !important; margin:0 !important; }
+      [class*="st-key-appearance_switch"] { position:fixed !important; top:116px !important; right:12px !important; z-index:2147483002 !important; display:flex !important; justify-content:flex-end !important; width:auto !important; margin:0 !important; }
       [class*="st-key-appearance_switch"] [role="radiogroup"] {
         display:inline-flex !important; align-items:center !important; gap:3px !important; padding:3px !important;
         border:1px solid #66551F !important; border-radius:999px !important; background:#15191F !important;
@@ -2375,7 +2376,7 @@ else:
       [class*="st-key-appearance_switch"] [role="radio"][aria-checked="true"] { background:#3B3216 !important; color:#FFE477 !important; }
       [class*="st-key-appearance_switch"] [data-testid="stMarkdownContainer"] p { color:#B9BEC8 !important; }
       @media(max-width:640px) {
-        [class*="st-key-appearance_switch"] { top:22px !important; right:96px !important; }
+        [class*="st-key-appearance_switch"] { top:116px !important; right:12px !important; }
         [class*="st-key-appearance_switch"] [role="radio"] { padding:3px 6px !important; min-width:27px !important; font-size:.9rem !important; }
       }
     </style>
