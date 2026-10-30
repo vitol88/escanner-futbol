@@ -3499,6 +3499,25 @@ if _analysis_page_active:
         section.main > div.block-container:has([class*="st-key-live_match_{_analysis_page_id}"]) [data-testid="stVerticalBlockBorderWrapper"] {{
           border-color:transparent !important;
         }}
+        /* La línea restante pertenece al contenedor de la sección "En vivo ahora", no a las tarjetas. */
+        [class*="st-key-live_now_section"],
+        [class*="st-key-live_now_section"] > div,
+        [class*="st-key-live_now_section"] > div > [data-testid="stExpander"],
+        [class*="st-key-live_now_section"] [data-testid="stVerticalBlockBorderWrapper"]:has([class*="st-key-live_match_{_analysis_page_id}"]),
+        [class*="st-key-live_now_section"] [data-testid="stVerticalBlockBorderWrapper"]:has([class*="st-key-live_match_{_analysis_page_id}"]) > [data-testid="stVerticalBlock"] {{
+          border:0 !important; outline:0 !important; box-shadow:none !important;
+          background:transparent !important;
+        }}
+        [class*="st-key-live_now_section"]::before,
+        [class*="st-key-live_now_section"]::after,
+        [class*="st-key-live_now_section"] > div::before,
+        [class*="st-key-live_now_section"] > div::after {{
+          content:none !important; display:none !important; border:0 !important;
+        }}
+        /* La vista individual no debe heredar un marco del bloque principal de Streamlit. */
+        section.main > div.block-container:has([class*="st-key-live_match_{_analysis_page_id}"]) > [data-testid="stVerticalBlock"] {{
+          border:0 !important; outline:0 !important; box-shadow:none !important;
+        }}
         [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stExpander"] {{ border:0 !important; margin:0 !important; padding:0 !important; }}
         [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stExpander"] > details > div {{ padding:0 !important; margin:0 !important; }}
         /* Mantener visibles las cuatro herramientas durante toda la navegación del análisis. */
