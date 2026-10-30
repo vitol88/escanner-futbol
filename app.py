@@ -3261,10 +3261,11 @@ else:
                                                     (f"{away_name} · goles a favor fuera", history.get("away_goals_for"), history.get("away_goal_sample", 0)),
                                                     (f"{away_name} · goles recibidos fuera", history.get("away_goals_against"), history.get("away_goal_sample", 0)),
                                                 ]
-                                                goal_table_html = '<div class="goal-history-wrap"><div class="goal-history-heading">▥ Promedio de goles <span>Histórico</span></div><table class="goal-history-table"><thead><tr><th>Equipo / indicador</th><th>Prom.</th></tr></thead><tbody>'
+                                                goal_table_html = '<div class="goal-history-wrap"><div class="goal-history-heading">▥ Promedio de goles <span>Promedio · muestra</span></div><table class="goal-history-table"><thead><tr><th>Equipo / indicador</th><th>Prom. · n</th></tr></thead><tbody>'
                                                 for label, avg, sample in goal_history_rows:
                                                     avg_text = f"{avg:.2f}".rstrip("0").rstrip(".") if isinstance(avg, (int, float)) else "N/D"
-                                                    goal_table_html += f'<tr><td>{html.escape(str(label))}</td><td>{avg_text}</td></tr>'
+                                                    sample_text = int(sample or 0)
+                                                    goal_table_html += f'<tr><td>{html.escape(str(label))}</td><td>{avg_text} <span style="color:#9CA3AF;font-size:.82em;">({sample_text})</span></td></tr>'
                                                 goal_table_html += '</tbody></table></div>'
                                                 st.markdown(goal_table_html, unsafe_allow_html=True)
 
