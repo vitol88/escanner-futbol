@@ -1702,8 +1702,11 @@ st.markdown("""
   }
   @media(max-width:640px) {
     section.main > div.block-container:has(.h2h-page-kicker) {
-      padding-top:14px !important; padding-left:10px !important; padding-right:10px !important;
-      max-width:100vw !important; overflow-x:hidden !important;
+      padding-top:14px !important; padding-left:12px !important; padding-right:12px !important;
+      width:100% !important; max-width:100vw !important; box-sizing:border-box !important;
+      overflow-x:hidden !important;
+      border-left:1px solid rgba(232,204,112,.24) !important;
+      border-right:1px solid rgba(232,204,112,.24) !important;
     }
     .h2h-page-kicker {
       margin-top:-65px !important; font-size:.94rem !important; letter-spacing:.045em !important;
