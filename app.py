@@ -2910,7 +2910,7 @@ def update_scan_progress(value, title, detail, done=False):
     )
 
 with st.container(key="scan_actions_row"):
-    st.markdown('<style>[class*="st-key-scan_actions_row"] [class*="st-key-scan_cta_card"] { max-width:560px !important; margin:0 auto !important; } @media(max-width:640px) { [class*="st-key-scan_actions_row"] [class*="st-key-scan_cta_card"] { margin-top:34px !important; } }</style>', unsafe_allow_html=True)
+    st.markdown('<style>[class*="st-key-scan_actions_row"] [data-testid="stHorizontalBlock"] { display:grid !important; grid-template-columns:minmax(0,1fr) !important; width:100% !important; } [class*="st-key-scan_actions_row"] [data-testid="column"] { width:100% !important; min-width:0 !important; } [class*="st-key-scan_actions_row"] [class*="st-key-scan_cta_card"] { display:block !important; width:100% !important; max-width:560px !important; margin:0 auto !important; } [class*="st-key-scan_cta_card"] [data-testid="stButton"], [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button { width:100% !important; max-width:100% !important; box-sizing:border-box !important; } @media(max-width:640px) { [class*="st-key-scan_actions_row"] [class*="st-key-scan_cta_card"] { margin-top:34px !important; } }</style>', unsafe_allow_html=True)
     with st.container(key="scan_cta_card"):
         manual_scan = st.button(
             "**TOCA EL BALÓN**\n\nActualizar y analizar\n\nUn toque. Todo el análisis.",
