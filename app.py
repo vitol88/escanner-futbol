@@ -2949,19 +2949,19 @@ if _analysis_page_active:
   }}
 
         /* Regreso a partidos: enlace compacto y uniforme debajo de la navegación superior. */
-        [class*="st-key-analysis_page_nav"] {
+        [class*="st-key-analysis_page_nav"] {{
           position:relative !important; z-index:30 !important;
           width:100% !important; margin-top:-112px !important; margin-bottom:18px !important;
           padding:0 2px !important; box-sizing:border-box !important;
-        }
-        [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] {
+        }}
+        [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] {{
           display:flex !important; justify-content:flex-start !important;
           width:100% !important; margin:0 !important; padding:0 !important;
-        }
-        [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] [data-testid="stButton"] {
+        }}
+        [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] [data-testid="stButton"] {{
           width:auto !important; max-width:100% !important; margin:0 !important;
-        }
-        [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button {
+        }}
+        [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button {{
           display:inline-flex !important; align-items:center !important; justify-content:flex-start !important;
           width:auto !important; min-width:0 !important; min-height:36px !important; height:36px !important;
           padding:4px 2px !important; border:0 !important; border-radius:0 !important;
@@ -2970,22 +2970,22 @@ if _analysis_page_active:
           font-size:.82rem !important; font-weight:650 !important; letter-spacing:.015em !important;
           text-align:left !important; white-space:nowrap !important;
           transition:color .18s ease,transform .18s ease !important;
-        }
-        [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button:hover {
+        }}
+        [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button:hover {{
           color:#F5E3A4 !important; -webkit-text-fill-color:#F5E3A4 !important;
           background:transparent !important; box-shadow:none !important; transform:translateX(-2px) !important;
-        }
+        }}
         [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button:focus,
-        [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button:focus-visible {
+        [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button:focus-visible {{
           outline:1px solid rgba(232,204,112,.45) !important; outline-offset:3px !important;
           box-shadow:none !important;
-        }
-        @media(max-width:640px) {
-          [class*="st-key-analysis_page_nav"] { margin-top:-112px !important; margin-bottom:16px !important; }
-          [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button {
+        }}
+        @media(max-width:640px) {{
+          [class*="st-key-analysis_page_nav"] {{ margin-top:-112px !important; margin-bottom:16px !important; }}
+          [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button {{
             min-height:36px !important; height:36px !important; font-size:.78rem !important;
-          }
-        }
+          }}
+        }}
 </style>
         """,
         unsafe_allow_html=True,
