@@ -2000,6 +2000,46 @@ if st.session_state.get("appearance_mode") == "☀️ Claro":
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:not(:has(strong)) { color:#68717F !important; }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before { background-color:#FFFFFF !important; }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button:hover { background-color:#FFFFFF !important; }
+
+      /* Mantener el escáner claro también durante hover, pulsación y foco. */
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button:hover,
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button:active,
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button:focus,
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button:focus-visible {
+        background-color:#FFFFFF !important;
+        background-image:radial-gradient(ellipse at 20% 50%,rgba(250,204,21,.17),transparent 42%),linear-gradient(135deg,#FFFFFF,#F2F4F7) !important;
+        color:#20242C !important;
+        border-color:#D6B84C !important;
+        box-shadow:inset 0 0 24px rgba(181,138,0,.07),0 5px 18px rgba(31,41,55,.12) !important;
+        outline-color:#D6B84C !important;
+      }
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button:active {
+        transform:scale(.99) !important;
+      }
+      .scan-running-status {
+        color:#806000 !important;
+        background:linear-gradient(110deg,#FFFFFF,#FFF8E5) !important;
+        border:1px solid #D6B84C !important;
+        box-shadow:0 5px 16px rgba(31,41,55,.07) !important;
+      }
+      .scan-running-status strong { color:#947000 !important; }
+      .scan-code-icon { color:#B58A00 !important; text-shadow:0 0 12px rgba(181,138,0,.28) !important; }
+      .scan-running-subtitle { color:#68717F !important; }
+      .scan-sweep { background:linear-gradient(90deg,transparent,#C49A20,transparent) !important; }
+      [class*="st-key-analysis_scan_radar_goals_"] [data-testid="stButton"] > button:hover,
+      [class*="st-key-analysis_scan_goals_"] [data-testid="stButton"] > button:hover,
+      [class*="st-key-analysis_scan_radar_corners_"] [data-testid="stButton"] > button:hover,
+      [class*="st-key-analysis_scan_corners_"] [data-testid="stButton"] > button:hover,
+      [class*="st-key-analysis_scan_radar_goals_"] [data-testid="stButton"] > button:active,
+      [class*="st-key-analysis_scan_goals_"] [data-testid="stButton"] > button:active,
+      [class*="st-key-analysis_scan_radar_corners_"] [data-testid="stButton"] > button:active,
+      [class*="st-key-analysis_scan_corners_"] [data-testid="stButton"] > button:active {
+        background:linear-gradient(145deg,#FFF8E5,#F2E7C5) !important;
+        color:#755800 !important;
+        border-color:#D6B84C !important;
+        box-shadow:0 4px 14px rgba(181,138,0,.13) !important;
+      }
+
       [class*="st-key-search_goal_matches"] [data-testid="stTextInput"] > div { background:#FFFFFF !important; border-color:#C7A43A !important; }
       [class*="st-key-search_goal_matches"] input,[data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input {
         color:#20242C !important; -webkit-text-fill-color:#20242C !important; caret-color:#9A7400 !important;
