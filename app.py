@@ -1670,53 +1670,35 @@ st.markdown(f"""
 
 st.markdown("""
 <style>
-/* Barra superior de cuatro accesos: estilos anclados al contenedor único */
-div[class*="st-key-home_nav_bar"] { width:100% !important; max-width:100% !important; min-width:0 !important; overflow:hidden !important; }
-div[class*="st-key-home_nav_bar"] [data-testid="stHorizontalBlock"] {
+div[class*="st-key-home_nav_bar"] { width:100% !important; max-width:100% !important; padding:0 !important; }
+div[class*="st-key-home_nav_bar"] [data-testid="stRadio"] > div {
  display:flex !important; flex-direction:row !important; flex-wrap:nowrap !important;
- width:100% !important; max-width:100% !important; min-width:0 !important;
- gap:4px !important; align-items:stretch !important; overflow:hidden !important;
+ justify-content:space-between !important; align-items:stretch !important; gap:4px !important;
+ width:100% !important; min-width:0 !important;
 }
-div[class*="st-key-home_nav_bar"] [data-testid="column"] {
- display:block !important; flex:1 1 0 !important; width:25% !important;
- max-width:25% !important; min-width:0 !important; padding:0 !important;
+div[class*="st-key-home_nav_bar"] [data-testid="stRadio"] label {
+ flex:1 1 0 !important; min-width:0 !important; width:25% !important; max-width:25% !important;
+ display:flex !important; justify-content:center !important; align-items:center !important;
+ padding:8px 2px !important; margin:0 !important; border:1px solid rgba(213,169,30,.55) !important;
+ border-radius:9px !important; background:linear-gradient(145deg,#191B20,#101216) !important;
+ color:#E8E8EA !important; text-align:center !important; font-weight:700 !important;
+ font-size:.78rem !important; line-height:1.12 !important;
 }
-div[class*="st-key-home_nav_bar"] [class*="st-key-home_nav_stats"],
-div[class*="st-key-home_nav_bar"] [class*="st-key-home_nav_goals"],
-div[class*="st-key-home_nav_bar"] [class*="st-key-home_nav_corners"],
-div[class*="st-key-home_nav_bar"] [class*="st-key-home_nav_h2h"] {
- width:100% !important; max-width:100% !important; min-width:0 !important;
+div[class*="st-key-home_nav_bar"] [data-testid="stRadio"] label p {
+ margin:0 !important; text-align:center !important; overflow-wrap:anywhere !important;
 }
-div[class*="st-key-home_nav_bar"] button {
- box-sizing:border-box !important; display:flex !important; align-items:center !important;
- justify-content:center !important; width:100% !important; max-width:100% !important;
- min-width:0 !important; height:58px !important; min-height:58px !important;
- padding:5px 2px !important; margin:0 !important; overflow:hidden !important;
- border:1px solid rgba(213,169,30,.52) !important; border-radius:10px !important;
- background:linear-gradient(145deg,#1B1D22,#111317) !important; color:#E8E8EA !important;
- font-size:.78rem !important; font-weight:750 !important; line-height:1.12 !important;
- white-space:normal !important; box-shadow:none !important;
-}
-div[class*="st-key-home_nav_bar"] button p {
- width:100% !important; margin:0 !important; padding:0 !important;
- text-align:center !important; white-space:normal !important; overflow-wrap:anywhere !important;
- font-size:inherit !important; line-height:inherit !important;
-}
-div[class*="st-key-home_nav_bar"] button[kind="primary"] {
- border:2px solid #FACC15 !important; border-radius:10px !important;
+div[class*="st-key-home_nav_bar"] [data-testid="stRadio"] label:has(input:checked) {
+ border:2px solid #FACC15 !important; color:#FFD52A !important;
  background:linear-gradient(145deg,#342B15,#17140D) !important;
- color:#FFD52A !important; box-shadow:0 0 12px rgba(250,204,21,.14) !important;
+ box-shadow:0 0 12px rgba(250,204,21,.14) !important;
 }
+div[class*="st-key-home_nav_bar"] [data-testid="stRadio"] label > div:first-child { display:none !important; }
 @media(max-width:640px) {
- div[class*="st-key-home_nav_bar"] { padding:0 2px !important; }
- div[class*="st-key-home_nav_bar"] [data-testid="stHorizontalBlock"] { gap:3px !important; }
- div[class*="st-key-home_nav_bar"] [data-testid="column"] {
-  flex:1 1 0 !important; width:25% !important; max-width:25% !important; min-width:0 !important;
- }
- div[class*="st-key-home_nav_bar"] button {
-  height:50px !important; min-height:50px !important; padding:3px 1px !important;
-  border-radius:8px !important; font-size:.61rem !important; line-height:1.05 !important;
-  letter-spacing:-.035em !important;
+ div[class*="st-key-home_nav_bar"] [data-testid="stRadio"] > div { gap:3px !important; }
+ div[class*="st-key-home_nav_bar"] [data-testid="stRadio"] label {
+  height:52px !important; min-height:52px !important; padding:3px 1px !important;
+  border-radius:7px !important; font-size:clamp(.50rem,1.9vw,.62rem) !important;
+  line-height:1.04 !important; letter-spacing:-.04em !important;
  }
 }
 </style>
@@ -1726,26 +1708,25 @@ _home_selected_id = str(((_home_selected_fixture.get("fixture") or {}).get("id")
 _home_tool_state = st.session_state.get("main_fixture_tool") or {}
 _home_active_tool = _home_tool_state.get("tool") if str(_home_tool_state.get("fixture_id")) == _home_selected_id else None
 _home_active_market = _home_tool_state.get("market") if str(_home_tool_state.get("fixture_id")) == _home_selected_id else None
+_home_default_nav = "📊 Estadísticas" if _home_active_tool == "stats" else ("⚽ Goles" if _home_active_market == "goals" else ("🚩 Córners" if _home_active_market == "corners" else ("👥 H2H" if _home_active_tool == "h2h" else "📊 Estadísticas")))
 with st.container(key="home_nav_bar"):
-    _home_nav_cols = st.columns(4, gap="small")
-    with _home_nav_cols[0]:
-        _home_stats = st.button("📊 Estadísticas", key="home_nav_stats", use_container_width=True, disabled=not bool(_home_selected_id), type="primary" if _home_active_tool == "stats" else "secondary")
-    with _home_nav_cols[1]:
-        _home_goals = st.button("⚽ Goles y señales", key="home_nav_goals", use_container_width=True, disabled=not bool(_home_selected_id), type="primary" if _home_active_market == "goals" else "secondary")
-    with _home_nav_cols[2]:
-        _home_corners = st.button("🚩 Córners", key="home_nav_corners", use_container_width=True, disabled=not bool(_home_selected_id), type="primary" if _home_active_market == "corners" else "secondary")
-    with _home_nav_cols[3]:
-        _home_h2h = st.button("👥 H2H", key="home_nav_h2h", use_container_width=True, disabled=not bool(_home_selected_id), type="primary" if _home_active_tool == "h2h" else "secondary")
-if _home_stats:
+    _home_nav_choice = st.radio(
+        "Navegación del partido",
+        ["📊 Estadísticas", "⚽ Goles", "🚩 Córners", "👥 H2H"],
+        index=["📊 Estadísticas", "⚽ Goles", "🚩 Córners", "👥 H2H"].index(_home_default_nav),
+        horizontal=True, label_visibility="collapsed", key="home_nav_choice",
+        disabled=not bool(_home_selected_id),
+    )
+if _home_nav_choice == "📊 Estadísticas" and _home_active_tool != "stats":
     st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "stats"}
     st.rerun()
-if _home_goals:
+if _home_nav_choice == "⚽ Goles" and _home_active_market != "goals":
     st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "market", "market": "goals"}
     st.rerun()
-if _home_corners:
+if _home_nav_choice == "🚩 Córners" and _home_active_market != "corners":
     st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "market", "market": "corners"}
     st.rerun()
-if _home_h2h:
+if _home_nav_choice == "👥 H2H" and _home_active_tool != "h2h":
     st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "h2h"}
     st.rerun()
 
