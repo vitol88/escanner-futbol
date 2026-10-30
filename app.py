@@ -961,9 +961,9 @@ st.markdown("""
   .goal-form-result-v { color:#FFFFFF; background:#16A34A; }
   .goal-form-result-e { color:#FFFFFF; background:#6B7280; }
   .goal-form-result-d { color:#FFFFFF; background:#DC2626; }
-  .goal-form-header { display:flex; align-items:center; gap:8px; margin-bottom:4px; min-width:0; }
-  .goal-form-logo { width:34px; height:34px; object-fit:contain; flex:0 0 34px; }
-  .goal-form-team { flex:1 1 auto; min-width:0; color:#E4E4E7; font-size:.72rem; font-weight:800; line-height:1.3; overflow-wrap:break-word; word-break:normal; hyphens:none; }
+  .goal-form-header { display:flex; align-items:center; gap:10px; margin:2px 0 9px; min-width:0; width:100%; box-sizing:border-box; }
+  .goal-form-logo { width:38px; height:38px; object-fit:contain; flex:0 0 38px; }
+  .goal-form-team { display:block; flex:1 1 0%; min-width:0; max-width:100%; color:#E4E4E7; font-size:.78rem; font-weight:800; line-height:1.3; white-space:normal; overflow-wrap:break-word; word-break:normal; hyphens:none; }
   .goal-form-record { color:#FACC15; font-size:1.15rem; font-weight:900; margin:4px 0; }
   .goal-form-line { color:#BFC2CA; font-size:.68rem; line-height:1.45; }
   .goal-h2h-summary { margin:.5rem 0; border:1px solid #393326; border-radius:10px; padding:9px 11px; color:#D4D4D8; background:#15191F; font-size:.78rem; line-height:1.5; }
@@ -4568,7 +4568,14 @@ else:
                                                         flip_key = f"goal_form_flipped_{match_id}_{team.get('id') or label}"
                                                         is_flipped = bool(st.session_state.get(flip_key, False))
                                                         with col.container(border=True):
-                                                            head_col, ball_col = st.columns([0.86, 0.14], gap="small", vertical_alignment="center")
+                                                            st.markdown(
+                                                                f'<div class="goal-form-header">{logo_html}<div class="goal-form-team">{("ÚLTIMOS PARTIDOS · " if is_flipped else "")}{html.escape(label)}</div></div>',
+                                                                unsafe_allow_html=True,
+                                                            )
+                                                            _, ball_col = st.columns([0.82, 0.18], gap="small", vertical_alignment="center")
+                                                            if ball_col.button("⚽", key=f"goal_form_flip_btn_{match_id}_{team.get('id') or label}", help="Ver últimos partidos" if not is_flipped else "Volver al resumen"):
+                                                                st.session_state[flip_key] = not is_flipped
+                                                                st.rerun()
                                                             if is_flipped:
                                                                 head_col.markdown(
                                                                     f'<div class="goal-form-header">{logo_html}<div class="goal-form-team">ÚLTIMOS PARTIDOS · {html.escape(label)}</div></div>',
