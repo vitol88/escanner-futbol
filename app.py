@@ -1938,7 +1938,7 @@ with st.container(key="home_nav_bar"):
         st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "h2h"}
         st.rerun()
 
-# Selector de apariencia: el modo oscuro sigue siendo el predeterminado.
+# Selector de apariencia: ubicado debajo de la navegación fija, visible en móvil y escritorio.
 with st.container(key="appearance_switch"):
     st.radio(
         "Apariencia",
@@ -2044,7 +2044,7 @@ if st.session_state.get("appearance_mode") == "☀️ Claro":
       .fl-standings-table .fl-stat-win { color:#9A7400 !important; background:#FFF5CC !important; }
       .fl-standings-table .fl-stat-draw { color:#586170 !important; background:#EDF0F4 !important; }
       .fl-standings-table .fl-stat-loss { color:#C52F3B !important; background:#FDEBED !important; }
-      [class*="st-key-appearance_switch"] { display:flex !important; justify-content:flex-end !important; width:100% !important; margin:0 0 8px !important; }
+      [class*="st-key-appearance_switch"] { position:fixed !important; top:181px !important; right:16px !important; z-index:2147482999 !important; display:flex !important; justify-content:flex-end !important; width:auto !important; margin:0 !important; }
       [class*="st-key-appearance_switch"] [role="radiogroup"] {
         display:inline-flex !important; gap:4px !important; padding:4px !important;
         border:1px solid #D6B84C !important; border-radius:999px !important; background:#FFFFFF !important;
@@ -2054,7 +2054,7 @@ if st.session_state.get("appearance_mode") == "☀️ Claro":
       [class*="st-key-appearance_switch"] [role="radio"][aria-checked="true"] { background:#F6E6A8 !important; color:#493800 !important; }
       [class*="st-key-appearance_switch"] [data-testid="stMarkdownContainer"] p { color:#596273 !important; }
       @media(max-width:640px) {
-        [class*="st-key-appearance_switch"] { justify-content:flex-end !important; margin:0 2px 7px !important; }
+        [class*="st-key-appearance_switch"] { top:181px !important; right:10px !important; justify-content:flex-end !important; margin:0 !important; }
         [class*="st-key-appearance_switch"] [role="radio"] { padding:4px 9px !important; font-size:.78rem !important; }
       }
     </style>
@@ -2063,7 +2063,7 @@ else:
     st.markdown("""
     <style>
       /* Selector compacto para el tema oscuro original. */
-      [class*="st-key-appearance_switch"] { display:flex !important; justify-content:flex-end !important; width:100% !important; margin:0 0 8px !important; }
+      [class*="st-key-appearance_switch"] { position:fixed !important; top:181px !important; right:16px !important; z-index:2147482999 !important; display:flex !important; justify-content:flex-end !important; width:auto !important; margin:0 !important; }
       [class*="st-key-appearance_switch"] [role="radiogroup"] {
         display:inline-flex !important; gap:4px !important; padding:4px !important;
         border:1px solid #66551F !important; border-radius:999px !important; background:#15191F !important;
