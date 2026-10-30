@@ -2591,6 +2591,13 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
 else:
     st.markdown("""
     <style>
+      /* La ficha de forma reciente queda abierta, sin marco, igual que en modo claro. */
+      .goal-form-card {
+        border:0 !important;
+        border-radius:0 !important;
+        background:transparent !important;
+        box-shadow:none !important;
+      }
       /* Selector compacto para el tema oscuro original. */
       [class*="st-key-appearance_switch"] { position:fixed !important; top:116px !important; right:12px !important; z-index:2147483002 !important; display:flex !important; justify-content:flex-end !important; width:auto !important; margin:0 !important; }
       [class*="st-key-appearance_switch"] [role="radiogroup"] {
