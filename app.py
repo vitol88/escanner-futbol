@@ -976,7 +976,7 @@ st.markdown("""
   .goal-form-record { color:#FACC15; font-size:1.15rem; font-weight:900; margin:4px 0; }
   .goal-form-line { color:#BFC2CA; font-size:.68rem; line-height:1.45; }
   .goal-h2h-summary { margin:.5rem 0; border:1px solid #393326; border-radius:10px; padding:9px 11px; color:#D4D4D8; background:#15191F; font-size:.78rem; line-height:1.5; }
-  .goal-last-goal { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin:.8rem 0 1rem; padding:12px 14px; border:2px solid #FACC15; border-radius:12px; background:linear-gradient(135deg,rgba(250,204,21,.16),#191C22 52%,#101216); box-shadow:0 0 0 1px rgba(250,204,21,.22),0 0 16px rgba(250,204,21,.16); color:#F4F4F5; font-size:.84rem; line-height:1.5; }
+  .goal-last-goal { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin:1.65rem 0 1rem; padding:12px 14px; border:2px solid #FACC15; border-radius:12px; background:linear-gradient(135deg,rgba(250,204,21,.16),#191C22 52%,#101216); box-shadow:0 0 0 1px rgba(250,204,21,.22),0 0 16px rgba(250,204,21,.16); color:#F4F4F5; font-size:.84rem; line-height:1.5; }
   .goal-last-goal b { color:#FFE566; font-weight:950; letter-spacing:.35px; }
   .goal-last-goal span { display:inline-flex; align-items:center; justify-content:center; min-width:44px; padding:3px 8px; border:1px solid #FACC15; border-radius:7px; background:#FACC15; color:#111419; font-weight:950; font-size:.9rem; }
   @keyframes goal-minute-alarm {
