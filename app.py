@@ -2059,6 +2059,25 @@ if st.session_state.get("appearance_mode") == "☀️ Claro":
       }
     </style>
     """, unsafe_allow_html=True)
+else:
+    st.markdown("""
+    <style>
+      /* Selector compacto para el tema oscuro original. */
+      [class*="st-key-appearance_switch"] { display:flex !important; justify-content:flex-end !important; width:100% !important; margin:0 0 8px !important; }
+      [class*="st-key-appearance_switch"] [role="radiogroup"] {
+        display:inline-flex !important; gap:4px !important; padding:4px !important;
+        border:1px solid #66551F !important; border-radius:999px !important; background:#15191F !important;
+        box-shadow:0 3px 12px rgba(0,0,0,.22) !important;
+      }
+      [class*="st-key-appearance_switch"] [role="radio"] { padding:5px 11px !important; color:#B9BEC8 !important; border-radius:999px !important; }
+      [class*="st-key-appearance_switch"] [role="radio"][aria-checked="true"] { background:#3B3216 !important; color:#FFE477 !important; }
+      [class*="st-key-appearance_switch"] [data-testid="stMarkdownContainer"] p { color:#B9BEC8 !important; }
+      @media(max-width:640px) {
+        [class*="st-key-appearance_switch"] { justify-content:flex-end !important; margin:0 2px 7px !important; }
+        [class*="st-key-appearance_switch"] [role="radio"] { padding:4px 9px !important; font-size:.78rem !important; }
+      }
+    </style>
+    """, unsafe_allow_html=True)
 
 # La hora se calcula en el navegador para respetar la zona horaria local de cada dispositivo.
 st.components.v1.html("""
