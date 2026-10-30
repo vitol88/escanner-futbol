@@ -963,7 +963,7 @@ st.markdown("""
   .goal-form-result-d { color:#FFFFFF; background:#DC2626; }
   .goal-form-header { display:flex; align-items:center; gap:8px; margin-bottom:4px; min-width:0; }
   .goal-form-logo { width:34px; height:34px; object-fit:contain; flex:0 0 34px; }
-  .goal-form-team { color:#E4E4E7; font-size:.78rem; font-weight:800; line-height:1.25; overflow-wrap:anywhere; }
+  .goal-form-team { flex:1 1 auto; min-width:0; color:#E4E4E7; font-size:.72rem; font-weight:800; line-height:1.3; overflow-wrap:break-word; word-break:normal; hyphens:none; }
   .goal-form-record { color:#FACC15; font-size:1.15rem; font-weight:900; margin:4px 0; }
   .goal-form-line { color:#BFC2CA; font-size:.68rem; line-height:1.45; }
   .goal-h2h-summary { margin:.5rem 0; border:1px solid #393326; border-radius:10px; padding:9px 11px; color:#D4D4D8; background:#15191F; font-size:.78rem; line-height:1.5; }
@@ -2436,6 +2436,63 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         color:#493800 !important;
         -webkit-text-fill-color:#493800 !important;
         border:1px solid #D6B84C !important;
+      }
+
+
+      /* Reloj del partido: insignia clara, legible y con contraste dorado. */
+      .fixture-clock {
+        color:#806000 !important;
+        -webkit-text-fill-color:#806000 !important;
+        background:#FFF7DC !important;
+        border:1px solid #D6B84C !important;
+        box-shadow:0 2px 7px rgba(181,138,0,.10) !important;
+      }
+
+      /* Historial de últimos partidos y tarjetas de reacción en tema claro. */
+      .goal-form-card,
+      .goal-form-back,
+      .goal-comeback-card {
+        background:linear-gradient(145deg,#FFFFFF 0%,#F5F7FA 100%) !important;
+        border:1px solid #D6B84C !important;
+        box-shadow:0 5px 16px rgba(31,41,55,.07) !important;
+        color:#303744 !important;
+      }
+      .goal-form-back-title {
+        color:#806000 !important;
+        -webkit-text-fill-color:#806000 !important;
+        border-bottom:1px solid #E7D9A8 !important;
+        padding-bottom:8px !important;
+      }
+      .goal-form-match {
+        color:#303744 !important;
+        border-top:1px solid #E7EAF0 !important;
+      }
+      .goal-form-match-meta {
+        color:#947000 !important;
+        -webkit-text-fill-color:#947000 !important;
+      }
+      .goal-form-match-teams,
+      .goal-form-match-score {
+        color:#263142 !important;
+        -webkit-text-fill-color:#263142 !important;
+      }
+      .goal-form-team {
+        color:#263142 !important;
+        -webkit-text-fill-color:#263142 !important;
+      }
+      .goal-form-line { color:#586170 !important; -webkit-text-fill-color:#586170 !important; }
+      .goal-form-record { color:#806000 !important; -webkit-text-fill-color:#806000 !important; }
+      .goal-comeback-card b {
+        color:#806000 !important;
+        -webkit-text-fill-color:#806000 !important;
+      }
+      .goal-comeback-card span {
+        color:#303744 !important;
+        -webkit-text-fill-color:#303744 !important;
+      }
+      .goal-comeback-card small {
+        color:#68717F !important;
+        -webkit-text-fill-color:#68717F !important;
       }
 
 </style>
