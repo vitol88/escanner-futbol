@@ -2551,7 +2551,11 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         box-shadow:none !important;
       }
       .goal-last-goal { animation:none !important; }
-      .goal-last-goal span { animation:none !important; }
+      .goal-last-goal span {
+        animation:goal-minute-alarm 1.15s ease-in-out infinite !important;
+        transform-origin:center !important;
+        box-shadow:0 0 0 0 rgba(181,138,0,.38) !important;
+      }
 
 </style>
     """, unsafe_allow_html=True)
