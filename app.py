@@ -3134,8 +3134,14 @@ if _analysis_page_active:
           section.main > div.block-container:has(.h2h-page-kicker) .h2h-page-kicker + div,
           section.main > div.block-container:has(.h2h-page-kicker) .h2h-summary-layout,
           section.main > div.block-container:has(.h2h-page-kicker) .h2h-history-list {{
+            width:calc(100% - 16px) !important; max-width:calc(100% - 16px) !important;
+            min-width:0 !important; margin-left:auto !important; margin-right:auto !important;
+            box-sizing:border-box !important;
+          }}
+          section.main > div.block-container:has(.h2h-page-kicker) .h2h-description {{
             width:100% !important; max-width:100% !important; min-width:0 !important;
-            margin-left:0 !important; margin-right:0 !important; box-sizing:border-box !important;
+            margin-left:0 !important; margin-right:0 !important; padding-left:6px !important;
+            padding-right:6px !important; box-sizing:border-box !important;
           }}
           [class*="st-key-analysis_page_nav"] {{
             width:100% !important; max-width:100% !important; min-width:0 !important;
