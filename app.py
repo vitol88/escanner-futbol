@@ -1670,35 +1670,44 @@ st.markdown(f"""
 
 st.markdown("""
 <style>
-div[class*="st-key-home_nav_bar"] { width:100% !important; max-width:100% !important; padding:0 !important; }
-div[class*="st-key-home_nav_bar"] [data-testid="stRadio"] > div {
- display:flex !important; flex-direction:row !important; flex-wrap:nowrap !important;
- justify-content:space-between !important; align-items:stretch !important; gap:4px !important;
- width:100% !important; min-width:0 !important;
+/* Barra HORIZONTAL: el grupo real de radios ocupa todo el ancho */
+div[class*="st-key-home_nav_bar"] { width:100% !important; max-width:100% !important; padding:0 !important; margin:0 !important; }
+div[class*="st-key-home_nav_bar"] [data-testid="stWidgetLabel"] { display:none !important; }
+div[class*="st-key-home_nav_bar"] [role="radiogroup"] {
+ display:grid !important; grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+ grid-auto-flow:column !important; gap:5px !important; width:100% !important;
+ min-width:0 !important; align-items:stretch !important;
 }
-div[class*="st-key-home_nav_bar"] [data-testid="stRadio"] label {
- flex:1 1 0 !important; min-width:0 !important; width:25% !important; max-width:25% !important;
- display:flex !important; justify-content:center !important; align-items:center !important;
- padding:8px 2px !important; margin:0 !important; border:1px solid rgba(213,169,30,.55) !important;
+div[class*="st-key-home_nav_bar"] [role="radiogroup"] > label {
+ display:flex !important; flex-direction:column !important; align-items:center !important;
+ justify-content:center !important; box-sizing:border-box !important;
+ width:100% !important; min-width:0 !important; max-width:100% !important;
+ height:60px !important; min-height:60px !important; margin:0 !important;
+ padding:4px 2px !important; border:1px solid rgba(213,169,30,.58) !important;
  border-radius:9px !important; background:linear-gradient(145deg,#191B20,#101216) !important;
- color:#E8E8EA !important; text-align:center !important; font-weight:700 !important;
- font-size:.78rem !important; line-height:1.12 !important;
+ color:#E8E8EA !important; text-align:center !important; font-size:clamp(.65rem,.85vw,.82rem) !important;
+ font-weight:750 !important; line-height:1.1 !important; overflow:hidden !important;
 }
-div[class*="st-key-home_nav_bar"] [data-testid="stRadio"] label p {
- margin:0 !important; text-align:center !important; overflow-wrap:anywhere !important;
+div[class*="st-key-home_nav_bar"] [role="radiogroup"] > label > div:first-child {
+ display:none !important;
 }
-div[class*="st-key-home_nav_bar"] [data-testid="stRadio"] label:has(input:checked) {
+div[class*="st-key-home_nav_bar"] [role="radiogroup"] > label p {
+ margin:0 !important; padding:0 !important; width:100% !important;
+ text-align:center !important; white-space:pre-line !important; overflow-wrap:normal !important;
+ font-size:inherit !important; line-height:inherit !important;
+}
+div[class*="st-key-home_nav_bar"] [role="radiogroup"] > label:has(input:checked) {
  border:2px solid #FACC15 !important; color:#FFD52A !important;
  background:linear-gradient(145deg,#342B15,#17140D) !important;
- box-shadow:0 0 12px rgba(250,204,21,.14) !important;
+ box-shadow:0 0 12px rgba(250,204,21,.15) !important;
 }
-div[class*="st-key-home_nav_bar"] [data-testid="stRadio"] label > div:first-child { display:none !important; }
+div[class*="st-key-home_nav_bar"] [role="radiogroup"] input[type="radio"] { display:none !important; }
 @media(max-width:640px) {
- div[class*="st-key-home_nav_bar"] [data-testid="stRadio"] > div { gap:3px !important; }
- div[class*="st-key-home_nav_bar"] [data-testid="stRadio"] label {
-  height:52px !important; min-height:52px !important; padding:3px 1px !important;
-  border-radius:7px !important; font-size:clamp(.50rem,1.9vw,.62rem) !important;
-  line-height:1.04 !important; letter-spacing:-.04em !important;
+ div[class*="st-key-home_nav_bar"] [role="radiogroup"] { gap:3px !important; }
+ div[class*="st-key-home_nav_bar"] [role="radiogroup"] > label {
+  height:54px !important; min-height:54px !important; padding:3px 1px !important;
+  border-radius:8px !important; font-size:clamp(.58rem,2.0vw,.68rem) !important;
+  line-height:1.05 !important; letter-spacing:-.025em !important;
  }
 }
 </style>
@@ -1708,25 +1717,25 @@ _home_selected_id = str(((_home_selected_fixture.get("fixture") or {}).get("id")
 _home_tool_state = st.session_state.get("main_fixture_tool") or {}
 _home_active_tool = _home_tool_state.get("tool") if str(_home_tool_state.get("fixture_id")) == _home_selected_id else None
 _home_active_market = _home_tool_state.get("market") if str(_home_tool_state.get("fixture_id")) == _home_selected_id else None
-_home_default_nav = "📊 Estadísticas" if _home_active_tool == "stats" else ("⚽ Goles" if _home_active_market == "goals" else ("🚩 Córners" if _home_active_market == "corners" else ("👥 H2H" if _home_active_tool == "h2h" else "📊 Estadísticas")))
+_home_default_nav = "📊\nEstadísticas" if _home_active_tool == "stats" else ("⚽\nGoles" if _home_active_market == "goals" else ("🚩\nCórners" if _home_active_market == "corners" else ("👥\nH2H" if _home_active_tool == "h2h" else "📊\nEstadísticas")))
 with st.container(key="home_nav_bar"):
     _home_nav_choice = st.radio(
         "Navegación del partido",
-        ["📊 Estadísticas", "⚽ Goles", "🚩 Córners", "👥 H2H"],
-        index=["📊 Estadísticas", "⚽ Goles", "🚩 Córners", "👥 H2H"].index(_home_default_nav),
+        ["📊\nEstadísticas", "⚽\nGoles", "🚩\nCórners", "👥\nH2H"],
+        index=["📊\nEstadísticas", "⚽\nGoles", "🚩\nCórners", "👥\nH2H"].index(_home_default_nav),
         horizontal=True, label_visibility="collapsed", key="home_nav_choice",
         disabled=not bool(_home_selected_id),
     )
-if _home_nav_choice == "📊 Estadísticas" and _home_active_tool != "stats":
+if _home_nav_choice == "📊\nEstadísticas" and _home_active_tool != "stats":
     st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "stats"}
     st.rerun()
-if _home_nav_choice == "⚽ Goles" and _home_active_market != "goals":
+if _home_nav_choice == "⚽\nGoles" and _home_active_market != "goals":
     st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "market", "market": "goals"}
     st.rerun()
-if _home_nav_choice == "🚩 Córners" and _home_active_market != "corners":
+if _home_nav_choice == "🚩\nCórners" and _home_active_market != "corners":
     st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "market", "market": "corners"}
     st.rerun()
-if _home_nav_choice == "👥 H2H" and _home_active_tool != "h2h":
+if _home_nav_choice == "👥\nH2H" and _home_active_tool != "h2h":
     st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "h2h"}
     st.rerun()
 
