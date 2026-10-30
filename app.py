@@ -2359,6 +2359,7 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       @media(max-width:640px) {
         [class*="st-key-appearance_switch"] { top:49px !important; right:12px !important; }
         [class*="st-key-appearance_switch"] [role="radiogroup"] { gap:1px !important; padding:2px !important; }
+        [class*="st-key-appearance_switch"] { transform:scale(.78) !important; transform-origin:top right !important; }
         [class*="st-key-appearance_switch"] [role="radio"] { padding:2px 4px !important; min-width:22px !important; font-size:.76rem !important; }
       }
     </style>
@@ -2379,6 +2380,7 @@ else:
       @media(max-width:640px) {
         [class*="st-key-appearance_switch"] { top:49px !important; right:12px !important; }
         [class*="st-key-appearance_switch"] [role="radiogroup"] { gap:1px !important; padding:2px !important; }
+        [class*="st-key-appearance_switch"] { transform:scale(.78) !important; transform-origin:top right !important; }
         [class*="st-key-appearance_switch"] [role="radio"] { padding:2px 4px !important; min-width:22px !important; font-size:.76rem !important; }
       }
     </style>
@@ -2908,7 +2910,7 @@ def update_scan_progress(value, title, detail, done=False):
     )
 
 with st.container(key="scan_actions_row"):
-    st.markdown('<style>[class*="st-key-scan_actions_row"] [class*="st-key-scan_cta_card"] { max-width:560px !important; margin:0 auto !important; }</style>', unsafe_allow_html=True)
+    st.markdown('<style>[class*="st-key-scan_actions_row"] [class*="st-key-scan_cta_card"] { max-width:560px !important; margin:0 auto !important; } @media(max-width:640px) { [class*="st-key-scan_actions_row"] [class*="st-key-scan_cta_card"] { margin-top:18px !important; } }</style>', unsafe_allow_html=True)
     with st.container(key="scan_cta_card"):
         manual_scan = st.button(
             "**TOCA EL BALÓN**\n\nActualizar y analizar\n\nUn toque. Todo el análisis.",
