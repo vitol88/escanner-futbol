@@ -1672,11 +1672,11 @@ st.markdown("""
 <style>
 div[class*="st-key-home_nav_bar"] { width:100% !important; max-width:100% !important; padding:0 !important; }
 div[class*="st-key-home_nav_bar"] [data-testid="stHorizontalBlock"] { display:flex !important; flex-wrap:nowrap !important; gap:5px !important; width:100% !important; min-width:0 !important; }
-div[class*="st-key-home_nav_bar"] [data-testid="column"] { flex:1 1 0 !important; width:25% !important; max-width:25% !important; min-width:0 !important; padding:0 !important; }
+div[class*="st-key-home_nav_bar"] [data-testid="column"] { flex:0 0 calc(25% - 4px) !important; width:calc(25% - 4px) !important; max-width:calc(25% - 4px) !important; min-width:0 !important; padding:0 !important; }
 div[class*="st-key-home_topnav_stats"] button, div[class*="st-key-home_topnav_goals"] button, div[class*="st-key-home_topnav_corners"] button, div[class*="st-key-home_topnav_h2h"] button {
- box-sizing:border-box !important; width:100% !important; min-width:0 !important; height:54px !important; min-height:54px !important; padding:4px 2px !important;
+ box-sizing:border-box !important; width:100% !important; min-width:0 !important; height:42px !important; min-height:42px !important; padding:3px 1px !important;
  border:1px solid #80661B !important; border-radius:10px !important; background:linear-gradient(145deg,#1C1E23,#111317) !important;
- color:#E8E8E8 !important; font-size:.72rem !important; font-weight:800 !important; line-height:1.08 !important; white-space:pre-line !important; overflow:hidden !important;
+ color:#E8E8E8 !important; font-size:1.15rem !important; font-weight:800 !important; line-height:1 !important; white-space:nowrap !important; overflow:hidden !important;
 }
 div[class*="st-key-home_topnav_stats"] button[kind="primary"], div[class*="st-key-home_topnav_goals"] button[kind="primary"], div[class*="st-key-home_topnav_corners"] button[kind="primary"], div[class*="st-key-home_topnav_h2h"] button[kind="primary"] {
  background:linear-gradient(145deg,#3A3016,#211D11) !important; border:2px solid #FACC15 !important; color:#FFD52A !important; box-shadow:0 0 14px rgba(250,204,21,.13) !important;
@@ -1684,7 +1684,7 @@ div[class*="st-key-home_topnav_stats"] button[kind="primary"], div[class*="st-ke
 @media(max-width:640px) {
  div[class*="st-key-home_nav_bar"] [data-testid="stHorizontalBlock"] { gap:3px !important; }
  div[class*="st-key-home_topnav_stats"] button, div[class*="st-key-home_topnav_goals"] button, div[class*="st-key-home_topnav_corners"] button, div[class*="st-key-home_topnav_h2h"] button {
-  height:52px !important; min-height:52px !important; padding:3px 1px !important; font-size:.60rem !important; letter-spacing:-.035em !important; border-radius:8px !important;
+  height:40px !important; min-height:40px !important; padding:2px 1px !important; font-size:1rem !important; letter-spacing:0 !important; border-radius:8px !important;
  }
 }
 </style>
@@ -1697,13 +1697,13 @@ _home_active_market = _home_tool_state.get("market") if str(_home_tool_state.get
 with st.container(key="home_nav_bar"):
     _home_nav_cols = st.columns(4, gap="small")
     with _home_nav_cols[0]:
-        _home_stats_clicked = st.button("▥\nESTADÍSTICAS", key="home_topnav_stats", use_container_width=True, type="primary" if _home_active_tool == "stats" else "secondary", disabled=not bool(_home_selected_id))
+        _home_stats_clicked = st.button("📊", key="home_topnav_stats", use_container_width=True, type="primary" if _home_active_tool == "stats" else "secondary", disabled=not bool(_home_selected_id))
     with _home_nav_cols[1]:
-        _home_goals_clicked = st.button("⚽\nGOLES", key="home_topnav_goals", use_container_width=True, type="primary" if _home_active_market == "goals" else "secondary", disabled=not bool(_home_selected_id))
+        _home_goals_clicked = st.button("⚽", key="home_topnav_goals", use_container_width=True, type="primary" if _home_active_market == "goals" else "secondary", disabled=not bool(_home_selected_id))
     with _home_nav_cols[2]:
-        _home_corners_clicked = st.button("⚑\nCÓRNERS", key="home_topnav_corners", use_container_width=True, type="primary" if _home_active_market == "corners" else "secondary", disabled=not bool(_home_selected_id))
+        _home_corners_clicked = st.button("🚩", key="home_topnav_corners", use_container_width=True, type="primary" if _home_active_market == "corners" else "secondary", disabled=not bool(_home_selected_id))
     with _home_nav_cols[3]:
-        _home_h2h_clicked = st.button("♧\nH2H", key="home_topnav_h2h", use_container_width=True, type="primary" if _home_active_tool == "h2h" else "secondary", disabled=not bool(_home_selected_id))
+        _home_h2h_clicked = st.button("👥", key="home_topnav_h2h", use_container_width=True, type="primary" if _home_active_tool == "h2h" else "secondary", disabled=not bool(_home_selected_id))
     if _home_stats_clicked:
         st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "stats"}
         st.rerun()
