@@ -1515,8 +1515,11 @@ st.markdown("""
     background:linear-gradient(145deg,#1B1E23,#17191E) !important;
     box-shadow:0 4px 12px rgba(0,0,0,.12) !important;
   }
-  .h2h-summary-label { color:#85868B !important; font-size:.73rem !important; line-height:1.3 !important; text-transform:uppercase !important; letter-spacing:.025em !important; }
+  .h2h-summary-label { color:#AEB3BC !important; font-size:.73rem !important; line-height:1.3 !important; text-transform:uppercase !important; letter-spacing:.025em !important; }
   .h2h-summary-value { color:#FFD52A !important; font-size:1.35rem !important; font-weight:850 !important; line-height:1.45 !important; margin-top:4px !important; }
+  .h2h-summary-card:nth-child(4) .h2h-summary-value { color:#20C77A !important; }
+  .h2h-summary-card:nth-child(5) .h2h-summary-value { color:#F04455 !important; }
+  .h2h-summary-card:nth-child(6) .h2h-summary-value { font-size:1.05rem !important; }
   .h2h-history-list { width:100% !important; min-width:0 !important; }
   .h2h-match-row {
     display:grid !important; grid-template-columns:112px minmax(0,1fr) 82px minmax(0,1fr) !important;
@@ -3145,6 +3148,8 @@ else:
                                             valid_goal_totals = []
                                             draw_count = 0
                                             both_score_count = 0
+                                            home_wins_count = 0
+                                            away_wins_count = 0
                                             for past in h2h_matches:
                                                 pf, pt, pg = past.get("fixture") or {}, past.get("teams") or {}, past.get("goals") or {}
                                                 ph, pa = pt.get("home") or {}, pt.get("away") or {}
@@ -3161,6 +3166,10 @@ else:
                                                     valid_goal_totals.append(home_goals + away_goals)
                                                     if home_goals == away_goals:
                                                         draw_count += 1
+                                                    elif home_goals > away_goals:
+                                                        home_wins_count += 1
+                                                    else:
+                                                        away_wins_count += 1
                                                     if home_goals > 0 and away_goals > 0:
                                                         both_score_count += 1
                                                 h2h_html += (
@@ -3180,6 +3189,9 @@ else:
                                                 f'<div class="h2h-summary-card"><div class="h2h-summary-label">AMBOS MARCAN</div><div class="h2h-summary-value">{both_score_count}/{len(valid_goal_totals)}</div></div>'
                                                 f'<div class="h2h-summary-card"><div class="h2h-summary-label">PROM. GOLES</div><div class="h2h-summary-value">{average_goals:.2f}</div></div>'
                                                 f'<div class="h2h-summary-card"><div class="h2h-summary-label">EMPATES</div><div class="h2h-summary-value">{draw_count}/{len(valid_goal_totals)}</div></div>'
+                                                f'<div class="h2h-summary-card"><div class="h2h-summary-label">GANADOS LOCAL</div><div class="h2h-summary-value">{home_wins_count}/{len(valid_goal_totals)}</div></div>'
+                                                f'<div class="h2h-summary-card"><div class="h2h-summary-label">GANADOS VISITANTE</div><div class="h2h-summary-value">{away_wins_count}/{len(valid_goal_totals)}</div></div>'
+                                                f'<div class="h2h-summary-card"><div class="h2h-summary-label">MUESTRA</div><div class="h2h-summary-value">{len(valid_goal_totals)} PARTIDOS</div></div>'
                                                 '</div>'
                                             )
                                             st.markdown(summary_html + '<div class="h2h-history-list">' + h2h_html + '</div>', unsafe_allow_html=True)
