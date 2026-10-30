@@ -2495,6 +2495,64 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         -webkit-text-fill-color:#68717F !important;
       }
 
+
+      /* Indicadores de promedio H2H y último gol en modo claro. */
+      .goal-h2h-average-badge {
+        display:flex !important;
+        align-items:center !important;
+        flex-wrap:wrap !important;
+        gap:8px !important;
+        margin:8px 0 16px !important;
+        padding:9px 12px !important;
+        width:fit-content !important;
+        max-width:100% !important;
+        clear:both !important;
+        position:relative !important;
+        border:1px solid #D6B84C !important;
+        border-radius:10px !important;
+        background:linear-gradient(135deg,#FFFFFF 0%,#F5F7FA 100%) !important;
+        box-shadow:0 4px 12px rgba(31,41,55,.07) !important;
+        color:#806000 !important;
+      }
+      .goal-h2h-average-badge > span:first-child {
+        color:#806000 !important;
+        -webkit-text-fill-color:#806000 !important;
+        font-weight:850 !important;
+      }
+      .goal-h2h-average-badge > span:last-child {
+        display:inline-flex !important;
+        align-items:center !important;
+        justify-content:center !important;
+        padding:5px 10px !important;
+        border:1px solid #D6B84C !important;
+        border-radius:8px !important;
+        background:#F6E6A8 !important;
+        color:#493800 !important;
+        -webkit-text-fill-color:#493800 !important;
+        font-weight:900 !important;
+      }
+      .goal-last-goal {
+        background:linear-gradient(135deg,#FFFFFF 0%,#FFF9E8 100%) !important;
+        border:1px solid #D6B84C !important;
+        border-left:4px solid #B58A00 !important;
+        box-shadow:0 4px 12px rgba(31,41,55,.07) !important;
+        color:#303744 !important;
+      }
+      .goal-last-goal b,
+      .goal-last-goal strong {
+        color:#806000 !important;
+        -webkit-text-fill-color:#806000 !important;
+      }
+      .goal-last-goal span {
+        background:#F6E6A8 !important;
+        border:1px solid #D6B84C !important;
+        color:#493800 !important;
+        -webkit-text-fill-color:#493800 !important;
+        box-shadow:none !important;
+      }
+      .goal-last-goal { animation:none !important; }
+      .goal-last-goal span { animation:none !important; }
+
 </style>
     """, unsafe_allow_html=True)
 else:
@@ -4655,11 +4713,7 @@ else:
                                                         </div>
                                                         """
                                                     return f"""
-                                                    <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;
-                                                                margin:8px 0 16px;padding:7px 10px;
-                                                                border:1px solid #51451D;border-radius:9px;
-                                                                background:linear-gradient(135deg,#17191f,#20232b);
-                                                                width:fit-content;max-width:100%;clear:both;position:relative;">
+                                                    <div class="goal-h2h-average-badge">
                                                       <span style="font-size:11px;font-weight:700;color:#FACC15;letter-spacing:.3px;">
                                                         {label}
                                                       </span>
