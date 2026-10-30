@@ -2044,6 +2044,60 @@ if st.session_state.get("appearance_mode") == "☀️ Claro":
       .fl-standings-table .fl-stat-win { color:#9A7400 !important; background:#FFF5CC !important; }
       .fl-standings-table .fl-stat-draw { color:#586170 !important; background:#EDF0F4 !important; }
       .fl-standings-table .fl-stat-loss { color:#C52F3B !important; background:#FDEBED !important; }
+      /* Scanner en modo claro: estos overrides solo existen dentro del tema ☀️ Claro. */
+      [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details > summary {
+        background:#FFF2C7 !important; border:1px solid #D6B84C !important;
+        box-shadow:0 5px 16px rgba(31,41,55,.07) !important;
+      }
+      [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details > summary p {
+        color:#755800 !important; text-shadow:none !important;
+      }
+      [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details > summary::after {
+        background:#E8CC70 !important; color:#332800 !important;
+      }
+      [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] > details > summary {
+        background:linear-gradient(100deg,#FFFFFF,#F7F8FA) !important;
+        border:1px solid #DDE2E9 !important; color:#263142 !important;
+        box-shadow:0 2px 7px rgba(31,41,55,.035) !important;
+      }
+      [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] > details > summary p {
+        color:#263142 !important;
+      }
+      [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] > details > summary [data-testid="stExpanderToggleIcon] {
+        color:#947000 !important;
+      }
+      [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] > details > summary:hover {
+        background:#FFF8E5 !important; border-color:#D6B84C !important;
+        box-shadow:inset 3px 0 0 #B58A00,0 3px 9px rgba(31,41,55,.06) !important;
+      }
+      [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] > details > summary:hover p {
+        color:#755800 !important;
+      }
+      .fl-match-scoreboard {
+        background:linear-gradient(145deg,#FFFFFF 0%,#F7F8FA 100%) !important;
+        border:1px solid #DDE2E9 !important;
+        box-shadow:0 4px 13px rgba(31,41,55,.07) !important;
+      }
+      .fl-match-scoreboard.is-selected {
+        background:linear-gradient(145deg,#FFF9E8 0%,#FFF2C7 100%) !important;
+        border:1.5px solid #D6B84C !important;
+        box-shadow:inset 0 0 0 1px rgba(181,138,0,.08),0 5px 16px rgba(181,138,0,.10) !important;
+      }
+      .fl-match-clock {
+        background:linear-gradient(145deg,#FFF8E5,#F7F1DE) !important;
+        border:1px solid #D8C47E !important;
+      }
+      .fl-match-minute,.fl-match-minute-main { color:#806000 !important; text-shadow:none !important; }
+      .fl-match-clock-separator { color:#947000 !important; }
+      .fl-match-seconds { color:#755800 !important; }
+      .fl-match-team { color:#263142 !important; }
+      .fl-match-goals {
+        color:#806000 !important;
+        background:linear-gradient(145deg,#FFF1BD,#F8E8B0) !important;
+        text-shadow:none !important;
+      }
+      .fl-match-live { color:#B42318 !important; background:#FEECEB !important; border-color:#F3B7B2 !important; }
+      .fl-match-live::before { background:#DC3D35 !important; box-shadow:none !important; }
       [class*="st-key-appearance_switch"] { position:fixed !important; top:181px !important; right:16px !important; z-index:2147483002 !important; display:flex !important; justify-content:flex-end !important; width:auto !important; margin:0 !important; }
       [class*="st-key-appearance_switch"] [role="radiogroup"] {
         display:inline-flex !important; gap:4px !important; padding:4px !important;
