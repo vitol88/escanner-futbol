@@ -2511,6 +2511,41 @@ if _analysis_page_active:
             color:#FFF1A8 !important; -webkit-text-fill-color:#FFF1A8 !important; box-shadow:0 0 14px rgba(250,204,21,.15) !important;
             transform:translateY(-1px) !important;
         }}
+        /* Navegación principal horizontal: sustituye el menú lateral en las vistas de análisis. */
+        [data-testid="stSidebar"] {{ display:none !important; }}
+        [data-testid="stMain"] {{ margin-left:0 !important; }}
+        [class*="st-key-analysis_page_nav"] {{ width:100% !important; margin:0 0 12px 0 !important; }}
+        [class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{
+          display:grid !important; grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+          gap:8px !important; width:100% !important; align-items:stretch !important;
+        }}
+        [class*="st-key-analysis_page_nav"] [data-testid="column"] {{ min-width:0 !important; width:auto !important; flex:none !important; }}
+        [class*="st-key-topnav_stats_"] button, [class*="st-key-topnav_goals_"] button,
+        [class*="st-key-topnav_corners_"] button, [class*="st-key-topnav_h2h_"] button {{
+          min-height:58px !important; height:58px !important; padding:8px 5px !important;
+          border:1px solid #80661B !important; border-radius:12px !important;
+          background:linear-gradient(145deg,#1C1E23,#111317) !important;
+          color:#E8E8E8 !important; font-size:.82rem !important; font-weight:800 !important;
+          white-space:normal !important; line-height:1.2 !important;
+        }}
+        [class*="st-key-topnav_stats_"] button[kind="primary"],
+        [class*="st-key-topnav_goals_"] button[kind="primary"],
+        [class*="st-key-topnav_corners_"] button[kind="primary"],
+        [class*="st-key-topnav_h2h_"] button[kind="primary"] {{
+          background:linear-gradient(145deg,#3A3016,#211D11) !important;
+          border:2px solid #FACC15 !important; color:#FFD52A !important;
+          box-shadow:0 0 14px rgba(250,204,21,.13) !important;
+        }}
+        [class*="st-key-topnav_back_"] {{ margin-top:2px !important; }}
+        [class*="st-key-topnav_back_"] button {{ min-height:36px !important; padding:5px 10px !important; font-size:.76rem !important; }}
+        @media(max-width:640px) {{
+          [class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{ gap:5px !important; }}
+          [class*="st-key-topnav_stats_"] button, [class*="st-key-topnav_goals_"] button,
+          [class*="st-key-topnav_corners_"] button, [class*="st-key-topnav_h2h_"] button {{
+            min-height:54px !important; height:54px !important; padding:6px 3px !important;
+            font-size:.62rem !important; letter-spacing:-.025em !important;
+          }}
+        }}
         /* En la vista dedicada ocultamos los controles globales para priorizar la navegación del análisis. */
         [class*="st-key-top_status_controls"] {{ display:none !important; height:0 !important; min-height:0 !important; margin:0 !important; padding:0 !important; }}
         [class*="st-key-top_status_controls"] > div {{ display:none !important; height:0 !important; margin:0 !important; padding:0 !important; }}
@@ -2805,54 +2840,31 @@ if _analysis_page_active:
     )
     with st.container(key="analysis_page_nav"):
         _nav_market = str(_current_tool_page.get("market") or "")
-        with st.container(key="analysis_nav_back_row"):
-            if _nav_market in {"goals", "corners"}:
-                _nav_cols = st.columns(3, gap="small")
-                with _nav_cols[0]:
-                    _back_clicked = st.button("← Volver", key="analysis_page_back", use_container_width=True, help="Volver al partido")
-                with _nav_cols[1]:
-                    _top_scan_clicked = st.button("⚽ Escanear en vivo", key="analysis_page_scan", use_container_width=True, help="Escanear en vivo")
-                with _nav_cols[2]:
-                    _top_refresh_clicked = st.button("⟳ Actualizar", key="analysis_page_refresh", use_container_width=True, help="Actualizar escáner")
-            else:
-                # En Estadísticas y H2H la navegación ya está disponible en el menú lateral.
-                # No duplicar el botón "Volver al partido" dentro de esas pantallas.
-                _back_clicked = False
-                _top_scan_clicked = False
-                _top_refresh_clicked = False
-            if _top_scan_clicked or _top_refresh_clicked:
-                _requested_action = "scan" if _top_scan_clicked else "refresh"
-                st.session_state["analysis_scan_request"] = {
-                    "fixture_id": _analysis_page_id,
-                    "market": _nav_market,
-                    "action": _requested_action,
-                }
-                st.session_state["analysis_scan_feedback"] = {
-                    "fixture_id": _analysis_page_id,
-                    "market": _nav_market,
-                    "action": _requested_action,
-                    "state": "running",
-                }
-                st.rerun()
-            _visible_feedback = st.session_state.get("analysis_scan_feedback") or {}
-            if str(_visible_feedback.get("fixture_id")) == _analysis_page_id and _visible_feedback.get("market") == _nav_market:
-                if _visible_feedback.get("action") == "refresh":
-                    _feedback_done = _visible_feedback.get("state") == "done"
-                    _feedback_title = "ACTUALIZADO" if _feedback_done else "ACTUALIZANDO…"
-                    _feedback_subtitle = "Los datos y señales se actualizaron" if _feedback_done else "Actualizando datos y señales de este partido"
-                    _feedback_width = "100%" if _feedback_done else "58%"
-                    _feedback_class = "scan-refresh-feedback is-done" if _feedback_done else "scan-refresh-feedback"
-                    st.markdown(
-                        f'<div class="{_feedback_class}"><div class="scan-refresh-feedback-top"><span class="scan-code-icon">{"✓" if _feedback_done else "⟳"}</span><div><strong>{_feedback_title}</strong><div class="scan-running-subtitle">{_feedback_subtitle}</div></div></div><div class="scan-refresh-track"><div class="scan-refresh-fill" style="width:{_feedback_width}"></div></div></div>',
-                        unsafe_allow_html=True,
-                    )
-                else:
-                    st.markdown(
-                        '<div class="scan-running-status"><span class="scan-code-icon">⟳</span><div><strong>ESCANEANDO…</strong><div class="scan-running-subtitle">Actualizando señales y datos en vivo</div></div><span class="scan-sweep"></span></div>',
-                        unsafe_allow_html=True,
-                    )
+        _nav_tool = str(_current_tool_page.get("tool") or "")
+        _nav_cols = st.columns(4, gap="small")
+        with _nav_cols[0]:
+            _nav_stats_clicked = st.button("▥  ESTADÍSTICAS", key=f"topnav_stats_{_analysis_page_id}", use_container_width=True, type="primary" if _nav_tool == "stats" else "secondary")
+        with _nav_cols[1]:
+            _nav_goals_clicked = st.button("⚽  GOLES Y SEÑALES", key=f"topnav_goals_{_analysis_page_id}", use_container_width=True, type="primary" if _nav_market == "goals" else "secondary")
+        with _nav_cols[2]:
+            _nav_corners_clicked = st.button("⚑  CÓRNERS", key=f"topnav_corners_{_analysis_page_id}", use_container_width=True, type="primary" if _nav_market == "corners" else "secondary")
+        with _nav_cols[3]:
+            _nav_h2h_clicked = st.button("♧  H2H", key=f"topnav_h2h_{_analysis_page_id}", use_container_width=True, type="primary" if _nav_tool == "h2h" else "secondary")
+        if _nav_stats_clicked:
+            st.session_state["main_fixture_tool"] = {"fixture_id": _analysis_page_id, "tool": "stats"}
+            st.rerun()
+        if _nav_goals_clicked:
+            st.session_state["main_fixture_tool"] = {"fixture_id": _analysis_page_id, "tool": "market", "market": "goals"}
+            st.rerun()
+        if _nav_corners_clicked:
+            st.session_state["main_fixture_tool"] = {"fixture_id": _analysis_page_id, "tool": "market", "market": "corners"}
+            st.rerun()
+        if _nav_h2h_clicked:
+            st.session_state["main_fixture_tool"] = {"fixture_id": _analysis_page_id, "tool": "h2h"}
+            st.rerun()
+        # Acceso de regreso sin abrir el panel lateral.
+        _back_clicked = st.button("← Volver a partidos en vivo", key=f"topnav_back_{_analysis_page_id}", help="Regresar a la lista de partidos")
         if _back_clicked:
-            # Mantener abierta la liga y el encuentro que originaron esta vista.
             st.session_state[f"live_match_{_analysis_page_id}"] = True
             for _match in st.session_state.get("live_fixtures", []):
                 _fixture = _match.get("fixture") or {}
