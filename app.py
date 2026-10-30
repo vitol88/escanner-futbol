@@ -2956,7 +2956,7 @@ if _analysis_page_active:
         }}
         [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] {{
           display:flex !important; justify-content:flex-start !important;
-          width:100% !important; margin:0 !important; padding:0 !important;
+          width:100% !important; margin:112px 0 0 0 !important; padding:0 !important;
         }}
         [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] [data-testid="stButton"] {{
           width:auto !important; max-width:100% !important; margin:0 !important;
