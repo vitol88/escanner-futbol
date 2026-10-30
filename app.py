@@ -2557,6 +2557,28 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         box-shadow:0 0 0 0 rgba(181,138,0,.38) !important;
       }
 
+
+      /* Tip headings stay visible in light mode; one clear title per card section. */
+      .tip-section-heading {
+        color:#20242C !important;
+        -webkit-text-fill-color:#20242C !important;
+      }
+      .tip-section-heading > span:not(.tip-heading-icon):not(.tip-heading-status) {
+        color:#20242C !important;
+        -webkit-text-fill-color:#20242C !important;
+      }
+      .tip-heading-icon {
+        color:#A77B00 !important;
+        -webkit-text-fill-color:#A77B00 !important;
+        text-shadow:none !important;
+      }
+      .tip-heading-status {
+        color:#806000 !important;
+        -webkit-text-fill-color:#806000 !important;
+        background:#FFF7DC !important;
+        border-color:#D6B84C !important;
+      }
+      .risk-heading .tip-heading-icon { color:#A77B00 !important; }
 </style>
     """, unsafe_allow_html=True)
 else:
@@ -4856,25 +4878,25 @@ else:
                                                 if match_main_options:
                                                     selected_main = max(match_main_options, key=lambda x: x["prob"])
                                                     st.markdown(
-                                                        f'<div class="tip-card"><div class="tip-card-label">✦ SEÑAL PRINCIPAL</div>'
+                                                        f'<div class="tip-card">'
                                                         f'<div class="tip-card-title">{html.escape(selected_main["market"])}</div>'
                                                         f'<div class="tip-card-meta">{html.escape(selected_main["bookmaker"])} · mercado en vivo verificado</div></div>',
                                                         unsafe_allow_html=True,
                                                     )
                                                 else:
-                                                    st.markdown('<div class="tip-card tip-card-empty"><div class="tip-card-label">✦ SEÑAL PRINCIPAL</div><div class="tip-card-title">Sin oportunidad confirmada por ahora</div><div class="tip-card-meta">Esperando una cuota disponible con respaldo estadístico.</div></div>', unsafe_allow_html=True)
+                                                    st.markdown('<div class="tip-card tip-card-empty"><div class="tip-card-title">Sin oportunidad confirmada por ahora</div><div class="tip-card-meta">Esperando una cuota disponible con respaldo estadístico.</div></div>', unsafe_allow_html=True)
 
                                                 st.markdown('<div class="tip-section-heading risk-heading"><span class="tip-heading-icon">⌁</span><span>TIP DE ALTO RIESGO</span><span class="tip-heading-status">RIESGO ALTO</span></div>', unsafe_allow_html=True)
                                                 if match_risk_options:
                                                     selected_risk = max(match_risk_options, key=lambda x: x["prob"])
                                                     st.markdown(
-                                                        f'<div class="tip-card risk-tip-card"><div class="tip-card-label">⚡ SEÑAL DE ALTO RIESGO</div>'
+                                                        f'<div class="tip-card risk-tip-card">'
                                                         f'<div class="tip-card-title">{html.escape(selected_risk["market"])}</div>'
                                                         f'<div class="tip-card-meta">{html.escape(selected_risk["bookmaker"])} · mercado en vivo verificado</div></div>',
                                                         unsafe_allow_html=True,
                                                     )
                                                 else:
-                                                    st.markdown('<div class="tip-card risk-tip-card tip-card-empty"><div class="tip-card-label">⚡ SEÑAL DE ALTO RIESGO</div><div class="tip-card-title">Sin oportunidad confirmada por ahora</div><div class="tip-card-meta">No se fuerza una selección ni se inventa un mercado.</div></div>', unsafe_allow_html=True)
+                                                    st.markdown('<div class="tip-card risk-tip-card tip-card-empty"><div class="tip-card-title">Sin oportunidad confirmada por ahora</div><div class="tip-card-meta">No se fuerza una selección ni se inventa un mercado.</div></div>', unsafe_allow_html=True)
 
                                                 # Numerology is strictly risk-only context, never a standalone prediction.
                                                 match_stats_for_patterns = st.session_state.stats_cache.get(str(match_id), [])
@@ -5180,15 +5202,15 @@ else:
                                                     st.markdown('<div class="tip-section-heading"><span class="tip-heading-icon">◈</span><span>TIP PRINCIPAL</span></div>', unsafe_allow_html=True)
                                                     if main_options:
                                                         chosen = max(main_options, key=lambda option: option["edge"])
-                                                        st.markdown(f'<div class="tip-card"><div class="tip-card-label">✦ SEÑAL PRINCIPAL · CUOTA {chosen["odd"]:.2f}</div><div class="tip-card-title">{html.escape(chosen["market"])}</div><div class="tip-card-meta">{html.escape(chosen["bookmaker"])} · probabilidad exploratoria {chosen["prob"]:.1%} · ventaja estimada {chosen["edge"]:.1%}</div></div>', unsafe_allow_html=True)
+                                                        st.markdown(f'<div class="tip-card"><div class="tip-card-title">{html.escape(chosen["market"])}</div><div class="tip-card-meta">{html.escape(chosen["bookmaker"])} · probabilidad exploratoria {chosen["prob"]:.1%} · ventaja estimada {chosen["edge"]:.1%}</div></div>', unsafe_allow_html=True)
                                                     else:
-                                                        st.markdown('<div class="tip-card tip-card-empty"><div class="tip-card-label">✦ SEÑAL PRINCIPAL</div><div class="tip-card-title">Sin oportunidad confirmada por ahora</div><div class="tip-card-meta">Se requiere respaldo estadístico suficiente.</div></div>', unsafe_allow_html=True)
+                                                        st.markdown('<div class="tip-card tip-card-empty"><div class="tip-card-title">Sin oportunidad confirmada por ahora</div><div class="tip-card-meta">Se requiere respaldo estadístico suficiente.</div></div>', unsafe_allow_html=True)
                                                     st.markdown('<div class="tip-section-heading risk-heading"><span class="tip-heading-icon">⌁</span><span>TIP DE ALTO RIESGO</span></div>', unsafe_allow_html=True)
                                                     if risk_options:
                                                         chosen_risk = max(risk_options, key=lambda option: option["edge"])
-                                                        st.markdown(f'<div class="tip-card risk-tip-card"><div class="tip-card-label">⚡ SEÑAL DE ALTO RIESGO · CUOTA {chosen_risk["odd"]:.2f}</div><div class="tip-card-title">{html.escape(chosen_risk["market"])}</div><div class="tip-card-meta">{html.escape(chosen_risk["bookmaker"])} · probabilidad exploratoria {chosen_risk["prob"]:.1%} · ventaja estimada {chosen_risk["edge"]:.1%}</div></div>', unsafe_allow_html=True)
+                                                        st.markdown(f'<div class="tip-card risk-tip-card"><div class="tip-card-title">{html.escape(chosen_risk["market"])}</div><div class="tip-card-meta">{html.escape(chosen_risk["bookmaker"])} · probabilidad exploratoria {chosen_risk["prob"]:.1%} · ventaja estimada {chosen_risk["edge"]:.1%}</div></div>', unsafe_allow_html=True)
                                                     else:
-                                                        st.markdown('<div class="tip-card risk-tip-card tip-card-empty"><div class="tip-card-label">⚡ SEÑAL DE ALTO RIESGO</div><div class="tip-card-title">Sin oportunidad confirmada por ahora</div><div class="tip-card-meta">Se requiere respaldo estadístico suficiente.</div></div>', unsafe_allow_html=True)
+                                                        st.markdown('<div class="tip-card risk-tip-card tip-card-empty"><div class="tip-card-title">Sin oportunidad confirmada por ahora</div><div class="tip-card-meta">Se requiere respaldo estadístico suficiente.</div></div>', unsafe_allow_html=True)
                                                     goals = match.get("goals") or {}
                                                     patterns = numerology_context(goals.get("home"), goals.get("away"), home_c, away_c, safe_stat(st.session_state.stats_cache.get(str(match_id), []), "Yellow Cards", 0), safe_stat(st.session_state.stats_cache.get(str(match_id), []), "Yellow Cards", 1))
                                             elif corner_item:
@@ -5841,7 +5863,7 @@ else:
                         )
                         st.markdown('<div class="tip-section-heading"><span class="tip-heading-icon">◈</span><span>TIP PRINCIPAL</span><span class="tip-heading-status">EN VIVO</span></div>', unsafe_allow_html=True)
                         st.markdown(
-                            f'<div class="tip-card"><div class="tip-card-label">TIP PRINCIPAL · CUOTA {chosen_main["odd"]:.2f}</div>'
+                            f'<div class="tip-card">'
                             f'<div class="tip-card-title">{html.escape(chosen_main["market"])}</div>'
                             f'<div class="tip-card-meta">{html.escape(chosen_main["bookmaker"])} · Probabilidad estimada {chosen_main["model_prob"]:.1%} · Implícita {chosen_main["implied_probability"]:.1%} · Ventaja estimada {chosen_main["estimated_edge"]:.1%}</div></div>',
                             unsafe_allow_html=True,
@@ -5858,7 +5880,7 @@ else:
                         st.markdown('<div class="tip-section-heading risk-heading"><span class="tip-heading-icon">⌁</span><span>TIP DE ALTO RIESGO</span><span class="tip-heading-status">RIESGO ALTO</span></div>', unsafe_allow_html=True)
                         for risk_item in selected_risk:
                             st.markdown(
-                                f'<div class="tip-card risk-tip-card"><div class="tip-card-label">ALTO RIESGO · CUOTA {risk_item["odd"]:.2f}</div>'
+                                f'<div class="tip-card risk-tip-card">'
                                 f'<div class="tip-card-title">{html.escape(risk_item["market"])}</div>'
                                 f'<div class="tip-card-meta">{html.escape(risk_item["bookmaker"])} · Probabilidad estimada {risk_item["model_prob"]:.1%} · Implícita {risk_item["implied_probability"]:.1%} · Ventaja estimada {risk_item["estimated_edge"]:.1%}</div></div>',
                                 unsafe_allow_html=True,
@@ -6125,7 +6147,7 @@ else:
                             if main_options:
                                 chosen = max(main_options, key=lambda option: option["edge"])
                                 st.markdown(
-                                    f'<div class="tip-card"><div class="tip-card-label">TIP PRINCIPAL</div>'
+                                    f'<div class="tip-card">'
                                     f'<div class="tip-card-title">{html.escape(chosen["market"])}</div>'
                                     f'<div class="tip-card-meta">Cuota {chosen["odd"]:.2f} · {html.escape(chosen["bookmaker"])} · probabilidad exploratoria {chosen["probability"]:.1%}</div></div>',
                                     unsafe_allow_html=True,
@@ -6136,7 +6158,7 @@ else:
                             if risk_options:
                                 chosen_risk = max(risk_options, key=lambda option: option["edge"])
                                 st.markdown(
-                                    f'<div class="tip-card risk-tip-card"><div class="tip-card-label">ALTO RIESGO</div>'
+                                    f'<div class="tip-card risk-tip-card">'
                                     f'<div class="tip-card-title">{html.escape(chosen_risk["market"])}</div>'
                                     f'<div class="tip-card-meta">Cuota {chosen_risk["odd"]:.2f} · {html.escape(chosen_risk["bookmaker"])} · probabilidad exploratoria {chosen_risk["probability"]:.1%}</div></div>',
                                     unsafe_allow_html=True,
