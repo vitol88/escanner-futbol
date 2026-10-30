@@ -1566,6 +1566,47 @@ st.markdown("""
     caret-color:transparent !important;
     user-select:none !important;
   }
+  .h2h-summary-layout {
+    display:flex !important; flex-direction:column !important; gap:10px !important;
+    width:100% !important; max-width:100% !important; min-width:0 !important;
+    box-sizing:border-box !important; margin:4px 0 14px !important;
+  }
+  .h2h-sample-card, .h2h-result-card, .h2h-secondary-card {
+    min-width:0 !important; box-sizing:border-box !important;
+    border:1px solid #302B20 !important; border-radius:14px !important;
+    background:linear-gradient(145deg,#1B1E23,#14161B) !important;
+    box-shadow:0 4px 12px rgba(0,0,0,.12) !important;
+  }
+  .h2h-sample-card { padding:12px 14px !important; text-align:center !important; }
+  .h2h-sample-value { color:#E8CC70 !important; font-size:1.45rem !important; font-weight:900 !important; line-height:1.35 !important; margin-top:3px !important; }
+  .h2h-results-grid {
+    display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    gap:8px !important; width:100% !important; min-width:0 !important;
+  }
+  .h2h-result-card { padding:12px 8px !important; text-align:center !important; }
+  .h2h-result-card .h2h-summary-label { min-height:2.5em !important; display:flex !important; align-items:center !important; justify-content:center !important; font-size:.66rem !important; letter-spacing:.015em !important; }
+  .h2h-result-count { color:#F4F4F5 !important; font-size:1.2rem !important; font-weight:850 !important; line-height:1.35 !important; margin-top:5px !important; }
+  .h2h-result-pct { color:#E8CC70 !important; font-size:1.25rem !important; font-weight:900 !important; line-height:1.3 !important; margin-top:3px !important; }
+  .h2h-distribution { padding:10px 12px !important; border:1px solid #302B20 !important; border-radius:12px !important; background:#111419 !important; }
+  .h2h-distribution-heading { display:flex !important; justify-content:space-between !important; gap:8px !important; color:#AEB3BC !important; font-size:.68rem !important; font-weight:750 !important; letter-spacing:.06em !important; }
+  .h2h-distribution-heading strong { color:#E8CC70 !important; font-size:.78rem !important; }
+  .h2h-distribution-track { display:flex !important; overflow:hidden !important; width:100% !important; height:9px !important; margin:9px 0 7px !important; border-radius:99px !important; background:#292D34 !important; gap:1px !important; }
+  .h2h-distribution-track span { display:block !important; min-width:0 !important; height:100% !important; }
+  .h2h-distribution-home { background:#E8CC70 !important; }
+  .h2h-distribution-draw { background:#858B98 !important; }
+  .h2h-distribution-away { background:#75A9D6 !important; }
+  .h2h-distribution-legend { display:flex !important; justify-content:space-between !important; flex-wrap:wrap !important; gap:4px 8px !important; color:#AEB3BC !important; font-size:.62rem !important; }
+  .h2h-secondary-grid { display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:9px !important; width:100% !important; min-width:0 !important; }
+  .h2h-secondary-card { padding:12px 13px !important; }
+  .h2h-secondary-value { color:#E8CC70 !important; font-size:1.3rem !important; font-weight:900 !important; line-height:1.35 !important; margin-top:5px !important; }
+  .h2h-secondary-pct, .h2h-secondary-note { color:#AEB3BC !important; font-size:.72rem !important; margin-top:2px !important; }
+  @media(max-width:390px) {
+    .h2h-result-card { padding:10px 5px !important; }
+    .h2h-result-card .h2h-summary-label { font-size:.59rem !important; }
+    .h2h-result-count { font-size:1.05rem !important; }
+    .h2h-result-pct { font-size:1.12rem !important; }
+    .h2h-distribution-legend { font-size:.57rem !important; }
+  }
   .h2h-summary-grid {
     display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)) !important;
     gap:10px !important; width:100% !important; max-width:100% !important;
@@ -3402,14 +3443,37 @@ else:
                                                 average_goals = sum(valid_goal_totals) / len(valid_goal_totals)
                                             else:
                                                 average_goals = 0.0
+                                            h2h_sample_size = len(valid_goal_totals)
+                                            if h2h_sample_size:
+                                                home_pct = round(home_wins_count / h2h_sample_size * 100, 1)
+                                                draw_pct = round(draw_count / h2h_sample_size * 100, 1)
+                                                away_pct = round(100.0 - home_pct - draw_pct, 1)
+                                                both_pct = round(both_score_count / h2h_sample_size * 100, 1)
+                                            else:
+                                                home_pct = draw_pct = away_pct = both_pct = 0.0
+                                            def h2h_pct_label(value):
+                                                return f"{value:.1f}".replace(".", ",") + "%"
                                             summary_html = (
-                                                '<div class="h2h-summary-grid">'
-                                                f'<div class="h2h-summary-card"><div class="h2h-summary-label">AMBOS MARCAN</div><div class="h2h-summary-value">{both_score_count}/{len(valid_goal_totals)}</div></div>'
-                                                f'<div class="h2h-summary-card"><div class="h2h-summary-label">PROM. GOLES</div><div class="h2h-summary-value">{average_goals:.2f}</div></div>'
-                                                f'<div class="h2h-summary-card"><div class="h2h-summary-label">EMPATES</div><div class="h2h-summary-value">{draw_count}/{len(valid_goal_totals)}</div></div>'
-                                                f'<div class="h2h-summary-card"><div class="h2h-summary-label">GANADOS LOCAL</div><div class="h2h-summary-value">{home_wins_count}/{len(valid_goal_totals)}</div></div>'
-                                                f'<div class="h2h-summary-card"><div class="h2h-summary-label">GANADOS VISITANTE</div><div class="h2h-summary-value">{away_wins_count}/{len(valid_goal_totals)}</div></div>'
-                                                f'<div class="h2h-summary-card"><div class="h2h-summary-label">MUESTRA</div><div class="h2h-summary-value">{len(valid_goal_totals)} PARTIDOS</div></div>'
+                                                '<div class="h2h-summary-layout">'
+                                                f'<div class="h2h-sample-card"><div class="h2h-summary-label">MUESTRA</div><div class="h2h-sample-value">{h2h_sample_size} PARTIDOS</div></div>'
+                                                '<div class="h2h-results-grid">'
+                                                f'<div class="h2h-result-card"><div class="h2h-summary-label">GANADOR LOCAL</div><div class="h2h-result-count">{home_wins_count}/{h2h_sample_size}</div><div class="h2h-result-pct">{h2h_pct_label(home_pct)}</div></div>'
+                                                f'<div class="h2h-result-card"><div class="h2h-summary-label">EMPATE</div><div class="h2h-result-count">{draw_count}/{h2h_sample_size}</div><div class="h2h-result-pct">{h2h_pct_label(draw_pct)}</div></div>'
+                                                f'<div class="h2h-result-card"><div class="h2h-summary-label">GANADOR VISITANTE</div><div class="h2h-result-count">{away_wins_count}/{h2h_sample_size}</div><div class="h2h-result-pct">{h2h_pct_label(away_pct)}</div></div>'
+                                                '</div>'
+                                                '<div class="h2h-distribution">'
+                                                '<div class="h2h-distribution-heading"><span>DISTRIBUCIÓN DE RESULTADOS</span><strong>100%</strong></div>'
+                                                '<div class="h2h-distribution-track">'
+                                                f'<span class="h2h-distribution-home" style="width:{home_pct}%"></span>'
+                                                f'<span class="h2h-distribution-draw" style="width:{draw_pct}%"></span>'
+                                                f'<span class="h2h-distribution-away" style="width:{away_pct}%"></span>'
+                                                '</div>'
+                                                f'<div class="h2h-distribution-legend"><span>Local {h2h_pct_label(home_pct)}</span><span>Empate {h2h_pct_label(draw_pct)}</span><span>Visitante {h2h_pct_label(away_pct)}</span></div>'
+                                                '</div>'
+                                                '<div class="h2h-secondary-grid">'
+                                                f'<div class="h2h-secondary-card"><div class="h2h-summary-label">AMBOS MARCAN</div><div class="h2h-secondary-value">{both_score_count}/{h2h_sample_size}</div><div class="h2h-secondary-pct">{h2h_pct_label(both_pct)}</div></div>'
+                                                f'<div class="h2h-secondary-card"><div class="h2h-summary-label">PROMEDIO DE GOLES</div><div class="h2h-secondary-value">{average_goals:.2f}</div><div class="h2h-secondary-note">Goles por partido</div></div>'
+                                                '</div>'
                                                 '</div>'
                                             )
                                             st.markdown(summary_html + '<div class="h2h-history-list">' + h2h_html + '</div>', unsafe_allow_html=True)
