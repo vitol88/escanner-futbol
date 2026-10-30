@@ -1277,6 +1277,20 @@ st.markdown("""
     line-height:1.5 !important; font-weight:850 !important; white-space:pre-line !important;
     text-align:left !important; box-shadow:inset 0 0 24px rgba(250,204,21,.08),0 0 0 1px rgba(250,204,21,.12) !important;
   }
+  /* Solo jerarquía tipográfica del texto del CTA; geometría y animación permanecen intactas. */
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p { margin:0 !important; }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:has(strong) {
+    margin:0 0 5px !important; line-height:1.12 !important;
+  }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button strong {
+    display:block !important; color:#FFE36A !important;
+    font-size:clamp(1.18rem,4.2vw,1.55rem) !important;
+    font-weight:950 !important; letter-spacing:.035em !important;
+  }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:not(:has(strong)) {
+    color:#C9CDD5 !important; font-size:clamp(.76rem,2.5vw,.9rem) !important;
+    font-weight:550 !important; line-height:1.2 !important;
+  }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
     content:"" !important; position:absolute !important; left:4% !important; top:50% !important;
     width:min(38%,170px) !important; aspect-ratio:1 !important; height:auto !important;
@@ -2449,7 +2463,7 @@ with st.container(key="scan_actions_row"):
     with scan_action_cols[0]:
         with st.container(key="scan_cta_card"):
             manual_scan = st.button(
-                "FOOTBALL LAB\nTOCA EL BALÓN\nPara escanear partidos en vivo",
+                "**TOCA EL BALÓN**\n\nPara escanear",
                 type="primary",
                 key="scan_all_live",
             )
