@@ -2635,6 +2635,46 @@ else:
       }
     </style>
     """, unsafe_allow_html=True)
+else:
+    st.markdown("""
+    <style>
+      /* Indicador promedio H2H: tarjeta compacta también en modo oscuro. */
+      .goal-h2h-average-badge {
+        display:flex !important;
+        align-items:center !important;
+        flex-wrap:wrap !important;
+        gap:8px !important;
+        margin:8px 0 16px !important;
+        padding:9px 12px !important;
+        width:fit-content !important;
+        max-width:100% !important;
+        clear:both !important;
+        position:relative !important;
+        border:1px solid #66551F !important;
+        border-radius:10px !important;
+        background:linear-gradient(135deg,#171A20 0%,#101216 100%) !important;
+        box-shadow:0 4px 14px rgba(0,0,0,.22) !important;
+        color:#FACC15 !important;
+      }
+      .goal-h2h-average-badge > span:first-child {
+        color:#FACC15 !important;
+        -webkit-text-fill-color:#FACC15 !important;
+        font-weight:850 !important;
+      }
+      .goal-h2h-average-badge > span:last-child {
+        display:inline-flex !important;
+        align-items:center !important;
+        justify-content:center !important;
+        padding:5px 10px !important;
+        border:1px solid #E6BD24 !important;
+        border-radius:8px !important;
+        background:#FACC15 !important;
+        color:#171717 !important;
+        -webkit-text-fill-color:#171717 !important;
+        font-weight:900 !important;
+      }
+    </style>
+    """, unsafe_allow_html=True)
 
 # La hora se calcula en el navegador para respetar la zona horaria local de cada dispositivo.
 st.components.v1.html("""
