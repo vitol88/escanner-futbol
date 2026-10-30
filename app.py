@@ -214,9 +214,10 @@ st.markdown("""
     box-shadow:0 0 9px rgba(250,204,21,.45) !important;
   }
   .fl-scan-progress-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:7px 0 0; font-family:system-ui,-apple-system,sans-serif; }
-  .fl-scan-progress-title { color:#FFF1A8 !important; -webkit-text-fill-color:#FFF1A8 !important; opacity:1 !important; display:inline-block !important; font-size:11px; line-height:1.25; font-weight:900; letter-spacing:.12em; text-transform:uppercase; }
-  .fl-scan-progress-percent { color:#FFE45C !important; -webkit-text-fill-color:#FFE45C !important; opacity:1 !important; display:inline-block !important; font-size:12px; line-height:1.25; font-weight:900; font-variant-numeric:tabular-nums; text-shadow:0 0 10px rgba(250,204,21,.24); }
-  .fl-scan-progress-caption { display:flex; align-items:center; gap:6px; color:#C4C7CE !important; -webkit-text-fill-color:#C4C7CE !important; opacity:1 !important; font-size:10px; line-height:1.35; margin:4px 0 0; }
+  [class*="st-key-scan-progress"] .fl-scan-progress-head { display:flex !important; visibility:visible !important; opacity:1 !important; min-height:16px !important; }
+  [class*="st-key-scan-progress"] .fl-scan-progress-title { color:#FFF1A8 !important; -webkit-text-fill-color:#FFF1A8 !important; opacity:1 !important; visibility:visible !important; display:inline-block !important; font-size:11px !important; line-height:1.25 !important; font-weight:900 !important; letter-spacing:.12em; text-transform:uppercase; }
+  [class*="st-key-scan-progress"] .fl-scan-progress-percent { color:#FFE45C !important; -webkit-text-fill-color:#FFE45C !important; opacity:1 !important; visibility:visible !important; display:inline-block !important; font-size:12px !important; line-height:1.25 !important; font-weight:900 !important; font-variant-numeric:tabular-nums; text-shadow:0 0 10px rgba(250,204,21,.24); }
+  [class*="st-key-scan-progress"] .fl-scan-progress-caption { display:flex !important; visibility:visible !important; align-items:center; gap:6px; color:#D6D3B8 !important; -webkit-text-fill-color:#D6D3B8 !important; opacity:1 !important; font-size:10px !important; line-height:1.35 !important; margin:4px 0 0; }
   .fl-scan-progress-caption .fl-live-dot { width:5px; height:5px; flex:0 0 5px; border-radius:50%; background:#FACC15; box-shadow:0 0 8px #FACC15; animation:fl-live-pulse 1.2s ease-in-out infinite; }
   .fl-scan-progress-caption.is-done { color:#F1E8BF !important; -webkit-text-fill-color:#F1E8BF !important; opacity:1 !important; }
   .fl-scan-progress-caption.is-done .fl-live-dot { background:#86EFAC; box-shadow:0 0 7px #86EFAC; animation:none; }
@@ -2062,10 +2063,28 @@ if st.session_state.get("appearance_mode") == "☀️ Claro":
         box-shadow:0 0 7px rgba(181,138,0,.16) !important;
         animation:none !important;
       }
-      .fl-scan-progress-title { color:#755800 !important; }
-      .fl-scan-progress-percent { color:#806000 !important; text-shadow:none !important; }
-      .fl-scan-progress-caption { color:#68717F !important; }
-      .fl-scan-progress-caption.is-done { color:#536273 !important; }
+      [class*="st-key-scan-progress"] .fl-scan-progress-head {
+        display:flex !important; visibility:visible !important; opacity:1 !important;
+        min-height:16px !important; margin:7px 0 2px !important;
+      }
+      [class*="st-key-scan-progress"] .fl-scan-progress-title {
+        display:inline-block !important; visibility:visible !important; opacity:1 !important;
+        color:#755800 !important; -webkit-text-fill-color:#755800 !important;
+        font-size:11px !important; font-weight:900 !important; line-height:1.25 !important;
+      }
+      [class*="st-key-scan-progress"] .fl-scan-progress-percent {
+        display:inline-block !important; visibility:visible !important; opacity:1 !important;
+        color:#755800 !important; -webkit-text-fill-color:#755800 !important;
+        font-size:12px !important; font-weight:900 !important; text-shadow:none !important;
+      }
+      [class*="st-key-scan-progress"] .fl-scan-progress-caption {
+        display:flex !important; visibility:visible !important; opacity:1 !important;
+        color:#174A80 !important; -webkit-text-fill-color:#174A80 !important;
+        font-size:10px !important; font-weight:600 !important; line-height:1.35 !important;
+      }
+      [class*="st-key-scan-progress"] .fl-scan-progress-caption.is-done {
+        color:#174A80 !important; -webkit-text-fill-color:#174A80 !important;
+      }
       .fl-scan-progress-caption .fl-live-dot { background:#C49A20 !important; box-shadow:none !important; }
       .fl-scan-progress-caption.is-done .fl-live-dot { background:#258653 !important; }
 
