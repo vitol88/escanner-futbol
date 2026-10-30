@@ -2045,6 +2045,25 @@ if st.session_state.get("appearance_mode") == "☀️ Claro":
       .fl-standings-table .fl-stat-draw { color:#586170 !important; background:#EDF0F4 !important; }
       .fl-standings-table .fl-stat-loss { color:#C52F3B !important; background:#FDEBED !important; }
       /* Scanner en modo claro: estos overrides solo existen dentro del tema ☀️ Claro. */
+      /* Liga que contiene el partido seleccionado: azul tecnológico, solo en modo claro. */
+      [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"]:has(.fl-match-scoreboard.is-selected) > details > summary {
+        background:linear-gradient(100deg,#E8F2FF,#DDEBFC) !important;
+        border:1.5px solid #3978C8 !important;
+        box-shadow:inset 3px 0 0 #3978C8,0 3px 10px rgba(36,99,166,.09) !important;
+      }
+      [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"]:has(.fl-match-scoreboard.is-selected) > details > summary p {
+        color:#174A80 !important;
+        font-weight:800 !important;
+      }
+      [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"]:has(.fl-match-scoreboard.is-selected) > details > summary [data-testid="stExpanderToggleIcon"] {
+        color:#2463A6 !important;
+      }
+      [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"]:has(.fl-match-scoreboard.is-selected) > details > summary:hover {
+        background:#DCEBFC !important;
+        border-color:#2463A6 !important;
+        box-shadow:inset 3px 0 0 #2463A6,0 4px 12px rgba(36,99,166,.13) !important;
+      }
+
       [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details > summary {
         background:#FFF2C7 !important; border:1px solid #D6B84C !important;
         box-shadow:0 5px 16px rgba(31,41,55,.07) !important;
