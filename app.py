@@ -1302,12 +1302,12 @@ st.markdown("""
     display:block !important; position:relative !important; overflow:hidden !important;
     width:100% !important; min-width:100% !important; min-height:160px !important; height:160px !important;
     box-sizing:border-box !important; padding:20px 18px 20px 49% !important;
-    border-radius:22px !important; border:2px solid #FACC15 !important;
+    border-radius:25px !important; border:2px solid #F5CE4D !important;
     background-color:#090A0D !important;
-    background-image:radial-gradient(ellipse at 20% 50%,rgba(250,204,21,.14),transparent 42%),linear-gradient(135deg,#090A0D,#17191F) !important;
+    background-image:radial-gradient(ellipse at 18% 48%,rgba(250,204,21,.19),transparent 43%),radial-gradient(ellipse at 82% 10%,rgba(255,226,125,.07),transparent 38%),linear-gradient(132deg,#08090C 0%,#111318 58%,#19170F 100%) !important;
     color:#F4F4F5 !important; font-size:clamp(1rem,3.8vw,1.35rem) !important;
     line-height:1.5 !important; font-weight:850 !important; white-space:pre-line !important;
-    text-align:left !important; box-shadow:inset 0 0 24px rgba(250,204,21,.08),0 0 0 1px rgba(250,204,21,.12) !important;
+    text-align:left !important; box-shadow:inset 0 1px 0 rgba(255,245,190,.34),inset 0 0 28px rgba(250,204,21,.10),0 0 0 1px rgba(250,204,21,.22),0 8px 26px rgba(0,0,0,.34),0 0 22px rgba(250,204,21,.12) !important;
   }
   /* Solo jerarquía tipográfica del texto del CTA; geometría y animación permanecen intactas. */
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p { margin:0 !important; }
@@ -1315,9 +1315,10 @@ st.markdown("""
     margin:0 0 5px !important; line-height:1.12 !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button strong {
-    display:block !important; color:#FFE36A !important;
-    font-size:clamp(1.18rem,4.2vw,1.55rem) !important;
-    font-weight:950 !important; letter-spacing:.035em !important;
+    display:block !important; color:#FFE27A !important;
+    font-size:clamp(1.22rem,4.35vw,1.62rem) !important;
+    font-weight:950 !important; letter-spacing:.055em !important;
+    text-shadow:0 2px 12px rgba(250,204,21,.20) !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:not(:has(strong)) {
     color:#F1D66D !important; font-size:clamp(.88rem,2.8vw,1rem) !important;
@@ -1333,14 +1334,14 @@ st.markdown("""
     transform:translateY(-50%); border-radius:50% !important; border:3px solid #FACC15 !important;
     background-color:#090A0D !important;
     background-image:radial-gradient(circle at center,#FACC15 0 6%,#14151A 7% 14%,transparent 15%),repeating-radial-gradient(circle at center,transparent 0 10px,rgba(250,204,21,.55) 11px 13px,transparent 14px 20px),conic-gradient(from 0deg,transparent 0 12%,rgba(250,204,21,.95) 16%,transparent 28% 48%,rgba(250,204,21,.45) 53%,transparent 68%) !important;
-    box-shadow:0 0 20px rgba(250,204,21,.45),inset 0 0 18px rgba(250,204,21,.25) !important;
+    box-shadow:0 0 25px rgba(250,204,21,.55),inset 0 0 22px rgba(250,204,21,.30),0 0 0 5px rgba(250,204,21,.045) !important;
     animation:scanner-radar-spin 3s linear infinite !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
     content:"⚽" !important; position:absolute !important; left:23% !important; top:50% !important;
     transform:translate(-50%,-50%); width:40px !important; height:40px !important;
     display:flex !important; align-items:center !important; justify-content:center !important;
-    font-size:clamp(1.8rem,6vw,2.7rem) !important; filter:drop-shadow(0 0 10px rgba(250,204,21,.75)) !important;
+    font-size:clamp(1.8rem,6vw,2.7rem) !important; filter:sepia(1) saturate(2.2) hue-rotate(2deg) drop-shadow(0 0 12px rgba(250,204,21,.82)) !important;
     animation:scanner-ball-orbit 2s ease-in-out infinite !important;
   }
   /* Botones de escaneo/actualización dentro de Goles y Córners: selector por key para evitar que queden pequeños. */
@@ -2025,14 +2026,15 @@ if st.session_state.get("appearance_mode") == "☀️ Claro":
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
         background-color:#FFFFFF !important;
-        background-image:radial-gradient(ellipse at 20% 50%,rgba(250,204,21,.13),transparent 42%),linear-gradient(135deg,#FFFFFF,#F2F4F7) !important;
+        background-image:radial-gradient(ellipse at 18% 48%,rgba(250,204,21,.18),transparent 43%),linear-gradient(132deg,#FFFFFF 0%,#F8F8F5 58%,#F3EBD4 100%) !important;
         color:#20242C !important;
-        box-shadow:inset 0 0 24px rgba(181,138,0,.055),0 5px 18px rgba(31,41,55,.10) !important;
+        border-color:#D6B84C !important;
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.95),inset 0 0 26px rgba(181,138,0,.08),0 0 0 1px rgba(181,138,0,.18),0 8px 24px rgba(31,41,55,.12) !important;
       }
-      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button strong { color:#9A7400 !important; }
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button strong { color:#947000 !important; text-shadow:0 2px 10px rgba(181,138,0,.18) !important; }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:not(:has(strong)) { color:#9A7400 !important; }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) { color:#68717F !important; }
-      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before { background-color:#FFFFFF !important; }
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before { background-color:#FFFFFF !important; box-shadow:0 0 26px rgba(181,138,0,.30),inset 0 0 22px rgba(181,138,0,.18) !important; }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button:hover { background-color:#FFFFFF !important; }
 
       /* Mantener el escáner claro también durante hover, pulsación y foco. */
