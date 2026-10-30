@@ -5058,9 +5058,12 @@ else:
             for item in st.session_state.get("live_fixtures", [])
             if (item.get("fixture") or {}).get("id") is not None
         }
-        for cached_stats_key in list(st.session_state.stats_cache):
-            if str(cached_stats_key) in live_fixture_ids_for_refresh:
-                st.session_state.stats_cache.pop(cached_stats_key, None)
+        # Si el botón balón acaba de actualizar el listado, conserva las estadísticas
+        # consultadas durante esa misma actualización para no duplicar llamadas a la API.
+        if not manual_scan:
+            for cached_stats_key in list(st.session_state.stats_cache):
+                if str(cached_stats_key) in live_fixture_ids_for_refresh:
+                    st.session_state.stats_cache.pop(cached_stats_key, None)
         st.session_state.goal_scan_results = []
         st.session_state.corner_scan_results = []
         # Fetch live statistics before estimating goals, so this same scan can
@@ -5103,7 +5106,8 @@ else:
         # Refresh no more often than the scan itself; the API plan limits still apply.
         odds_now = datetime.now().timestamp()
         last_odds_epoch = float(st.session_state.get("live_odds_last_fetch_epoch", 0) or 0)
-        if get_api_key() and (manual_scan or odds_now - last_odds_epoch >= 300):
+        # El pipeline del balón ya consultó cuotas en la fase de actualización; reutilizar ese resultado.
+        if get_api_key() and odds_now - last_odds_epoch >= 300:
             try:
                 odds_payload = api_get("odds/live")
                 st.session_state.live_odds_by_fixture = extract_live_odds(odds_payload)
