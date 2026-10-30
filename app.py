@@ -3083,9 +3083,40 @@ if _analysis_page_active:
           box-shadow:none !important;
         }}
         @media(max-width:640px) {{
-          [class*="st-key-analysis_page_nav"] {{ margin-top:-112px !important; margin-bottom:16px !important; }}
+          /* H2H: mantener todo el contenido dentro del ancho real del móvil. */
+          section.main, [data-testid="stMain"], section.main > div.block-container {{
+            width:100% !important; max-width:100% !important; min-width:0 !important;
+            margin-left:0 !important; margin-right:0 !important; box-sizing:border-box !important;
+            overflow-x:hidden !important;
+          }}
+          section.main > div.block-container:has(.h2h-page-kicker) {{
+            padding-left:12px !important; padding-right:12px !important;
+          }}
+          section.main > div.block-container:has(.h2h-page-kicker) .h2h-page-kicker,
+          section.main > div.block-container:has(.h2h-page-kicker) .h2h-page-kicker + div,
+          section.main > div.block-container:has(.h2h-page-kicker) .h2h-summary-layout,
+          section.main > div.block-container:has(.h2h-page-kicker) .h2h-history-list {{
+            width:100% !important; max-width:100% !important; min-width:0 !important;
+            margin-left:0 !important; margin-right:0 !important; box-sizing:border-box !important;
+          }}
+          [class*="st-key-analysis_page_nav"] {{
+            width:100% !important; max-width:100% !important; min-width:0 !important;
+            margin-left:0 !important; margin-right:0 !important; padding-left:8px !important;
+            padding-right:8px !important; box-sizing:border-box !important; overflow:visible !important;
+          }}
+          [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] {{
+            width:100% !important; max-width:100% !important; min-width:0 !important;
+            margin-left:0 !important; margin-right:0 !important; box-sizing:border-box !important;
+          }}
+          [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] [data-testid="stButton"] {{
+            width:100% !important; max-width:100% !important; min-width:0 !important;
+            box-sizing:border-box !important;
+          }}
           [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button {{
-            min-height:36px !important; height:36px !important; font-size:.78rem !important;
+            width:auto !important; max-width:100% !important; min-width:0 !important;
+            height:auto !important; min-height:38px !important; padding:6px 4px !important;
+            white-space:normal !important; overflow-wrap:anywhere !important;
+            box-sizing:border-box !important; font-size:.78rem !important;
           }}
         }}
 </style>
