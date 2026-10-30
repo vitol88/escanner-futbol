@@ -2022,6 +2022,28 @@ if st.session_state.get("appearance_mode") == "☀️ Claro":
       .live-stats-league,.live-stats-team,.live-stats-team strong { color:#303744 !important; }
       .live-stats-score { background:#FFFFFF !important; color:#947000 !important; border-color:#D6B84C !important; text-shadow:none !important; }
       .live-stats-metrics { color:#303744 !important; }
+      /* Estadísticas: contraste azul oscuro para etiquetas y cifras en modo claro. */
+      .live-stat-values,
+      .live-stat-values span {
+        color:#174A80 !important;
+        -webkit-text-fill-color:#174A80 !important;
+        font-weight:650 !important;
+      }
+      .live-stat-values strong,
+      .live-stat-values strong:first-child,
+      .live-stat-values strong:last-child {
+        color:#123F70 !important;
+        -webkit-text-fill-color:#123F70 !important;
+        font-weight:900 !important;
+      }
+      .live-stat-track { background:#DCE4EF !important; }
+      .live-stats-pitch .pitch-minute,
+      .live-stats-pitch .pitch-score,
+      .live-stats-pitch .pitch-team,
+      .live-stats-pitch .pitch-team span {
+        color:#FFFFFF !important;
+      }
+
       .fl-standings-scroll { background:#FFFFFF !important; border-color:#D6B84C !important; box-shadow:0 8px 22px rgba(31,41,55,.08) !important; }
       .fl-standings-table { color:#303744 !important; }
       .fl-standings-table th { background:#F4F0E2 !important; color:#785B00 !important; border-bottom-color:#D8C47E !important; }
