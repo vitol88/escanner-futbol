@@ -1693,7 +1693,17 @@ div[class*="st-key-home_topnav_stats"] button, div[class*="st-key-home_topnav_go
  color:#E8E8E8 !important; font-size:1.15rem !important; font-weight:800 !important; line-height:1 !important; white-space:nowrap !important; overflow:hidden !important;
 }
 div[class*="st-key-home_topnav_stats"] button[kind="primary"], div[class*="st-key-home_topnav_goals"] button[kind="primary"], div[class*="st-key-home_topnav_corners"] button[kind="primary"], div[class*="st-key-home_topnav_h2h"] button[kind="primary"] {
- background:linear-gradient(145deg,#3A3016,#211D11) !important; border:2px solid #FACC15 !important; color:#FFD52A !important; box-shadow:0 0 14px rgba(250,204,21,.13) !important;
+ background:#FFE34D !important; background-color:#FFE34D !important;
+ border:2px solid #FFF29A !important; color:#090A0D !important;
+ box-shadow:0 0 0 1px rgba(255,227,77,.28),0 0 18px rgba(255,211,36,.38) !important;
+ font-weight:900 !important;
+}
+div[class*="st-key-home_topnav_stats"] button[kind="primary"]:hover,
+div[class*="st-key-home_topnav_goals"] button[kind="primary"]:hover,
+div[class*="st-key-home_topnav_corners"] button[kind="primary"]:hover,
+div[class*="st-key-home_topnav_h2h"] button[kind="primary"]:hover {
+ background:#FFF078 !important; border-color:#FFF6BD !important;
+ color:#090A0D !important; box-shadow:0 0 22px rgba(255,227,77,.5) !important;
 }
 @media(max-width:640px) {
  div[class*="st-key-home_nav_bar"] [data-testid="stHorizontalBlock"] { grid-template-columns:repeat(4,minmax(0,1fr)) !important; gap:0 !important; column-gap:0 !important; }
