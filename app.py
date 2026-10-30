@@ -2056,6 +2056,47 @@ if st.session_state.get("appearance_mode") == "☀️ Claro":
       .fl-standings-table tr.is-away-focus td { background:#FFF3C4 !important; }
       .fl-standings-table tr.is-home-focus .fl-standings-team span { color:#075985 !important; }
       .fl-standings-table tr.is-away-focus .fl-standings-team span { color:#806000 !important; }
+
+      /* Resaltado de los dos equipos del partido en clasificación: mayor especificidad que el CSS interno de la tabla. */
+      .fl-standings-scroll .fl-standings-table tbody tr.is-home-focus td {
+        background:#E5F1FF !important;
+        color:#174A80 !important;
+        border-top:1px solid #9DBCE5 !important;
+        border-bottom:1px solid #9DBCE5 !important;
+      }
+      .fl-standings-scroll .fl-standings-table tbody tr.is-home-focus td:first-child {
+        box-shadow:inset 4px 0 0 #3978C8 !important;
+      }
+      .fl-standings-scroll .fl-standings-table tbody tr.is-home-focus .fl-standings-rank,
+      .fl-standings-scroll .fl-standings-table tbody tr.is-home-focus .fl-standings-rank span {
+        color:#174A80 !important;
+        background:#D4E7FC !important;
+        border-color:#8DB4E3 !important;
+      }
+      .fl-standings-scroll .fl-standings-table tbody tr.is-home-focus .fl-standings-team span {
+        color:#123F70 !important;
+        font-weight:950 !important;
+      }
+      .fl-standings-scroll .fl-standings-table tbody tr.is-away-focus td {
+        background:#FFF3CC !important;
+        color:#755800 !important;
+        border-top:1px solid #E5CD7C !important;
+        border-bottom:1px solid #E5CD7C !important;
+      }
+      .fl-standings-scroll .fl-standings-table tbody tr.is-away-focus td:first-child {
+        box-shadow:inset 4px 0 0 #C49A20 !important;
+      }
+      .fl-standings-scroll .fl-standings-table tbody tr.is-away-focus .fl-standings-rank,
+      .fl-standings-scroll .fl-standings-table tbody tr.is-away-focus .fl-standings-rank span {
+        color:#755800 !important;
+        background:#F9E7A7 !important;
+        border-color:#D6B84C !important;
+      }
+      .fl-standings-scroll .fl-standings-table tbody tr.is-away-focus .fl-standings-team span {
+        color:#684D00 !important;
+        font-weight:950 !important;
+      }
+
       .fl-standings-heading { background:linear-gradient(100deg,#FFF7DC,#FFFFFF) !important; border-color:#E2D39E !important; }
       .fl-standings-heading-title,.fl-standings-heading-league { color:#806000 !important; }
       .h2h-summary-card,.h2h-history-list,.h2h-match-row,.h2h-summary-layout {
