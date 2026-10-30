@@ -3475,23 +3475,30 @@ else:
                                           box-sizing:border-box !important;
                                         }
                                         [class*="st-key-league_standings_cta"] [data-testid="stButton"] > button {
-                                          display:flex !important; align-items:center !important; justify-content:flex-start !important;
-                                          gap:11px !important; width:100% !important; min-width:0 !important; max-width:100% !important;
+                                          display:flex !important; flex-direction:row !important; align-items:center !important;
+                                          justify-content:flex-start !important; gap:10px !important;
+                                          width:100% !important; min-width:0 !important; max-width:100% !important;
                                           height:54px !important; min-height:54px !important; max-height:54px !important;
                                           padding:0 16px !important; box-sizing:border-box !important; overflow:hidden !important;
-                                          border:1px solid #8A7026 !important; border-radius:13px !important;
-                                          color:#F4D777 !important; -webkit-text-fill-color:#F4D777 !important;
-                                          background:linear-gradient(110deg,#292414 0%,#1B1D23 62%,#15171C 100%) !important;
-                                          font-size:.92rem !important; font-weight:850 !important; letter-spacing:.015em !important;
+                                          border:1px solid #A88A36 !important; border-radius:13px !important;
+                                          color:#FFE27A !important; -webkit-text-fill-color:#FFE27A !important;
+                                          background:linear-gradient(105deg,#302817 0%,#1D1F25 58%,#15171C 100%) !important;
+                                          font-size:1rem !important; font-weight:900 !important; letter-spacing:.035em !important;
                                           line-height:1 !important; text-align:left !important; white-space:nowrap !important;
-                                          box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 4px 13px rgba(0,0,0,.22) !important;
+                                          box-shadow:inset 0 1px 0 rgba(255,255,255,.065),0 4px 13px rgba(0,0,0,.24),inset 3px 0 0 rgba(250,204,21,.65) !important;
                                           transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .18s ease !important;
+                                        }
+                                        [class*="st-key-league_standings_cta"] [data-testid="stButton"] > button > div {
+                                          display:flex !important; flex:0 1 auto !important; align-items:center !important;
+                                          justify-content:flex-start !important; width:auto !important; min-width:0 !important;
+                                          margin:0 !important; padding:0 !important; gap:10px !important;
                                         }
                                         [class*="st-key-league_standings_cta"] [data-testid="stButton"] > button p {
                                           display:block !important; visibility:visible !important; opacity:1 !important;
                                           margin:0 !important; padding:0 !important; color:inherit !important;
                                           -webkit-text-fill-color:inherit !important; font-size:inherit !important;
-                                          line-height:1 !important; white-space:nowrap !important;
+                                          font-weight:900 !important; letter-spacing:.035em !important;
+                                          line-height:1 !important; white-space:nowrap !important; text-align:left !important;
                                         }
                                         [class*="st-key-league_standings_cta"] [data-testid="stButton"] > button [data-testid="stIconMaterial"],
                                         [class*="st-key-league_standings_cta"] [data-testid="stButton"] > button svg {
@@ -3513,7 +3520,7 @@ else:
                                           [class*="st-key-league_standings_cta"] { margin:10px 0 14px !important; }
                                           [class*="st-key-league_standings_cta"] [data-testid="stButton"] > button {
                                             height:50px !important; min-height:50px !important; max-height:50px !important;
-                                            padding:0 13px !important; font-size:.86rem !important; border-radius:11px !important;
+                                            padding:0 13px !important; font-size:.94rem !important; border-radius:11px !important;
                                           }
                                           [class*="st-key-league_standings_cta"] [data-testid="stButton"] > button [data-testid="stIconMaterial"],
                                           [class*="st-key-league_standings_cta"] [data-testid="stButton"] > button svg {
