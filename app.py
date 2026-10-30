@@ -1709,9 +1709,20 @@ st.markdown("""
       border-right:1px solid rgba(232,204,112,.24) !important;
     }
     .h2h-page-kicker {
-      margin-top:-65px !important; font-size:.94rem !important; letter-spacing:.045em !important;
-      line-height:1.35 !important; margin-bottom:12px !important; padding:11px 10px !important;
+      width:calc(100% - 16px) !important; max-width:calc(100% - 16px) !important;
+      margin-top:-65px !important; margin-right:auto !important; margin-bottom:12px !important; margin-left:auto !important;
+      box-sizing:border-box !important; font-size:.94rem !important; letter-spacing:.045em !important;
+      line-height:1.35 !important; padding:11px 10px !important;
       gap:7px !important; border-radius:9px !important;
+    }
+    .h2h-description {
+      width:calc(100% - 16px) !important; max-width:calc(100% - 16px) !important;
+      margin:8px auto 12px !important; padding:0 6px !important;
+      box-sizing:border-box !important;
+    }
+    .h2h-summary-layout {
+      width:calc(100% - 16px) !important; max-width:calc(100% - 16px) !important;
+      margin:4px auto 14px !important; box-sizing:border-box !important;
     }
     .h2h-page-kicker + div {
       box-sizing:border-box !important; width:100% !important; max-width:100% !important;
@@ -1729,7 +1740,14 @@ st.markdown("""
     .h2h-summary-label { font-size:.66rem !important; line-height:1.3 !important; overflow-wrap:normal !important; white-space:normal !important; }
     .h2h-summary-value { font-size:1.08rem !important; line-height:1.35 !important; overflow-wrap:normal !important; white-space:normal !important; }
     .h2h-summary-card:nth-child(6) .h2h-summary-value { font-size:.92rem !important; }
-    .h2h-history-list { width:100% !important; max-width:100% !important; overflow:hidden !important; }
+    .h2h-history-list {
+      width:calc(100% - 16px) !important; max-width:calc(100% - 16px) !important;
+      margin-left:auto !important; margin-right:auto !important;
+      box-sizing:border-box !important; overflow:hidden !important;
+      border-left:1px solid rgba(232,204,112,.24) !important;
+      border-right:1px solid rgba(232,204,112,.24) !important;
+      border-radius:12px !important;
+    }
     .h2h-match-row { grid-template-columns:64px minmax(0,1fr) 52px minmax(0,1fr) !important; gap:4px !important; padding:9px 5px !important; max-width:100% !important; overflow:hidden !important; }
     .h2h-match-row .h2h-date { font-size:.62rem !important; }
     .h2h-match-row .h2h-team { min-width:0 !important; gap:3px !important; font-size:.65rem !important; }
