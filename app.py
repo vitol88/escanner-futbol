@@ -2026,6 +2026,45 @@ if st.session_state.get("appearance_mode") == "☀️ Claro":
       .scan-code-icon { color:#B58A00 !important; text-shadow:0 0 12px rgba(181,138,0,.28) !important; }
       .scan-running-subtitle { color:#68717F !important; }
       .scan-sweep { background:linear-gradient(90deg,transparent,#C49A20,transparent) !important; }
+
+      /* Las dos barras reales de progreso: pista gris azulada y avance dorado. */
+      [class*="st-key-scan-progress"] [data-testid="stProgress"] {
+        background:transparent !important;
+      }
+      [class*="st-key-scan-progress"] [data-testid="stProgress"] > div {
+        height:auto !important;
+        min-height:0 !important;
+        background:transparent !important;
+        border:0 !important;
+        box-shadow:none !important;
+        overflow:visible !important;
+      }
+      [class*="st-key-scan-progress"] [data-testid="stProgress"] [role="progressbar"] {
+        height:10px !important;
+        min-height:10px !important;
+        border-radius:999px !important;
+        overflow:hidden !important;
+        background:#E8EDF4 !important;
+        border:1px solid #D5DEE9 !important;
+        box-shadow:inset 0 1px 2px rgba(31,41,55,.06) !important;
+      }
+      [class*="st-key-scan-progress"] [data-testid="stProgress"] [role="progressbar"] > div,
+      [class*="st-key-scan-progress"] [data-testid="stProgress"] [role="progressbar"] > div > div {
+        height:100% !important;
+        border:0 !important;
+        border-radius:999px !important;
+        background:linear-gradient(90deg,#D6B84C 0%,#E8C85F 48%,#F2D77D 100%) !important;
+        background-size:100% 100% !important;
+        box-shadow:0 0 7px rgba(181,138,0,.16) !important;
+        animation:none !important;
+      }
+      .fl-scan-progress-title { color:#755800 !important; }
+      .fl-scan-progress-percent { color:#806000 !important; text-shadow:none !important; }
+      .fl-scan-progress-caption { color:#68717F !important; }
+      .fl-scan-progress-caption.is-done { color:#536273 !important; }
+      .fl-scan-progress-caption .fl-live-dot { background:#C49A20 !important; box-shadow:none !important; }
+      .fl-scan-progress-caption.is-done .fl-live-dot { background:#258653 !important; }
+
       [class*="st-key-analysis_scan_radar_goals_"] [data-testid="stButton"] > button:hover,
       [class*="st-key-analysis_scan_goals_"] [data-testid="stButton"] > button:hover,
       [class*="st-key-analysis_scan_radar_corners_"] [data-testid="stButton"] > button:hover,
