@@ -2633,11 +2633,6 @@ if st.session_state.get("appearance_mode") not in {"☀️", "☀️ Claro"}:
         [class*="st-key-appearance_switch"] { transform:scale(.78) !important; transform-origin:top right !important; }
         [class*="st-key-appearance_switch"] [role="radio"] { padding:2px 4px !important; min-width:22px !important; font-size:.76rem !important; }
       }
-    </style>
-    """, unsafe_allow_html=True)
-else:
-    st.markdown("""
-    <style>
       /* Indicador promedio H2H: tarjeta compacta también en modo oscuro. */
       .goal-h2h-average-badge {
         display:flex !important;
@@ -2675,6 +2670,7 @@ else:
       }
     </style>
     """, unsafe_allow_html=True)
+
 
 # La hora se calcula en el navegador para respetar la zona horaria local de cada dispositivo.
 st.components.v1.html("""
