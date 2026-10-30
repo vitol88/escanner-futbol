@@ -3484,6 +3484,21 @@ if _analysis_page_active:
         [data-testid="stVerticalBlockBorderWrapper"]:has([class*="st-key-live_match_{_analysis_page_id}"]) > [data-testid="stVerticalBlock"] {{
           border:0 !important; outline:0 !important; box-shadow:none !important; background:transparent !important;
         }}
+        /* Neutralizar también los wrappers ANCESTROS de Streamlit: el marco visible rodea al contenedor del partido desde fuera. */
+        section.main > div.block-container:has([class*="st-key-live_match_{_analysis_page_id}"]),
+        section.main > div.block-container:has([class*="st-key-live_match_{_analysis_page_id}"]) [data-testid="stVerticalBlockBorderWrapper"],
+        section.main > div.block-container:has([class*="st-key-live_match_{_analysis_page_id}"]) [data-testid="stVerticalBlockBorderWrapper"] > [data-testid="stVerticalBlock"],
+        section.main > div.block-container:has([class*="st-key-live_match_{_analysis_page_id}"]) [class*="st-key-live_match_{_analysis_page_id}"] {{
+          border-left:0 !important; border-right:0 !important; border-top:0 !important;
+          outline:0 !important; box-shadow:none !important;
+        }}
+        /* El separador superior heredado no forma parte del diseño de Goles y señales. */
+        section.main > div.block-container:has([class*="st-key-live_match_{_analysis_page_id}"]) hr {{
+          display:none !important; border:0 !important; height:0 !important; margin:0 !important;
+        }}
+        section.main > div.block-container:has([class*="st-key-live_match_{_analysis_page_id}"]) [data-testid="stVerticalBlockBorderWrapper"] {{
+          border-color:transparent !important;
+        }}
         [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stExpander"] {{ border:0 !important; margin:0 !important; padding:0 !important; }}
         [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stExpander"] > details > div {{ padding:0 !important; margin:0 !important; }}
         /* Mantener visibles las cuatro herramientas durante toda la navegación del análisis. */
