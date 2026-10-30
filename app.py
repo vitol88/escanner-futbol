@@ -3477,6 +3477,13 @@ if _analysis_page_active:
         [class*="st-key-live_now_expander"] {{ border:0 !important; margin:0 !important; padding:0 !important; }}
         [class*="st-key-live_league_"]:has([class*="st-key-live_match_{_analysis_page_id}"]) {{ border:0 !important; margin:0 !important; padding:0 !important; }}
         [class*="st-key-live_match_{_analysis_page_id}"] {{ display:block !important; width:100% !important; max-width:100% !important; margin:0 !important; padding:0 !important; border:0 !important; }}
+        /* Quitar el marco exterior heredado de la vista de análisis; conservar los bordes de las tarjetas internas. */
+        [data-testid="stVerticalBlockBorderWrapper"]:has([class*="st-key-live_match_{_analysis_page_id}"]) {{
+          border:0 !important; outline:0 !important; box-shadow:none !important; background:transparent !important;
+        }}
+        [data-testid="stVerticalBlockBorderWrapper"]:has([class*="st-key-live_match_{_analysis_page_id}"]) > [data-testid="stVerticalBlock"] {{
+          border:0 !important; outline:0 !important; box-shadow:none !important; background:transparent !important;
+        }}
         [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stExpander"] {{ border:0 !important; margin:0 !important; padding:0 !important; }}
         [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stExpander"] > details > div {{ padding:0 !important; margin:0 !important; }}
         /* Mantener visibles las cuatro herramientas durante toda la navegación del análisis. */
