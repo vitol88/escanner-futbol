@@ -232,6 +232,67 @@ st.markdown("""
     [class*="st-key-control_row"] { gap:.45rem !important; }
     [class*="st-key-control_row"] button { font-size:.78rem !important; padding:.3rem .4rem !important; }
     [class*="st-key-control_row"] label { font-size:.78rem !important; }
+
+    /* Ajuste móvil: progreso alineado al ancho útil, sin desbordes ni escala excesiva. */
+    [class*="st-key-scan-progress"] {
+      display:block !important;
+      width:calc(100% - 18px) !important;
+      max-width:100% !important;
+      min-width:0 !important;
+      margin:8px auto 12px !important;
+      padding:0 !important;
+      box-sizing:border-box !important;
+    }
+    [class*="st-key-scan-progress"] > div,
+    [class*="st-key-scan-progress"] [data-testid="stVerticalBlock"],
+    [class*="st-key-scan-progress"] [data-testid="stElementContainer"] {
+      width:100% !important;
+      max-width:100% !important;
+      min-width:0 !important;
+      box-sizing:border-box !important;
+    }
+    [class*="st-key-scan-progress"] [data-testid="stProgress"] {
+      width:100% !important;
+      margin:5px 0 0 !important;
+    }
+    [class*="st-key-scan-progress"] [data-testid="stProgress"] > div,
+    [class*="st-key-scan-progress"] [data-testid="stProgress"] [role="progressbar"] {
+      height:8px !important;
+      min-height:8px !important;
+    }
+    .fl-scan-progress-head {
+      width:100% !important;
+      gap:8px !important;
+      margin:5px 0 0 !important;
+    }
+    .fl-scan-progress-title {
+      font-size:10px !important;
+      letter-spacing:.095em !important;
+      line-height:1.2 !important;
+    }
+    .fl-scan-progress-percent {
+      flex:0 0 auto !important;
+      font-size:11px !important;
+    }
+    .fl-scan-progress-caption {
+      width:100% !important;
+      max-width:100% !important;
+      font-size:9px !important;
+      line-height:1.3 !important;
+      white-space:normal !important;
+      overflow-wrap:anywhere !important;
+    }
+    .scan-running-status {
+      width:calc(100% - 18px) !important;
+      max-width:100% !important;
+      margin:8px auto 0 !important;
+      padding:10px 12px !important;
+      gap:9px !important;
+      box-sizing:border-box !important;
+      font-size:.82rem !important;
+    }
+    .scan-code-icon { font-size:1.65rem !important; }
+    .scan-running-subtitle { font-size:.74rem !important; }
   }
 
   [class*="st-key-sound_enabled_toggle"] { padding:5px 8px; border:1px solid #393326; border-radius:12px; background:#15191F; }
