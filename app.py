@@ -1562,6 +1562,23 @@ st.markdown("""
   section.main [data-testid="stMarkdownContainer"] * {
     caret-color:transparent !important;
   }
+  .h2h-description {
+    display:block !important; width:100% !important; max-width:100% !important;
+    min-width:0 !important; box-sizing:border-box !important;
+    margin:8px 0 12px !important; padding:0 10px !important;
+    color:#AEB3BC !important; font-size:.9rem !important; line-height:1.55 !important;
+    white-space:normal !important; overflow:visible !important;
+    overflow-wrap:anywhere !important; word-break:normal !important;
+    text-indent:0 !important;
+  }
+  @media(max-width:640px) {
+    .h2h-description {
+      width:100% !important; max-width:100% !important; min-width:0 !important;
+      margin:8px 0 12px !important; padding:0 10px !important;
+      font-size:.82rem !important; line-height:1.5 !important;
+      box-sizing:border-box !important; overflow-wrap:anywhere !important;
+    }
+  }
   .h2h-page-kicker, .h2h-page-kicker * {
     caret-color:transparent !important;
     user-select:none !important;
@@ -3431,9 +3448,9 @@ else:
                                             h2h_matches = h2h_data["matches"]
                                             if h2h_data.get("scope") == "league":
                                                 league_name_safe = html.escape(str(_match_league.get("name") or "la competición actual"))
-                                                st.caption(f"Últimos {len(h2h_matches)} enfrentamientos finalizados de {league_name_safe}, con el equipo local actual jugando en casa.")
+                                                st.markdown(f'<div class="h2h-description">Últimos {len(h2h_matches)} enfrentamientos finalizados de {league_name_safe}, con el equipo local actual jugando en casa.</div>', unsafe_allow_html=True)
                                             else:
-                                                st.caption(f"Últimos {len(h2h_matches)} enfrentamientos finalizados con el equipo local actual jugando en casa; se prioriza la misma competición y se completa con otras si hace falta.")
+                                                st.markdown(f'<div class="h2h-description">Últimos {len(h2h_matches)} enfrentamientos finalizados con el equipo local actual jugando en casa; se prioriza la misma competición y se completa con otras si hace falta.</div>', unsafe_allow_html=True)
                                             h2h_html = ""
                                             valid_goal_totals = []
                                             draw_count = 0
