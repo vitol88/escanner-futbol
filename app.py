@@ -2358,7 +2358,8 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       [class*="st-key-appearance_switch"] [data-testid="stMarkdownContainer"] p { color:#596273 !important; }
       @media(max-width:640px) {
         [class*="st-key-appearance_switch"] { top:49px !important; right:12px !important; }
-        [class*="st-key-appearance_switch"] [role="radio"] { padding:3px 6px !important; min-width:27px !important; font-size:.9rem !important; }
+        [class*="st-key-appearance_switch"] [role="radiogroup"] { gap:1px !important; padding:2px !important; }
+        [class*="st-key-appearance_switch"] [role="radio"] { padding:2px 4px !important; min-width:22px !important; font-size:.76rem !important; }
       }
     </style>
     """, unsafe_allow_html=True)
@@ -2377,7 +2378,8 @@ else:
       [class*="st-key-appearance_switch"] [data-testid="stMarkdownContainer"] p { color:#B9BEC8 !important; }
       @media(max-width:640px) {
         [class*="st-key-appearance_switch"] { top:49px !important; right:12px !important; }
-        [class*="st-key-appearance_switch"] [role="radio"] { padding:3px 6px !important; min-width:27px !important; font-size:.9rem !important; }
+        [class*="st-key-appearance_switch"] [role="radiogroup"] { gap:1px !important; padding:2px !important; }
+        [class*="st-key-appearance_switch"] [role="radio"] { padding:2px 4px !important; min-width:22px !important; font-size:.76rem !important; }
       }
     </style>
     """, unsafe_allow_html=True)
