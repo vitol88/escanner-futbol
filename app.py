@@ -896,13 +896,14 @@ st.markdown("""
   .match-analysis-kicker { color:#FACC15; font-size:.72rem; font-weight:900; letter-spacing:1.2px; text-transform:uppercase; }
   .match-analysis-title { color:#F4F4F5; font-size:1.08rem; font-weight:850; margin:.25rem 0 .65rem; }
   .goals-section-title {
-    display:flex !important; align-items:center !important; gap:10px !important;
-    margin:8px 0 16px !important; padding:0 0 12px !important; width:100% !important;
-    border-bottom:2px solid rgba(250,204,21,.42) !important;
-    color:#F8FAFC !important; font-size:clamp(1.45rem,2.8vw,1.9rem) !important;
-    font-weight:950 !important; letter-spacing:.015em !important; line-height:1.2 !important;
-    text-shadow:0 2px 14px rgba(250,204,21,.12) !important;
+    display:flex !important; align-items:center !important; gap:9px !important;
+    margin:8px 0 18px !important; padding:0 !important; width:100% !important;
+    border:0 !important; border-bottom:0 !important; box-shadow:none !important;
+    color:#F1F3F6 !important; font-size:clamp(1.28rem,2.35vw,1.58rem) !important;
+    font-weight:800 !important; letter-spacing:.005em !important; line-height:1.25 !important;
+    text-shadow:none !important;
   }
+  .goals-section-title::first-letter { font-size:.94em !important; }
   .h2h-match-row { display:grid; grid-template-columns:82px minmax(0,1fr) 70px minmax(0,1fr); gap:8px; align-items:center; padding:9px 4px; border-bottom:1px solid #34302A; font-size:.8rem; }
   .h2h-team { display:flex; align-items:center; gap:6px; min-width:0; overflow-wrap:anywhere; }
   .h2h-team img { width:22px; height:22px; object-fit:contain; flex:0 0 22px; }
@@ -2596,10 +2597,13 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       }
 
       .goals-section-title {
-        color:#20242C !important;
-        -webkit-text-fill-color:#20242C !important;
-        border-bottom-color:rgba(181,138,0,.38) !important;
+        color:#263449 !important;
+        -webkit-text-fill-color:#263449 !important;
+        border:0 !important;
+        border-bottom:0 !important;
+        box-shadow:none !important;
         text-shadow:none !important;
+        font-weight:800 !important;
       }
 </style>
     """, unsafe_allow_html=True)
