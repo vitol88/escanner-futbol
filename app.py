@@ -2063,7 +2063,7 @@ if st.session_state.get("appearance_mode") == "☀️ Claro":
       [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] > details > summary p {
         color:#263142 !important;
       }
-      [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] > details > summary [data-testid="stExpanderToggleIcon] {
+      [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] > details > summary [data-testid="stExpanderToggleIcon"] {
         color:#947000 !important;
       }
       [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] > details > summary:hover {
