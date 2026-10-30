@@ -4577,19 +4577,6 @@ else:
                                                                 st.session_state[flip_key] = not is_flipped
                                                                 st.rerun()
                                                             if is_flipped:
-                                                                head_col.markdown(
-                                                                    f'<div class="goal-form-header">{logo_html}<div class="goal-form-team">ÚLTIMOS PARTIDOS · {html.escape(label)}</div></div>',
-                                                                    unsafe_allow_html=True,
-                                                                )
-                                                            else:
-                                                                head_col.markdown(
-                                                                    f'<div class="goal-form-header">{logo_html}<div class="goal-form-team">{html.escape(label)}</div></div>',
-                                                                    unsafe_allow_html=True,
-                                                                )
-                                                            if ball_col.button("⚽", key=f"goal_form_flip_btn_{match_id}_{team.get('id') or label}", help="Ver últimos partidos" if not is_flipped else "Volver al resumen"):
-                                                                st.session_state[flip_key] = not is_flipped
-                                                                st.rerun()
-                                                            if is_flipped:
                                                                 recent_matches = (form_data.get("recent_matches") or [])[:3]
                                                                 recent_html = [
                                                                     '<div class="goal-form-back">',
