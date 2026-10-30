@@ -3518,6 +3518,26 @@ if _analysis_page_active:
         section.main > div.block-container:has([class*="st-key-live_match_{_analysis_page_id}"]) > [data-testid="stVerticalBlock"] {{
           border:0 !important; outline:0 !important; box-shadow:none !important;
         }}
+        /* FIX DEFINITIVO: la cabecera visible identifica el panel real; neutralizar solo los wrappers estructurales que la contienen. */
+        section.main > div.block-container:has(.goals-section-title),
+        section.main > div.block-container:has(.goals-section-title) > [data-testid="stVerticalBlock"],
+        section.main > div.block-container:has(.goals-section-title) > [data-testid="stVerticalBlock"] > [data-testid="stVerticalBlockBorderWrapper"],
+        section.main > div.block-container:has(.goals-section-title) > [data-testid="stVerticalBlock"] > [data-testid="stVerticalBlockBorderWrapper"] > [data-testid="stVerticalBlock"],
+        [data-testid="stVerticalBlockBorderWrapper"]:has(.goals-section-title),
+        [data-testid="stVerticalBlockBorderWrapper"]:has(.goals-section-title) > [data-testid="stVerticalBlock"] {{
+          border:0 !important; border-left:0 !important; border-right:0 !important; border-top:0 !important;
+          outline:0 !important; box-shadow:none !important; background:transparent !important;
+        }}
+        section.main > div.block-container:has(.goals-section-title) hr,
+        section.main > div.block-container:has(.goals-section-title) > [data-testid="stVerticalBlock"] > hr {{
+          display:none !important; border:0 !important; height:0 !important; margin:0 !important; padding:0 !important;
+        }}
+        section.main > div.block-container:has(.goals-section-title)::before,
+        section.main > div.block-container:has(.goals-section-title)::after,
+        section.main > div.block-container:has(.goals-section-title) > [data-testid="stVerticalBlock"]::before,
+        section.main > div.block-container:has(.goals-section-title) > [data-testid="stVerticalBlock"]::after {{
+          content:none !important; display:none !important; border:0 !important; box-shadow:none !important;
+        }}
         [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stExpander"] {{ border:0 !important; margin:0 !important; padding:0 !important; }}
         [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stExpander"] > details > div {{ padding:0 !important; margin:0 !important; }}
         /* Mantener visibles las cuatro herramientas durante toda la navegación del análisis. */
