@@ -3134,9 +3134,13 @@ if _analysis_page_active:
           section.main > div.block-container:has(.h2h-page-kicker) .h2h-page-kicker + div,
           section.main > div.block-container:has(.h2h-page-kicker) .h2h-summary-layout,
           section.main > div.block-container:has(.h2h-page-kicker) .h2h-history-list {{
-            width:calc(100% - 16px) !important; max-width:calc(100% - 16px) !important;
-            min-width:0 !important; margin-left:auto !important; margin-right:auto !important;
-            box-sizing:border-box !important;
+            width:calc(100% - 28px) !important; max-width:calc(100% - 28px) !important;
+            min-width:0 !important; margin-left:14px !important; margin-right:14px !important;
+            box-sizing:border-box !important; justify-self:center !important;
+          }}
+          section.main > div.block-container:has(.h2h-page-kicker) .h2h-summary-layout > *,
+          section.main > div.block-container:has(.h2h-page-kicker) .h2h-history-list > * {{
+            max-width:100% !important; min-width:0 !important; box-sizing:border-box !important;
           }}
           section.main > div.block-container:has(.h2h-page-kicker) .h2h-description {{
             width:100% !important; max-width:100% !important; min-width:0 !important;
