@@ -3603,42 +3603,56 @@ else:
                                                             _goals_against = _goals_stats.get("against", 0)
                                                             _goal_diff = _standing.get("goalsDiff", 0)
                                                             _points = _standing.get("points", 0)
-                                                            _form = html.escape(str(_standing.get("form") or "—"))
-                                                            _highlight = " is-focus-team" if _team_id in {_selected_home_id, _selected_away_id} else ""
+                                                            _raw_form = str(_standing.get("form") or "")
+                                                            _form_items = []
+                                                            for _result in _raw_form.replace(" ", "").upper():
+                                                                _result_label = {"W": "G", "L": "D", "D": "E", "G": "G", "E": "E"}.get(_result)
+                                                                if _result_label:
+                                                                    _form_items.append(f'<span class="fl-form-chip fl-form-{_result_label.lower()}">{_result_label}</span>')
+                                                            _form_html = "".join(_form_items) or '<span class="fl-form-empty">—</span>'
+                                                            if _team_id == _selected_home_id:
+                                                                _focus_class = " is-home-focus"
+                                                            elif _team_id == _selected_away_id:
+                                                                _focus_class = " is-away-focus"
+                                                            else:
+                                                                _focus_class = ""
                                                             _table_rows_html.append(
-                                                                f'<tr class="{_highlight.strip()}">'
-                                                                f'<td class="fl-standings-rank">{html.escape(str(_standing.get("rank") or "—"))}</td>'
+                                                                f'<tr class="{_focus_class.strip()}">'
+                                                                f'<td class="fl-standings-rank"><span>{html.escape(str(_standing.get("rank") or "—"))}</span></td>'
                                                                 f'<td class="fl-standings-team">{_logo_html}<span>{_team_name}</span></td>'
-                                                                f'<td>{html.escape(str(_played))}</td><td>{html.escape(str(_wins))}</td>'
-                                                                f'<td>{html.escape(str(_draws))}</td><td>{html.escape(str(_losses))}</td>'
+                                                                f'<td>{html.escape(str(_played))}</td><td class="fl-stat-win">{html.escape(str(_wins))}</td>'
+                                                                f'<td class="fl-stat-draw">{html.escape(str(_draws))}</td><td class="fl-stat-loss">{html.escape(str(_losses))}</td>'
                                                                 f'<td>{html.escape(str(_goals_for))}</td><td>{html.escape(str(_goals_against))}</td>'
-                                                                f'<td>{html.escape(str(_goal_diff))}</td><td class="fl-standings-points">{html.escape(str(_points))}</td>'
-                                                                f'<td class="fl-standings-form">{_form}</td></tr>'
+                                                                f'<td class="fl-standings-diff">{html.escape(str(_goal_diff))}</td><td class="fl-standings-points">{html.escape(str(_points))}</td>'
+                                                                f'<td class="fl-standings-form">{_form_html}</td></tr>'
                                                             )
                                                         _standings_table_html = (
                                                             '<div class="fl-standings-scroll"><table class="fl-standings-table">'
-                                                            '<thead><tr><th>POS</th><th>EQUIPO</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>PTS</th><th>FORMA</th></tr></thead>'
+                                                            '<thead><tr><th>POS</th><th>EQUIPO</th><th>PJ</th><th class="fl-head-win">G</th><th class="fl-head-draw">E</th><th class="fl-head-loss">D</th><th>GF</th><th>GC</th><th>DG</th><th class="fl-head-points">PTS</th><th>FORMA</th></tr></thead>'
                                                             f'<tbody>{"".join(_table_rows_html)}</tbody></table></div>'
                                                         )
                                                         st.markdown(
                                                             '<style>'
-                                                            '.fl-standings-scroll{width:100%;max-width:100%;overflow-x:auto;border:1px solid #403722;border-radius:13px;background:linear-gradient(145deg,#171B22,#101318);-webkit-overflow-scrolling:touch;margin:8px 0 16px;box-sizing:border-box;}'
-                                                            '.fl-standings-table{width:100%;min-width:680px;border-collapse:separate;border-spacing:0;color:#E5E7EB;font-size:12px;font-variant-numeric:tabular-nums;}'
-                                                            '.fl-standings-table th{padding:12px 9px;text-align:center;color:#DCC36D;background:#211F18;font-size:10px;letter-spacing:.08em;white-space:nowrap;border-bottom:1px solid #55451D;}'
-                                                            '.fl-standings-table td{padding:11px 9px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.055);}'
-                                                            '.fl-standings-table tr:last-child td{border-bottom:0;}'
-                                                            '.fl-standings-table .fl-standings-rank{color:#B9A66B;font-weight:800;width:38px;}'
-                                                            '.fl-standings-table .fl-standings-team{text-align:left;min-width:150px;font-weight:700;display:table-cell;}'
-                                                            '.fl-standings-table .fl-standings-team img{width:19px;height:19px;object-fit:contain;vertical-align:middle;margin-right:8px;}'
-                                                            '.fl-standings-table .fl-standings-points{color:#F8D65E;font-weight:900;font-size:13px;}'
-                                                            '.fl-standings-table .fl-standings-form{color:#AEB4C0;font-size:11px;letter-spacing:.06em;}'
-                                                            '.fl-standings-table tr.is-focus-team td{background:rgba(250,204,21,.075);}'
-                                                            '.fl-standings-table tr.is-focus-team .fl-standings-team span{color:#FFE477;}'
+                                                            '.fl-standings-scroll{width:100%;max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;border:1px solid rgba(212,175,55,.48);border-radius:16px;background:linear-gradient(145deg,#151A22,#0D1118);-webkit-overflow-scrolling:touch;margin:10px 0 16px;box-shadow:0 12px 28px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.035);scrollbar-width:thin;scrollbar-color:#80651C #171B22;}'
+                                                            '.fl-standings-table{width:100%;min-width:730px;border-collapse:separate;border-spacing:0;color:#E8EAF0;font-size:12px;font-variant-numeric:tabular-nums;}'
+                                                            '.fl-standings-table th{padding:13px 10px;text-align:center;color:#E8D48A;background:linear-gradient(180deg,#292719,#1D1D19);font-size:10px;font-weight:900;letter-spacing:.1em;white-space:nowrap;border-bottom:1px solid rgba(218,183,77,.48);}'
+                                                            '.fl-standings-table td{height:51px;padding:10px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.065);background:rgba(255,255,255,.012);}'
+                                                            '.fl-standings-table tbody tr:nth-child(even) td{background:rgba(255,255,255,.035);}.fl-standings-table tbody tr:hover td{background:rgba(250,204,21,.065);}.fl-standings-table tr:last-child td{border-bottom:0;}'
+                                                            '.fl-standings-table .fl-standings-rank{width:48px;color:#C9B878;font-weight:900;}.fl-standings-table .fl-standings-rank span{display:inline-flex;align-items:center;justify-content:center;min-width:27px;height:27px;border-radius:9px;background:linear-gradient(145deg,#292B31,#191C22);border:1px solid rgba(255,255,255,.09);}'
+                                                            '.fl-standings-table .fl-standings-team{text-align:left;min-width:174px;font-weight:800;}.fl-standings-table .fl-standings-team img{width:25px;height:25px;object-fit:contain;vertical-align:middle;margin-right:10px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));}'
+                                                            '.fl-standings-table .fl-standings-points{color:#FFE071;font-weight:950;font-size:14px;background:rgba(250,204,21,.075);}.fl-standings-table .fl-standings-diff{font-weight:850;color:#CBD5E1;}'
+                                                            '.fl-standings-table .fl-stat-win{color:#FACC15;font-weight:900;background:rgba(250,204,21,.085);}.fl-standings-table .fl-stat-draw{color:#D1D5DB;font-weight:850;background:rgba(156,163,175,.09);}.fl-standings-table .fl-stat-loss{color:#FF646B;font-weight:900;background:rgba(239,68,68,.09);}'
+                                                            '.fl-standings-table th.fl-head-win{color:#17130A;background:linear-gradient(180deg,#FFE56B,#EAB308);}.fl-standings-table th.fl-head-draw{color:#FFF;background:linear-gradient(180deg,#68717D,#3F4650);}.fl-standings-table th.fl-head-loss{color:#FFF;background:linear-gradient(180deg,#F04452,#991B2B);}.fl-standings-table th.fl-head-points{color:#FFE27A;background:linear-gradient(180deg,#3A3018,#252014);}'
+                                                            '.fl-standings-table .fl-standings-form{min-width:112px;}.fl-form-chip{display:inline-flex;align-items:center;justify-content:center;width:20px;height:22px;margin:0 2px;border-radius:6px;font-size:10px;font-weight:950;box-shadow:inset 0 1px 0 rgba(255,255,255,.16);}'
+                                                            '.fl-form-g{color:#17130A;background:linear-gradient(145deg,#FFE66D,#EAB308);}.fl-form-e{color:#F8FAFC;background:linear-gradient(145deg,#727B87,#4B5563);}.fl-form-d{color:#FFF;background:linear-gradient(145deg,#F04452,#991B2B);}.fl-form-empty{color:#7D8490;}'
+                                                            '.fl-standings-table tr.is-home-focus td{background:rgba(14,165,233,.12)!important;border-top:1px solid rgba(56,189,248,.3);border-bottom:1px solid rgba(56,189,248,.3);}.fl-standings-table tr.is-home-focus .fl-standings-rank span{color:#E0F2FE;background:linear-gradient(145deg,#075985,#0C4A6E);border-color:#38BDF8;}.fl-standings-table tr.is-home-focus .fl-standings-team span{color:#7DD3FC;}'
+                                                            '.fl-standings-table tr.is-away-focus td{background:rgba(250,204,21,.12)!important;border-top:1px solid rgba(250,204,21,.3);border-bottom:1px solid rgba(250,204,21,.3);}.fl-standings-table tr.is-away-focus .fl-standings-rank span{color:#FFF2B2;background:linear-gradient(145deg,#8A6508,#5B4308);border-color:#FACC15;}.fl-standings-table tr.is-away-focus .fl-standings-team span{color:#FFE477;}'
+                                                            '@media(max-width:640px){.fl-standings-table{min-width:730px;font-size:11px;}.fl-standings-table th{padding:12px 8px;font-size:9px;}.fl-standings-table td{height:47px;padding:9px 8px;}.fl-standings-table .fl-standings-team{min-width:158px;}.fl-standings-table .fl-standings-team img{width:22px;height:22px;margin-right:8px;}.fl-form-chip{width:18px;height:20px;margin:0 1px;}}'
                                                             '</style>',
                                                             unsafe_allow_html=True,
                                                         )
                                                         st.markdown(_standings_table_html, unsafe_allow_html=True)
-                                                    st.caption("Los dos equipos del partido que estás analizando aparecen resaltados en dorado. Desliza horizontalmente la tabla para consultar todas las columnas en el celular.")
+                                                    st.caption("Local en azul y visitante en dorado. G = ganados, E = empates y D = derrotas; la columna FORMA usa las mismas letras y colores. Desliza horizontalmente para ver todas las columnas en el celular.")
                                     elif tool_name == "h2h":
                                         _match_league = match.get("league") or {}
                                         h2h_key = f"h2h-v3-home-{match_home_id}-{match_away_id}-{_match_league.get('id') or 'all'}"
