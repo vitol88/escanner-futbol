@@ -2511,8 +2511,7 @@ if _analysis_page_active:
             color:#FFF1A8 !important; -webkit-text-fill-color:#FFF1A8 !important; box-shadow:0 0 14px rgba(250,204,21,.15) !important;
             transform:translateY(-1px) !important;
         }}
-        /* Navegación principal horizontal: sustituye el menú lateral en las vistas de análisis. */
-        [data-testid="stSidebar"] {{ display:none !important; }}
+        /* Navegación horizontal en análisis; el menú lateral se conserva disponible. */
         [data-testid="stMain"] {{ margin-left:0 !important; }}
         [class*="st-key-analysis_page_nav"] {{ width:100% !important; margin:0 0 12px 0 !important; }}
         [class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{
@@ -2956,6 +2955,61 @@ if not fixtures:
         <div class="brand-subtitle">Un panel único para explorar los mercados disponibles en los partidos en vivo.</div>
       </div>
     </div>
+    """, unsafe_allow_html=True)
+    _home_selected_fixture = st.session_state.get("selected_live_fixture") or {}
+    _home_selected_id = str(((_home_selected_fixture.get("fixture") or {}).get("id")) or st.session_state.get("selected_live_fixture_id") or "")
+    _home_tool_state = st.session_state.get("main_fixture_tool") or {}
+    _home_active_tool = _home_tool_state.get("tool") if str(_home_tool_state.get("fixture_id")) == _home_selected_id else None
+    _home_active_market = _home_tool_state.get("market") if str(_home_tool_state.get("fixture_id")) == _home_selected_id else None
+    st.markdown('<div class="home-analysis-nav-title">NAVEGACIÓN RÁPIDA · ANÁLISIS DEL PARTIDO</div>', unsafe_allow_html=True)
+    _home_nav_cols = st.columns(4, gap="small")
+    with _home_nav_cols[0]:
+        _home_stats = st.button("▥  ESTADÍSTICAS", key="home_nav_stats", use_container_width=True, disabled=not bool(_home_selected_id), type="primary" if _home_active_tool == "stats" else "secondary")
+    with _home_nav_cols[1]:
+        _home_goals = st.button("⚽  GOLES Y SEÑALES", key="home_nav_goals", use_container_width=True, disabled=not bool(_home_selected_id), type="primary" if _home_active_market == "goals" else "secondary")
+    with _home_nav_cols[2]:
+        _home_corners = st.button("⚑  CÓRNERS", key="home_nav_corners", use_container_width=True, disabled=not bool(_home_selected_id), type="primary" if _home_active_market == "corners" else "secondary")
+    with _home_nav_cols[3]:
+        _home_h2h = st.button("♧  H2H", key="home_nav_h2h", use_container_width=True, disabled=not bool(_home_selected_id), type="primary" if _home_active_tool == "h2h" else "secondary")
+    if _home_stats:
+        st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "stats"}
+        st.rerun()
+    if _home_goals:
+        st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "market", "market": "goals"}
+        st.rerun()
+    if _home_corners:
+        st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "market", "market": "corners"}
+        st.rerun()
+    if _home_h2h:
+        st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "h2h"}
+        st.rerun()
+    if not _home_selected_id:
+        st.caption("Selecciona primero un partido en vivo para habilitar estas cuatro secciones.")
+    st.markdown("""
+    <style>
+      .home-analysis-nav-title { margin:14px 0 8px; color:#E7D79A; font-size:.68rem; font-weight:900; letter-spacing:.13em; text-transform:uppercase; }
+      [class*="st-key-home_nav_stats_"] button, [class*="st-key-home_nav_goals_"] button,
+      [class*="st-key-home_nav_corners_"] button, [class*="st-key-home_nav_h2h_"] button {
+        min-height:58px !important; height:58px !important; padding:8px 5px !important;
+        border:1px solid #80661B !important; border-radius:12px !important;
+        background:linear-gradient(145deg,#1C1E23,#111317) !important; color:#E8E8E8 !important;
+        font-size:.78rem !important; font-weight:850 !important; white-space:normal !important; line-height:1.2 !important;
+      }
+      [class*="st-key-home_nav_stats_"] button[kind="primary"],
+      [class*="st-key-home_nav_goals_"] button[kind="primary"],
+      [class*="st-key-home_nav_corners_"] button[kind="primary"],
+      [class*="st-key-home_nav_h2h_"] button[kind="primary"] {
+        border:2px solid #FACC15 !important; background:linear-gradient(145deg,#3A3016,#211D11) !important;
+        color:#FFD52A !important; box-shadow:0 0 14px rgba(250,204,21,.13) !important;
+      }
+      @media(max-width:640px) {
+        [class*="st-key-home_nav_stats_"] button, [class*="st-key-home_nav_goals_"] button,
+        [class*="st-key-home_nav_corners_"] button, [class*="st-key-home_nav_h2h_"] button {
+          min-height:54px !important; height:54px !important; padding:6px 3px !important;
+          font-size:.62rem !important; letter-spacing:-.025em !important;
+        }
+      }
+    </style>
     """, unsafe_allow_html=True)
 else:
     # Mostrar partidos en vivo; si se envió una búsqueda, priorizar sus resultados.
