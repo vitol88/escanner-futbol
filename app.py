@@ -4665,7 +4665,7 @@ else:
                                                         logo_html = f'<img class="goal-form-logo" src="{team_logo}" alt="">' if team_logo else ""
                                                         flip_key = f"goal_form_flipped_{match_id}_{team.get('id') or label}"
                                                         is_flipped = bool(st.session_state.get(flip_key, False))
-                                                        with col.container(border=True):
+                                                        with col.container():
                                                             st.markdown(
                                                                 f'<div class="goal-form-header">{logo_html}<div class="goal-form-team">{("ÚLTIMOS PARTIDOS · " if is_flipped else "")}{html.escape(label)}</div></div>',
                                                                 unsafe_allow_html=True,
