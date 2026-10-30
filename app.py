@@ -214,6 +214,34 @@ st.markdown("""
     box-shadow:0 0 9px rgba(250,204,21,.45) !important;
   }
   .fl-scan-progress-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:7px 0 0; font-family:system-ui,-apple-system,sans-serif; }
+  /* Separación estructural: evita que la primera barra se monte sobre el título y el porcentaje. */
+  [class*="st-key-scan-progress"] .fl-scan-progress-head {
+    box-sizing:border-box !important;
+    position:relative !important;
+    z-index:2 !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+    width:100% !important;
+    min-height:26px !important;
+    padding:3px 0 7px !important;
+    margin:0 0 7px !important;
+    overflow:visible !important;
+    clear:both !important;
+  }
+  [class*="st-key-scan-progress"] [data-testid="stProgress"] {
+    position:relative !important;
+    z-index:1 !important;
+    display:block !important;
+    clear:both !important;
+    width:100% !important;
+    margin:5px 0 0 !important;
+    padding:0 !important;
+  }
+  [class*="st-key-scan-progress"] [data-testid="stProgress"] > div {
+    box-sizing:border-box !important;
+  }
+
   [class*="st-key-scan-progress"] .fl-scan-progress-head { display:flex !important; visibility:visible !important; opacity:1 !important; min-height:16px !important; }
   [class*="st-key-scan-progress"] .fl-scan-progress-title { color:#FFF1A8 !important; -webkit-text-fill-color:#FFF1A8 !important; opacity:1 !important; visibility:visible !important; display:inline-block !important; font-size:11px !important; line-height:1.25 !important; font-weight:900 !important; letter-spacing:.12em; text-transform:uppercase; }
   [class*="st-key-scan-progress"] .fl-scan-progress-percent { color:#FFE45C !important; -webkit-text-fill-color:#FFE45C !important; opacity:1 !important; visibility:visible !important; display:inline-block !important; font-size:12px !important; line-height:1.25 !important; font-weight:900 !important; font-variant-numeric:tabular-nums; text-shadow:0 0 10px rgba(250,204,21,.24); }
