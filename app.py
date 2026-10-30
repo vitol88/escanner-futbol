@@ -1668,76 +1668,33 @@ st.markdown(f"""
 {f'<input class="update-toast-toggle" type="checkbox" id="close-update-toast" aria-label="Ocultar notificación"><div class="update-toast" role="status"><div class="update-toast-icon">◷</div><div><div class="update-toast-title">ÚLTIMA ACTUALIZACIÓN</div><div class="update-toast-time" id="update-toast-time">{header_time}</div></div><div class="update-toast-check">✓</div><label class="update-toast-close" for="close-update-toast" role="button" tabindex="0" aria-label="Cerrar notificación" title="Cerrar">×</label></div>' if show_splash_intro else ''}
 """, unsafe_allow_html=True)
 
-st.markdown("""
-<style>
-/* Barra HORIZONTAL: el grupo real de radios ocupa todo el ancho */
-div[class*="st-key-home_nav_bar"] { width:100% !important; max-width:100% !important; padding:0 !important; margin:0 !important; }
-div[class*="st-key-home_nav_bar"] [data-testid="stWidgetLabel"] { display:none !important; }
-div[class*="st-key-home_nav_bar"] [role="radiogroup"] {
- display:grid !important; grid-template-columns:repeat(4,minmax(0,1fr)) !important;
- grid-auto-flow:column !important; gap:5px !important; width:100% !important;
- min-width:0 !important; align-items:stretch !important;
-}
-div[class*="st-key-home_nav_bar"] [role="radiogroup"] > label {
- display:flex !important; flex-direction:column !important; align-items:center !important;
- justify-content:center !important; box-sizing:border-box !important;
- width:100% !important; min-width:0 !important; max-width:100% !important;
- height:60px !important; min-height:60px !important; margin:0 !important;
- padding:4px 2px !important; border:1px solid rgba(213,169,30,.58) !important;
- border-radius:9px !important; background:linear-gradient(145deg,#191B20,#101216) !important;
- color:#E8E8EA !important; text-align:center !important; font-size:clamp(.65rem,.85vw,.82rem) !important;
- font-weight:750 !important; line-height:1.1 !important; overflow:hidden !important;
-}
-div[class*="st-key-home_nav_bar"] [role="radiogroup"] > label > div:first-child {
- display:none !important;
-}
-div[class*="st-key-home_nav_bar"] [role="radiogroup"] > label p {
- margin:0 !important; padding:0 !important; width:100% !important;
- text-align:center !important; white-space:pre-line !important; overflow-wrap:normal !important;
- font-size:inherit !important; line-height:inherit !important;
-}
-div[class*="st-key-home_nav_bar"] [role="radiogroup"] > label:has(input:checked) {
- border:2px solid #FACC15 !important; color:#FFD52A !important;
- background:linear-gradient(145deg,#342B15,#17140D) !important;
- box-shadow:0 0 12px rgba(250,204,21,.15) !important;
-}
-div[class*="st-key-home_nav_bar"] [role="radiogroup"] input[type="radio"] { display:none !important; }
-@media(max-width:640px) {
- div[class*="st-key-home_nav_bar"] [role="radiogroup"] { gap:3px !important; }
- div[class*="st-key-home_nav_bar"] [role="radiogroup"] > label {
-  height:54px !important; min-height:54px !important; padding:3px 1px !important;
-  border-radius:8px !important; font-size:clamp(.58rem,2.0vw,.68rem) !important;
-  line-height:1.05 !important; letter-spacing:-.025em !important;
- }
-}
-</style>
-""", unsafe_allow_html=True)
 _home_selected_fixture = st.session_state.get("selected_live_fixture") or {}
 _home_selected_id = str(((_home_selected_fixture.get("fixture") or {}).get("id")) or st.session_state.get("selected_live_fixture_id") or "")
 _home_tool_state = st.session_state.get("main_fixture_tool") or {}
 _home_active_tool = _home_tool_state.get("tool") if str(_home_tool_state.get("fixture_id")) == _home_selected_id else None
 _home_active_market = _home_tool_state.get("market") if str(_home_tool_state.get("fixture_id")) == _home_selected_id else None
-_home_default_nav = "📊\nEstadísticas" if _home_active_tool == "stats" else ("⚽\nGoles" if _home_active_market == "goals" else ("🚩\nCórners" if _home_active_market == "corners" else ("👥\nH2H" if _home_active_tool == "h2h" else "📊\nEstadísticas")))
 with st.container(key="home_nav_bar"):
-    _home_nav_choice = st.radio(
-        "Navegación del partido",
-        ["📊\nEstadísticas", "⚽\nGoles", "🚩\nCórners", "👥\nH2H"],
-        index=["📊\nEstadísticas", "⚽\nGoles", "🚩\nCórners", "👥\nH2H"].index(_home_default_nav),
-        horizontal=True, label_visibility="collapsed", key="home_nav_choice",
-        disabled=not bool(_home_selected_id),
-    )
-if _home_nav_choice == "📊\nEstadísticas" and _home_active_tool != "stats":
-    st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "stats"}
-    st.rerun()
-if _home_nav_choice == "⚽\nGoles" and _home_active_market != "goals":
-    st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "market", "market": "goals"}
-    st.rerun()
-if _home_nav_choice == "🚩\nCórners" and _home_active_market != "corners":
-    st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "market", "market": "corners"}
-    st.rerun()
-if _home_nav_choice == "👥\nH2H" and _home_active_tool != "h2h":
-    st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "h2h"}
-    st.rerun()
+    _home_nav_cols = st.columns(4, gap="small")
+    with _home_nav_cols[0]:
+        _home_stats_clicked = st.button("▥\nESTADÍSTICAS", key="home_topnav_stats", use_container_width=True, type="primary" if _home_active_tool == "stats" else "secondary", disabled=not bool(_home_selected_id))
+    with _home_nav_cols[1]:
+        _home_goals_clicked = st.button("⚽\nGOLES", key="home_topnav_goals", use_container_width=True, type="primary" if _home_active_market == "goals" else "secondary", disabled=not bool(_home_selected_id))
+    with _home_nav_cols[2]:
+        _home_corners_clicked = st.button("⚑\nCÓRNERS", key="home_topnav_corners", use_container_width=True, type="primary" if _home_active_market == "corners" else "secondary", disabled=not bool(_home_selected_id))
+    with _home_nav_cols[3]:
+        _home_h2h_clicked = st.button("♧\nH2H", key="home_topnav_h2h", use_container_width=True, type="primary" if _home_active_tool == "h2h" else "secondary", disabled=not bool(_home_selected_id))
+    if _home_stats_clicked:
+        st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "stats"}
+        st.rerun()
+    if _home_goals_clicked:
+        st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "market", "market": "goals"}
+        st.rerun()
+    if _home_corners_clicked:
+        st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "market", "market": "corners"}
+        st.rerun()
+    if _home_h2h_clicked:
+        st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "h2h"}
+        st.rerun()
 
 # La hora se calcula en el navegador para respetar la zona horaria local de cada dispositivo.
 st.components.v1.html("""
@@ -2909,29 +2866,6 @@ if _analysis_page_active:
         unsafe_allow_html=True,
     )
     with st.container(key="analysis_page_nav"):
-        _nav_market = str(_current_tool_page.get("market") or "")
-        _nav_tool = str(_current_tool_page.get("tool") or "")
-        _nav_cols = st.columns(4, gap="small")
-        with _nav_cols[0]:
-            _nav_stats_clicked = st.button("▥  ESTADÍSTICAS", key=f"topnav_stats_{_analysis_page_id}", use_container_width=True, type="primary" if _nav_tool == "stats" else "secondary")
-        with _nav_cols[1]:
-            _nav_goals_clicked = st.button("⚽  GOLES Y SEÑALES", key=f"topnav_goals_{_analysis_page_id}", use_container_width=True, type="primary" if _nav_market == "goals" else "secondary")
-        with _nav_cols[2]:
-            _nav_corners_clicked = st.button("⚑  CÓRNERS", key=f"topnav_corners_{_analysis_page_id}", use_container_width=True, type="primary" if _nav_market == "corners" else "secondary")
-        with _nav_cols[3]:
-            _nav_h2h_clicked = st.button("♧  H2H", key=f"topnav_h2h_{_analysis_page_id}", use_container_width=True, type="primary" if _nav_tool == "h2h" else "secondary")
-        if _nav_stats_clicked:
-            st.session_state["main_fixture_tool"] = {"fixture_id": _analysis_page_id, "tool": "stats"}
-            st.rerun()
-        if _nav_goals_clicked:
-            st.session_state["main_fixture_tool"] = {"fixture_id": _analysis_page_id, "tool": "market", "market": "goals"}
-            st.rerun()
-        if _nav_corners_clicked:
-            st.session_state["main_fixture_tool"] = {"fixture_id": _analysis_page_id, "tool": "market", "market": "corners"}
-            st.rerun()
-        if _nav_h2h_clicked:
-            st.session_state["main_fixture_tool"] = {"fixture_id": _analysis_page_id, "tool": "h2h"}
-            st.rerun()
         # Acceso de regreso sin abrir el panel lateral.
         _back_clicked = st.button("← Volver a partidos en vivo", key=f"topnav_back_{_analysis_page_id}", help="Regresar a la lista de partidos")
         if _back_clicked:
