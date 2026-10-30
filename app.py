@@ -373,7 +373,7 @@ st.markdown("""
    /* Acciones principales en una sola fila: escáner a la izquierda y actualizar a la derecha. */
    [class*="st-key-scan_actions_row"] [data-testid="stHorizontalBlock"] {
      display:grid !important; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) !important;
-     align-items:stretch !important; gap:12px !important;
+     align-items:center !important; gap:12px !important;
    }
    [class*="st-key-scan_actions_row"] [data-testid="column"] {
      min-width:0 !important; width:auto !important; flex:none !important;
@@ -417,8 +417,11 @@ st.markdown("""
       padding-top:30px !important; box-sizing:border-box !important;
     }
     [class*="st-key-scan_actions_row"] [data-testid="stHorizontalBlock"] {
-      margin-top:0 !important;
+      margin-top:24px !important; align-items:center !important;
     }
+    /* El espacio se controla desde la fila completa para que no cambie tras el scan. */
+    [class*="st-key-scan_cta_card"] { margin-top:0 !important; margin-bottom:0 !important; }
+    [class*="st-key-control_row"] { align-self:center !important; margin-top:0 !important; }
   }
   [class*="st-key-analysis_scan_cta"] { margin:.35rem 0 .65rem !important; }
   /* Botones grandes y llamativos dentro de las secciones de goles y córners. */
