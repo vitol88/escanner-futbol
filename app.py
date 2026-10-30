@@ -2504,16 +2504,16 @@ if _analysis_page_active:
     st.markdown(
         f"""
         <style>
-        /* En las vistas dedicadas no se muestra la cabecera global: recuperar ese espacio y subir el análisis. */
-        section.main > div.block-container {{ padding-top: 18px !important; }}
-        [data-testid="stSidebar"] > div:first-child {{ padding-top: 18px !important; }}
+        /* Mantener la cabecera principal visible también en cada vista de análisis. */
+        section.main > div.block-container {{ padding-top: 144px !important; }}
+        [data-testid="stSidebar"] > div:first-child {{ padding-top: 126px !important; }}
         @media (max-width: 640px) {{
-          section.main > div.block-container {{ padding-top: 10px !important; padding-left: .65rem !important; padding-right: .65rem !important; }}
-          [data-testid="stSidebar"] > div:first-child {{ padding-top: 12px !important; }}
+          section.main > div.block-container {{ padding-top: 112px !important; padding-left: .65rem !important; padding-right: .65rem !important; }}
+          [data-testid="stSidebar"] > div:first-child {{ padding-top: 96px !important; }}
         }}
         /* Pantalla dedicada: dejar únicamente el botón de regreso y el contenido del análisis elegido. */
         {'' if (_analysis_page_tool == "market" and str(_current_tool_page.get("market") or "") in {"goals", "corners"}) else '[class*="st-key-control_row"], [class*="st-key-scan_cta_card"],'}
-        [class*="st-key-scan-progress"], .brand-header, .match-analysis-panel {{ display:none !important; }}
+        [class*="st-key-scan-progress"], .match-analysis-panel {{ display:none !important; }}
         /* En la vista individual se oculta la cabecera de "En vivo ahora" y el reloj del listado. */
         [class*="st-key-live_now_expander"] > div[data-testid="stExpander"] > details > summary,
         [class*="st-key-live_now_expander"] [data-testid="stExpander"] > details > summary,
