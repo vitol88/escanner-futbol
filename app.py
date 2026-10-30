@@ -2607,7 +2607,7 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       }
 </style>
     """, unsafe_allow_html=True)
-else:
+if st.session_state.get("appearance_mode") not in {"☀️", "☀️ Claro"}:
     st.markdown("""
     <style>
       /* La ficha de forma reciente queda abierta, sin marco, igual que en modo claro. */
