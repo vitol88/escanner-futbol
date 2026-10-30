@@ -2579,6 +2579,13 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         border-color:#D6B84C !important;
       }
       .risk-heading .tip-heading-icon { color:#A77B00 !important; }
+
+      /* Cabecera azul suave para la tabla de promedio de goles en modo claro. */
+      .goal-history-table th {
+        background:linear-gradient(135deg,#E5EEF8 0%,#DCE8F5 100%) !important;
+        color:#24476B !important;
+        border-bottom:1px solid #B8CDE3 !important;
+      }
 </style>
     """, unsafe_allow_html=True)
 else:
@@ -4533,7 +4540,7 @@ else:
                                                     (f"{away_name} · goles a favor fuera", history.get("away_goals_for"), history.get("away_goal_sample", 0)),
                                                     (f"{away_name} · goles recibidos fuera", history.get("away_goals_against"), history.get("away_goal_sample", 0)),
                                                 ]
-                                                goal_table_html = '<div class="goal-history-wrap"><div class="goal-history-heading">▥ Promedio de goles <span>Promedio</span></div><table class="goal-history-table"><thead><tr><th>Equipo / indicador</th><th>Promedio</th></tr></thead><tbody>'
+                                                goal_table_html = '<div class="goal-history-wrap"><div class="goal-history-heading">▥ Promedio de goles</div><table class="goal-history-table"><thead><tr><th>Equipo / indicador</th><th>Promedio</th></tr></thead><tbody>'
                                                 for label, avg, sample in goal_history_rows:
                                                     avg_text = f"{avg:.2f}".rstrip("0").rstrip(".") if isinstance(avg, (int, float)) else "N/D"
                                                     sample_text = int(sample or 0)
