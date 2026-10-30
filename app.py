@@ -1901,7 +1901,7 @@ _home_active_market = _home_tool_state.get("market") if str(_home_tool_state.get
 with st.container(key="home_nav_bar"):
     _home_nav_cols = st.columns(4, gap="small")
     with _home_nav_cols[0]:
-        _home_stats_clicked = st.button("STATS", key="home_topnav_stats", icon=":material/query_stats:", use_container_width=True, type="primary" if _home_active_tool == "stats" else "secondary", disabled=not bool(_home_selected_id))
+        _home_stats_clicked = st.button("STATS", key="home_topnav_stats", icon=":material/query_stats:", use_container_width=True, type="primary" if _home_active_tool in {"stats", "standings"} else "secondary", disabled=not bool(_home_selected_id))
     with _home_nav_cols[1]:
         _home_goals_clicked = st.button("GOLES", key="home_topnav_goals", icon=":material/sports_soccer:", use_container_width=True, type="primary" if _home_active_market == "goals" else "secondary", disabled=not bool(_home_selected_id))
     with _home_nav_cols[2]:
@@ -1986,8 +1986,8 @@ with st.sidebar:
     _sidebar_tool_market = str(_sidebar_tool_page.get("market") or "")
     _sidebar_tool_active = bool(_sidebar_tool_id and _sidebar_tool_page.get("tool"))
     _sidebar_dedicated_view = bool(_sidebar_tool_active)
-    _sidebar_section_title = ({"stats": "Estadísticas", "h2h": "H2H"}.get(str(_sidebar_tool_page.get("tool") or ""), {"goals": "Goles y señales", "corners": "Córners y señales"}.get(_sidebar_tool_market, "Configuración")))
-    _sidebar_section_icon = "📊" if _sidebar_tool_page.get("tool") == "stats" else "🛡" if _sidebar_tool_page.get("tool") == "h2h" else "⚽" if _sidebar_tool_market == "goals" else "🚩" if _sidebar_tool_market == "corners" else "⚙"
+    _sidebar_section_title = ({"stats": "Estadísticas", "standings": "Clasificación", "h2h": "H2H"}.get(str(_sidebar_tool_page.get("tool") or ""), {"goals": "Goles y señales", "corners": "Córners y señales"}.get(_sidebar_tool_market, "Configuración")))
+    _sidebar_section_icon = "🏆" if _sidebar_tool_page.get("tool") == "standings" else "📊" if _sidebar_tool_page.get("tool") == "stats" else "🛡" if _sidebar_tool_page.get("tool") == "h2h" else "⚽" if _sidebar_tool_market == "goals" else "🚩" if _sidebar_tool_market == "corners" else "⚙"
     st.markdown(
         f'<div style="margin:0 0 18px 0;padding:4px 0 12px 0;border-bottom:1px solid rgba(250,204,21,.32);">'+
         f'<div style="font-size:.68rem;font-weight:850;letter-spacing:.19em;text-transform:uppercase;color:#B9A35A;margin-bottom:7px;">FOOTBALL LAB <span style="color:#FACC15;">/ ANÁLISIS</span></div>'+
@@ -2048,7 +2048,7 @@ with st.sidebar:
         _menu_tool_state = st.session_state.get("main_fixture_tool") or {}
         _menu_active_tool = _menu_tool_state.get("tool") if str(_menu_tool_state.get("fixture_id")) == _selected_fixture_for_menu_id else None
         _menu_active_market = _menu_tool_state.get("market") if str(_menu_tool_state.get("fixture_id")) == _selected_fixture_for_menu_id else None
-        _menu_stats = st.button("ESTADÍSTICAS", icon=":material/query_stats:", help="Estadísticas en vivo", key=f"main_stats_{_selected_fixture_for_menu_id}", type="primary" if _menu_active_tool == "stats" else "secondary", use_container_width=True)
+        _menu_stats = st.button("ESTADÍSTICAS", icon=":material/query_stats:", help="Estadísticas en vivo", key=f"main_stats_{_selected_fixture_for_menu_id}", type="primary" if _menu_active_tool in {"stats", "standings"} else "secondary", use_container_width=True)
         _menu_goals = st.button("GOLES Y SEÑALES", icon=":material/sports_soccer:", help="Goles y señales", key=f"main_market_{_selected_fixture_for_menu_id}_goals", type="primary" if _menu_active_market == "goals" else "secondary", use_container_width=True)
         _menu_corners = st.button("CÓRNERS", icon=":material/flag:", help="Córners y señales", key=f"main_market_{_selected_fixture_for_menu_id}_corners", type="primary" if _menu_active_market == "corners" else "secondary", use_container_width=True)
         _menu_h2h = st.button("H2H", icon=":material/shield:", help="Historial de enfrentamientos (H2H)", key=f"main_h2h_{_selected_fixture_for_menu_id}", type="primary" if _menu_active_tool == "h2h" else "secondary", use_container_width=True)
@@ -2066,13 +2066,18 @@ with st.sidebar:
             st.rerun()
         if _sidebar_tool_active:
             st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
-            if st.button("← VOLVER A PARTIDOS EN VIVO", key="sidebar_analysis_back", use_container_width=True, help="Volver a la lista de partidos"):
-                # Conservar el partido y la liga seleccionados para regresar al mismo punto.
-                st.session_state["selected_live_fixture_id"] = _sidebar_tool_id
-                st.session_state["return_to_fixture_id"] = _sidebar_tool_id
-                st.session_state["main_fixture_tool"] = {}
-                st.session_state["live_now_expander"] = True
-                st.rerun()
+            if _sidebar_tool_page.get("tool") == "standings":
+                if st.button("← VOLVER A ESTADÍSTICAS", key="sidebar_standings_back", use_container_width=True, help="Regresar a las estadísticas del mismo partido"):
+                    st.session_state["main_fixture_tool"] = {"fixture_id": _sidebar_tool_id, "tool": "stats"}
+                    st.rerun()
+            else:
+                if st.button("← VOLVER A PARTIDOS EN VIVO", key="sidebar_analysis_back", use_container_width=True, help="Volver a la lista de partidos"):
+                    # Conservar el partido y la liga seleccionados para regresar al mismo punto.
+                    st.session_state["selected_live_fixture_id"] = _sidebar_tool_id
+                    st.session_state["return_to_fixture_id"] = _sidebar_tool_id
+                    st.session_state["main_fixture_tool"] = {}
+                    st.session_state["live_now_expander"] = True
+                    st.rerun()
     else:
         st.caption("Haz clic en la tarjeta de un partido para seleccionar el encuentro y habilitar estas herramientas.")
 
@@ -2097,7 +2102,7 @@ def _api_cache_ttl(endpoint: str, params: dict[str, Any] | None = None) -> int:
             for item in st.session_state.get("live_fixtures", [])
         }
         return 45 if fixture_id in live_ids else 21600
-    if endpoint == "fixtures/headtohead":
+    if endpoint in {"fixtures/headtohead", "standings"}:
         return 21600
     return 600
 
@@ -3173,20 +3178,26 @@ if _analysis_page_active:
     )
     with st.container(key="analysis_page_nav"):
         # Acceso de regreso sin abrir el panel lateral.
-        _back_clicked = st.button("← Volver a partidos en vivo", key=f"topnav_back_{_analysis_page_id}", help="Regresar a la lista de partidos")
+        _is_standings_page = _analysis_page_tool == "standings"
+        _back_label = "← Volver a estadísticas" if _is_standings_page else "← Volver a partidos en vivo"
+        _back_help = "Regresar a las estadísticas del mismo partido" if _is_standings_page else "Regresar a la lista de partidos"
+        _back_clicked = st.button(_back_label, key=f"topnav_back_{_analysis_page_id}", help=_back_help)
         if _back_clicked:
-            st.session_state[f"live_match_{_analysis_page_id}"] = True
-            for _match in st.session_state.get("live_fixtures", []):
-                _fixture = _match.get("fixture") or {}
-                if str(_fixture.get("id")) == _analysis_page_id:
-                    _league = _match.get("league") or {}
-                    _country = _league.get("country") or "Otros países"
-                    _league_name = _league.get("name") or "Liga sin nombre"
-                    st.session_state[f"live_league_{_country}_{_league_name}"] = True
-                    break
-            st.session_state["live_now_expander"] = True
-            st.session_state["main_fixture_tool"] = {}
-            st.session_state["return_to_fixture_id"] = _analysis_page_id
+            if _is_standings_page:
+                st.session_state["main_fixture_tool"] = {"fixture_id": _analysis_page_id, "tool": "stats"}
+            else:
+                st.session_state[f"live_match_{_analysis_page_id}"] = True
+                for _match in st.session_state.get("live_fixtures", []):
+                    _fixture = _match.get("fixture") or {}
+                    if str(_fixture.get("id")) == _analysis_page_id:
+                        _league = _match.get("league") or {}
+                        _country = _league.get("country") or "Otros países"
+                        _league_name = _league.get("name") or "Liga sin nombre"
+                        st.session_state[f"live_league_{_country}_{_league_name}"] = True
+                        break
+                st.session_state["live_now_expander"] = True
+                st.session_state["main_fixture_tool"] = {}
+                st.session_state["return_to_fixture_id"] = _analysis_page_id
             st.rerun()
     st.markdown(
         '<div class="match-analysis-panel"><div class="match-analysis-kicker">FOOTBALL LAB · ANÁLISIS INDIVIDUAL</div><div class="match-analysis-title">Vista ampliada del partido</div><div class="signal-meta">Consulta el análisis seleccionado y vuelve a los partidos cuando termines.</div></div>',
@@ -3450,6 +3461,132 @@ else:
                                                 st.info("La API no entregó estadísticas detalladas para este partido.")
                                         else:
                                             st.info("La API no entregó estadísticas para este partido.")
+                                        st.markdown("""
+                                        <style>
+                                        [class*="st-key-league_standings_cta"] button {
+                                          min-height:54px !important; border:1px solid #B8942C !important;
+                                          border-radius:13px !important; color:#F8D96B !important;
+                                          background:linear-gradient(110deg,#282313,#17191F 72%) !important;
+                                          font-weight:850 !important; letter-spacing:.015em !important;
+                                          box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 4px 14px rgba(0,0,0,.22) !important;
+                                        }
+                                        [class*="st-key-league_standings_cta"] button:hover {
+                                          border-color:#FFE566 !important; color:#FFF0A5 !important;
+                                          background:linear-gradient(110deg,#3A3016,#202127) !important;
+                                          box-shadow:0 0 18px rgba(250,204,21,.16) !important;
+                                        }
+                                        </style>
+                                        """, unsafe_allow_html=True)
+                                        with st.container(key="league_standings_cta"):
+                                            if st.button("🏆  Ver clasificación", key=f"open_standings_{match_id}", use_container_width=True, type="secondary"):
+                                                st.session_state["main_fixture_tool"] = {"fixture_id": str(match_id), "tool": "standings"}
+                                                st.rerun()
+                                    elif tool_name == "standings":
+                                        _standings_league = match.get("league") or {}
+                                        _standings_league_id = _standings_league.get("id")
+                                        _standings_season = _standings_league.get("season")
+                                        _standings_league_name = str(_standings_league.get("name") or "Competición")
+                                        st.markdown(
+                                            f'<div class="h2h-page-kicker">🏆 <span>CLASIFICACIÓN</span> · {html.escape(_standings_league_name.upper())}</div>',
+                                            unsafe_allow_html=True,
+                                        )
+                                        st.markdown(
+                                            f'<div style="margin:8px 0 16px;color:#AEB4C0;font-size:.9rem;">Tabla oficial de la competición · Temporada {html.escape(str(_standings_season or "actual"))}</div>',
+                                            unsafe_allow_html=True,
+                                        )
+                                        if not _standings_league_id or not _standings_season:
+                                            st.info("La API no proporcionó el identificador o la temporada de esta competición. No podemos consultar una tabla fiable.")
+                                        else:
+                                            _standings_cache_key = f"standings-v1-{_standings_league_id}-{_standings_season}"
+                                            if _standings_cache_key not in st.session_state.setdefault("standings_cache", {}):
+                                                try:
+                                                    _standings_payload = api_get(
+                                                        "standings",
+                                                        {"league": int(_standings_league_id), "season": int(_standings_season)},
+                                                    )
+                                                    st.session_state.standings_cache[_standings_cache_key] = {
+                                                        "response": _standings_payload.get("response") or [],
+                                                        "error": None,
+                                                    }
+                                                except Exception as _standings_exc:
+                                                    st.session_state.standings_cache[_standings_cache_key] = {
+                                                        "response": [],
+                                                        "error": str(_standings_exc),
+                                                    }
+                                            _standings_result = st.session_state.get("standings_cache", {}).get(_standings_cache_key) or {}
+                                            if _standings_result.get("error"):
+                                                st.warning(f"No se pudo consultar la clasificación: {_standings_result['error']}")
+                                            else:
+                                                _standings_response = _standings_result.get("response") or []
+                                                _standings_league_data = ((_standings_response[0] or {}).get("league") or {}) if _standings_response else {}
+                                                _standings_groups = _standings_league_data.get("standings") or []
+                                                if not _standings_groups:
+                                                    st.info("Esta competición no ofrece una tabla de posiciones tradicional. Puede tratarse de una copa, fase eliminatoria o torneo sin clasificación de liga.")
+                                                else:
+                                                    _selected_home_id = str(match_home_id or "")
+                                                    _selected_away_id = str(match_away_id or "")
+                                                    for _group_index, _group_rows in enumerate(_standings_groups):
+                                                        if not isinstance(_group_rows, list) or not _group_rows:
+                                                            continue
+                                                        _group_name = str((_group_rows[0] or {}).get("group") or "")
+                                                        if len(_standings_groups) > 1 or _group_name:
+                                                            st.markdown(
+                                                                f'<div style="margin:18px 0 9px;color:#F4D978;font-weight:850;letter-spacing:.08em;text-transform:uppercase;">{html.escape(_group_name or f"Grupo {_group_index + 1}")}</div>',
+                                                                unsafe_allow_html=True,
+                                                            )
+                                                        _table_rows_html = []
+                                                        for _standing in _group_rows:
+                                                            _team_info = _standing.get("team") or {}
+                                                            _team_id = str(_team_info.get("id") or "")
+                                                            _team_name = html.escape(str(_team_info.get("name") or "Equipo"))
+                                                            _team_logo = str(_team_info.get("logo") or "").strip()
+                                                            _logo_html = f'<img src="{html.escape(_team_logo, quote=True)}" alt="" loading="lazy">' if _team_logo.startswith("https://") else ""
+                                                            _all_stats = _standing.get("all") or {}
+                                                            _goals_stats = _all_stats.get("goals") or {}
+                                                            _played = _all_stats.get("played", 0)
+                                                            _wins = _all_stats.get("win", 0)
+                                                            _draws = _all_stats.get("draw", 0)
+                                                            _losses = _all_stats.get("lose", 0)
+                                                            _goals_for = _goals_stats.get("for", 0)
+                                                            _goals_against = _goals_stats.get("against", 0)
+                                                            _goal_diff = _standing.get("goalsDiff", 0)
+                                                            _points = _standing.get("points", 0)
+                                                            _form = html.escape(str(_standing.get("form") or "—"))
+                                                            _highlight = " is-focus-team" if _team_id in {_selected_home_id, _selected_away_id} else ""
+                                                            _table_rows_html.append(
+                                                                f'<tr class="{_highlight.strip()}">'
+                                                                f'<td class="fl-standings-rank">{html.escape(str(_standing.get("rank") or "—"))}</td>'
+                                                                f'<td class="fl-standings-team">{_logo_html}<span>{_team_name}</span></td>'
+                                                                f'<td>{html.escape(str(_played))}</td><td>{html.escape(str(_wins))}</td>'
+                                                                f'<td>{html.escape(str(_draws))}</td><td>{html.escape(str(_losses))}</td>'
+                                                                f'<td>{html.escape(str(_goals_for))}</td><td>{html.escape(str(_goals_against))}</td>'
+                                                                f'<td>{html.escape(str(_goal_diff))}</td><td class="fl-standings-points">{html.escape(str(_points))}</td>'
+                                                                f'<td class="fl-standings-form">{_form}</td></tr>'
+                                                            )
+                                                        _standings_table_html = (
+                                                            '<div class="fl-standings-scroll"><table class="fl-standings-table">'
+                                                            '<thead><tr><th>POS</th><th>EQUIPO</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>PTS</th><th>FORMA</th></tr></thead>'
+                                                            f'<tbody>{"".join(_table_rows_html)}</tbody></table></div>'
+                                                        )
+                                                        st.markdown(
+                                                            '<style>'
+                                                            '.fl-standings-scroll{width:100%;max-width:100%;overflow-x:auto;border:1px solid #403722;border-radius:13px;background:linear-gradient(145deg,#171B22,#101318);-webkit-overflow-scrolling:touch;margin:8px 0 16px;box-sizing:border-box;}'
+                                                            '.fl-standings-table{width:100%;min-width:680px;border-collapse:separate;border-spacing:0;color:#E5E7EB;font-size:12px;font-variant-numeric:tabular-nums;}'
+                                                            '.fl-standings-table th{padding:12px 9px;text-align:center;color:#DCC36D;background:#211F18;font-size:10px;letter-spacing:.08em;white-space:nowrap;border-bottom:1px solid #55451D;}'
+                                                            '.fl-standings-table td{padding:11px 9px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.055);}'
+                                                            '.fl-standings-table tr:last-child td{border-bottom:0;}'
+                                                            '.fl-standings-table .fl-standings-rank{color:#B9A66B;font-weight:800;width:38px;}'
+                                                            '.fl-standings-table .fl-standings-team{text-align:left;min-width:150px;font-weight:700;display:table-cell;}'
+                                                            '.fl-standings-table .fl-standings-team img{width:19px;height:19px;object-fit:contain;vertical-align:middle;margin-right:8px;}'
+                                                            '.fl-standings-table .fl-standings-points{color:#F8D65E;font-weight:900;font-size:13px;}'
+                                                            '.fl-standings-table .fl-standings-form{color:#AEB4C0;font-size:11px;letter-spacing:.06em;}'
+                                                            '.fl-standings-table tr.is-focus-team td{background:rgba(250,204,21,.075);}'
+                                                            '.fl-standings-table tr.is-focus-team .fl-standings-team span{color:#FFE477;}'
+                                                            '</style>',
+                                                            unsafe_allow_html=True,
+                                                        )
+                                                        st.markdown(_standings_table_html, unsafe_allow_html=True)
+                                                    st.caption("Los dos equipos del partido que estás analizando aparecen resaltados en dorado. Desliza horizontalmente la tabla para consultar todas las columnas en el celular.")
                                     elif tool_name == "h2h":
                                         _match_league = match.get("league") or {}
                                         h2h_key = f"h2h-v3-home-{match_home_id}-{match_away_id}-{_match_league.get('id') or 'all'}"
