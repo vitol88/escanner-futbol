@@ -2092,6 +2092,19 @@ if st.session_state.get("appearance_mode") == "☀️ Claro":
       [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] > details > summary:hover p {
         color:#755800 !important;
       }
+      /* Toda liga abierta conserva el dorado en modo claro; evita heredar el negro del tema oscuro. */
+      [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] > details[open] > summary {
+        background:linear-gradient(100deg,#FFF8E5,#FFF2C7) !important;
+        border:1.5px solid #D6B84C !important;
+        box-shadow:inset 3px 0 0 #B58A00,0 3px 9px rgba(181,138,0,.08) !important;
+      }
+      [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] > details[open] > summary p {
+        color:#755800 !important;
+        font-weight:800 !important;
+      }
+      [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] > details[open] > summary [data-testid="stExpanderToggleIcon"] {
+        color:#947000 !important;
+      }
       .fl-match-scoreboard {
         background:linear-gradient(145deg,#FFFFFF 0%,#F7F8FA 100%) !important;
         border:1px solid #DDE2E9 !important;
