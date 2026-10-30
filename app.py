@@ -1938,6 +1938,128 @@ with st.container(key="home_nav_bar"):
         st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "h2h"}
         st.rerun()
 
+# Selector de apariencia: el modo oscuro sigue siendo el predeterminado.
+with st.container(key="appearance_switch"):
+    st.radio(
+        "Apariencia",
+        options=["🌙 Oscuro", "☀️ Claro"],
+        index=0,
+        horizontal=True,
+        key="appearance_mode",
+        label_visibility="collapsed",
+    )
+
+if st.session_state.get("appearance_mode") == "☀️ Claro":
+    st.markdown("""
+    <style>
+      /* PALETA CLARA FOOTBALL LAB — solo se activa al elegir ☀️ Claro. */
+      :root { color-scheme:light; --fl-bg:#F4F6F9; --fl-surface:#FFFFFF; --fl-text:#20242C; --fl-muted:#68717F; --fl-gold:#B58A00; --fl-border:#DDE2E9; }
+      html,body,.stApp,[data-testid="stAppViewContainer"],section.main,.main,.block-container {
+        background:#F4F6F9 !important; color:#20242C !important;
+      }
+      [data-testid="stHeader"] { background:rgba(244,246,249,.96) !important; }
+      [data-testid="stSidebar"],[data-testid="stSidebar"] > div:first-child { background:#FFFFFF !important; border-right:1px solid #DDE2E9 !important; }
+      html body .stApp p,html body .stApp label,html body .stApp li,html body .stApp [data-testid="stMarkdownContainer"] { color:#303744; }
+      html body .stApp h1,html body .stApp h2,html body .stApp h3 { color:#9A7400 !important; }
+      html body .stApp [data-testid="stCaptionContainer"],html body .stApp small { color:#68717F !important; }
+      [data-testid="stMetric"] { background:#FFFFFF !important; border:1px solid #DDE2E9 !important; color:#20242C !important; }
+      [data-testid="stMetric"] label,[data-testid="stMetric"] [data-testid="stMetricValue"] { color:#20242C !important; }
+      [data-testid="stTabs"] button[role="tab"] { color:#586170 !important; }
+      [data-testid="stTabs"] button[role="tab"][aria-selected="true"] { color:#9A7400 !important; border-bottom-color:#C59A18 !important; }
+      [data-testid="stExpander"] { background:#FFFFFF !important; border:1px solid #DDE2E9 !important; color:#20242C !important; }
+      [data-testid="stExpander"] summary,[data-testid="stExpander"] summary p { color:#303744 !important; }
+      [data-testid="stDataFrame"],[data-testid="stTable"] { background:#FFFFFF !important; border:1px solid #DDE2E9 !important; }
+      .stTextInput input,.stNumberInput input,.stTextArea textarea,.stDateInput input,.stSelectbox [data-baseweb="select"] > div {
+        background:#FFFFFF !important; color:#20242C !important; -webkit-text-fill-color:#20242C !important; border-color:#CBD2DC !important;
+      }
+      .stTextInput input::placeholder,.stTextArea textarea::placeholder { color:#8992A0 !important; -webkit-text-fill-color:#8992A0 !important; }
+      div.stButton > button[kind="secondary"] { background:linear-gradient(145deg,#FFFFFF,#F0F2F5) !important; color:#354052 !important; border-color:#C7A43A !important; }
+      div.stButton > button[kind="secondary"]:hover { background:#FFF5D5 !important; color:#785B00 !important; border-color:#B58A00 !important; }
+      .brand-header {
+        background:linear-gradient(105deg,#FFFFFF 0%,#F2F4F7 52%,#FFFFFF 100%) !important;
+        border-top-color:#D6B84C !important; border-bottom-color:#D6B84C !important;
+        box-shadow:0 8px 24px rgba(31,41,55,.10),inset 0 1px 0 rgba(255,255,255,.9) !important;
+      }
+      .brand-title { color:#20242C !important; }
+      .brand-subtitle { color:#737B89 !important; }
+      .brand-pill { color:#16834B !important; background:#E8F7EF !important; border-color:#B8E4C9 !important; }
+      div[class*="st-key-home_nav_bar"] { background:rgba(255,255,255,.98) !important; box-shadow:0 7px 18px rgba(31,41,55,.10) !important; }
+      div[class*="st-key-home_topnav_stats"] button,div[class*="st-key-home_topnav_goals"] button,div[class*="st-key-home_topnav_corners"] button,div[class*="st-key-home_topnav_h2h"] button {
+        background:linear-gradient(145deg,#FFFFFF,#F0F2F5) !important; color:#947000 !important; border-color:#C7A43A !important;
+      }
+      div[class*="st-key-home_topnav_stats"] button[kind="primary"],div[class*="st-key-home_topnav_goals"] button[kind="primary"],div[class*="st-key-home_topnav_corners"] button[kind="primary"],div[class*="st-key-home_topnav_h2h"] button[kind="primary"] {
+        background:#F6E6A8 !important; color:#332800 !important; border-color:#C49A20 !important;
+      }
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
+        background-color:#FFFFFF !important;
+        background-image:radial-gradient(ellipse at 20% 50%,rgba(250,204,21,.13),transparent 42%),linear-gradient(135deg,#FFFFFF,#F2F4F7) !important;
+        color:#20242C !important;
+        box-shadow:inset 0 0 24px rgba(181,138,0,.055),0 5px 18px rgba(31,41,55,.10) !important;
+      }
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button strong { color:#9A7400 !important; }
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:not(:has(strong)) { color:#68717F !important; }
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before { background-color:#FFFFFF !important; }
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button:hover { background-color:#FFFFFF !important; }
+      [class*="st-key-search_goal_matches"] [data-testid="stTextInput"] > div { background:#FFFFFF !important; border-color:#C7A43A !important; }
+      [class*="st-key-search_goal_matches"] input,[data-testid="stSidebar"] [class*="st-key-search_goal_matches"] input {
+        color:#20242C !important; -webkit-text-fill-color:#20242C !important; caret-color:#9A7400 !important;
+      }
+      [class*="st-key-search_goal_matches"] input::placeholder { color:#8992A0 !important; -webkit-text-fill-color:#8992A0 !important; }
+      [class*="st-key-auto_refresh_control_card"] [data-testid="stToggle"] label p,[class*="st-key-sound_control_card"] [data-testid="stToggle"] label p { color:#806000 !important; }
+      [class*="st-key-auto_refresh_control_card"] [role="switch"],[class*="st-key-sound_control_card"] [role="switch"] { background:#F2E7C5 !important; }
+      [class*="st-key-control_row"] button[kind="primary"] { background:#FACC15 !important; color:#171717 !important; }
+      .signal-card,.tip-card,.risk-tip-card,.live-match-card,.fixture-hero,.loading-brand {
+        background:linear-gradient(145deg,#FFFFFF 0%,#F3F5F8 100%) !important;
+        border-color:#D4B65B !important; box-shadow:0 6px 20px rgba(31,41,55,.08) !important; color:#20242C !important;
+      }
+      .signal-title,.tip-card-title,.tip-card-empty .tip-card-title,.live-match-team,.fixture-hero-team { color:#20242C !important; }
+      .signal-kicker,.signal-pick,.tip-card-label,.tip-card-meta,.live-match-league span,.fixture-clock,.loading-title { color:#947000 !important; }
+      .signal-meta,.tip-card-empty .tip-card-meta,.live-match-league,.fixture-hero-top,.fixture-hero-league,.loading-subtitle { color:#68717F !important; }
+      .live-match-score,.fixture-hero-score { background:#FFF7DC !important; color:#8A6800 !important; border-color:#D6B84C !important; }
+      .live-stats-panel { background:linear-gradient(145deg,#FFFFFF,#F1F4F8) !important; color:#20242C !important; border-color:#D6B84C !important; box-shadow:0 8px 22px rgba(31,41,55,.09) !important; }
+      .live-stats-heading { color:#947000 !important; border-bottom-color:#E3D39C !important; text-shadow:none !important; }
+      .live-stats-scoreboard { background:linear-gradient(180deg,#F8FAFC,#EEF1F5) !important; }
+      .live-stats-league,.live-stats-team,.live-stats-team strong { color:#303744 !important; }
+      .live-stats-score { background:#FFFFFF !important; color:#947000 !important; border-color:#D6B84C !important; text-shadow:none !important; }
+      .live-stats-metrics { color:#303744 !important; }
+      .fl-standings-scroll { background:#FFFFFF !important; border-color:#D6B84C !important; box-shadow:0 8px 22px rgba(31,41,55,.08) !important; }
+      .fl-standings-table { color:#303744 !important; }
+      .fl-standings-table th { background:#F4F0E2 !important; color:#785B00 !important; border-bottom-color:#D8C47E !important; }
+      .fl-standings-table td { background:#FFFFFF !important; color:#303744 !important; border-bottom-color:#E7EAF0 !important; }
+      .fl-standings-table tbody tr:nth-child(even) td { background:#F6F7F9 !important; }
+      .fl-standings-table .fl-standings-rank span { background:#F0F2F5 !important; color:#806000 !important; border-color:#DDE2E9 !important; }
+      .fl-standings-table .fl-standings-team span { color:#20242C !important; }
+      .fl-standings-table .fl-standings-points { color:#8A6800 !important; background:#FFF7DC !important; }
+      .fl-standings-table tr.is-home-focus td { background:#E4F3FC !important; }
+      .fl-standings-table tr.is-away-focus td { background:#FFF3C4 !important; }
+      .fl-standings-table tr.is-home-focus .fl-standings-team span { color:#075985 !important; }
+      .fl-standings-table tr.is-away-focus .fl-standings-team span { color:#806000 !important; }
+      .fl-standings-heading { background:linear-gradient(100deg,#FFF7DC,#FFFFFF) !important; border-color:#E2D39E !important; }
+      .fl-standings-heading-title,.fl-standings-heading-league { color:#806000 !important; }
+      .h2h-summary-card,.h2h-history-list,.h2h-match-row,.h2h-summary-layout {
+        background:#FFFFFF !important; color:#303744 !important; border-color:#DDE2E9 !important;
+      }
+      .h2h-page-kicker,.h2h-summary-label,.h2h-match-row .h2h-date { color:#806000 !important; }
+      .h2h-summary-value,.h2h-match-row .h2h-team { color:#20242C !important; }
+      .fl-standings-table .fl-stat-win { color:#9A7400 !important; background:#FFF5CC !important; }
+      .fl-standings-table .fl-stat-draw { color:#586170 !important; background:#EDF0F4 !important; }
+      .fl-standings-table .fl-stat-loss { color:#C52F3B !important; background:#FDEBED !important; }
+      [class*="st-key-appearance_switch"] { display:flex !important; justify-content:flex-end !important; width:100% !important; margin:0 0 8px !important; }
+      [class*="st-key-appearance_switch"] [role="radiogroup"] {
+        display:inline-flex !important; gap:4px !important; padding:4px !important;
+        border:1px solid #D6B84C !important; border-radius:999px !important; background:#FFFFFF !important;
+        box-shadow:0 3px 12px rgba(31,41,55,.08) !important;
+      }
+      [class*="st-key-appearance_switch"] [role="radio"] { padding:5px 11px !important; color:#596273 !important; border-radius:999px !important; }
+      [class*="st-key-appearance_switch"] [role="radio"][aria-checked="true"] { background:#F6E6A8 !important; color:#493800 !important; }
+      [class*="st-key-appearance_switch"] [data-testid="stMarkdownContainer"] p { color:#596273 !important; }
+      @media(max-width:640px) {
+        [class*="st-key-appearance_switch"] { justify-content:flex-end !important; margin:0 2px 7px !important; }
+        [class*="st-key-appearance_switch"] [role="radio"] { padding:4px 9px !important; font-size:.78rem !important; }
+      }
+    </style>
+    """, unsafe_allow_html=True)
+
 # La hora se calcula en el navegador para respetar la zona horaria local de cada dispositivo.
 st.components.v1.html("""
 <script>
