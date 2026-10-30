@@ -3538,8 +3538,27 @@ else:
                                         _standings_league_id = _standings_league.get("id")
                                         _standings_season = _standings_league.get("season")
                                         _standings_league_name = str(_standings_league.get("name") or "Competición")
+                                        _standings_flag = str(_standings_league.get("flag") or "").strip()
+                                        _standings_flag_html = (
+                                            f'<img class="fl-standings-league-flag" src="{html.escape(_standings_flag, quote=True)}" alt="" loading="lazy">'
+                                            if _standings_flag.startswith("https://") else
+                                            '<span class="fl-standings-league-flag-emoji">🏆</span>'
+                                        )
                                         st.markdown(
-                                            f'<div class="h2h-page-kicker">🏆 <span>CLASIFICACIÓN</span> · {html.escape(_standings_league_name.upper())}</div>',
+                                            f'<div class="fl-standings-heading">{_standings_flag_html}<span class="fl-standings-heading-title">CLASIFICACIÓN</span><span class="fl-standings-heading-divider">·</span><span class="fl-standings-heading-league">{html.escape(_standings_league_name.upper())}</span></div>',
+                                            unsafe_allow_html=True,
+                                        )
+                                        st.markdown(
+                                            '<style>'
+                                            '.fl-standings-heading{display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%;max-width:100%;min-width:0;box-sizing:border-box;margin:8px 0 12px;padding:13px 15px;border:1px solid rgba(250,204,21,.3);border-left:3px solid #FACC15;border-radius:12px;background:linear-gradient(100deg,rgba(250,204,21,.13),rgba(250,204,21,.025));color:#FFF1A8;font-weight:950;letter-spacing:.045em;line-height:1.3;text-shadow:0 0 15px rgba(250,204,21,.18);}'
+                                            '.fl-standings-league-flag{display:inline-block;width:27px;height:19px;flex:0 0 27px;object-fit:cover;border-radius:3px;box-shadow:0 2px 7px rgba(0,0,0,.35);}'
+                                            '.fl-standings-league-flag-emoji{display:inline-flex;align-items:center;justify-content:center;width:27px;height:27px;flex:0 0 27px;font-size:23px;}'
+                                            '.fl-standings-heading-title{color:#FACC15;font-size:1rem;}'
+                                            '.fl-standings-heading-divider{color:#8B783E;}'
+                                            '.fl-standings-heading-league{min-width:0;overflow-wrap:anywhere;color:#FFF0B0;font-size:1rem;}'
+                                            'section.main > div.block-container:has(.fl-standings-heading){width:100%!important;max-width:1120px!important;box-sizing:border-box!important;}'
+                                            '@media(max-width:640px){section.main > div.block-container:has(.fl-standings-heading){width:100%!important;max-width:100vw!important;padding-left:12px!important;padding-right:12px!important;padding-top:12px!important;overflow-x:hidden!important;box-sizing:border-box!important;}section.main > div.block-container:has(.fl-standings-heading) [data-testid="stVerticalBlock"]{min-width:0!important;max-width:100%!important;box-sizing:border-box!important;}.fl-standings-heading{gap:7px;margin:4px 0 10px;padding:11px 10px;border-radius:10px;}.fl-standings-heading-title,.fl-standings-heading-league{font-size:.84rem;letter-spacing:.025em;}.fl-standings-league-flag{width:24px;height:17px;flex-basis:24px;}}'
+                                            '</style>',
                                             unsafe_allow_html=True,
                                         )
                                         st.markdown(
