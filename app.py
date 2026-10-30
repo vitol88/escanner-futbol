@@ -1701,6 +1701,32 @@ div[class*="st-key-home_nav_bar"] button > div {
 div[class*="st-key-home_nav_bar"] button [data-testid="stIconMaterial"] {
  font-size:21px !important; line-height:1 !important; color:inherit !important;
 }
+/* Navegación premium: icono centrado arriba y etiqueta debajo */
+div[class*="st-key-home_nav_bar"] button {
+ position:relative !important; display:block !important;
+ height:66px !important; min-height:66px !important; padding:0 2px !important;
+}
+div[class*="st-key-home_nav_bar"] button [data-testid="stIconMaterial"] {
+ position:absolute !important; top:8px !important; left:50% !important;
+ transform:translateX(-50%) !important; margin:0 !important;
+ font-size:21px !important; line-height:1 !important;
+}
+div[class*="st-key-home_nav_bar"] button [data-testid="stMarkdownContainer"] {
+ position:absolute !important; left:2px !important; right:2px !important;
+ bottom:7px !important; width:auto !important; margin:0 !important;
+ text-align:center !important; line-height:1 !important;
+}
+div[class*="st-key-home_nav_bar"] button [data-testid="stMarkdownContainer"] p {
+ margin:0 !important; padding:0 !important; text-align:center !important;
+ font-size:.65rem !important; line-height:1 !important; letter-spacing:.045em !important;
+ white-space:nowrap !important; overflow:visible !important; text-overflow:clip !important;
+}
+@media(max-width:640px) {
+ div[class*="st-key-home_nav_bar"] button { height:64px !important; min-height:64px !important; }
+ div[class*="st-key-home_nav_bar"] button [data-testid="stIconMaterial"] { top:7px !important; font-size:20px !important; }
+ div[class*="st-key-home_nav_bar"] button [data-testid="stMarkdownContainer"] { bottom:7px !important; }
+ div[class*="st-key-home_nav_bar"] button [data-testid="stMarkdownContainer"] p { font-size:.62rem !important; }
+}
 div[class*="st-key-home_topnav_stats"] button:hover, div[class*="st-key-home_topnav_goals"] button:hover,
 div[class*="st-key-home_topnav_corners"] button:hover, div[class*="st-key-home_topnav_h2h"] button:hover {
  border-color:#D5B33D !important; background:linear-gradient(145deg,#302A19,#191A1D) !important;
