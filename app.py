@@ -1320,8 +1320,12 @@ st.markdown("""
     font-weight:950 !important; letter-spacing:.035em !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:not(:has(strong)) {
-    color:#C9CDD5 !important; font-size:clamp(.76rem,2.5vw,.9rem) !important;
-    font-weight:550 !important; line-height:1.2 !important;
+    color:#F1D66D !important; font-size:clamp(.88rem,2.8vw,1rem) !important;
+    font-weight:750 !important; line-height:1.2 !important; margin:0 0 5px !important;
+  }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) {
+    color:#C9CDD5 !important; font-size:clamp(.66rem,2.1vw,.78rem) !important;
+    font-weight:550 !important; line-height:1.2 !important; margin-top:5px !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
     content:"" !important; position:absolute !important; left:4% !important; top:50% !important;
@@ -2026,7 +2030,8 @@ if st.session_state.get("appearance_mode") == "☀️ Claro":
         box-shadow:inset 0 0 24px rgba(181,138,0,.055),0 5px 18px rgba(31,41,55,.10) !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button strong { color:#9A7400 !important; }
-      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:not(:has(strong)) { color:#68717F !important; }
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:not(:has(strong)) { color:#9A7400 !important; }
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) { color:#68717F !important; }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before { background-color:#FFFFFF !important; }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button:hover { background-color:#FFFFFF !important; }
 
@@ -2899,7 +2904,7 @@ with st.container(key="scan_actions_row"):
     with scan_action_cols[0]:
         with st.container(key="scan_cta_card"):
             manual_scan = st.button(
-                "**TOCA EL BALÓN**\n\nPara escanear",
+                "**TOCA EL BALÓN**\n\nActualizar y analizar\n\nUn solo toque. Todo el proceso.",
                 type="primary",
                 key="scan_all_live",
             )
