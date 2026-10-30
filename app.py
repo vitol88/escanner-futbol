@@ -1327,8 +1327,8 @@ st.markdown("""
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) {
     color:#FFFFFF !important; -webkit-text-fill-color:#FFFFFF !important;
     font-size:clamp(.70rem,2.2vw,.82rem) !important;
-    font-weight:650 !important; line-height:1.2 !important; margin-top:7px !important;
-    letter-spacing:.015em !important;
+    font-weight:650 !important; line-height:1.2 !important; margin-top:0 !important;
+    letter-spacing:.015em !important; position:relative !important; top:-11px !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
     content:"" !important; position:absolute !important; left:4% !important; top:50% !important;
