@@ -2098,9 +2098,25 @@ if st.session_state.get("appearance_mode") == "☀️ Claro":
         box-shadow:0 4px 13px rgba(31,41,55,.07) !important;
       }
       .fl-match-scoreboard.is-selected {
-        background:linear-gradient(145deg,#FFF9E8 0%,#FFF2C7 100%) !important;
-        border:1.5px solid #D6B84C !important;
-        box-shadow:inset 0 0 0 1px rgba(181,138,0,.08),0 5px 16px rgba(181,138,0,.10) !important;
+        background:linear-gradient(145deg,#E8F2FF 0%,#DDEBFC 100%) !important;
+        border:2px solid #3978C8 !important;
+        box-shadow:inset 0 0 0 1px rgba(57,120,200,.08),0 5px 16px rgba(36,99,166,.12) !important;
+      }
+      .fl-match-scoreboard.is-selected .fl-match-clock {
+        background:linear-gradient(145deg,#F2F7FF,#E5EFFD) !important;
+        border-color:#9DBCE5 !important;
+      }
+      .fl-match-scoreboard.is-selected .fl-match-minute,
+      .fl-match-scoreboard.is-selected .fl-match-minute-main,
+      .fl-match-scoreboard.is-selected .fl-match-clock-separator,
+      .fl-match-scoreboard.is-selected .fl-match-seconds,
+      .fl-match-scoreboard.is-selected .fl-match-team,
+      .fl-match-scoreboard.is-selected .fl-match-goals {
+        color:#174A80 !important;
+        text-shadow:none !important;
+      }
+      .fl-match-scoreboard.is-selected .fl-match-goals {
+        background:linear-gradient(145deg,#DCEBFC,#CFE1F8) !important;
       }
       .fl-match-clock {
         background:linear-gradient(145deg,#FFF8E5,#F7F1DE) !important;
