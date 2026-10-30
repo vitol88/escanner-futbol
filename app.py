@@ -3261,7 +3261,7 @@ else:
                                                     (f"{away_name} · goles a favor fuera", history.get("away_goals_for"), history.get("away_goal_sample", 0)),
                                                     (f"{away_name} · goles recibidos fuera", history.get("away_goals_against"), history.get("away_goal_sample", 0)),
                                                 ]
-                                                goal_table_html = '<div class="goal-history-wrap"><div class="goal-history-heading">▥ Promedio de goles <span>Promedio · muestra</span></div><table class="goal-history-table"><thead><tr><th>Equipo / indicador</th><th>Prom. · n</th></tr></thead><tbody>'
+                                                goal_table_html = '<div class="goal-history-wrap"><div class="goal-history-heading">▥ Promedio de goles <span>Promedio</span></div><table class="goal-history-table"><thead><tr><th>Equipo / indicador</th><th>Promedio</th></tr></thead><tbody>'
                                                 for label, avg, sample in goal_history_rows:
                                                     avg_text = f"{avg:.2f}".rstrip("0").rstrip(".") if isinstance(avg, (int, float)) else "N/D"
                                                     sample_text = int(sample or 0)
@@ -3703,7 +3703,7 @@ else:
                                                     {"Indicador": f"{corner_away_name} · córners a favor fuera", "Promedio": history.get("away_corners_for"), "Muestra": history.get("away_corner_sample", 0)},
                                                     {"Indicador": f"{corner_away_name} · córners concedidos fuera", "Promedio": history.get("away_corners_against"), "Muestra": history.get("away_corner_sample", 0)},
                                                 ]
-                                                history_html = '<div class="goal-history-wrap"><div class="goal-history-heading">📊 Promedios de córners en la competición actual <span>Promedio · muestra</span></div><table class="goal-history-table"><thead><tr><th>Indicador</th><th>Prom. · n</th></tr></thead><tbody>'
+                                                history_html = '<div class="goal-history-wrap"><div class="goal-history-heading">📊 Promedios de córners en la competición actual <span>Promedio</span></div><table class="goal-history-table"><thead><tr><th>Indicador</th><th>Prom. · n</th></tr></thead><tbody>'
                                                 for row in history_rows:
                                                     avg = row["Promedio"]
                                                     avg_text = f"{avg:.2f}".rstrip("0").rstrip(".") if isinstance(avg, (int, float)) else "N/D"
