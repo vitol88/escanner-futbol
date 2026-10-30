@@ -1103,8 +1103,8 @@ st.markdown("""
   [class*="st-key-select_live_match_"] button:active { outline:none !important; border:0 !important; box-shadow:none !important; background:transparent !important; }
   .fl-match-clock {
     display:flex; min-height:80px; flex-direction:column; align-items:center; justify-content:center; gap:5px;
-    border:1px solid #655522; border-radius:12px; background:linear-gradient(145deg,#201E16,#111419);
-    padding:5px 3px; box-sizing:border-box;
+    border:0 !important; border-radius:0 !important; background:transparent !important;
+    box-shadow:none !important; padding:5px 3px; box-sizing:border-box;
   }
   .fl-match-minute { display:flex; align-items:baseline; justify-content:center; gap:1px; color:#FFE566; font-size:1.22rem; line-height:1.1; font-weight:850; font-variant-numeric:tabular-nums; letter-spacing:.1px; text-shadow:0 0 12px rgba(250,204,21,.12); }
   .fl-match-minute-main { font-size:1.22rem; font-weight:950; }
@@ -2102,10 +2102,6 @@ if st.session_state.get("appearance_mode") == "☀️ Claro":
         border:2px solid #3978C8 !important;
         box-shadow:inset 0 0 0 1px rgba(57,120,200,.08),0 5px 16px rgba(36,99,166,.12) !important;
       }
-      .fl-match-scoreboard.is-selected .fl-match-clock {
-        background:linear-gradient(145deg,#F2F7FF,#E5EFFD) !important;
-        border-color:#9DBCE5 !important;
-      }
       .fl-match-scoreboard.is-selected .fl-match-minute,
       .fl-match-scoreboard.is-selected .fl-match-minute-main,
       .fl-match-scoreboard.is-selected .fl-match-clock-separator,
@@ -2119,8 +2115,9 @@ if st.session_state.get("appearance_mode") == "☀️ Claro":
         background:linear-gradient(145deg,#DCEBFC,#CFE1F8) !important;
       }
       .fl-match-clock {
-        background:linear-gradient(145deg,#FFF8E5,#F7F1DE) !important;
-        border:1px solid #D8C47E !important;
+        background:transparent !important;
+        border:0 !important;
+        box-shadow:none !important;
       }
       .fl-match-minute,.fl-match-minute-main { color:#806000 !important; text-shadow:none !important; }
       .fl-match-clock-separator { color:#947000 !important; }
