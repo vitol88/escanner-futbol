@@ -1587,10 +1587,10 @@ st.markdown("""
   .h2h-result-card .h2h-summary-label { min-height:2.5em !important; display:flex !important; align-items:center !important; justify-content:center !important; font-size:.66rem !important; letter-spacing:.015em !important; }
   .h2h-result-count { color:#F4F4F5 !important; font-size:1.2rem !important; font-weight:850 !important; line-height:1.35 !important; margin-top:5px !important; }
   .h2h-result-pct { color:#E8CC70 !important; font-size:1.25rem !important; font-weight:900 !important; line-height:1.3 !important; margin-top:3px !important; }
-  .h2h-distribution { padding:10px 12px !important; border:1px solid #302B20 !important; border-radius:12px !important; background:#111419 !important; }
-  .h2h-distribution-heading { display:flex !important; justify-content:space-between !important; gap:8px !important; color:#AEB3BC !important; font-size:.68rem !important; font-weight:750 !important; letter-spacing:.06em !important; }
-  .h2h-distribution-heading strong { color:#E8CC70 !important; font-size:.78rem !important; }
-  .h2h-distribution-track { display:flex !important; overflow:hidden !important; width:100% !important; height:9px !important; margin:9px 0 7px !important; border-radius:99px !important; background:#292D34 !important; gap:1px !important; }
+  .h2h-distribution { padding:14px 14px 12px !important; border:1px solid rgba(232,204,112,.48) !important; border-radius:14px !important; background:linear-gradient(135deg,rgba(232,204,112,.10),#111419 58%) !important; box-shadow:inset 0 1px 0 rgba(255,230,160,.08),0 5px 16px rgba(0,0,0,.16) !important; }
+  .h2h-distribution-heading { display:flex !important; align-items:center !important; justify-content:space-between !important; gap:8px !important; color:#F0D98C !important; font-size:.76rem !important; font-weight:900 !important; letter-spacing:.09em !important; }
+  .h2h-distribution-heading strong { color:#17191E !important; background:linear-gradient(135deg,#F4D982,#D9B94F) !important; border:1px solid rgba(255,238,180,.7) !important; border-radius:999px !important; padding:4px 10px !important; font-size:.78rem !important; font-weight:950 !important; box-shadow:0 2px 8px rgba(232,204,112,.18) !important; }
+  .h2h-distribution-track { display:flex !important; overflow:hidden !important; width:100% !important; height:12px !important; margin:11px 0 9px !important; border-radius:99px !important; background:#292D34 !important; gap:1px !important; box-shadow:inset 0 1px 3px rgba(0,0,0,.35) !important; }
   .h2h-distribution-track span { display:block !important; min-width:0 !important; height:100% !important; }
   .h2h-distribution-home { background:#E8CC70 !important; }
   .h2h-distribution-draw { background:#858B98 !important; }
@@ -3457,9 +3457,9 @@ else:
                                                 '<div class="h2h-summary-layout">'
                                                 f'<div class="h2h-sample-card"><div class="h2h-summary-label">MUESTRA</div><div class="h2h-sample-value">{h2h_sample_size} PARTIDOS</div></div>'
                                                 '<div class="h2h-results-grid">'
-                                                f'<div class="h2h-result-card"><div class="h2h-summary-label">GANADOR LOCAL</div><div class="h2h-result-count">{home_wins_count}/{h2h_sample_size}</div><div class="h2h-result-pct">{h2h_pct_label(home_pct)}</div></div>'
-                                                f'<div class="h2h-result-card"><div class="h2h-summary-label">EMPATE</div><div class="h2h-result-count">{draw_count}/{h2h_sample_size}</div><div class="h2h-result-pct">{h2h_pct_label(draw_pct)}</div></div>'
-                                                f'<div class="h2h-result-card"><div class="h2h-summary-label">GANADOR VISITANTE</div><div class="h2h-result-count">{away_wins_count}/{h2h_sample_size}</div><div class="h2h-result-pct">{h2h_pct_label(away_pct)}</div></div>'
+                                                f'<div class="h2h-result-card"><div class="h2h-summary-label">GANADOR LOCAL</div><div class="h2h-result-count">{home_wins_count}/{h2h_sample_size}</div></div>'
+                                                f'<div class="h2h-result-card"><div class="h2h-summary-label">EMPATE</div><div class="h2h-result-count">{draw_count}/{h2h_sample_size}</div></div>'
+                                                f'<div class="h2h-result-card"><div class="h2h-summary-label">GANADOR VISITANTE</div><div class="h2h-result-count">{away_wins_count}/{h2h_sample_size}</div></div>'
                                                 '</div>'
                                                 '<div class="h2h-distribution">'
                                                 '<div class="h2h-distribution-heading"><span>DISTRIBUCIÓN DE RESULTADOS</span><strong>100%</strong></div>'
