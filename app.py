@@ -2572,7 +2572,7 @@ if _analysis_page_active:
         }}
         /* Pantalla dedicada: dejar únicamente el botón de regreso y el contenido del análisis elegido. */
         {'' if (_analysis_page_tool == "market" and str(_current_tool_page.get("market") or "") in {"goals", "corners"}) else '[class*="st-key-control_row"], [class*="st-key-scan_cta_card"],'}
-        [class*="st-key-scan-progress"], .match-analysis-panel {{ display:none !important; }}
+        {'' if (_analysis_page_tool == "market" and str(_current_tool_page.get("market") or "") in {"goals", "corners"} and refresh) else '[class*="st-key-scan-progress"],'} .match-analysis-panel {{ display:none !important; }}
         /* En la vista individual se oculta la cabecera de "En vivo ahora" y el reloj del listado. */
         [class*="st-key-live_now_expander"] > div[data-testid="stExpander"] > details > summary,
         [class*="st-key-live_now_expander"] [data-testid="stExpander"] > details > summary,
