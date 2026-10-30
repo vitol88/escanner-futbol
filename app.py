@@ -1300,7 +1300,7 @@ st.markdown("""
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button,
   [class*="st-key-scan_cta_card"] button[data-testid^="stBaseButton"] {
     display:block !important; position:relative !important; overflow:hidden !important;
-    width:100% !important; min-width:100% !important; min-height:160px !important; height:160px !important;
+    width:100% !important; min-width:100% !important; max-width:560px !important; min-height:160px !important; height:160px !important;
     box-sizing:border-box !important; padding:20px 18px 20px 49% !important;
     border-radius:25px !important; border:2px solid #F5CE4D !important;
     background-color:#090A0D !important;
@@ -1325,8 +1325,10 @@ st.markdown("""
     font-weight:750 !important; line-height:1.2 !important; margin:0 0 5px !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) {
-    color:#C9CDD5 !important; font-size:clamp(.66rem,2.1vw,.78rem) !important;
-    font-weight:550 !important; line-height:1.2 !important; margin-top:5px !important;
+    color:#FFFFFF !important; -webkit-text-fill-color:#FFFFFF !important;
+    font-size:clamp(.70rem,2.2vw,.82rem) !important;
+    font-weight:650 !important; line-height:1.2 !important; margin-top:7px !important;
+    letter-spacing:.015em !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
     content:"" !important; position:absolute !important; left:4% !important; top:50% !important;
@@ -2033,7 +2035,7 @@ if st.session_state.get("appearance_mode") == "☀️ Claro":
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button strong { color:#947000 !important; text-shadow:0 2px 10px rgba(181,138,0,.18) !important; }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:not(:has(strong)) { color:#9A7400 !important; }
-      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) { color:#68717F !important; }
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) { color:#68717F !important; -webkit-text-fill-color:#68717F !important; }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before { background-color:#FFFFFF !important; box-shadow:0 0 26px rgba(181,138,0,.30),inset 0 0 22px rgba(181,138,0,.18) !important; }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button:hover { background-color:#FFFFFF !important; }
 
@@ -2902,21 +2904,16 @@ def update_scan_progress(value, title, detail, done=False):
     )
 
 with st.container(key="scan_actions_row"):
-    scan_action_cols = st.columns([1.35, 1], gap="small", vertical_alignment="center")
-    with scan_action_cols[0]:
-        with st.container(key="scan_cta_card"):
-            manual_scan = st.button(
-                "**TOCA EL BALÓN**\n\nActualizar y analizar\n\nUn solo toque. Todo el proceso.",
-                type="primary",
-                key="scan_all_live",
-            )
-    with scan_action_cols[1]:
-        with st.container(key="control_row"):
-            refresh = st.button(
-                "Actualizar scan",
-                type="primary",
-                help="Actualiza el listado de partidos y ejecuta el escaneo disponible."
-            )
+    st.markdown('<style>[class*="st-key-scan_actions_row"] [class*="st-key-scan_cta_card"] { max-width:560px !important; margin:0 auto !important; }</style>', unsafe_allow_html=True)
+    with st.container(key="scan_cta_card"):
+        manual_scan = st.button(
+            "**TOCA EL BALÓN**\n\nActualizar y analizar\n\nUn toque. Todo el análisis.",
+            type="primary",
+            key="scan_all_live",
+        )
+# El balón ejecuta ahora la actualización general y el análisis completo en una sola secuencia.
+# Se conserva el flujo existente de actualización; el botón secundario deja de ser necesario.
+refresh = manual_scan
 
 with st.container(key="scan-progress"):
     scan_progress_label = st.empty()
