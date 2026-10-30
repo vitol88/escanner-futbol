@@ -2362,7 +2362,83 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         [class*="st-key-appearance_switch"] { transform:scale(.78) !important; transform-origin:top right !important; }
         [class*="st-key-appearance_switch"] [role="radio"] { padding:2px 4px !important; min-width:22px !important; font-size:.76rem !important; }
       }
-    </style>
+    
+      /* Componentes de Goles y Señales: adaptar lectura, historial y promedio H2H al tema claro. */
+      .goal-live-summary {
+        background:linear-gradient(135deg,#FFFFFF 0%,#F5F7FA 100%) !important;
+        border:1px solid #D6B84C !important;
+        border-left:4px solid #B58A00 !important;
+        box-shadow:0 5px 16px rgba(31,41,55,.07) !important;
+      }
+      .goal-live-summary-title {
+        color:#947000 !important;
+        -webkit-text-fill-color:#947000 !important;
+      }
+      .goal-live-summary p {
+        color:#303744 !important;
+        -webkit-text-fill-color:#303744 !important;
+      }
+
+      .history-table {
+        background:#FFFFFF !important;
+        border:1px solid #D6B84C !important;
+        box-shadow:0 5px 16px rgba(31,41,55,.06) !important;
+      }
+      .history-table th {
+        background:#F4F0E2 !important;
+        color:#785B00 !important;
+        border-bottom:1px solid #D8C47E !important;
+      }
+      .history-table td {
+        background:#FFFFFF !important;
+        color:#303744 !important;
+        border-top:1px solid #E7EAF0 !important;
+      }
+      .history-table tr:nth-child(even) td {
+        background:#F6F7F9 !important;
+      }
+
+      .goal-history-wrap {
+        background:#FFFFFF !important;
+        border-color:#D6B84C !important;
+        box-shadow:0 5px 16px rgba(31,41,55,.06) !important;
+      }
+      .goal-history-heading {
+        background:linear-gradient(100deg,#FFF7DC,#FFFFFF) !important;
+        color:#806000 !important;
+        border-bottom:1px solid #E2D39E !important;
+      }
+      .goal-history-heading span { color:#68717F !important; }
+      .goal-history-table th {
+        background:#F4F0E2 !important;
+        color:#785B00 !important;
+        border-bottom:1px solid #D8C47E !important;
+      }
+      .goal-history-table td {
+        background:#FFFFFF !important;
+        color:#303744 !important;
+        border-top:1px solid #E7EAF0 !important;
+      }
+      .goal-history-table tr:nth-child(even) td { background:#F6F7F9 !important; }
+
+      .goal-average-badge {
+        background:linear-gradient(135deg,#FFFFFF 0%,#F5F7FA 100%) !important;
+        border:1px solid #D6B84C !important;
+        border-radius:10px !important;
+        box-shadow:0 4px 12px rgba(31,41,55,.07) !important;
+      }
+      .goal-average-badge > span:first-child {
+        color:#806000 !important;
+        -webkit-text-fill-color:#806000 !important;
+      }
+      .goal-average-badge > span:last-child {
+        background:#F6E6A8 !important;
+        color:#493800 !important;
+        -webkit-text-fill-color:#493800 !important;
+        border:1px solid #D6B84C !important;
+      }
+
+</style>
     """, unsafe_allow_html=True)
 else:
     st.markdown("""
@@ -4342,7 +4418,7 @@ else:
                                                     expected_match_goals = projected_home_goals + projected_away_goals
                                                     st.markdown(
                                                         f"""
-                                                        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+                                                        <div class="goal-average-badge" style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;
                                                                     margin:16px 0 18px;padding:7px 10px;
                                                                     border:1px solid #51451D;border-radius:9px;
                                                                     background:linear-gradient(135deg,#17191f,#20232b);
