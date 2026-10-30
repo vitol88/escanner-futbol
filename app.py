@@ -2910,7 +2910,7 @@ def update_scan_progress(value, title, detail, done=False):
     )
 
 with st.container(key="scan_actions_row"):
-    st.markdown('<style>[class*="st-key-scan_actions_row"] [class*="st-key-scan_cta_card"] { max-width:560px !important; margin:0 auto !important; } @media(max-width:640px) { [class*="st-key-scan_actions_row"] [class*="st-key-scan_cta_card"] { margin-top:18px !important; } }</style>', unsafe_allow_html=True)
+    st.markdown('<style>[class*="st-key-scan_actions_row"] [class*="st-key-scan_cta_card"] { max-width:560px !important; margin:0 auto !important; } @media(max-width:640px) { [class*="st-key-scan_actions_row"] [class*="st-key-scan_cta_card"] { margin-top:34px !important; } }</style>', unsafe_allow_html=True)
     with st.container(key="scan_cta_card"):
         manual_scan = st.button(
             "**TOCA EL BALÓN**\n\nActualizar y analizar\n\nUn toque. Todo el análisis.",
