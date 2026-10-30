@@ -1507,7 +1507,8 @@ st.markdown("""
   }
   .h2h-summary-grid {
     display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)) !important;
-    gap:10px !important; width:100% !important; margin:2px 0 14px !important;
+    gap:10px !important; width:100% !important; max-width:100% !important;
+    min-width:0 !important; box-sizing:border-box !important; margin:2px 0 14px !important;
   }
   .h2h-summary-card {
     min-width:0 !important; box-sizing:border-box !important; padding:12px 14px !important;
@@ -1554,22 +1555,16 @@ st.markdown("""
     .h2h-match-row .h2h-score { min-width:46px !important; font-size:.74rem !important; }
   }
   .h2h-page-kicker {
-    display:block !important;
-    /* La regla del contenedor no se refleja en todos los layouts de Streamlit.
-       Compensar directamente el espacio reservado por la cabecera fija. */
-    margin-top:-80px !important;
-    margin-right:0 !important;
-    margin-bottom:12px !important;
-    margin-left:0 !important;
-    padding:0 0 12px 0 !important;
-    color:#FFE566 !important;
-    font-size:clamp(1rem,1.35vw,1.18rem) !important;
-    font-weight:950 !important;
-    letter-spacing:.12em !important;
-    line-height:1.35 !important;
-    text-transform:uppercase !important;
-    text-shadow:0 0 16px rgba(250,204,21,.18) !important;
-    border-bottom:1px solid rgba(250,204,21,.24) !important;
+    display:flex !important; align-items:center !important; gap:10px !important;
+    flex-wrap:wrap !important; box-sizing:border-box !important; max-width:100% !important;
+    margin-top:-80px !important; margin-right:0 !important; margin-bottom:14px !important; margin-left:0 !important;
+    padding:12px 14px !important; color:#FFF1A8 !important;
+    font-size:clamp(1.02rem,1.5vw,1.22rem) !important; font-weight:950 !important;
+    letter-spacing:.055em !important; line-height:1.35 !important; text-transform:uppercase !important;
+    text-shadow:0 0 18px rgba(250,204,21,.24) !important;
+    background:linear-gradient(100deg,rgba(250,204,21,.13),rgba(250,204,21,.035) 68%,rgba(250,204,21,0)) !important;
+    border:1px solid rgba(250,204,21,.30) !important; border-left:3px solid #FACC15 !important;
+    border-radius:11px !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 5px 18px rgba(0,0,0,.16) !important;
   }
   .h2h-page-kicker span { color:#C49A20 !important; padding:0 .25em !important; }
   /* H2H: panel compacto, con filas limpias y marcador siempre destacado. */
@@ -1588,16 +1583,31 @@ st.markdown("""
   }
   @media(max-width:640px) {
     section.main > div.block-container:has(.h2h-page-kicker) {
-      padding-top:14px !important;
+      padding-top:14px !important; padding-left:10px !important; padding-right:10px !important;
+      max-width:100vw !important; overflow-x:hidden !important;
     }
     .h2h-page-kicker {
-      margin-top:-65px !important;
-      font-size:.88rem !important;
-      letter-spacing:.075em !important;
-      line-height:1.45 !important;
-      margin-bottom:10px !important;
-      padding-bottom:9px !important;
+      margin-top:-65px !important; font-size:.94rem !important; letter-spacing:.045em !important;
+      line-height:1.35 !important; margin-bottom:12px !important; padding:11px 10px !important;
+      gap:7px !important; border-radius:9px !important;
     }
+    .h2h-summary-grid {
+      grid-template-columns:repeat(3,minmax(0,1fr)) !important; gap:6px !important;
+      width:100% !important; max-width:100% !important; margin:2px 0 10px !important;
+    }
+    .h2h-summary-card {
+      min-width:0 !important; padding:9px 6px !important; border-radius:10px !important;
+      overflow:hidden !important;
+    }
+    .h2h-summary-label { font-size:clamp(.48rem,1.75vw,.60rem) !important; line-height:1.25 !important; overflow-wrap:anywhere !important; }
+    .h2h-summary-value { font-size:clamp(.88rem,3.5vw,1.05rem) !important; line-height:1.3 !important; overflow-wrap:anywhere !important; }
+    .h2h-summary-card:nth-child(6) .h2h-summary-value { font-size:clamp(.72rem,2.8vw,.9rem) !important; }
+    .h2h-history-list { max-width:100% !important; overflow:hidden !important; }
+    .h2h-match-row { grid-template-columns:64px minmax(0,1fr) 52px minmax(0,1fr) !important; gap:4px !important; padding:9px 5px !important; max-width:100% !important; overflow:hidden !important; }
+    .h2h-match-row .h2h-date { font-size:.62rem !important; }
+    .h2h-match-row .h2h-team { min-width:0 !important; gap:3px !important; font-size:.65rem !important; }
+    .h2h-match-row .h2h-team img { width:16px !important; height:16px !important; flex-basis:16px !important; }
+    .h2h-match-row .h2h-score { min-width:48px !important; padding:5px 3px !important; font-size:.78rem !important; border-radius:7px !important; }
   }
 
   /* Corrección de foco: texto sólido sobre fondo opaco mientras se escribe. */
