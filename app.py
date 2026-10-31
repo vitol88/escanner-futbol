@@ -1760,11 +1760,17 @@ st.markdown("""
   .h2h-match-row:hover { background:linear-gradient(100deg,#24251F,#191B20) !important; border-bottom-color:rgba(250,204,21,.42) !important; }
   .h2h-match-row .h2h-team { font-weight:600 !important; line-height:1.3 !important; }
   .h2h-match-row .h2h-score { font-size:.94rem !important; text-shadow:0 0 12px rgba(250,204,21,.12) !important; }
+   /* Historial H2H: bandas alternas tipo Excel, sin separadores entre partidos. */
+   html body .stApp .h2h-match-row-full.h2h-stripe-even { background:#15191F !important; border:0 !important; border-bottom:0 !important; }
+   html body .stApp .h2h-match-row-full.h2h-stripe-odd { background:#1B2027 !important; border:0 !important; border-bottom:0 !important; }
   /* H2H oscuro: misma franja compacta del modo claro y balón dorado al extremo derecho. */
   html body .stApp [class*="st-key-h2h_history_row_"] {
     position:relative !important; width:100% !important; max-width:100% !important;
     overflow:visible !important; perspective:1000px !important; margin:0 !important;
   }
+       /* Historial H2H claro: alternancia blanco/gris suave, sin líneas divisorias. */
+       html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full.h2h-stripe-even { background:#FFFFFF !important; border:0 !important; border-bottom:0 !important; }
+       html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full.h2h-stripe-odd { background:#F6F7F9 !important; border:0 !important; border-bottom:0 !important; }
   html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full {
     width:100% !important; box-sizing:border-box !important;
     padding:8px 48px 8px 10px !important; gap:8px !important;
@@ -4970,13 +4976,13 @@ else:
                                             )
                                             st.markdown(summary_html, unsafe_allow_html=True)
                                             st.markdown('<div class="h2h-history-list">', unsafe_allow_html=True)
-                                            for _h2h_row in h2h_rows:
+                                            for _h2h_index, _h2h_row in enumerate(h2h_rows):
                                                 _h2h_fixture_id = _h2h_row.get("fixture_id")
                                                 _h2h_timeline_key = f"h2h_goal_timeline_open_{h2h_key}"
                                                 _h2h_is_open = st.session_state.get(_h2h_timeline_key) == str(_h2h_fixture_id) if _h2h_fixture_id else False
                                                 with st.container(key=f"h2h_history_row_{h2h_key}_{_h2h_fixture_id or _h2h_row['date_html']}"):
                                                     st.markdown(
-                                                        f'<div class="h2h-match-row h2h-match-row-full{" h2h-row-front-open" if _h2h_is_open else ""}"><span class="h2h-date">{_h2h_row["date_html"]}</span><span class="h2h-team"><img src="{_h2h_row["home_logo"]}" alt="" onerror="this.style.display=\'none\'"><span class="h2h-team-name">{_h2h_row["home_html"]}</span></span><span class="h2h-score">{_h2h_row["home_goals"] if _h2h_row["home_goals"] is not None else "—"} – {_h2h_row["away_goals"] if _h2h_row["away_goals"] is not None else "—"}</span><span class="h2h-team"><img src="{_h2h_row["away_logo"]}" alt="" onerror="this.style.display=\'none\'"><span class="h2h-team-name">{_h2h_row["away_html"]}</span></span></div>',
+                                                        f'<div class="h2h-match-row h2h-match-row-full {"h2h-stripe-even" if _h2h_index % 2 == 0 else "h2h-stripe-odd"}{" h2h-row-front-open" if _h2h_is_open else ""}"><span class="h2h-date">{_h2h_row["date_html"]}</span><span class="h2h-team"><img src="{_h2h_row["home_logo"]}" alt="" onerror="this.style.display=\'none\'"><span class="h2h-team-name">{_h2h_row["home_html"]}</span></span><span class="h2h-score">{_h2h_row["home_goals"] if _h2h_row["home_goals"] is not None else "—"} – {_h2h_row["away_goals"] if _h2h_row["away_goals"] is not None else "—"}</span><span class="h2h-team"><img src="{_h2h_row["away_logo"]}" alt="" onerror="this.style.display=\'none\'"><span class="h2h-team-name">{_h2h_row["away_html"]}</span></span></div>',
                                                         unsafe_allow_html=True,
                                                     )
                                                     if _h2h_fixture_id:
