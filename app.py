@@ -2053,6 +2053,15 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         background:#E5E9EF !important;
         box-shadow:inset 0 1px 3px rgba(31,41,55,.12) !important;
       }
+      html body .stApp .h2h-distribution-track .h2h-distribution-home {
+        background:#D5A91E !important;
+      }
+      html body .stApp .h2h-distribution-track .h2h-distribution-draw {
+        background:#8292AA !important;
+      }
+      html body .stApp .h2h-distribution-track .h2h-distribution-away {
+        background:#3D9B78 !important;
+      }
       html body .stApp .h2h-history-list,
       html body .stApp .h2h-match-row {
         background:#FFFFFF !important;
