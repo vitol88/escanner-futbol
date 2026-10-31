@@ -3677,20 +3677,28 @@ with st.container(key="scan_actions_row"):
 }
 @media(max-width:640px) {
   [class*="st-key-scan_actions_row"] { padding-top:18px !important; }
+  /* En celular, CTA compacto y centrado: evita que ocupe todo el ancho. */
   [class*="st-key-scan_actions_row"] [class*="st-key-scan_cta_card"] {
-    width:100% !important; max-width:100% !important; min-width:0 !important;
-    flex:1 1 100% !important; margin:12px auto 0 !important;
+    display:block !important; width: min(360px, calc(100vw - 48px)) !important;
+    max-width:360px !important; min-width:0 !important;
+    flex:0 1 360px !important; margin:12px auto 0 !important;
+    justify-self:center !important;
+  }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"],
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] > div {
+    width:100% !important; max-width:360px !important; margin:0 auto !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
-    width:100% !important; max-width:100% !important; height:208px !important;
-    min-height:208px !important; padding:122px 10px 13px !important;
+    display:flex !important; width:100% !important; max-width:360px !important;
+    height:190px !important; min-height:190px !important;
+    padding:108px 10px 12px !important; margin:0 auto !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
-    width:108px !important; max-width:44% !important; top:41% !important;
+    width:88px !important; max-width:42% !important; top:39% !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
-    width:46px !important; height:46px !important; top:41% !important;
-    font-size:2.35rem !important;
+    width:40px !important; height:40px !important; top:39% !important;
+    font-size:2rem !important;
   }
 }""", unsafe_allow_html=True)
     with st.container(key="scan_cta_card"):
