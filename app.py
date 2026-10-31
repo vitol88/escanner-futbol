@@ -3714,15 +3714,30 @@ with st.container(key="scan_actions_row"):
     z-index:4 !important; text-align:center !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
-    width:108px !important; height:108px !important; max-width:42% !important; top:70% !important;
-    animation:scanner-radar-spin 3s linear infinite !important;
-    box-shadow:0 0 20px rgba(250,204,21,.45),inset 0 0 18px rgba(250,204,21,.25) !important;
+    width:108px !important; height:108px !important; max-width:42% !important;
+    left:4% !important; top:70% !important; transform-origin:50% 50% !important;
+    background-image:
+      radial-gradient(circle at center,rgba(255,220,75,.98) 0 5%,#8B6500 6% 12%,transparent 13%),
+      repeating-radial-gradient(circle at center,transparent 0 10px,rgba(255,211,55,.78) 11px 13px,transparent 14px 20px),
+      conic-gradient(from 0deg,transparent 0 8%,rgba(255,214,65,.98) 13%,rgba(255,238,145,.12) 20%,transparent 28% 43%,rgba(255,198,35,.8) 50%,transparent 62% 100%) !important;
+    animation:fl-mobile-radar-revolve 2.4s linear infinite !important;
+    box-shadow:0 0 25px rgba(250,204,21,.68),inset 0 0 22px rgba(250,204,21,.4) !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
-    width:46px !important; height:46px !important; top:70% !important;
+    width:46px !important; height:46px !important; top:70% !important; left:23% !important;
     font-size:2.35rem !important; line-height:1 !important;
-    animation:scanner-ball-orbit 2s ease-in-out infinite !important;
-    filter:drop-shadow(0 0 10px rgba(250,204,21,.75)) !important;
+    animation:fl-mobile-golden-ball 1.8s linear infinite !important;
+    filter:sepia(1) saturate(5.5) hue-rotate(355deg) brightness(1.12) drop-shadow(0 0 12px rgba(255,202,35,.98)) !important;
+    text-shadow:0 0 12px rgba(255,213,65,.95) !important;
+  }
+  @keyframes fl-mobile-radar-revolve {
+    0% { transform:translate(-50%,-50%) rotate(0deg); }
+    100% { transform:translate(-50%,-50%) rotate(360deg); }
+  }
+  @keyframes fl-mobile-golden-ball {
+    0% { transform:translate(-50%,-50%) rotate(0deg) scale(1); }
+    50% { transform:translate(-50%,-50%) rotate(180deg) scale(1.09); }
+    100% { transform:translate(-50%,-50%) rotate(360deg) scale(1); }
   }
 }""", unsafe_allow_html=True)
     with st.container(key="scan_cta_card"):
