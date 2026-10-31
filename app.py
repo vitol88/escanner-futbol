@@ -6594,14 +6594,6 @@ else:
                                                         """,
                                                         unsafe_allow_html=True,
                                                     )
-                                                    st.markdown(
-                                                        corner_period_cards_html(
-                                                            match_first_half_corners,
-                                                            match_second_half_corners,
-                                                            "Proyección combinada · ambos tiempos suman el total del partido",
-                                                        ),
-                                                        unsafe_allow_html=True,
-                                                    )
 
                                                 pace = corner_item.get("pace")
                                                 st.markdown("### 📡 Lectura en vivo")
