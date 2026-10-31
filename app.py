@@ -1681,6 +1681,11 @@ st.markdown("""
   .h2h-secondary-card { padding:12px 13px !important; }
   .h2h-secondary-value { color:#E8CC70 !important; font-size:1.3rem !important; font-weight:900 !important; line-height:1.35 !important; margin-top:5px !important; }
   .h2h-secondary-pct, .h2h-secondary-note { color:#AEB3BC !important; font-size:.72rem !important; margin-top:2px !important; }
+  .h2h-period-grid { display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:9px !important; width:100% !important; min-width:0 !important; margin-top:9px !important; }
+  .h2h-period-card { min-width:0 !important; box-sizing:border-box !important; padding:12px 13px !important; border:1px solid rgba(232,204,112,.42) !important; border-radius:13px !important; background:linear-gradient(145deg,#1B1E23,#14161B) !important; box-shadow:0 4px 12px rgba(0,0,0,.12) !important; }
+  .h2h-period-value { color:#E8CC70 !important; font-size:1.3rem !important; font-weight:900 !important; line-height:1.35 !important; margin-top:5px !important; }
+  .h2h-period-note { color:#AEB3BC !important; font-size:.68rem !important; line-height:1.4 !important; margin-top:3px !important; }
+  @media(max-width:390px) { .h2h-period-card { padding:10px 9px !important; } .h2h-period-value { font-size:1.12rem !important; } .h2h-period-note { font-size:.62rem !important; } }
   @media(max-width:390px) {
     .h2h-result-card { padding:10px 5px !important; }
     .h2h-result-card .h2h-summary-label { font-size:.59rem !important; }
@@ -2201,6 +2206,20 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       html body .stApp .h2h-secondary-value {
         color:#987300 !important;
         -webkit-text-fill-color:#987300 !important;
+      }
+      html body .stApp .h2h-period-card {
+        background:linear-gradient(145deg,#FFFFFF 0%,#F5F7FA 100%) !important;
+        border:1px solid #D8C27A !important;
+        box-shadow:0 4px 12px rgba(31,41,55,.07) !important;
+        color:#303744 !important;
+      }
+      html body .stApp .h2h-period-value {
+        color:#987300 !important;
+        -webkit-text-fill-color:#987300 !important;
+      }
+      html body .stApp .h2h-period-note {
+        color:#586170 !important;
+        -webkit-text-fill-color:#586170 !important;
       }
       html body .stApp .h2h-result-pct,
       html body .stApp .h2h-secondary-pct,
@@ -5409,6 +5428,8 @@ else:
                                                 st.markdown(f'<div class="h2h-description">Últimos {len(h2h_matches)} enfrentamientos finalizados con el equipo local actual jugando en casa; se prioriza la misma competición y se completa con otras si hace falta.</div>', unsafe_allow_html=True)
                                             h2h_rows = []
                                             valid_goal_totals = []
+                                            first_half_goal_totals = []
+                                            second_half_goal_totals = []
                                             draw_count = 0
                                             both_score_count = 0
                                             home_wins_count = 0
@@ -5425,6 +5446,16 @@ else:
                                                 ph_name, pa_name = html.escape(str(ph.get("name") or "Local")), html.escape(str(pa.get("name") or "Visitante"))
                                                 ph_logo, pa_logo = html.escape(str(ph.get("logo") or ""), quote=True), html.escape(str(pa.get("logo") or ""), quote=True)
                                                 home_goals, away_goals = pg.get("home"), pg.get("away")
+                                                _past_score = past.get("score") or {}
+                                                _half_score = _past_score.get("halftime") or {}
+                                                _half_home, _half_away = _half_score.get("home"), _half_score.get("away")
+                                                if (
+                                                    isinstance(home_goals, (int, float)) and isinstance(away_goals, (int, float))
+                                                    and isinstance(_half_home, (int, float)) and isinstance(_half_away, (int, float))
+                                                    and 0 <= _half_home <= home_goals and 0 <= _half_away <= away_goals
+                                                ):
+                                                    first_half_goal_totals.append(_half_home + _half_away)
+                                                    second_half_goal_totals.append((home_goals - _half_home) + (away_goals - _half_away))
                                                 if isinstance(home_goals, (int, float)) and isinstance(away_goals, (int, float)):
                                                     valid_goal_totals.append(home_goals + away_goals)
                                                     if home_goals == away_goals:
@@ -5453,6 +5484,9 @@ else:
                                             else:
                                                 average_goals = 0.0
                                             h2h_sample_size = len(valid_goal_totals)
+                                            h2h_period_sample_size = min(len(first_half_goal_totals), len(second_half_goal_totals))
+                                            first_half_average = sum(first_half_goal_totals) / h2h_period_sample_size if h2h_period_sample_size else None
+                                            second_half_average = sum(second_half_goal_totals) / h2h_period_sample_size if h2h_period_sample_size else None
                                             if h2h_sample_size:
                                                 home_pct = round(home_wins_count / h2h_sample_size * 100, 1)
                                                 draw_pct = round(draw_count / h2h_sample_size * 100, 1)
@@ -5482,6 +5516,10 @@ else:
                                                 '<div class="h2h-secondary-grid">'
                                                 f'<div class="h2h-secondary-card"><div class="h2h-summary-label">AMBOS MARCAN</div><div class="h2h-secondary-value">{both_score_count}/{h2h_sample_size}</div><div class="h2h-secondary-pct">{h2h_pct_label(both_pct)}</div></div>'
                                                 f'<div class="h2h-secondary-card"><div class="h2h-summary-label">PROMEDIO DE GOLES</div><div class="h2h-secondary-value">{average_goals:.2f}</div><div class="h2h-secondary-note">Goles por partido</div></div>'
+                                                '</div>'
+                                                '<div class="h2h-period-grid">'
+                                                f'<div class="h2h-period-card"><div class="h2h-summary-label">PROMEDIO · PRIMER TIEMPO</div><div class="h2h-period-value">{first_half_average:.2f if first_half_average is not None else "—"}</div><div class="h2h-period-note">Goles por partido · {h2h_period_sample_size}/{len(h2h_matches)} con descanso disponible</div></div>'
+                                                f'<div class="h2h-period-card"><div class="h2h-summary-label">PROMEDIO · SEGUNDO TIEMPO</div><div class="h2h-period-value">{second_half_average:.2f if second_half_average is not None else "—"}</div><div class="h2h-period-note">Goles por partido · {h2h_period_sample_size}/{len(h2h_matches)} con descanso disponible</div></div>'
                                                 '</div>'
                                                 '</div>'
                                             )
