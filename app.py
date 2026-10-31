@@ -3788,18 +3788,24 @@ with st.container(key="top_status_controls"):
     if(!alertOn){b.title='Alertas desactivadas';return;}
    try {
      localStorage.setItem('football-lab-audio-activated', 'true');
-     if ('speechSynthesis' in window && 'SpeechSynthesisUtterance' in window) {
-       window.speechSynthesis.cancel();
-       const u = new SpeechSynthesisUtterance('¡Gol!');
-       u.lang = 'es-CO'; u.rate = 0.95;
-       window.speechSynthesis.speak(u);
-     }
      const C=window.AudioContext||window.webkitAudioContext;
      if(!C) { b.title='Alertas activadas'; return; }
-     const c=new C(), o=c.createOscillator(), g=c.createGain();
-     o.type='sine'; o.frequency.value=880; g.gain.value=0.08;
-     o.connect(g); g.connect(c.destination);
-     Promise.resolve(c.resume()).then(()=>{o.start();setTimeout(()=>{try{o.stop();}catch(e){} c.close();},220);});
+     const c=new C();
+     const playAirportChime = () => {
+       const notes=[659.25,783.99,987.77,783.99];
+       const starts=[0,0.22,0.46,0.82];
+       notes.forEach((freq,i)=>{
+         const osc=c.createOscillator(), gain=c.createGain(), t=c.currentTime+starts[i];
+         osc.type='sine'; osc.frequency.setValueAtTime(freq,t);
+         gain.gain.setValueAtTime(0.0001,t);
+         gain.gain.exponentialRampToValueAtTime(0.095,t+0.035);
+         gain.gain.exponentialRampToValueAtTime(0.0001,t+0.30);
+         osc.connect(gain); gain.connect(c.destination);
+         osc.start(t); osc.stop(t+0.32);
+       });
+       setTimeout(()=>{try{c.close();}catch(e){}},1250);
+     };
+     Promise.resolve(c.resume()).then(playAirportChime);
      b.title='Alertas activadas';
    } catch(e) { b.title='Alertas activadas (audio no disponible)'; }
  });
@@ -4410,29 +4416,24 @@ st.components.v1.html(
       }}
       if (!muted) {{
         try {{
-          const goalEvents = fresh.filter(e => String(e.title || '').toLowerCase().includes('gol'));
-          if (goalEvents.length && 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window) {{
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance('¡Gol!');
-            utterance.lang = 'es-CO';
-            utterance.rate = 0.95;
-            window.speechSynthesis.speak(utterance);
-          }}
           const AudioCtx = window.AudioContext || window.webkitAudioContext;
           if (AudioCtx) {{
             const ctx = new AudioCtx();
-            const playChime = () => {{
-              [880, 1175].forEach((freq, i) => {{
-                const osc = ctx.createOscillator(), gain = ctx.createGain(), t = ctx.currentTime + i * 0.14;
-                osc.type = 'sine'; osc.frequency.value = freq;
-                gain.gain.setValueAtTime(0.0001, t);
-                gain.gain.exponentialRampToValueAtTime(0.12, t + 0.025);
-                gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
-                osc.connect(gain); gain.connect(ctx.destination); osc.start(t); osc.stop(t + 0.2);
+            const playAirportChime = () => {{
+              const notes=[659.25,783.99,987.77,783.99];
+              const starts=[0,0.22,0.46,0.82];
+              notes.forEach((freq,i)=>{{
+                const osc=ctx.createOscillator(), gain=ctx.createGain(), t=ctx.currentTime+starts[i];
+                osc.type='sine'; osc.frequency.setValueAtTime(freq,t);
+                gain.gain.setValueAtTime(0.0001,t);
+                gain.gain.exponentialRampToValueAtTime(0.095,t+0.035);
+                gain.gain.exponentialRampToValueAtTime(0.0001,t+0.30);
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.start(t); osc.stop(t+0.32);
               }});
-              setTimeout(() => ctx.close(), 700);
+              setTimeout(()=>{{try{{ctx.close();}}catch(e){{}}}},1250);
             }};
-            Promise.resolve(ctx.resume()).then(playChime).catch(() => {{ try {{ ctx.close(); }} catch (e) {{}} }});
+            Promise.resolve(ctx.resume()).then(playAirportChime).catch(()=>{{try{{ctx.close();}}catch(e){{}}}});
           }}
         }} catch (e) {{}}
       }}
