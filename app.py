@@ -3689,16 +3689,34 @@ with st.container(key="scan_actions_row"):
     width:100% !important; max-width:270px !important; margin:0 auto !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
-    display:flex !important; width:100% !important; max-width:270px !important;
-    height:158px !important; min-height:158px !important;
-    padding:88px 8px 10px !important; margin:0 auto !important;
+    display:flex !important; flex-direction:column !important;
+    align-items:center !important; justify-content:flex-end !important;
+    width:100% !important; max-width:270px !important;
+    height:170px !important; min-height:170px !important;
+    padding:92px 8px 10px !important; margin:0 auto !important;
+    position:relative !important; overflow:hidden !important;
+  }
+  /* El rótulo principal queda arriba del radar, dentro del borde dorado. */
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:first-of-type {
+    position:absolute !important; top:9px !important; left:8px !important;
+    width:calc(100% - 16px) !important; margin:0 !important;
+    text-align:center !important; z-index:4 !important;
+  }
+  /* Los textos de acción y apoyo quedan debajo del balón, sin cruzarlo. */
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(2) {
+    position:relative !important; margin:0 0 3px !important;
+    z-index:4 !important; text-align:center !important;
+  }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) {
+    position:relative !important; margin:0 !important;
+    z-index:4 !important; text-align:center !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
-    width:72px !important; max-width:38% !important; top:36% !important;
+    width:68px !important; max-width:38% !important; top:58% !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
-    width:32px !important; height:32px !important; top:36% !important;
-    font-size:1.65rem !important;
+    width:30px !important; height:30px !important; top:58% !important;
+    font-size:1.55rem !important;
   }
 }""", unsafe_allow_html=True)
     with st.container(key="scan_cta_card"):
