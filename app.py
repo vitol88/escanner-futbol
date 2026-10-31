@@ -4272,6 +4272,7 @@ if should_refresh:
                 if sum(score) > old_total:
                     new_events.append({
                         "id": f"{fixture_id}:{score[0]}-{score[1]}",
+                        "type": "goal",
                         "title": "⚽ ¡GOOOOL!",
                         "message": f"{home.get('name', 'Local')} {score[0]} - {score[1]} {away.get('name', 'Visitante')}"
                     })
@@ -4349,6 +4350,7 @@ if should_refresh:
                         teams = match.get("teams") or {}
                         corner_events.append({
                             "id": f"corner:{fixture_id}:{now_total}",
+                            "type": "corner",
                             "title": "🚩 ¡NUEVO CÓRNER!",
                             "message": f"{(teams.get('home') or {}).get('name', 'Local')} vs {(teams.get('away') or {}).get('name', 'Visitante')} · total {now_total}"
                         })
@@ -4417,24 +4419,40 @@ st.components.v1.html(
       if (!muted) {{
         try {{
           const AudioCtx = window.AudioContext || window.webkitAudioContext;
-          if (AudioCtx) {{
+          const speakCorner = () => {{
+            if (!('speechSynthesis' in window)) return;
+            const utterance = new SpeechSynthesisUtterance('Córner');
+            utterance.lang = 'es-CO';
+            utterance.rate = 0.92;
+            utterance.pitch = 1.04;
+            utterance.volume = 0.72;
+            const voices = window.speechSynthesis.getVoices();
+            const spanishVoices = voices.filter(v => /^es(-|$)/i.test(v.lang));
+            const femaleVoice = spanishVoices.find(v => /female|mujer|paulina|monica|helena|lucia|laura|sofia|google español/i.test(v.name));
+            if (femaleVoice) utterance.voice = femaleVoice;
+            window.speechSynthesis.speak(utterance);
+          }};
+          const playGoalChime = () => {{
+            if (!AudioCtx) return;
             const ctx = new AudioCtx();
-            const playAirportChime = () => {{
-              const notes=[659.25,783.99,987.77,783.99];
-              const starts=[0,0.22,0.46,0.82];
-              notes.forEach((freq,i)=>{{
-                const osc=ctx.createOscillator(), gain=ctx.createGain(), t=ctx.currentTime+starts[i];
-                osc.type='sine'; osc.frequency.setValueAtTime(freq,t);
-                gain.gain.setValueAtTime(0.0001,t);
-                gain.gain.exponentialRampToValueAtTime(0.095,t+0.035);
-                gain.gain.exponentialRampToValueAtTime(0.0001,t+0.30);
-                osc.connect(gain); gain.connect(ctx.destination);
-                osc.start(t); osc.stop(t+0.32);
-              }});
-              setTimeout(()=>{{try{{ctx.close();}}catch(e){{}}}},1250);
-            }};
-            Promise.resolve(ctx.resume()).then(playAirportChime).catch(()=>{{try{{ctx.close();}}catch(e){{}}}});
-          }}
+            const notes=[659.25,783.99,987.77,783.99];
+            const starts=[0,0.22,0.46,0.82];
+            notes.forEach((freq,i)=>{{
+              const osc=ctx.createOscillator(), gain=ctx.createGain(), t=ctx.currentTime+starts[i];
+              osc.type='sine'; osc.frequency.setValueAtTime(freq,t);
+              gain.gain.setValueAtTime(0.0001,t);
+              gain.gain.exponentialRampToValueAtTime(0.095,t+0.035);
+              gain.gain.exponentialRampToValueAtTime(0.0001,t+0.30);
+              osc.connect(gain); gain.connect(ctx.destination);
+              osc.start(t); osc.stop(t+0.32);
+            }});
+            Promise.resolve(ctx.resume()).catch(()=>{{try{{ctx.close();}}catch(e){{}}}});
+            setTimeout(()=>{{try{{ctx.close();}}catch(e){{}}}},1250);
+          }};
+          fresh.forEach(e => {{
+            if (e.type === 'corner') speakCorner();
+            else playGoalChime();
+          }});          }}
         }} catch (e) {{}}
       }}
     }}
