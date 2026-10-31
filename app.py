@@ -6135,6 +6135,16 @@ else:
                                                 current_minute = (match_fixture.get("status") or {}).get("elapsed")
                                                 current_total = (home_c + away_c) if isinstance(home_c, (int, float)) and isinstance(away_c, (int, float)) else None
                                                 history = corner_item.get("automatic_history") or {}
+                                                def corner_period_cards_html(first_value, second_value, note):
+                                                    first_label = f"{first_value:.2f}" if isinstance(first_value, (int, float)) else "N/D"
+                                                    second_label = f"{second_value:.2f}" if isinstance(second_value, (int, float)) else "N/D"
+                                                    safe_note = html.escape(str(note or ""))
+                                                    return (
+                                                        '<div class="corner-period-grid">'
+                                                        f'<div class="corner-period-card"><div class="corner-period-label">CÓRNERS · PRIMER TIEMPO</div><div class="corner-period-value">{first_label}</div><div class="corner-period-note">{safe_note}</div></div>'
+                                                        f'<div class="corner-period-card"><div class="corner-period-label">CÓRNERS · SEGUNDO TIEMPO</div><div class="corner-period-value">{second_label}</div><div class="corner-period-note">{safe_note}</div></div>'
+                                                        '</div>'
+                                                    )
                                                 # Los córners actuales ya aparecen en la tarjeta superior del partido.
                                                 # Evitamos repetir local, visitante y total en tres tarjetas separadas.
 
@@ -6176,6 +6186,15 @@ else:
                                                 away_inputs = [float(value) for value in away_inputs if isinstance(value, (int, float))]
                                                 projected_home_corners = sum(home_inputs) / len(home_inputs) if home_inputs else None
                                                 projected_away_corners = sum(away_inputs) / len(away_inputs) if away_inputs else None
+                                                def _corner_pair_mean(first_value, second_value):
+                                                    available_values = [float(v) for v in (first_value, second_value) if isinstance(v, (int, float))]
+                                                    return sum(available_values) / len(available_values) if available_values else None
+                                                projected_home_first = _corner_pair_mean(history.get("home_corners_for_first"), history.get("away_corners_against_first"))
+                                                projected_away_first = _corner_pair_mean(history.get("away_corners_for_first"), history.get("home_corners_against_first"))
+                                                projected_home_second = _corner_pair_mean(history.get("home_corners_for_second"), history.get("away_corners_against_second"))
+                                                projected_away_second = _corner_pair_mean(history.get("away_corners_for_second"), history.get("home_corners_against_second"))
+                                                competition_first_average = projected_home_first + projected_away_first if projected_home_first is not None and projected_away_first is not None else None
+                                                competition_second_average = projected_home_second + projected_away_second if projected_home_second is not None and projected_away_second is not None else None
                                                 if projected_home_corners is not None and projected_away_corners is not None:
                                                     competition_corner_average = projected_home_corners + projected_away_corners
                                                     st.markdown(
@@ -6196,6 +6215,14 @@ else:
                                                           </span>
                                                         </div>
                                                         """,
+                                                        unsafe_allow_html=True,
+                                                    )
+                                                    st.markdown(
+                                                        corner_period_cards_html(
+                                                            competition_first_average,
+                                                            competition_second_average,
+                                                            f"Muestra con eventos verificados · {min(int(history.get('home_corner_period_sample') or 0), int(history.get('away_corner_period_sample') or 0))} por localía",
+                                                        ),
                                                         unsafe_allow_html=True,
                                                     )
                                                 # El diagnóstico se conserva internamente en history para depuración,
