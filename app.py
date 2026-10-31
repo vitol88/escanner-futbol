@@ -2057,8 +2057,29 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         background:#D5A91E !important;
       }
       html body .stApp .h2h-distribution-track .h2h-distribution-draw {
-        background:#8292AA !important;
+        background:#397FC4 !important;
       }
+      html body .stApp .h2h-distribution-track .h2h-distribution-away {
+        background:#29966B !important;
+      }
+      html body .stApp .h2h-distribution-legend span {
+        display:inline-flex !important;
+        align-items:center !important;
+        gap:5px !important;
+        color:#586170 !important;
+        -webkit-text-fill-color:#586170 !important;
+        font-weight:750 !important;
+      }
+      html body .stApp .h2h-distribution-legend i {
+        display:inline-block !important;
+        width:9px !important;
+        height:9px !important;
+        flex:0 0 9px !important;
+        border-radius:50% !important;
+      }
+      html body .stApp .h2h-legend-local i { background:#D5A91E !important; }
+      html body .stApp .h2h-legend-draw i { background:#397FC4 !important; }
+      html body .stApp .h2h-legend-away i { background:#29966B !important; }
       html body .stApp .h2h-distribution-track .h2h-distribution-away {
         background:#3D9B78 !important;
       }
@@ -4789,7 +4810,7 @@ else:
                                                 f'<span class="h2h-distribution-draw" style="width:{draw_pct}%"></span>'
                                                 f'<span class="h2h-distribution-away" style="width:{away_pct}%"></span>'
                                                 '</div>'
-                                                f'<div class="h2h-distribution-legend"><span>Local {h2h_pct_label(home_pct)}</span><span>Empate {h2h_pct_label(draw_pct)}</span><span>Visitante {h2h_pct_label(away_pct)}</span></div>'
+                                                f'<div class="h2h-distribution-legend"><span class="h2h-legend-local"><i></i>Local {h2h_pct_label(home_pct)}</span><span class="h2h-legend-draw"><i></i>Empate {h2h_pct_label(draw_pct)}</span><span class="h2h-legend-away"><i></i>Visitante {h2h_pct_label(away_pct)}</span></div>'
                                                 '</div>'
                                                 '<div class="h2h-secondary-grid">'
                                                 f'<div class="h2h-secondary-card"><div class="h2h-summary-label">AMBOS MARCAN</div><div class="h2h-secondary-value">{both_score_count}/{h2h_sample_size}</div><div class="h2h-secondary-pct">{h2h_pct_label(both_pct)}</div></div>'
