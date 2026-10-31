@@ -3853,17 +3853,16 @@ with st.container(key="scan_actions_row"):
     [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
       --fl-cta-speed:4s;
       position:relative !important; display:block !important; width:100% !important;
-      max-width:560px !important; height:166px !important; min-height:166px !important;
+      max-width:720px !important; height:184px !important; min-height:184px !important;
       margin:0 auto !important; padding:0 14px !important; box-sizing:border-box !important;
-      overflow:hidden !important; border:2px solid #E7C447 !important; border-radius:30px !important;
-      background:radial-gradient(ellipse at 50% 68%,rgba(255,197,35,.16),transparent 48%),
-                 linear-gradient(145deg,#17150F,#0D0F13 58%,#17140B) !important;
-      color:#FFE17A !important; box-shadow:0 0 22px rgba(230,185,38,.22),inset 0 0 26px rgba(255,210,55,.07) !important;
+      overflow:visible !important; border:0 !important; border-radius:0 !important;
+      background:transparent !important;
+      color:#FFE17A !important; box-shadow:none !important;
       text-align:center !important;
     }
     [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p {
-      position:absolute !important; top:0 !important; left:36% !important;
-      width:60% !important; margin:0 !important; padding:0 !important;
+      position:absolute !important; top:0 !important; left:34% !important;
+      width:64% !important; margin:0 !important; padding:0 !important;
       color:#F5D77A !important; text-align:left !important; line-height:1.25 !important;
       font-size:14px !important; font-weight:700 !important; z-index:5 !important;
     }
@@ -3880,19 +3879,20 @@ with st.container(key="scan_actions_row"):
       font-size:clamp(10px,1.35vw,12px) !important; font-weight:600 !important;
     }
     [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
-      content:"" !important; position:absolute !important; left:18% !important; top:50% !important;
-      width:116px !important; height:116px !important; max-width:58% !important;
+      content:"" !important; position:absolute !important; left:13% !important; top:50% !important;
+      width:150px !important; height:150px !important; max-width:58% !important;
       box-sizing:border-box !important; border:4px solid #F5C928 !important; border-radius:50% !important;
       background:
         radial-gradient(circle,transparent 0 34%,rgba(255,214,60,.12) 35% 37%,transparent 38%),
-        repeating-radial-gradient(circle,transparent 0 18px,rgba(255,207,43,.62) 19px 21px,transparent 22px 29px),
+        repeating-radial-gradient(circle,transparent 0 16px,rgba(255,218,75,.78) 17px 19px,transparent 20px 29px),
+        radial-gradient(circle,transparent 0 31%,rgba(255,218,75,.72) 32% 34%,transparent 35% 48%,rgba(255,218,75,.62) 49% 51%,transparent 52% 66%,rgba(255,218,75,.55) 67% 69%,transparent 70%),
         conic-gradient(from var(--fl-cta-angle),transparent 0 8%,rgba(255,213,52,.98) 13%,rgba(255,232,130,.12) 22%,transparent 30% 48%,rgba(255,193,28,.78) 55%,transparent 68% 100%) !important;
       box-shadow:0 0 25px rgba(255,199,35,.48),inset 0 0 20px rgba(255,208,45,.20) !important;
       transform:translate(-50%,-50%) !important; transform-origin:center !important;
       animation:fl-cta-light-sweep var(--fl-cta-speed) linear infinite !important; z-index:2 !important; pointer-events:none !important;
     }
     [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
-      content:"⚽" !important; position:absolute !important; left:18% !important; top:50% !important;
+      content:"⚽" !important; position:absolute !important; left:13% !important; top:50% !important;
       width:48px !important; height:48px !important; display:flex !important;
       align-items:center !important; justify-content:center !important; font-size:42px !important;
       transform:none !important; translate:-50% -50% !important; rotate:0deg; transform-origin:center !important;
@@ -3916,21 +3916,21 @@ with st.container(key="scan_actions_row"):
     }
     @media(max-width:640px) {
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
-        width:100% !important; max-width:430px !important; height:156px !important;
-        min-height:156px !important; border-radius:24px !important;
+        width:100% !important; max-width:720px !important; height:184px !important;
+        min-height:184px !important; border:0 !important; border-radius:0 !important; background:transparent !important; box-shadow:none !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p {
-        top:0 !important; left:35% !important; width:61% !important;
+        top:0 !important; left:34% !important; width:64% !important;
         font-size:12px !important; line-height:1.25 !important; text-align:left !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:first-of-type { top:22px !important; font-size:16px !important; }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(2) { top:52px !important; font-size:12px !important; }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) { top:82px !important; font-size:9px !important; }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
-        left:18% !important; top:50% !important; width:104px !important; height:104px !important; max-width:58% !important;
+        left:13% !important; top:50% !important; width:140px !important; height:140px !important; max-width:58% !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
-        left:18% !important; top:50% !important;
+        left:13% !important; top:50% !important;
         width:44px !important; height:44px !important; font-size:39px !important;
         transform:none !important; translate:-50% -50% !important;
       }
