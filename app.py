@@ -2174,6 +2174,15 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
     <style>
       /* PALETA CLARA FOOTBALL LAB — solo se activa al elegir ☀️ Claro. */
       :root { color-scheme:light; --fl-bg:#F4F6F9; --fl-surface:#FFFFFF; --fl-text:#20242C; --fl-muted:#68717F; --fl-gold:#B58A00; --fl-border:#DDE2E9; }
+      /* CTA principal: adaptar únicamente el color de los dos textos secundarios al modo claro. */
+      html body .stApp [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(2) {
+        color:#303744 !important;
+        -webkit-text-fill-color:#303744 !important;
+      }
+      html body .stApp [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) {
+        color:#68717F !important;
+        -webkit-text-fill-color:#68717F !important;
+      }
       /* H2H: adaptar tarjetas y métricas al modo claro sin alterar estructura ni cálculos. */
       html body .stApp .h2h-sample-card,
       html body .stApp .h2h-result-card,
