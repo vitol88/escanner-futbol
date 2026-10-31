@@ -2094,6 +2094,56 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         color:#586170 !important;
         -webkit-text-fill-color:#586170 !important;
       }
+      /* H2H: una sola franja horizontal completa; el balón queda superpuesto al extremo */
+      html body .stApp [class*="st-key-h2h_history_row_"] {
+        position:relative !important; width:100% !important;
+        max-width:100% !important; overflow:visible !important;
+        perspective:1000px !important; margin:0 !important;
+      }
+      html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full {
+        width:100% !important; box-sizing:border-box !important;
+        padding-right:48px !important;
+        grid-template-columns:82px minmax(0,1fr) 70px minmax(0,1fr) !important;
+      }
+      html body .stApp [class*="st-key-h2h_history_row_"] [class*="st-key-h2h_goal_timeline_btn_"] {
+        position:absolute !important; right:7px !important; top:50% !important;
+        transform:translateY(-50%) !important; width:29px !important;
+        min-width:29px !important; z-index:5 !important;
+        margin:0 !important; padding:0 !important;
+      }
+      html body .stApp [class*="st-key-h2h_history_row_"] [class*="st-key-h2h_goal_timeline_btn_"] button {
+        width:27px !important; min-width:27px !important;
+        height:27px !important; min-height:27px !important;
+        padding:0 !important; border-radius:50% !important;
+        border:1px solid #FACC15 !important;
+        background:radial-gradient(circle at 35% 25%,#FFF1A6 0%,#FACC15 55%,#9A7000 100%) !important;
+        color:#171717 !important; font-size:12px !important;
+        box-shadow:0 0 7px #FACC1545 !important;
+      }
+      html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-timeline {
+        width:100% !important; box-sizing:border-box !important;
+        margin:0 0 9px !important; padding:10px 14px !important;
+        animation:h2hFlipReveal .48s cubic-bezier(.2,.75,.25,1) both !important;
+        transform-origin:center center !important;
+      }
+      @keyframes h2hFlipReveal {
+        0% { opacity:0; transform:rotateX(-72deg) scale(.985); }
+        65% { opacity:1; transform:rotateX(8deg) scale(1.005); }
+        100% { opacity:1; transform:rotateX(0) scale(1); }
+      }
+      @media(max-width:640px) {
+        html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full {
+          grid-template-columns:60px minmax(0,1fr) 48px minmax(0,1fr) !important;
+          padding-right:40px !important; gap:3px !important;
+        }
+        html body .stApp [class*="st-key-h2h_history_row_"] [class*="st-key-h2h_goal_timeline_btn_"] {
+          right:4px !important; width:25px !important; min-width:25px !important;
+        }
+        html body .stApp [class*="st-key-h2h_history_row_"] [class*="st-key-h2h_goal_timeline_btn_"] button {
+          width:24px !important; min-width:24px !important;
+          height:24px !important; min-height:24px !important;
+        }
+      }
       [class*="st-key-h2h_goal_timeline_btn_"] button {
         width:25px !important; min-width:25px !important;
         height:25px !important; min-height:25px !important;
@@ -4868,19 +4918,14 @@ else:
                                                 _h2h_timeline_key = f"h2h_goal_timeline_open_{h2h_key}"
                                                 _h2h_is_open = st.session_state.get(_h2h_timeline_key) == str(_h2h_fixture_id) if _h2h_fixture_id else False
                                                 with st.container(key=f"h2h_history_row_{h2h_key}_{_h2h_fixture_id or _h2h_row['date_html']}"):
-                                                    _h2h_cols = st.columns([0.90, 0.10], gap="small", vertical_alignment="center")
-                                                    with _h2h_cols[0]:
-                                                        st.markdown(
-                                                            f'<div class="h2h-match-row"><span class="h2h-date">{_h2h_row["date_html"]}</span><span class="h2h-team"><img src="{_h2h_row["home_logo"]}" alt="" onerror="this.style.display=\'none\'"><span class="h2h-team-name">{_h2h_row["home_html"]}</span></span><span class="h2h-score">{_h2h_row["home_goals"] if _h2h_row["home_goals"] is not None else "—"} – {_h2h_row["away_goals"] if _h2h_row["away_goals"] is not None else "—"}</span><span class="h2h-team"><img src="{_h2h_row["away_logo"]}" alt="" onerror="this.style.display=\'none\'"><span class="h2h-team-name">{_h2h_row["away_html"]}</span></span></div>',
-                                                            unsafe_allow_html=True,
-                                                        )
-                                                    with _h2h_cols[1]:
-                                                        if _h2h_fixture_id:
-                                                            if st.button("⚽", key=f"h2h_goal_timeline_btn_{h2h_key}_{_h2h_fixture_id}", help="Ver goleadores y minutos de este enfrentamiento"):
-                                                                st.session_state[_h2h_timeline_key] = None if _h2h_is_open else str(_h2h_fixture_id)
-                                                                st.rerun()
-                                                        else:
-                                                            st.caption("—")
+                                                    st.markdown(
+                                                        f'<div class="h2h-match-row h2h-match-row-full"><span class="h2h-date">{_h2h_row["date_html"]}</span><span class="h2h-team"><img src="{_h2h_row["home_logo"]}" alt="" onerror="this.style.display=\'none\'"><span class="h2h-team-name">{_h2h_row["home_html"]}</span></span><span class="h2h-score">{_h2h_row["home_goals"] if _h2h_row["home_goals"] is not None else "—"} – {_h2h_row["away_goals"] if _h2h_row["away_goals"] is not None else "—"}</span><span class="h2h-team"><img src="{_h2h_row["away_logo"]}" alt="" onerror="this.style.display=\'none\'"><span class="h2h-team-name">{_h2h_row["away_html"]}</span></span></div>',
+                                                        unsafe_allow_html=True,
+                                                    )
+                                                    if _h2h_fixture_id:
+                                                        if st.button("⚽", key=f"h2h_goal_timeline_btn_{h2h_key}_{_h2h_fixture_id}", help="Voltear este partido para ver los goleadores y minutos"):
+                                                            st.session_state[_h2h_timeline_key] = None if _h2h_is_open else str(_h2h_fixture_id)
+                                                            st.rerun()
                                                     if _h2h_is_open and _h2h_fixture_id:
                                                         _h2h_events_cache = st.session_state.setdefault("h2h_goal_events_cache", {})
                                                         _h2h_events_cache_key = str(_h2h_fixture_id)
