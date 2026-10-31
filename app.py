@@ -2100,14 +2100,15 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         max-width:100% !important; overflow:visible !important;
         perspective:1000px !important; margin:0 !important;
       }
+      html body .stApp [class*="st-key-h2h_history_row_"] .h2h-row-front-open { display:none !important; }
       html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full {
         width:100% !important; box-sizing:border-box !important;
         padding-right:48px !important;
         grid-template-columns:82px minmax(0,1fr) 70px minmax(0,1fr) !important;
       }
       html body .stApp [class*="st-key-h2h_history_row_"] [class*="st-key-h2h_goal_timeline_btn_"] {
-        position:absolute !important; right:7px !important; top:50% !important;
-        transform:translateY(-50%) !important; width:29px !important;
+        position:absolute !important; right:7px !important; top:12px !important;
+        transform:none !important; width:29px !important;
         min-width:29px !important; z-index:5 !important;
         margin:0 !important; padding:0 !important;
       }
@@ -2137,7 +2138,7 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
           padding-right:40px !important; gap:3px !important;
         }
         html body .stApp [class*="st-key-h2h_history_row_"] [class*="st-key-h2h_goal_timeline_btn_"] {
-          right:4px !important; width:25px !important; min-width:25px !important;
+          right:4px !important; top:9px !important; width:25px !important; min-width:25px !important;
         }
         html body .stApp [class*="st-key-h2h_history_row_"] [class*="st-key-h2h_goal_timeline_btn_"] button {
           width:24px !important; min-width:24px !important;
@@ -4919,7 +4920,7 @@ else:
                                                 _h2h_is_open = st.session_state.get(_h2h_timeline_key) == str(_h2h_fixture_id) if _h2h_fixture_id else False
                                                 with st.container(key=f"h2h_history_row_{h2h_key}_{_h2h_fixture_id or _h2h_row['date_html']}"):
                                                     st.markdown(
-                                                        f'<div class="h2h-match-row h2h-match-row-full"><span class="h2h-date">{_h2h_row["date_html"]}</span><span class="h2h-team"><img src="{_h2h_row["home_logo"]}" alt="" onerror="this.style.display=\'none\'"><span class="h2h-team-name">{_h2h_row["home_html"]}</span></span><span class="h2h-score">{_h2h_row["home_goals"] if _h2h_row["home_goals"] is not None else "—"} – {_h2h_row["away_goals"] if _h2h_row["away_goals"] is not None else "—"}</span><span class="h2h-team"><img src="{_h2h_row["away_logo"]}" alt="" onerror="this.style.display=\'none\'"><span class="h2h-team-name">{_h2h_row["away_html"]}</span></span></div>',
+                                                        f'<div class="h2h-match-row h2h-match-row-full{' h2h-row-front-open' if _h2h_is_open else ''}"><span class="h2h-date">{_h2h_row["date_html"]}</span><span class="h2h-team"><img src="{_h2h_row["home_logo"]}" alt="" onerror="this.style.display=\'none\'"><span class="h2h-team-name">{_h2h_row["home_html"]}</span></span><span class="h2h-score">{_h2h_row["home_goals"] if _h2h_row["home_goals"] is not None else "—"} – {_h2h_row["away_goals"] if _h2h_row["away_goals"] is not None else "—"}</span><span class="h2h-team"><img src="{_h2h_row["away_logo"]}" alt="" onerror="this.style.display=\'none\'"><span class="h2h-team-name">{_h2h_row["away_html"]}</span></span></div>',
                                                         unsafe_allow_html=True,
                                                     )
                                                     if _h2h_fixture_id:
