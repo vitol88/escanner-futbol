@@ -2147,8 +2147,8 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       }
       @media(max-width:640px) {
         html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-timeline { grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:4px !important; padding:5px !important; }
-        html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-event-row { grid-template-columns:24px 12px minmax(0,1fr) 40px !important; gap:3px !important; padding:4px !important; }
-        html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-score { min-width:38px !important; font-size:.60rem !important; padding:4px 3px !important; }
+        html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-event-row { grid-template-columns:22px 11px minmax(0,1fr) 35px !important; gap:2px !important; padding:3px !important; }
+        html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-score { width:34px !important; min-width:0 !important; height:22px !important; font-size:.56rem !important; padding:2px 1px !important; }
         html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-event-row strong { font-size:.59rem !important; }
         html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-event-row small { font-size:.52rem !important; }
       }
@@ -2172,17 +2172,17 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         background:linear-gradient(145deg,#20232B,#12151A);
       }
       .h2h-goal-event-row {
-        display:grid; grid-template-columns:27px 14px minmax(0,1fr) 42px;
-        align-items:center; gap:4px; min-width:0; padding:4px 5px;
+        display:grid; grid-template-columns:25px 13px minmax(0,1fr) 38px;
+        align-items:center; gap:3px; min-width:0; padding:3px 4px;
         border:1px solid rgba(255,255,255,.10); border-radius:7px;
         background:rgba(255,255,255,.045); box-sizing:border-box;
       }
       .h2h-goal-event-row:last-child { border-bottom:1px solid rgba(255,255,255,.10); }
       .h2h-goal-minute { color:#FACC15; font-size:.65rem; white-space:nowrap; }
       .h2h-goal-event-row > div { display:flex; flex-direction:column; min-width:0; gap:1px; }
-      .h2h-goal-event-row strong { color:#F4F4F5; font-size:.65rem; line-height:1.15; overflow-wrap:anywhere; }
-      .h2h-goal-event-row small { color:#A1A1AA; font-size:.56rem; line-height:1.1; overflow-wrap:anywhere; }
-      .h2h-goal-score { color:#FACC15; font-size:.64rem; white-space:nowrap; display:inline-flex; align-items:center; justify-content:center; justify-self:end; min-width:40px; box-sizing:border-box; padding:4px 5px; line-height:1.15; border:1px solid rgba(250,204,21,.42); border-radius:6px; background:rgba(250,204,21,.08); overflow:visible; }
+      .h2h-goal-event-row strong { color:#F4F4F5; font-size:.62rem; line-height:1.1; overflow-wrap:anywhere; }
+      .h2h-goal-event-row small { color:#A1A1AA; font-size:.53rem; line-height:1.05; overflow-wrap:anywhere; }
+      .h2h-goal-score { color:#FACC15; font-size:.60rem; white-space:nowrap; display:inline-flex; align-items:center; justify-content:center; justify-self:end; width:36px; min-width:0; height:23px; box-sizing:border-box; padding:2px; line-height:1; border:1px solid rgba(250,204,21,.55); border-radius:6px; background:#20232B; position:relative; z-index:2; }
       html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-timeline {
         background:linear-gradient(145deg,#FFFFFF,#F5F7FA) !important;
         border-color:#D8C27A !important;
@@ -2191,7 +2191,7 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-event-row strong { color:#263142 !important; }
       html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-event-row small { color:#586170 !important; }
       html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-minute,
-      html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-score { color:#806000 !important; }
+      html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-score { color:#806000 !important; background:#FFFFFF !important; border-color:#D8C27A !important; }
       html body .stApp .h2h-score {
         background:#F5F7FA !important;
         color:#263142 !important;
