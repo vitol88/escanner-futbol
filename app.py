@@ -3505,6 +3505,8 @@ def _api_cache_ttl(endpoint: str, params: dict[str, Any] | None = None) -> int:
             for item in st.session_state.get("live_fixtures", [])
         }
         return 45 if fixture_id in live_ids else 21600
+    if endpoint == "fixtures/events":
+        return 30
     if endpoint in {"fixtures/headtohead", "standings"}:
         return 21600
     return 600
@@ -3652,6 +3654,27 @@ def fixture_label(fixture: dict[str, Any]) -> str:
     minute_text = f"{minute}'" if minute is not None else str(status.get("short", "EN VIVO"))
     league = (fixture.get("league") or {}).get("name", "Liga")
     return f"{home} {score} {away} · {minute_text} · {league}"
+
+def fixture_red_card_counts(fixture_id: int | str, home_team_id: int | str | None, away_team_id: int | str | None) -> tuple[int, int]:
+    """Count official red-card events for each team in a live fixture."""
+    try:
+        payload = api_get("fixtures/events", {"fixture": fixture_id})
+        home_red = away_red = 0
+        for event in payload.get("response") or []:
+            if str(event.get("type") or "").casefold() != "card":
+                continue
+            detail = str(event.get("detail") or "").casefold()
+            if "red card" not in detail and "second yellow" not in detail:
+                continue
+            team_id = (event.get("team") or {}).get("id")
+            if team_id is not None and home_team_id is not None and str(team_id) == str(home_team_id):
+                home_red += 1
+            elif team_id is not None and away_team_id is not None and str(team_id) == str(away_team_id):
+                away_red += 1
+        return home_red, away_red
+    except Exception:
+        return 0, 0
+
 
 def fixture_card_html(fixture: dict[str, Any]) -> str:
     """Compact live match card using the team badge URLs supplied by API-Football."""
@@ -5267,6 +5290,9 @@ else:
                                 _away_score = match_goals.get("away") if match_goals.get("away") is not None else "—"
                                 _home_crest = f'<img class="fl-match-crest" src="{html.escape(match_home_logo, quote=True)}" alt="">' if match_home_logo else '<span class="fl-match-crest-empty">⚽</span>'
                                 _away_crest = f'<img class="fl-match-crest" src="{html.escape(match_away_logo, quote=True)}" alt="">' if match_away_logo else '<span class="fl-match-crest-empty">⚽</span>'
+                                _home_red_cards, _away_red_cards = fixture_red_card_counts(match_id, match_home_id, match_away_id)
+                                _home_red_badge = f'<span class="fl-red-card-badge" title="Tarjeta roja">🟥{(" ×" + str(_home_red_cards)) if _home_red_cards > 1 else ""}</span>' if _home_red_cards else ""
+                                _away_red_badge = f'<span class="fl-red-card-badge" title="Tarjeta roja">🟥{(" ×" + str(_away_red_cards)) if _away_red_cards > 1 else ""}</span>' if _away_red_cards else ""
                                 _status_short = str((match_fixture.get("status") or {}).get("short") or "")
                                 _live_badge = '<span class="fl-match-live">EN VIVO</span>' if _status_short in {"1H", "HT", "2H", "ET", "BT", "P", "LIVE"} or match_minute is not None else ""
                                 _is_selected_fixture = str(st.session_state.get("selected_live_fixture_id") or "") == str(match_id)
@@ -5275,8 +5301,8 @@ else:
                                     f'<div class="{_scoreboard_class}">'
                                     f'<div class="fl-match-clock"><div class="fl-match-minute"{_clock_data_attr}>{html.escape(_clock_text)}</div>{_live_badge}</div>'
                                     f'<div class="fl-match-teams">'
-                                    f'<div class="fl-match-team"><span class="fl-match-goals">{html.escape(str(_home_score))}</span>{_home_crest}<span class="fl-match-team-name">{html.escape(match_home_name)}</span></div>'
-                                    f'<div class="fl-match-team"><span class="fl-match-goals">{html.escape(str(_away_score))}</span>{_away_crest}<span class="fl-match-team-name">{html.escape(match_away_name)}</span></div>'
+                                    f'<div class="fl-match-team"><span class="fl-match-goals">{html.escape(str(_home_score))}</span>{_home_crest}<span class="fl-match-team-name">{html.escape(match_home_name)}</span>{_home_red_badge}</div>'
+                                    f'<div class="fl-match-team"><span class="fl-match-goals">{html.escape(str(_away_score))}</span>{_away_crest}<span class="fl-match-team-name">{html.escape(match_away_name)}</span>{_away_red_badge}</div>'
                                     f'</div></div>',
                                     unsafe_allow_html=True,
                                 )
