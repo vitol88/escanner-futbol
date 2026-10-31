@@ -4831,7 +4831,7 @@ else:
                                                         pass
 
                                                 if deep_context.get("available"):
-                                                    st.markdown('<div class="goal-deep-heading">⌁ CONTEXTO HISTÓRICO Y REACCIÓN AL GOL</div>', unsafe_allow_html=True)
+                                                    st.markdown('<div class="goal-deep-heading">⌁ ÚLTIMOS 3 PARTIDOS POR CONDICIÓN</div>', unsafe_allow_html=True)
                                                     form_cols = st.columns(2, gap="small")
                                                     for col, team, label, form_data in (
                                                         (form_cols[0], match_home, home_name, deep_context.get("home_form") or {}),
