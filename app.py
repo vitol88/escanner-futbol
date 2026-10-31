@@ -1791,14 +1791,6 @@ st.markdown("""
     position:relative !important; z-index:3 !important;
     box-shadow:0 0 0 3px #17191E !important;
   }
-  html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-score {
-    min-width:76px !important; min-height:36px !important; padding:6px 12px !important;
-    border:1px solid rgba(250,204,21,.62) !important; border-radius:9px !important;
-    background:linear-gradient(145deg,rgba(250,204,21,.19),rgba(250,204,21,.075)) !important;
-    color:#FFE566 !important; font-size:1rem !important; font-weight:900 !important;
-    line-height:1 !important; font-variant-numeric:tabular-nums !important;
-    text-shadow:0 0 10px rgba(250,204,21,.14) !important;
-  }
   @media(max-width:640px) {
     html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full {
       grid-template-columns:60px minmax(0,1fr) 48px minmax(0,1fr) !important;
@@ -1810,7 +1802,6 @@ st.markdown("""
     html body .stApp [class*="st-key-h2h_history_row_"] [class*="st-key-h2h_goal_timeline_btn_"] button {
       width:24px !important; min-width:24px !important; height:24px !important; min-height:24px !important;
     }
-    html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-score { min-width:54px !important; min-height:30px !important; padding:5px 4px !important; font-size:.82rem !important; border-radius:8px !important; }
   }
   .h2h-page-kicker + div { margin-top:0 !important; }
   section.main > div.block-container:has(.h2h-page-kicker) {
@@ -2165,12 +2156,8 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       /* El marcador queda visualmente por encima del separador entre partidos. */
       html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-score {
         position:relative !important; z-index:3 !important;
-        min-width:76px !important; min-height:36px !important; padding:6px 12px !important;
-        border:1px solid #D8C27A !important; border-radius:9px !important;
-        background:linear-gradient(145deg,#F7F1D9,#EEE5C5) !important;
-        color:#806000 !important; font-size:1rem !important; font-weight:900 !important;
-        line-height:1 !important; font-variant-numeric:tabular-nums !important;
-        box-shadow:0 1px 2px rgba(128,96,0,.08) !important; margin:2px 0 !important;
+        background:#F5F7FA !important; box-shadow:0 0 0 3px #FFFFFF !important;
+        margin:2px 0 !important;
       }
       html body .stApp [class*="st-key-h2h_history_row_"] [class*="st-key-h2h_goal_timeline_btn_"] {
         position:absolute !important; right:7px !important; top:12px !important;
@@ -2210,7 +2197,6 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
           width:24px !important; min-width:24px !important;
           height:24px !important; min-height:24px !important;
         }
-        html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-score { min-width:54px !important; min-height:30px !important; padding:5px 4px !important; font-size:.82rem !important; border-radius:8px !important; }
       }
       @media(max-width:640px) {
         html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-timeline { grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:4px !important; padding:5px !important; }
@@ -6886,5 +6872,3 @@ else:
             st.caption("El modelo necesita una referencia histórica compatible para estimar goles. Si no la encuentra, la señal se marca como no disponible; las estadísticas en vivo no sustituyen por sí solas una base histórica fiable.")
 
 
-    html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-score { min-width:54px !important; min-height:30px !important; padding:5px 4px !important; font-size:.82rem !important; border-radius:8px !important; }
-        html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-score { min-width:54px !important; min-height:30px !important; padding:5px 4px !important; font-size:.82rem !important; border-radius:8px !important; }
