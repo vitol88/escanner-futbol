@@ -3874,18 +3874,24 @@ with st.container(key="scan_actions_row"):
       color:#FFE17A !important; box-shadow:none !important;
       text-align:center !important;
     }
-    /* Texto en una sola columna a la derecha del radar: sin invadir los círculos. */
+    /* Jerarquía del texto a la derecha: título dorado, descripción blanca y mercados discretos. */
     [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p {
-      position:absolute !important; top:50% !important; left:34% !important;
-      width:63% !important; margin:0 !important; padding:0 !important;
-      transform:translateY(-50%) !important;
-      color:#D6D3C5 !important; text-align:left !important; line-height:1.55 !important;
-      font-size:clamp(11px,1.45vw,14px) !important; font-weight:600 !important; z-index:5 !important;
+      position:absolute !important; left:34% !important; width:63% !important;
+      margin:0 !important; padding:0 !important; transform:none !important;
+      text-align:left !important; z-index:5 !important;
     }
-    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p strong {
-      display:block !important; margin:0 0 9px !important;
-      color:#FFD84D !important; font-size:clamp(17px,2.6vw,23px) !important;
+    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:first-of-type {
+      top:31px !important; color:#FFD84D !important; font-size:clamp(17px,2.6vw,23px) !important;
       line-height:1.2 !important; font-weight:950 !important; letter-spacing:.045em !important;
+    }
+    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(2) {
+      top:72px !important; color:#FFFFFF !important; -webkit-text-fill-color:#FFFFFF !important;
+      font-size:clamp(13px,1.8vw,16px) !important; line-height:1.3 !important; font-weight:600 !important;
+    }
+    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) {
+      top:108px !important; color:#D5D7DC !important; -webkit-text-fill-color:#D5D7DC !important;
+      font-size:clamp(10px,1.35vw,12px) !important; line-height:1.3 !important; font-weight:450 !important;
+      letter-spacing:.01em !important;
     }
     [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
       content:"" !important; position:absolute !important; left:13% !important; top:50% !important;
@@ -3929,11 +3935,16 @@ with st.container(key="scan_actions_row"):
         min-height:184px !important; border:0 !important; border-radius:0 !important; background:transparent !important; box-shadow:none !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p {
-        top:50% !important; left:36% !important; width:61% !important;
-        transform:translateY(-50%) !important; font-size:11px !important; line-height:1.45 !important;
+        left:36% !important; width:61% !important; transform:none !important;
       }
-      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p strong {
-        margin-bottom:7px !important; font-size:clamp(14px,4vw,18px) !important; line-height:1.2 !important;
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:first-of-type {
+        top:35px !important; font-size:clamp(15px,4vw,18px) !important;
+      }
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(2) {
+        top:75px !important; font-size:clamp(11px,3.1vw,13px) !important;
+      }
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) {
+        top:112px !important; font-size:clamp(9px,2.5vw,10px) !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
         left:13% !important; top:50% !important; width:140px !important; height:140px !important; max-width:58% !important;
@@ -3966,7 +3977,7 @@ with st.container(key="scan_actions_row"):
     </style>""", unsafe_allow_html=True)
     with st.container(key="scan_cta_card"):
         manual_scan = st.button(
-            "**ESCANEAR EN VIVO**\nActualizar y analizar partidos\nEstadísticas · Goles · Córners · Empates · BTTS",
+            "**ESCANEAR EN VIVO**\n\nActualizar y analizar partidos\n\nEstadísticas · Goles · Córners",
             type="secondary",
             key="scan_all_live",
         )
