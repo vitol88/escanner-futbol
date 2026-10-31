@@ -1810,6 +1810,7 @@ st.markdown("""
     html body .stApp [class*="st-key-h2h_history_row_"] [class*="st-key-h2h_goal_timeline_btn_"] button {
       width:24px !important; min-width:24px !important; height:24px !important; min-height:24px !important;
     }
+    html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-score { min-width:54px !important; min-height:30px !important; padding:5px 4px !important; font-size:.82rem !important; border-radius:8px !important; }
   }
   .h2h-page-kicker + div { margin-top:0 !important; }
   section.main > div.block-container:has(.h2h-page-kicker) {
@@ -2209,6 +2210,7 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
           width:24px !important; min-width:24px !important;
           height:24px !important; min-height:24px !important;
         }
+        html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-score { min-width:54px !important; min-height:30px !important; padding:5px 4px !important; font-size:.82rem !important; border-radius:8px !important; }
       }
       @media(max-width:640px) {
         html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-timeline { grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:4px !important; padding:5px !important; }
