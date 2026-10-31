@@ -3662,7 +3662,7 @@ with st.container(key="scan_actions_row"):
 }
 /* Radar y balón comparten el centro geométrico del CTA. */
 [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
-  left:50% !important; top:59% !important; width:132px !important; height:132px !important; max-width:42% !important;
+  left:50% !important; top:55% !important; width:132px !important; height:132px !important; max-width:42% !important;
   transform:translate(-50%,-50%) !important; transform-origin:center !important;
   animation:scanner-radar-spin 3s linear infinite !important;
 }
@@ -3677,13 +3677,13 @@ with st.container(key="scan_actions_row"):
   z-index:4 !important; text-align:center !important; margin:0 !important;
 }
 [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:first-of-type {
-  top:auto !important; bottom:10px !important;
+  top:10px !important; bottom:auto !important;
 }
 [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(2) {
   top:10px !important; bottom:auto !important;
 }
 [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) {
-  top:54px !important; bottom:auto !important;
+  top:auto !important; bottom:10px !important;
 }
 @media(max-width:640px) {
   [class*="st-key-scan_actions_row"] { padding-top:30px !important; }
@@ -3705,13 +3705,13 @@ with st.container(key="scan_actions_row"):
     position:relative !important; overflow:hidden !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
-    top:59% !important; width:112px !important; height:112px !important;
+    top:55% !important; width:112px !important; height:112px !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
     top:59% !important; width:48px !important; height:48px !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:first-of-type {
-    top:auto !important; bottom:10px !important; left:8px !important;
+    top:10px !important; bottom:auto !important; left:8px !important;
     width:calc(100% - 16px) !important; margin:0 !important;
     text-align:center !important; z-index:4 !important;
   }
@@ -3721,7 +3721,7 @@ with st.container(key="scan_actions_row"):
     text-align:center !important; z-index:4 !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) {
-    top:48px !important; left:8px !important; bottom:auto !important;
+    top:auto !important; bottom:10px !important; left:8px !important;
     width:calc(100% - 16px) !important; margin:0 !important;
     text-align:center !important; z-index:4 !important;
   }
