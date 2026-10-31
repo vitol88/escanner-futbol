@@ -3849,6 +3849,21 @@ with st.container(key="scan_actions_row"):
 }""", unsafe_allow_html=True)
     # Override único del CTA: elimina los estilos heredados que desplazaban el radar y mezclaban los textos.
     st.markdown("""<style>
+    /* Mayor especificidad que los estilos de tema claro de Streamlit. */
+    html body .stApp [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button[kind="secondary"],
+    html body .stApp [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button[kind="secondary"]:hover,
+    html body .stApp [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button[kind="secondary"]:active,
+    html body .stApp [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button[kind="secondary"]:focus,
+    html body .stApp [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button[kind="secondary"]:focus-visible {
+      background:transparent !important;
+      background-color:transparent !important;
+      background-image:none !important;
+      border:0 !important;
+      border-color:transparent !important;
+      box-shadow:none !important;
+      outline:0 !important;
+      -webkit-tap-highlight-color:transparent !important;
+    }
     [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
       --fl-cta-speed:4s;
       position:relative !important; display:block !important; width:100% !important;
