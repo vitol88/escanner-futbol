@@ -3977,36 +3977,29 @@ if manual_scan:
     # Mantener el balón girando mientras se ejecuta este escaneo, no solo mientras se pulsa.
     st.markdown("""
     <style>
-      /* Una sola variable controla la velocidad del haz y del balón. */
+      /* Misma velocidad para haz y balón; se conserva la animación aprobada. */
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
         --fl-cta-speed:1.05s !important;
-      [class*="st-key-scan_cta_card"] button,
-      [class*="st-key-scan_cta_card"] button:hover,
-      [class*="st-key-scan_cta_card"] button:active,
-      [class*="st-key-scan_cta_card"] button:focus,
-      [class*="st-key-scan_cta_card"] button:focus-visible {
-        background:transparent !important; background-color:transparent !important;
-        background-image:none !important; border:0 !important; box-shadow:none !important;
-        outline:0 !important; -webkit-tap-highlight-color:transparent !important;
+        background:transparent !important;
+        background-color:transparent !important;
+        background-image:none !important;
+        border:0 !important;
+        box-shadow:none !important;
+        outline:0 !important;
+        appearance:none !important;
+        -webkit-appearance:none !important;
+        -webkit-tap-highlight-color:transparent !important;
       }
-      [class*="st-key-scan_cta_card"] button:active { transform:none !important; }
-
-      }
-      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
-        box-shadow:0 0 26px rgba(250,204,21,.72),inset 0 0 22px rgba(250,204,21,.38) !important;
-      }
-      /* El estado de escaneo no debe recuperar el fondo nativo del botón primario. */
-      [class*="st-key-scan_cta_card"],
-      [class*="st-key-scan_cta_card"] > div,
-      [class*="st-key-scan_cta_card"] [data-testid="stVerticalBlock"],
-      [class*="st-key-scan_cta_card"] [data-testid="stElementContainer"],
-      [class*="st-key-scan_cta_card"] [data-testid="stButton"],
-      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > div,
-      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button,
-      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button:hover,
-      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button:active,
-      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button:focus,
-      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button:focus-visible {
+      /* Eliminar el fondo de cada capa/wrapper del CTA en modo claro y oscuro. */
+      html body .stApp [class*="st-key-scan_cta_card"],
+      html body .stApp [class*="st-key-scan_cta_card"] > *,
+      html body .stApp [class*="st-key-scan_cta_card"] [data-testid],
+      html body .stApp [class*="st-key-scan_cta_card"] [data-testid] > *,
+      html body .stApp [class*="st-key-scan_cta_card"] button,
+      html body .stApp [class*="st-key-scan_cta_card"] button:hover,
+      html body .stApp [class*="st-key-scan_cta_card"] button:active,
+      html body .stApp [class*="st-key-scan_cta_card"] button:focus,
+      html body .stApp [class*="st-key-scan_cta_card"] button:focus-visible {
         background:transparent !important;
         background-color:transparent !important;
         background-image:none !important;
@@ -4014,7 +4007,10 @@ if manual_scan:
         border-color:transparent !important;
         outline:0 !important;
       }
-
+      [class*="st-key-scan_cta_card"] button:active { transform:none !important; }
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
+        box-shadow:0 0 26px rgba(250,204,21,.72),inset 0 0 22px rgba(250,204,21,.38) !important;
+      }
       @keyframes scanner-ball-orbit {
         0% { transform:translate(-50%,-50%) rotate(0deg) scale(1); }
         50% { transform:translate(-50%,-50%) rotate(180deg) scale(1.08); }
