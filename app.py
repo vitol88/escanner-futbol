@@ -3538,6 +3538,21 @@ if _analysis_page_active:
         section.main > div.block-container:has(.goals-section-title) > [data-testid="stVerticalBlock"]::after {{
           content:none !important; display:none !important; border:0 !important; box-shadow:none !important;
         }}
+        /* El marco oscuro viene del expander de liga que contiene el partido seleccionado, no de las tarjetas internas. */
+        [data-testid="stExpander"]:has(.goals-section-title),
+        [data-testid="stExpander"]:has(.goals-section-title) > details,
+        [data-testid="stExpander"]:has(.goals-section-title) > details > div,
+        [data-testid="stExpander"]:has(.goals-section-title) > details > div > [data-testid="stVerticalBlock"],
+        [class*="st-key-live_league_"]:has(.goals-section-title),
+        [class*="st-key-live_league_"]:has(.goals-section-title) > div {{
+          border:0 !important; outline:0 !important; box-shadow:none !important; background:transparent !important;
+        }}
+        [data-testid="stExpander"]:has(.goals-section-title)::before,
+        [data-testid="stExpander"]:has(.goals-section-title)::after,
+        [data-testid="stExpander"]:has(.goals-section-title) > details::before,
+        [data-testid="stExpander"]:has(.goals-section-title) > details::after {{
+          content:none !important; display:none !important;
+        }}
         [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stExpander"] {{ border:0 !important; margin:0 !important; padding:0 !important; }}
         [class*="st-key-live_match_{_analysis_page_id}"] [data-testid="stExpander"] > details > div {{ padding:0 !important; margin:0 !important; }}
         /* Mantener visibles las cuatro herramientas durante toda la navegación del análisis. */
