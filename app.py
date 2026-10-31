@@ -3680,7 +3680,7 @@ with st.container(key="scan_actions_row"):
   top:10px !important; bottom:auto !important;
 }
 [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(2) {
-  top:10px !important; bottom:auto !important;
+  top:54px !important; bottom:auto !important;
 }
 [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) {
   top:auto !important; bottom:10px !important;
@@ -3708,7 +3708,7 @@ with st.container(key="scan_actions_row"):
     top:55% !important; width:112px !important; height:112px !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
-    top:59% !important; width:48px !important; height:48px !important;
+    top:55% !important; width:48px !important; height:48px !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:first-of-type {
     top:10px !important; bottom:auto !important; left:8px !important;
@@ -3716,7 +3716,7 @@ with st.container(key="scan_actions_row"):
     text-align:center !important; z-index:4 !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(2) {
-    top:10px !important; left:8px !important; bottom:auto !important;
+    top:48px !important; left:8px !important; bottom:auto !important;
     width:calc(100% - 16px) !important; margin:0 !important;
     text-align:center !important; z-index:4 !important;
   }
@@ -3727,7 +3727,7 @@ with st.container(key="scan_actions_row"):
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
     width:108px !important; height:108px !important; max-width:42% !important;
-    left:50% !important; top:70% !important; transform-origin:50% 50% !important;
+    left:50% !important; top:55% !important; transform-origin:50% 50% !important;
     background-image:
       radial-gradient(circle at center,rgba(255,220,75,.98) 0 5%,#8B6500 6% 12%,transparent 13%),
       repeating-radial-gradient(circle at center,transparent 0 10px,rgba(255,211,55,.78) 11px 13px,transparent 14px 20px),
@@ -3736,7 +3736,7 @@ with st.container(key="scan_actions_row"):
     box-shadow:0 0 25px rgba(250,204,21,.68),inset 0 0 22px rgba(250,204,21,.4) !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
-    width:46px !important; height:46px !important; top:70% !important; left:50% !important;
+    width:46px !important; height:46px !important; top:55% !important; left:50% !important;
     font-size:2.35rem !important; line-height:1 !important;
     animation:fl-mobile-golden-ball 1.8s linear infinite !important;
     filter:sepia(1) saturate(5.5) hue-rotate(355deg) brightness(1.12) drop-shadow(0 0 12px rgba(255,202,35,.98)) !important;
