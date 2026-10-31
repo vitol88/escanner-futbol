@@ -1750,6 +1750,17 @@ st.markdown("""
     border-radius:11px !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 5px 18px rgba(0,0,0,.16) !important;
   }
   .h2h-page-kicker span { color:#C49A20 !important; padding:0 .25em !important; }
+  /* H2H modo oscuro: quitar la línea inferior del encabezado y los marcos laterales exteriores. */
+  html[data-theme="dark"] .h2h-page-kicker {
+    border-bottom:0 !important;
+    box-shadow:none !important;
+  }
+  html[data-theme="dark"] section.main > div.block-container:has(.h2h-page-kicker) {
+    border-left:0 !important; border-right:0 !important;
+  }
+  html[data-theme="dark"] .h2h-history-list {
+    border-left:0 !important; border-right:0 !important;
+  }
   /* H2H: panel compacto, con filas limpias y marcador siempre destacado. */
   .h2h-match-row {
     box-sizing:border-box !important; width:100% !important; min-width:0 !important;
