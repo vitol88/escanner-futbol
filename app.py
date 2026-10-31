@@ -909,15 +909,15 @@ st.markdown("""
   .h2h-team img { width:22px; height:22px; object-fit:contain; flex:0 0 22px; }
   .h2h-match-row, .corner-h2h-row { animation:matchFlipIn .32s ease both; }
   .corner-h2h-row { display:grid; grid-template-columns:82px minmax(0,1fr) 70px minmax(0,1fr) 88px; gap:8px; align-items:center; padding:9px 4px; border-bottom:1px solid #34302A; font-size:.8rem; }
-  .corner-history-grid {grid-template-columns:82px minmax(0,1fr) 74px minmax(0,1fr) 74px 85px;}
+  .corner-history-grid {grid-template-columns:76px minmax(0,1fr) 48px minmax(0,1fr) 48px 48px 48px 58px;}
   .corner-h2h-value { color:#FACC15; font-weight:850; text-align:center; white-space:nowrap; }
   .h2h-score { text-align:center; color:#FACC15; font-weight:900; white-space:nowrap; }
   @keyframes matchFlipIn { from {opacity:0; transform:perspective(900px) rotateX(-8deg) translateY(-7px)} to {opacity:1; transform:perspective(900px) rotateX(0) translateY(0)} }
   @media(max-width:620px) {
     .match-action-grid {grid-template-columns:repeat(2,minmax(0,1fr));}
     .h2h-match-row {grid-template-columns:65px minmax(0,1fr) 48px minmax(0,1fr);font-size:.7rem;gap:4px;}
-    /* Mantener cada partido histórico en una sola fila, compactando las seis columnas para móvil. */
-    .corner-h2h-row.corner-history-grid {grid-template-columns:52px minmax(0,1fr) 22px minmax(0,1fr) 22px 30px;column-gap:3px;row-gap:0;padding:7px 4px;font-size:.62rem;line-height:1.25;min-width:0;width:100%;box-sizing:border-box;}
+    /* Histórico de córners en móvil: ocho columnas compactas, incluyendo PT y ST. */
+    .corner-h2h-row.corner-history-grid {grid-template-columns:48px minmax(0,1fr) 20px minmax(0,1fr) 20px 25px 25px 29px;column-gap:2px;row-gap:0;padding:7px 3px;font-size:.60rem;line-height:1.25;min-width:0;width:100%;box-sizing:border-box;}
     .corner-h2h-row.corner-history-grid > span {min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-sizing:border-box;}
     .corner-h2h-row.corner-history-grid > span:first-child {font-size:.57rem;}
     .corner-h2h-row.corner-history-grid .h2h-team {display:flex;align-items:center;gap:3px;min-width:0;overflow:hidden;white-space:nowrap;}
@@ -929,8 +929,12 @@ st.markdown("""
     .corner-h2h-row.corner-history-grid.corner-history-header > span:nth-child(5) {font-size:0;}
     .corner-h2h-row.corner-history-grid.corner-history-header > span:nth-child(3)::after {content:"C-L";font-size:.56rem;}
     .corner-h2h-row.corner-history-grid.corner-history-header > span:nth-child(5)::after {content:"C-V";font-size:.56rem;}
-    .corner-h2h-row.corner-history-grid.corner-history-header > span:nth-child(6) {font-size:0;}
-    .corner-h2h-row.corner-history-grid.corner-history-header > span:nth-child(6)::after {content:"Total";font-size:.56rem;}
+    .corner-h2h-row.corner-history-grid.corner-history-header > span:nth-child(6),
+    .corner-h2h-row.corner-history-grid.corner-history-header > span:nth-child(7),
+    .corner-h2h-row.corner-history-grid.corner-history-header > span:nth-child(8) {font-size:0;}
+    .corner-h2h-row.corner-history-grid.corner-history-header > span:nth-child(6)::after {content:"PT";font-size:.56rem;}
+    .corner-h2h-row.corner-history-grid.corner-history-header > span:nth-child(7)::after {content:"ST";font-size:.56rem;}
+    .corner-h2h-row.corner-history-grid.corner-history-header > span:nth-child(8)::after {content:"Total";font-size:.56rem;}
     .corner-h2h-total-label {display:none !important;}
   }
 
@@ -6516,7 +6520,7 @@ else:
                                                     st.caption("No se pudo cargar el histórico de córners: " + str(h2h_rows["error"]))
                                                 elif isinstance(h2h_rows, list):
                                                     if h2h_rows:
-                                                        corners_html = '<div class="corner-h2h-row corner-history-grid corner-history-header" style="font-weight:800;color:#FACC15;border-bottom:1px solid #51451D;"><span>Fecha</span><span>Local</span><span class="corner-h2h-value">Córners L</span><span>Visitante</span><span class="corner-h2h-value">Córners V</span><span class="corner-h2h-value">Total córners</span></div>'
+                                                        corners_html = '<div class="corner-h2h-row corner-history-grid corner-history-header" style="font-weight:800;color:#FACC15;border-bottom:1px solid #51451D;"><span>Fecha</span><span>Local</span><span class="corner-h2h-value">Córners L</span><span>Visitante</span><span class="corner-h2h-value">Córners V</span><span class="corner-h2h-value">PT</span><span class="corner-h2h-value">ST</span><span class="corner-h2h-value">Total córners</span></div>'
                                                         for row in h2h_rows:
                                                             date_label = html.escape(str(row.get("Fecha") or "N/D"))
                                                             home_name = html.escape(str(row.get("Local") or "N/D"))
@@ -6531,6 +6535,8 @@ else:
                                                                 f'<span class="corner-h2h-value">{html.escape(str(home_corner))}</span>'
                                                                 f'<span class="h2h-team"><img src="{away_logo}" onerror="this.style.display=\'none\'">{away_name}</span>'
                                                                 f'<span class="corner-h2h-value">{html.escape(str(away_corner))}</span>'
+                                                                f'<span class="corner-h2h-value">{html.escape(str(row.get("PrimerTiempo") if row.get("PrimerTiempo") is not None else "N/D"))}</span>'
+                                                                f'<span class="corner-h2h-value">{html.escape(str(row.get("SegundoTiempo") if row.get("SegundoTiempo") is not None else "N/D"))}</span>'
                                                                 f'<span class="corner-h2h-value corner-h2h-total"><span class="corner-h2h-total-label" style="display:none;">Total córners</span>{html.escape(str(row.get("Total") if row.get("Total") is not None else "N/D"))}</span></div>'
                                                             )
                                                         st.markdown(corners_html, unsafe_allow_html=True)
