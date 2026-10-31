@@ -4169,8 +4169,9 @@ if should_refresh:
                 # Evitar repetir la consulta fallida en cada rerun del mismo minuto.
                 st.session_state.live_odds_last_fetch_epoch = odds_now_epoch
 
-        # Rotate through at most 5 fixtures per minute for corner stats. This keeps
-        # the Pro daily quota safe; it deliberately does not query every match every minute.
+        # Consultar hasta 5 partidos por minuto para proteger la cuota de API.
+        # El partido abierto por el usuario siempre ocupa el primer lugar del ciclo;
+        # los demás continúan rotando para mantener cobertura del resto de encuentros.
         live_for_corners = [
             match for match in new_fixtures
             if (match.get("fixture") or {}).get("id") is not None
@@ -4179,9 +4180,25 @@ if should_refresh:
         corner_events = []
         if live_for_corners:
             batch_size = min(5, len(live_for_corners))
-            offset = st.session_state.corner_rotation_index % len(live_for_corners)
-            rotated = live_for_corners[offset:] + live_for_corners[:offset]
-            for corner_idx, match in enumerate(rotated[:batch_size]):
+            selected_detail = st.session_state.get("selected_match_detail") or {}
+            selected_fixture_id = str(selected_detail.get("fixture_id") or "")
+            selected_match = next(
+                (item for item in live_for_corners
+                 if str(((item.get("fixture") or {}).get("id") or "")) == selected_fixture_id),
+                None,
+            )
+            remaining_matches = [
+                item for item in live_for_corners
+                if item is not selected_match
+            ]
+            if remaining_matches:
+                offset = st.session_state.corner_rotation_index % len(remaining_matches)
+                rotated_remaining = remaining_matches[offset:] + remaining_matches[:offset]
+            else:
+                offset = 0
+                rotated_remaining = []
+            prioritized_batch = ([selected_match] if selected_match is not None else []) + rotated_remaining[:max(0, batch_size - (1 if selected_match is not None else 0))]
+            for corner_idx, match in enumerate(prioritized_batch):
                 if refresh:
                     update_scan_progress(45 + int(45 * ((corner_idx + 1) / max(1, batch_size))), "Analizando estadísticas", f"Revisando actividad y córners · partido {corner_idx + 1} de {batch_size}")
                 fixture_data = match.get("fixture") or {}
@@ -4189,7 +4206,7 @@ if should_refresh:
                 try:
                     stat_payload = api_get("fixtures/statistics", {"fixture": fixture_id})
                     stat_rows = stat_payload.get("response") or []
-                    # Reuse live stats in the selected-match panel and corners tab.
+                    # Reutilizar datos recientes en el panel del partido seleccionado.
                     st.session_state.stats_cache[fixture_id] = stat_rows
                     home_c = safe_stat(stat_rows, "Corner Kicks", 0)
                     away_c = safe_stat(stat_rows, "Corner Kicks", 1)
@@ -4209,7 +4226,9 @@ if should_refresh:
                     if "HTTP 429" in str(stats_exc):
                         st.session_state.last_auto_refresh_error = "Se alcanzó el límite de la API; se pausaron las consultas de córners en este ciclo."
                         break
-            st.session_state.corner_rotation_index = (offset + batch_size) % max(1, len(live_for_corners))
+            if remaining_matches:
+                scanned_others = max(0, len(prioritized_batch) - (1 if selected_match is not None else 0))
+                st.session_state.corner_rotation_index = (offset + scanned_others) % len(remaining_matches)
 
         all_events = new_events + corner_events
         seen_ids = {event.get("id") for event in st.session_state.notification_events}
