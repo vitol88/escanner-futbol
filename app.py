@@ -2136,7 +2136,7 @@ div[class*="st-key-home_topnav_h2h"] button[kind="primary"]:hover, div[class*="s
 }
 /* Buscador principal debajo de la marca, con acabado negro y dorado. */
 div[class*="st-key-home_search_bar"] {
- position:fixed !important; top:260px !important; left:0 !important; right:0 !important;
+ position:fixed !important; top:235px !important; left:0 !important; right:0 !important;
  z-index:2147483002 !important; width:100vw !important; max-width:100vw !important;
  margin:0 !important; padding:0 !important; box-sizing:border-box !important;
  background:rgba(11,13,16,.98) !important;
