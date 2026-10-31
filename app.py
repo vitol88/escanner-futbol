@@ -3955,7 +3955,9 @@ if manual_scan:
         transform-origin:center !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before {
-        animation: scanner-radar-spin 1.05s linear infinite !important;
+        /* Mantener el centrado X/Y mientras gira: scanner-radar-spin elimina translateX(-50%). */
+        animation: fl-cta-radar 1.05s linear infinite !important;
+        transform-origin:center center !important;
         box-shadow:0 0 26px rgba(250,204,21,.72),inset 0 0 22px rgba(250,204,21,.38) !important;
       }
       @keyframes football-lab-ball-spin {
