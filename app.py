@@ -4419,18 +4419,28 @@ st.components.v1.html(
       if (!muted) {{
         try {{
           const AudioCtx = window.AudioContext || window.webkitAudioContext;
-          const speakCorner = () => {{
-            if (!('speechSynthesis' in window)) return;
-            const utterance = new SpeechSynthesisUtterance('Córner');
-            utterance.lang = 'es-CO';
-            utterance.rate = 0.92;
-            utterance.pitch = 1.04;
-            utterance.volume = 0.72;
-            const voices = window.speechSynthesis.getVoices();
-            const spanishVoices = voices.filter(v => /^es(-|$)/i.test(v.lang));
-            const femaleVoice = spanishVoices.find(v => /female|mujer|paulina|monica|helena|lucia|laura|sofia|google español/i.test(v.name));
-            if (femaleVoice) utterance.voice = femaleVoice;
-            window.speechSynthesis.speak(utterance);
+          const playCornerRadar = () => {{
+            if (!AudioCtx) return;
+            const ctx = new AudioCtx();
+            const notes = [740, 988, 988];
+            const starts = [0, 0.19, 0.43];
+            const levels = [0.075, 0.085, 0.026];
+            notes.forEach((freq, i) => {{
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              const t = ctx.currentTime + starts[i];
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(freq, t);
+              gain.gain.setValueAtTime(0.0001, t);
+              gain.gain.exponentialRampToValueAtTime(levels[i], t + 0.025);
+              gain.gain.exponentialRampToValueAtTime(0.0001, t + (i === 2 ? 0.22 : 0.19));
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              osc.start(t);
+              osc.stop(t + 0.24);
+            }});
+            Promise.resolve(ctx.resume()).catch(() => {{ try {{ ctx.close(); }} catch (e) {{}} }});
+            setTimeout(() => {{ try {{ ctx.close(); }} catch (e) {{}} }}, 850);
           }};
           const playGoalChime = () => {{
             if (!AudioCtx) return;
@@ -4450,7 +4460,7 @@ st.components.v1.html(
             setTimeout(()=>{{try{{ctx.close();}}catch(e){{}}}},1250);
           }};
           fresh.forEach(e => {{
-            if (e.type === 'corner') speakCorner();
+            if (e.type === 'corner') playCornerRadar();
             else playGoalChime();
           }});          }}
         }} catch (e) {{}}
