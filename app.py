@@ -3888,7 +3888,7 @@ with st.container(key="scan_actions_row"):
       align-items:center !important; justify-content:center !important; font-size:54px !important;
       transform:translate(-50%,-50%) rotate(0deg) !important; transform-origin:center !important;
       filter:sepia(1) saturate(6) hue-rotate(355deg) brightness(1.12) drop-shadow(0 0 13px rgba(255,195,20,.95)) !important;
-      animation:fl-cta-ball 2s linear infinite !important; z-index:3 !important; pointer-events:none !important;
+      animation:fl-cta-ball 4s linear infinite !important; z-index:3 !important; pointer-events:none !important;
     }
     /* El aro y los círculos quedan inmóviles; solo cambia el ángulo del haz dorado. */
     @property --fl-cta-angle {
@@ -3900,7 +3900,7 @@ with st.container(key="scan_actions_row"):
       from { --fl-cta-angle:0deg; }
       to { --fl-cta-angle:360deg; }
     }
-    /* El balón recorre una órbita circular dentro del radar; nunca abandona su perímetro. */
+    /* El balón gira sobre su propio eje en el centro fijo del espiral; no describe una órbita. */
     @keyframes fl-cta-ball {
       0%   { transform:translate(-50%,-50%) rotate(0deg); }
       100% { transform:translate(-50%,-50%) rotate(360deg); }
@@ -3961,7 +3961,7 @@ if manual_scan:
         box-shadow:0 0 26px rgba(250,204,21,.72),inset 0 0 22px rgba(250,204,21,.38) !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
-        animation-duration:.72s !important;
+        animation-duration:1.05s !important;
       }
       @keyframes scanner-ball-orbit {
         0% { transform:translate(-50%,-50%) rotate(0deg) scale(1); }
