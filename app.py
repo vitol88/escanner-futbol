@@ -2214,42 +2214,47 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         -webkit-text-fill-color:#987300 !important;
       }
       html body .stApp .corner-period-card { background:linear-gradient(145deg,#FFFFFF 0%,#F5F7FA 100%) !important; border-color:#D8C27A !important; }
-      /* Botón VER HISTÓRICO de córners: paleta clara, conservando forma e iconografía. */
-      html body .stApp [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button {
-        background:linear-gradient(145deg,#FFFFFF 0%,#F5F7FA 72%,#FBF6E6 100%) !important;
-        background-color:#FFFFFF !important;
+      /* Botón VER HISTÓRICO de córners: forzar paleta clara en todos los niveles de Streamlit. */
+      html body .stApp div[class*="st-key-corner_h2h_"] button,
+      html body .stApp div[class*="st-key-corner_h2h_"] [data-testid="stBaseButton-secondary"],
+      html body .stApp div[class*="st-key-corner_h2h_"] [data-testid="stBaseButton-primary"] {
+        background:#F7F4EA !important;
+        background-image:linear-gradient(145deg,#FFFFFF 0%,#F5F7FA 72%,#FBF6E6 100%) !important;
+        background-color:#F7F4EA !important;
         border:1.5px solid #D8C27A !important;
         color:#806000 !important;
         -webkit-text-fill-color:#806000 !important;
-        box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 3px 10px rgba(31,41,55,.09) !important;
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 3px 10px rgba(31,41,55,.09) !important;
       }
-      html body .stApp [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button p {
+      html body .stApp div[class*="st-key-corner_h2h_"] button *,
+      html body .stApp div[class*="st-key-corner_h2h_"] button p,
+      html body .stApp div[class*="st-key-corner_h2h_"] button span {
         color:#806000 !important;
         -webkit-text-fill-color:#806000 !important;
       }
-      html body .stApp [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button::before {
+      html body .stApp div[class*="st-key-corner_h2h_"] button::before {
         background:linear-gradient(145deg,#F9F1D8,#EFE3BD) !important;
         border-color:#D8C27A !important;
         color:#987300 !important;
-        box-shadow:inset 0 1px 0 rgba(255,255,255,.85) !important;
+        -webkit-text-fill-color:#987300 !important;
       }
-      html body .stApp [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button::after {
+      html body .stApp div[class*="st-key-corner_h2h_"] button::after {
         color:#987300 !important;
+        -webkit-text-fill-color:#987300 !important;
       }
-      html body .stApp [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button:hover {
-        background:linear-gradient(145deg,#FFFDF5 0%,#F7EBC5 100%) !important;
-        background-color:#FFFDF5 !important;
+      html body .stApp div[class*="st-key-corner_h2h_"] button:hover {
+        background:#FFFDF5 !important;
+        background-image:linear-gradient(145deg,#FFFDF5 0%,#F7EBC5 100%) !important;
         border-color:#B58A00 !important;
         color:#705400 !important;
         -webkit-text-fill-color:#705400 !important;
-        box-shadow:0 4px 12px rgba(31,41,55,.11),0 0 10px rgba(181,138,0,.12) !important;
       }
-      html body .stApp [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button:hover p,
-      html body .stApp [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button:hover::after {
+      html body .stApp div[class*="st-key-corner_h2h_"] button:hover *,
+      html body .stApp div[class*="st-key-corner_h2h_"] button:hover::after {
         color:#705400 !important;
         -webkit-text-fill-color:#705400 !important;
       }
-      html body .stApp [class*="st-key-corner_h2h_"] [data-testid="stButton"] > button:hover::before {
+      html body .stApp div[class*="st-key-corner_h2h_"] button:hover::before {
         background:#F3E5B8 !important;
         border-color:#B58A00 !important;
         color:#806000 !important;
