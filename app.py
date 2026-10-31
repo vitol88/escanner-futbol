@@ -3941,7 +3941,7 @@ with st.container(key="scan_actions_row"):
     </style>""", unsafe_allow_html=True)
     with st.container(key="scan_cta_card"):
         manual_scan = st.button(
-            "**TOCA EL BALÓN**\nActualizar y analizar\nUn toque. Todo el análisis.",
+            "**ESCANEAR EN VIVO**\nActualizar y analizar partidos\nEstadísticas · Goles · Córners · Empates · BTTS",
             type="primary",
             key="scan_all_live",
         )
