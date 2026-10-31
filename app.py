@@ -1750,8 +1750,28 @@ st.markdown("""
     border-radius:11px !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 5px 18px rgba(0,0,0,.16) !important;
   }
   .h2h-page-kicker span { color:#C49A20 !important; padding:0 .25em !important; }
-  /* H2H: eliminar los marcos de los contenedores Streamlit que envuelven esta vista.
-     Las tarjetas internas mantienen sus bordes propios. */
+  /* H2H: quitar los bordes de TODOS los divs ancestros del encabezado.
+     Las tarjetas internas no son ancestros y conservan sus propios contornos. */
+  html body .stApp section.main div:has(.h2h-page-kicker) {
+    border:0 !important;
+    outline:0 !important;
+    box-shadow:none !important;
+  }
+  html body .stApp section.main div:has(.h2h-page-kicker)::before,
+  html body .stApp section.main div:has(.h2h-page-kicker)::after {
+    border:0 !important;
+    outline:0 !important;
+    box-shadow:none !important;
+    content:none !important;
+    background-image:none !important;
+  }
+  html body .stApp .h2h-page-kicker {
+    border-top:0 !important;
+    border-right:0 !important;
+    border-bottom:0 !important;
+    box-shadow:none !important;
+  }
+
   html body .stApp section.main:has(.h2h-page-kicker),
   html body .stApp section.main:has(.h2h-page-kicker) > div,
   html body .stApp section.main:has(.h2h-page-kicker) > div > div,
