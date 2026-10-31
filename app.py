@@ -738,7 +738,7 @@ st.markdown("""
     .brand-mark svg { width:25px !important; height:25px !important; }
     .brand-title { font-size:clamp(1.05rem,4.8vw,1.45rem) !important; letter-spacing:0 !important; }
     .brand-subtitle { font-size:.62rem !important; letter-spacing:.7px !important; margin-top:2px !important; }
-    .brand-pill { position:absolute !important; right:clamp(112px,20vw,145px) !important; top:5px !important; margin:0 !important; padding:3px 7px !important; font-size:.58rem !important; }
+    .brand-pill { position:absolute !important; right:clamp(112px,20vw,145px) !important; top:-70px !important; margin:0 !important; padding:3px 7px !important; font-size:.58rem !important; }
     [data-testid="stSidebar"] { z-index:1000 !important; }\n    [data-testid="stSidebar"] > div:first-child { padding-top:96px !important; }
     section.main > div.block-container { padding-top:214px !important; }
   }
