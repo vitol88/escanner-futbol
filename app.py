@@ -3938,9 +3938,11 @@ with st.container(key="scan_actions_row"):
         left:53% !important; width:44% !important; transform:none !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:first-of-type {
+        left:60% !important; width:39% !important;
         top:35px !important; font-size:clamp(15px,4vw,18px) !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(2) {
+        left:60% !important; width:39% !important;
         top:75px !important; font-size:clamp(11px,3.1vw,13px) !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) {
