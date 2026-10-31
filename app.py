@@ -2155,6 +2155,17 @@ div[class*="st-key-home_search_button"] button [data-testid="stIconMaterial"] { 
 }
 </style>
 """, unsafe_allow_html=True)
+def _handle_live_search_change():
+    """Enter confirma la búsqueda; vaciar el campo restablece los partidos en vivo."""
+    query = str(st.session_state.get("search_goal_matches", "") or "").strip()
+    if not query:
+        st.session_state.pop("live_search_query", None)
+        st.session_state.pop("live_search_message", None)
+        st.session_state.pop("live_search_submit_requested", None)
+    else:
+        st.session_state["live_search_submit_requested"] = True
+
+search_clicked = False
 with st.container(key="home_search_bar"):
     _home_search_cols = st.columns([12, 1], gap="small")
     with _home_search_cols[0]:
@@ -3352,18 +3363,6 @@ st.components.v1.html("""
 
 MODEL_DATA = load_league_baselines()
 
-def _handle_live_search_change():
-    """Enter confirma la búsqueda; vaciar el campo restablece los partidos en vivo."""
-    query = str(st.session_state.get("search_goal_matches", "") or "").strip()
-    if not query:
-        st.session_state.pop("live_search_query", None)
-        st.session_state.pop("live_search_message", None)
-        st.session_state.pop("live_search_submit_requested", None)
-    else:
-        # Streamlit ejecuta este callback cuando el usuario pulsa Enter en el campo.
-        st.session_state["live_search_submit_requested"] = True
-
-search_clicked = False
 with st.sidebar:
     _sidebar_tool_page = st.session_state.get("main_fixture_tool") or {}
     _sidebar_tool_id = str(_sidebar_tool_page.get("fixture_id") or "")
