@@ -2094,6 +2094,44 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         color:#586170 !important;
         -webkit-text-fill-color:#586170 !important;
       }
+      [class*="st-key-h2h_goal_timeline_btn_"] button {
+        width:25px !important; min-width:25px !important;
+        height:25px !important; min-height:25px !important;
+        padding:0 !important; border-radius:50% !important;
+        border:1px solid #FACC15 !important;
+        background:radial-gradient(circle at 35% 25%,#FFF1A6 0%,#FACC15 55%,#9A7000 100%) !important;
+        color:#171717 !important; font-size:12px !important;
+        box-shadow:0 0 7px #FACC1545 !important;
+      }
+      [class*="st-key-h2h_goal_timeline_btn_"] button:hover {
+        transform:rotate(-10deg) scale(1.08) !important;
+        box-shadow:0 0 0 3px #FACC1535,0 0 17px #FACC1580 !important;
+      }
+      .h2h-goal-timeline {
+        margin:5px 0 12px; padding:8px 10px;
+        border:1px solid rgba(250,204,21,.32); border-radius:11px;
+        background:linear-gradient(145deg,#20232B,#12151A);
+      }
+      .h2h-goal-event-row {
+        display:grid; grid-template-columns:42px 20px minmax(0,1fr) auto;
+        align-items:center; gap:7px; padding:8px 2px;
+        border-bottom:1px solid rgba(255,255,255,.08);
+      }
+      .h2h-goal-event-row:last-child { border-bottom:0; }
+      .h2h-goal-minute { color:#FACC15; font-size:.72rem; white-space:nowrap; }
+      .h2h-goal-event-row > div { display:flex; flex-direction:column; min-width:0; gap:2px; }
+      .h2h-goal-event-row strong { color:#F4F4F5; font-size:.72rem; overflow-wrap:anywhere; }
+      .h2h-goal-event-row small { color:#A1A1AA; font-size:.62rem; overflow-wrap:anywhere; }
+      .h2h-goal-score { color:#FACC15; font-size:.78rem; white-space:nowrap; }
+      html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-timeline {
+        background:linear-gradient(145deg,#FFFFFF,#F5F7FA) !important;
+        border-color:#D8C27A !important;
+      }
+      html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-event-row { border-bottom-color:#E7EAF0 !important; }
+      html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-event-row strong { color:#263142 !important; }
+      html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-event-row small { color:#586170 !important; }
+      html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-minute,
+      html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-score { color:#806000 !important; }
       html body .stApp .h2h-score {
         background:#F5F7FA !important;
         color:#263142 !important;
@@ -4745,7 +4783,7 @@ else:
                                                 st.markdown(f'<div class="h2h-description">Últimos {len(h2h_matches)} enfrentamientos finalizados de {league_name_safe}, con el equipo local actual jugando en casa.</div>', unsafe_allow_html=True)
                                             else:
                                                 st.markdown(f'<div class="h2h-description">Últimos {len(h2h_matches)} enfrentamientos finalizados con el equipo local actual jugando en casa; se prioriza la misma competición y se completa con otras si hace falta.</div>', unsafe_allow_html=True)
-                                            h2h_html = ""
+                                            h2h_rows = []
                                             valid_goal_totals = []
                                             draw_count = 0
                                             both_score_count = 0
@@ -4773,14 +4811,17 @@ else:
                                                         away_wins_count += 1
                                                     if home_goals > 0 and away_goals > 0:
                                                         both_score_count += 1
-                                                h2h_html += (
-                                                    f'<div class="h2h-match-row">'
-                                                    f'<span class="h2h-date">{date_label}</span>'
-                                                    f'<span class="h2h-team"><img src="{ph_logo}" alt="" onerror="this.style.display=\'none\'"><span class="h2h-team-name">{ph_name}</span></span>'
-                                                    f'<span class="h2h-score">{home_goals if home_goals is not None else "—"} – {away_goals if away_goals is not None else "—"}</span>'
-                                                    f'<span class="h2h-team"><img src="{pa_logo}" alt="" onerror="this.style.display=\'none\'"><span class="h2h-team-name">{pa_name}</span></span>'
-                                                    f'</div>'
-                                                )
+                                                h2h_fixture_id = pf.get("id")
+                                                h2h_rows.append({
+                                                    "fixture_id": h2h_fixture_id,
+                                                    "date_html": date_label,
+                                                    "home_html": ph_name,
+                                                    "home_logo": ph_logo,
+                                                    "away_html": pa_name,
+                                                    "away_logo": pa_logo,
+                                                    "home_goals": home_goals,
+                                                    "away_goals": away_goals,
+                                                })
                                             if valid_goal_totals:
                                                 average_goals = sum(valid_goal_totals) / len(valid_goal_totals)
                                             else:
@@ -4818,7 +4859,72 @@ else:
                                                 '</div>'
                                                 '</div>'
                                             )
-                                            st.markdown(summary_html + '<div class="h2h-history-list">' + h2h_html + '</div>', unsafe_allow_html=True)
+                                            st.markdown(summary_html, unsafe_allow_html=True)
+                                            st.markdown('<div class="h2h-history-list">', unsafe_allow_html=True)
+                                            for _h2h_row in h2h_rows:
+                                                _h2h_fixture_id = _h2h_row.get("fixture_id")
+                                                _h2h_timeline_key = f"h2h_goal_timeline_open_{h2h_key}"
+                                                _h2h_is_open = st.session_state.get(_h2h_timeline_key) == str(_h2h_fixture_id) if _h2h_fixture_id else False
+                                                with st.container(key=f"h2h_history_row_{h2h_key}_{_h2h_fixture_id or _h2h_row['date_html']}"):
+                                                    _h2h_cols = st.columns([0.90, 0.10], gap="small", vertical_alignment="center")
+                                                    with _h2h_cols[0]:
+                                                        st.markdown(
+                                                            f'<div class="h2h-match-row"><span class="h2h-date">{_h2h_row["date_html"]}</span><span class="h2h-team"><img src="{_h2h_row["home_logo"]}" alt="" onerror="this.style.display=\'none\'"><span class="h2h-team-name">{_h2h_row["home_html"]}</span></span><span class="h2h-score">{_h2h_row["home_goals"] if _h2h_row["home_goals"] is not None else "—"} – {_h2h_row["away_goals"] if _h2h_row["away_goals"] is not None else "—"}</span><span class="h2h-team"><img src="{_h2h_row["away_logo"]}" alt="" onerror="this.style.display=\'none\'"><span class="h2h-team-name">{_h2h_row["away_html"]}</span></span></div>',
+                                                            unsafe_allow_html=True,
+                                                        )
+                                                    with _h2h_cols[1]:
+                                                        if _h2h_fixture_id:
+                                                            if st.button("⚽", key=f"h2h_goal_timeline_btn_{h2h_key}_{_h2h_fixture_id}", help="Ver goleadores y minutos de este enfrentamiento"):
+                                                                st.session_state[_h2h_timeline_key] = None if _h2h_is_open else str(_h2h_fixture_id)
+                                                                st.rerun()
+                                                        else:
+                                                            st.caption("—")
+                                                    if _h2h_is_open and _h2h_fixture_id:
+                                                        _h2h_events_cache = st.session_state.setdefault("h2h_goal_events_cache", {})
+                                                        _h2h_events_cache_key = str(_h2h_fixture_id)
+                                                        if _h2h_events_cache_key not in _h2h_events_cache:
+                                                            try:
+                                                                _h2h_events_payload = api_get("fixtures/events", {"fixture": _h2h_fixture_id})
+                                                                _h2h_events_cache[_h2h_events_cache_key] = _h2h_events_payload.get("response") or []
+                                                            except Exception as _h2h_events_exc:
+                                                                _h2h_events_cache[_h2h_events_cache_key] = {"error": str(_h2h_events_exc)}
+                                                        _h2h_events = _h2h_events_cache.get(_h2h_events_cache_key) or []
+                                                        if isinstance(_h2h_events, dict):
+                                                            st.caption("No fue posible consultar los eventos de este partido. Inténtalo más tarde.")
+                                                        else:
+                                                            _h2h_goal_events = [ev for ev in _h2h_events if str(ev.get("type") or "").casefold() == "goal" and str(ev.get("detail") or "").casefold() not in {"missed penalty", "penalty missed"}]
+                                                            _h2h_goal_events.sort(key=lambda ev: (int(((ev.get("time") or {}).get("elapsed")) or 0), int(((ev.get("time") or {}).get("extra")) or 0)))
+                                                            if not _h2h_goal_events:
+                                                                st.caption("Eventos de gol no disponibles para este encuentro.")
+                                                            else:
+                                                                _h2h_home_id = next((team.get("id") for team in (past.get("teams") or {}).values() if isinstance(team, dict) and team.get("name") == _h2h_row["home_html"]), None)
+                                                                _h2h_away_id = next((team.get("id") for team in (past.get("teams") or {}).values() if isinstance(team, dict) and team.get("name") == _h2h_row["away_html"]), None)
+                                                                _h2h_home_score, _h2h_away_score = 0, 0
+                                                                _h2h_timeline_html = ['<div class="h2h-goal-timeline">']
+                                                                for _h2h_event in _h2h_goal_events:
+                                                                    _h2h_event_team = _h2h_event.get("team") or {}
+                                                                    _h2h_event_team_id = _h2h_event_team.get("id")
+                                                                    if _h2h_event_team_id == _h2h_home_id:
+                                                                        _h2h_home_score += 1
+                                                                        _h2h_event_side = "home"
+                                                                    elif _h2h_event_team_id == _h2h_away_id:
+                                                                        _h2h_away_score += 1
+                                                                        _h2h_event_side = "away"
+                                                                    else:
+                                                                        _h2h_event_side = "other"
+                                                                    _h2h_event_time = _h2h_event.get("time") or {}
+                                                                    _h2h_elapsed, _h2h_extra = _h2h_event_time.get("elapsed"), _h2h_event_time.get("extra")
+                                                                    _h2h_minute = f"{_h2h_elapsed}+{_h2h_extra}′" if _h2h_extra else f"{_h2h_elapsed}′" if _h2h_elapsed is not None else "—"
+                                                                    _h2h_player = html.escape(str((_h2h_event.get("player") or {}).get("name") or "Autor no disponible"))
+                                                                    _h2h_team_name = html.escape(str(_h2h_event_team.get("name") or "Equipo"))
+                                                                    _h2h_detail = str(_h2h_event.get("detail") or "")
+                                                                    _h2h_assist = (_h2h_event.get("assist") or {}).get("name")
+                                                                    _h2h_note = " · " + html.escape(_h2h_detail) if _h2h_detail and _h2h_detail.casefold() not in {"normal goal", "goal"} else ""
+                                                                    _h2h_assist_html = f'<small>Asistencia: {html.escape(str(_h2h_assist))}</small>' if _h2h_assist else ""
+                                                                    _h2h_timeline_html.append(f'<div class="h2h-goal-event-row {_h2h_event_side}"><b class="h2h-goal-minute">{html.escape(str(_h2h_minute))}</b><span>⚽</span><div><strong>{_h2h_player}</strong><small>{_h2h_team_name}{_h2h_note}</small>{_h2h_assist_html}</div><b class="h2h-goal-score">{_h2h_home_score}–{_h2h_away_score}</b></div>')
+                                                                _h2h_timeline_html.append("</div>")
+                                                                st.markdown("".join(_h2h_timeline_html), unsafe_allow_html=True)
+                                            st.markdown('</div>', unsafe_allow_html=True)
                                         elif isinstance(h2h_data, list) and h2h_data:
                                             # Compatibilidad con entradas de caché creadas antes de h2h-v2.
                                             st.info("Se encontraron datos H2H antiguos en caché. Vuelve a abrir H2H para cargar el historial actualizado.")
