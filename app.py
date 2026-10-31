@@ -3876,7 +3876,7 @@ with st.container(key="scan_actions_row"):
     }
     /* Jerarquía del texto a la derecha: título dorado, descripción blanca y mercados discretos. */
     [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p {
-      position:absolute !important; left:34% !important; width:63% !important;
+      position:absolute !important; left:54% !important; width:43% !important;
       margin:0 !important; padding:0 !important; transform:none !important;
       text-align:left !important; z-index:5 !important;
     }
@@ -3935,7 +3935,7 @@ with st.container(key="scan_actions_row"):
         min-height:184px !important; border:0 !important; border-radius:0 !important; background:transparent !important; box-shadow:none !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p {
-        left:36% !important; width:61% !important; transform:none !important;
+        left:53% !important; width:44% !important; transform:none !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:first-of-type {
         top:35px !important; font-size:clamp(15px,4vw,18px) !important;
