@@ -6235,7 +6235,7 @@ else:
                                                         corner_period_cards_html(
                                                             competition_first_average,
                                                             competition_second_average,
-                                                            f"Muestra con eventos verificados · {min(int(history.get('home_corner_period_sample') or 0), int(history.get('away_corner_period_sample') or 0))} por localía",
+                                                            f"Estadísticas oficiales por tiempo · {min(int(history.get('home_corner_period_sample') or 0), int(history.get('away_corner_period_sample') or 0))} por localía",
                                                         ),
                                                         unsafe_allow_html=True,
                                                     )
@@ -6372,7 +6372,7 @@ else:
                                                                 corner_period_cards_html(
                                                                     h2h_first_avg,
                                                                     h2h_second_avg,
-                                                                    f"Eventos verificados · {min(len(valid_first_periods), len(valid_second_periods))} partidos",
+                                                                    f"Estadísticas oficiales por tiempo · {min(len(valid_first_periods), len(valid_second_periods))} partidos",
                                                                 ),
                                                                 unsafe_allow_html=True,
                                                             )
@@ -6397,9 +6397,14 @@ else:
                                                         total_match_average = int(adjusted_corner_average) + 1
                                                     match_first_half_corners = None
                                                     match_second_half_corners = None
-                                                    if all(isinstance(v, (int, float)) for v in (competition_first_average, competition_second_average, h2h_first_avg, h2h_second_avg)):
-                                                        raw_first_period = (competition_first_average + h2h_first_avg) / 2
-                                                        raw_second_period = (competition_second_average + h2h_second_avg) / 2
+                                                    period_sources = []
+                                                    if isinstance(competition_first_average, (int, float)) and isinstance(competition_second_average, (int, float)):
+                                                        period_sources.append((competition_first_average, competition_second_average))
+                                                    if isinstance(h2h_first_avg, (int, float)) and isinstance(h2h_second_avg, (int, float)):
+                                                        period_sources.append((h2h_first_avg, h2h_second_avg))
+                                                    if period_sources:
+                                                        raw_first_period = sum(pair[0] for pair in period_sources) / len(period_sources)
+                                                        raw_second_period = sum(pair[1] for pair in period_sources) / len(period_sources)
                                                         raw_period_sum = raw_first_period + raw_second_period
                                                         if raw_period_sum > 0:
                                                             match_first_half_corners = round((total_match_average * raw_first_period / raw_period_sum) * 2) / 2
