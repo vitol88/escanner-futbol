@@ -3990,12 +3990,10 @@ if manual_scan:
         -webkit-appearance:none !important;
         -webkit-tap-highlight-color:transparent !important;
       }
-      /* Eliminar el fondo de cada capa/wrapper del CTA en modo claro y oscuro. */
+      /* Neutralizar cualquier superficie HTML interna que herede el fondo del botón.
+         No se seleccionan ::before ni ::after: radar y balón conservan sus efectos. */
       html body .stApp [class*="st-key-scan_cta_card"],
-      html body .stApp [class*="st-key-scan_cta_card"] > *,
-      html body .stApp [class*="st-key-scan_cta_card"] [data-testid],
-      html body .stApp [class*="st-key-scan_cta_card"] [data-testid] > *,
-      html body .stApp [class*="st-key-scan_cta_card"] button,
+      html body .stApp [class*="st-key-scan_cta_card"] *,
       html body .stApp [class*="st-key-scan_cta_card"] button:hover,
       html body .stApp [class*="st-key-scan_cta_card"] button:active,
       html body .stApp [class*="st-key-scan_cta_card"] button:focus,
