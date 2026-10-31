@@ -2052,14 +2052,14 @@ st.markdown(f"""
 st.markdown("""
 <style>
 div[class*="st-key-home_nav_bar"] {
- position:fixed !important; top:150px !important; left:0 !important; right:0 !important;
+ position:fixed !important; top:218px !important; left:0 !important; right:0 !important;
  z-index:2147483001 !important; width:100vw !important; max-width:100vw !important;
  padding:0 clamp(18px,3.2vw,48px) !important; margin:0 !important;
  box-sizing:border-box !important; background:rgba(11,13,16,.98) !important;
  box-shadow:0 8px 18px rgba(0,0,0,.28) !important;
 }
 @media(max-width:640px) {
- div[class*="st-key-home_nav_bar"] { top:154px !important; padding:0 10px !important; }
+ div[class*="st-key-home_nav_bar"] { top:222px !important; padding:0 10px !important; }
 }
 div[class*="st-key-home_nav_bar"] [data-testid="stHorizontalBlock"] { display:grid !important; grid-template-columns:repeat(5,minmax(0,1fr)) !important; grid-auto-flow:column !important; gap:0 !important; column-gap:0 !important; width:100% !important; min-width:0 !important; margin:0 !important; padding:0 !important; box-sizing:border-box !important; overflow:visible !important; }
 div[class*="st-key-home_nav_bar"] [data-testid="column"] { display:block !important; flex:none !important; width:100% !important; max-width:100% !important; min-width:0 !important; padding:0 !important; margin:0 !important; box-sizing:border-box !important; }
@@ -2127,6 +2127,25 @@ div[class*="st-key-home_topnav_h2h"] button[kind="primary"]:hover, div[class*="s
  background:#EED88F !important; border-color:#F8EBC1 !important;
  color:#111419 !important; box-shadow:0 0 15px rgba(232,204,112,.28) !important;
 }
+/* Buscador principal debajo de la marca, con acabado negro y dorado. */
+div[class*="st-key-home_search_bar"] { margin:12px 10px 8px !important; padding:0 !important; }
+div[class*="st-key-home_search_bar"] [data-testid="stHorizontalBlock"] { gap:0 !important; align-items:stretch !important; }
+div[class*="st-key-home_search_bar"] [data-testid="column"] { padding:0 !important; min-width:0 !important; }
+div[class*="st-key-home_search_bar"] input {
+ min-height:46px !important; height:46px !important; padding:0 13px !important;
+ border:1.5px solid #A88632 !important; border-right:0 !important; border-radius:12px 0 0 12px !important;
+ background:linear-gradient(135deg,#202329,#111419) !important; color:#F5F5F5 !important;
+ -webkit-text-fill-color:#F5F5F5 !important; font-size:.86rem !important; font-weight:550 !important;
+ box-shadow:inset 0 1px 0 #ffffff0a,0 3px 12px #0004 !important;
+}
+div[class*="st-key-home_search_bar"] input::placeholder { color:#A5AAB4 !important; -webkit-text-fill-color:#A5AAB4 !important; opacity:1 !important; }
+div[class*="st-key-home_search_button"] { margin:0 !important; }
+div[class*="st-key-home_search_button"] button {
+ min-height:46px !important; height:46px !important; width:100% !important; padding:0 10px !important;
+ border:1.5px solid #D4AD37 !important; border-radius:0 12px 12px 0 !important;
+ background:linear-gradient(145deg,#FFE566,#E6AD08) !important; color:#171717 !important;
+}
+div[class*="st-key-home_search_button"] button [data-testid="stIconMaterial"] { color:#171717 !important; }
 @media(max-width:640px) {
  div[class*="st-key-home_nav_bar"] [data-testid="stHorizontalBlock"] { grid-template-columns:repeat(5,minmax(0,1fr)) !important; gap:5px !important; column-gap:7px !important; }
  div[class*="st-key-home_topnav_stats"] button, div[class*="st-key-home_topnav_goals"] button, div[class*="st-key-home_topnav_corners"] button, div[class*="st-key-home_topnav_h2h"] button, div[class*="st-key-home_topnav_tracker"] button {
@@ -2136,6 +2155,22 @@ div[class*="st-key-home_topnav_h2h"] button[kind="primary"]:hover, div[class*="s
 }
 </style>
 """, unsafe_allow_html=True)
+with st.container(key="home_search_bar"):
+    _home_search_cols = st.columns([12, 1], gap="small")
+    with _home_search_cols[0]:
+        st.text_input(
+            "Buscar equipo o liga",
+            key="search_goal_matches",
+            placeholder="Buscar equipo, liga o partido...",
+            label_visibility="collapsed",
+            on_change=_handle_live_search_change,
+        )
+    with _home_search_cols[1]:
+        search_clicked = st.button("", key="home_search_button", icon=":material/search:", help="Buscar equipo o liga", use_container_width=True)
+if not str(st.session_state.get("search_goal_matches", "") or "").strip():
+    st.session_state.pop("live_search_query", None)
+    st.session_state.pop("live_search_message", None)
+    st.session_state.pop("live_search_submit_requested", None)
 _home_selected_fixture = st.session_state.get("selected_live_fixture") or {}
 _home_selected_id = str(((_home_selected_fixture.get("fixture") or {}).get("id")) or st.session_state.get("selected_live_fixture_id") or "")
 _home_tool_state = st.session_state.get("main_fixture_tool") or {}
@@ -3344,30 +3379,7 @@ with st.sidebar:
         f'<div style="width:46px;height:3px;border-radius:99px;background:linear-gradient(90deg,#FFE566,#A87909);margin-top:11px;box-shadow:0 0 10px rgba(250,204,21,.22);"></div></div>',
         unsafe_allow_html=True,
     )
-    if not _sidebar_dedicated_view:
-        # Buscador nativo con acabado premium; conserva Enter, lupa y limpieza automática.
-        st.markdown(
-            '<div style="display:flex;align-items:center;gap:7px;margin:2px 0 8px;'
-            'color:#E7D79A;font-size:.68rem;font-weight:850;letter-spacing:.13em;text-transform:uppercase;">'
-            '<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#FACC15;'
-            'box-shadow:0 0 9px rgba(250,204,21,.65);"></span>BUSCAR PARTIDO O LIGA</div>',
-            unsafe_allow_html=True,
-        )
-        _search_cols = st.columns([5, 1], gap="small")
-        with _search_cols[0]:
-            st.text_input(
-                "Buscar equipo o liga",
-                key="search_goal_matches",
-                placeholder="Ej. Argentinos Juniors, Premier League…",
-                label_visibility="collapsed",
-                on_change=_handle_live_search_change,
-            )
-        with _search_cols[1]:
-            search_clicked = st.button("🔍", key="search_live_matches_button", help="Buscar equipo o liga", use_container_width=True)
-        if not str(st.session_state.get("search_goal_matches", "") or "").strip():
-            st.session_state.pop("live_search_query", None)
-            st.session_state.pop("live_search_message", None)
-            st.session_state.pop("live_search_submit_requested", None)
+    # El buscador se trasladó a la cabecera principal, debajo de la marca.
     if _sidebar_tool_active:
         _sidebar_selected_fixture = st.session_state.get("selected_live_fixture") or {}
         _sidebar_home = (_sidebar_selected_fixture.get("teams") or {}).get("home") or {}
