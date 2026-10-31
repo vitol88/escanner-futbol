@@ -6121,58 +6121,6 @@ else:
                                             selected_away_corners = safe_stat(live_corner_stats or [], "Corner Kicks", 1)
                                             st.markdown(fixture_hero_html(match, mode="corners", home_corners=selected_home_corners, away_corners=selected_away_corners), unsafe_allow_html=True)
 
-                                            # Lectura en vivo de córners: replica el panel informativo de Goles,
-                                            # usando únicamente marcador y estadísticas que entrega la API.
-                                            corner_live_teams = match.get("teams") or {}
-                                            corner_live_home = str((corner_live_teams.get("home") or {}).get("name") or "Local")
-                                            corner_live_away = str((corner_live_teams.get("away") or {}).get("name") or "Visitante")
-                                            corner_live_goals = match.get("goals") or {}
-                                            corner_live_minute = (match_fixture.get("status") or {}).get("elapsed")
-                                            corner_live_bits = []
-                                            if isinstance(corner_live_goals.get("home"), int) and isinstance(corner_live_goals.get("away"), int):
-                                                corner_live_bits.append(
-                                                    f"Marcador {corner_live_goals.get('home')}–{corner_live_goals.get('away')} "
-                                                    f"al minuto {corner_live_minute if corner_live_minute is not None else 'N/D'}"
-                                                )
-                                            if isinstance(selected_home_corners, (int, float)) and isinstance(selected_away_corners, (int, float)):
-                                                corner_live_total = selected_home_corners + selected_away_corners
-                                                corner_live_bits.append(
-                                                    f"córners {corner_live_home} {selected_home_corners}–{selected_away_corners} {corner_live_away} "
-                                                    f"(total {corner_live_total})"
-                                                )
-                                            corner_live_shots_home = safe_stat(live_corner_stats or [], "Total Shots", 0)
-                                            corner_live_shots_away = safe_stat(live_corner_stats or [], "Total Shots", 1)
-                                            corner_live_on_home = safe_stat(live_corner_stats or [], "Shots on Goal", 0)
-                                            corner_live_on_away = safe_stat(live_corner_stats or [], "Shots on Goal", 1)
-                                            corner_live_poss_home = safe_stat(live_corner_stats or [], "Ball Possession", 0)
-                                            corner_live_poss_away = safe_stat(live_corner_stats or [], "Ball Possession", 1)
-                                            if isinstance(corner_live_shots_home, (int, float)) and isinstance(corner_live_shots_away, (int, float)):
-                                                corner_live_bits.append(f"tiros totales {corner_live_shots_home}–{corner_live_shots_away}")
-                                            if isinstance(corner_live_on_home, (int, float)) and isinstance(corner_live_on_away, (int, float)):
-                                                corner_live_bits.append(f"tiros a puerta {corner_live_on_home}–{corner_live_on_away}")
-                                            if not corner_live_bits:
-                                                corner_live_summary = "La API todavía no entrega estadísticas suficientes para describir el ritmo de córners de este partido."
-                                            else:
-                                                corner_live_summary = "; ".join(corner_live_bits[:3]) + "."
-                                                if isinstance(selected_home_corners, (int, float)) and isinstance(selected_away_corners, (int, float)):
-                                                    if selected_home_corners + selected_away_corners == 0:
-                                                        corner_live_summary += " Todavía no se han registrado córners; conviene esperar más desarrollo antes de evaluar este mercado."
-                                                    elif abs(selected_home_corners - selected_away_corners) >= 3:
-                                                        corner_live_summary += f" La mayor cantidad de córners corresponde a {corner_live_home if selected_home_corners > selected_away_corners else corner_live_away}."
-                                                    else:
-                                                        corner_live_summary += " El reparto de córners se mantiene relativamente equilibrado."
-                                                if isinstance(corner_live_on_home, (int, float)) and isinstance(corner_live_on_away, (int, float)):
-                                                    if corner_live_on_home + corner_live_on_away == 0:
-                                                        corner_live_summary += " Aún no hay tiros a puerta; la presión ofensiva debe interpretarse con cautela."
-                                                    elif abs(corner_live_on_home - corner_live_on_away) >= 2:
-                                                        corner_live_summary += f" Los tiros a puerta favorecen a {corner_live_home if corner_live_on_home > corner_live_on_away else corner_live_away}."
-                                            st.markdown(
-                                                '<div class="goal-live-summary"><div class="goal-live-summary-title">◉ LECTURA EN VIVO</div><p>'
-                                                + html.escape(corner_live_summary)
-                                                + '</p></div>',
-                                                unsafe_allow_html=True,
-                                            )
-
                                             corner_item = next((item for item in st.session_state.get("corner_scan_results", []) if str(((item.get("fixture") or {}).get("fixture") or {}).get("id")) == str(match_id)), None)
                                             if corner_item:
                                                 if corner_item.get("error"):
