@@ -988,6 +988,12 @@ st.markdown("""
   .corner-total-average { display:flex; align-items:center; flex-wrap:wrap; gap:7px; margin:16px 0 18px; padding:9px 12px; border:2px solid #FACC15; border-radius:12px; background:linear-gradient(135deg,rgba(250,204,21,.16),#191C22 52%,#101216); box-shadow:0 0 0 1px rgba(250,204,21,.22),0 0 16px rgba(250,204,21,.16); color:#F4F4F5; font-size:.84rem; line-height:1.5; width:fit-content; max-width:100%; clear:both; position:relative; }
   .corner-total-average b { color:#FFE566; font-weight:950; letter-spacing:.35px; }
   .corner-total-average span { display:inline-flex; align-items:center; justify-content:center; min-width:44px; padding:4px 9px; border:1px solid #FACC15; border-radius:7px; background:#FACC15; color:#111419; font-weight:950; font-size:.9rem; animation:goal-minute-alarm 1.15s ease-in-out infinite; transform-origin:center; }
+  .corner-period-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; width:100%; margin:7px 0 16px; }
+  .corner-period-card { min-width:0; padding:10px 11px; border:1px solid #51451D; border-radius:10px; background:linear-gradient(145deg,#1B1E23,#14161B); }
+  .corner-period-label { color:#E8CC70; font-size:.68rem; font-weight:850; letter-spacing:.045em; line-height:1.35; }
+  .corner-period-value { color:#FFE566; font-size:1.25rem; font-weight:950; line-height:1.35; margin-top:4px; }
+  .corner-period-note { color:#AEB3BC; font-size:.65rem; line-height:1.35; margin-top:2px; }
+  @media(max-width:390px) { .corner-period-card { padding:9px 8px; } .corner-period-value { font-size:1.1rem; } .corner-period-label { font-size:.62rem; } }
   @media (prefers-reduced-motion: reduce) { .corner-total-average span { animation:none; } }
   @media (prefers-reduced-motion: reduce) {
     .goal-last-goal span { animation:none; }
@@ -2207,6 +2213,10 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         color:#987300 !important;
         -webkit-text-fill-color:#987300 !important;
       }
+      html body .stApp .corner-period-card { background:linear-gradient(145deg,#FFFFFF 0%,#F5F7FA 100%) !important; border-color:#D8C27A !important; }
+      html body .stApp .corner-period-label { color:#68717F !important; -webkit-text-fill-color:#68717F !important; }
+      html body .stApp .corner-period-value { color:#987300 !important; -webkit-text-fill-color:#987300 !important; }
+      html body .stApp .corner-period-note { color:#586170 !important; -webkit-text-fill-color:#586170 !important; }
       html body .stApp .h2h-period-card {
         background:linear-gradient(145deg,#FFFFFF 0%,#F5F7FA 100%) !important;
         border:1px solid #D8C27A !important;
