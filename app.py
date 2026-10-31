@@ -2135,9 +2135,9 @@ div[class*="st-key-home_search_bar"] {
  background:rgba(11,13,16,.98) !important;
 }
 
-div[class*="st-key-home_search_bar"] [data-testid="stHorizontalBlock"] { display:grid !important; grid-template-columns:minmax(0,1fr) 56px !important; grid-template-rows:48px !important; gap:0 !important; column-gap:0 !important; row-gap:0 !important; align-items:stretch !important; width:100% !important; margin:0 !important; padding:0 !important; }
-div[class*="st-key-home_search_bar"] [data-testid="column"]:nth-child(1) { grid-column:1 !important; width:100% !important; min-width:0 !important; }
-div[class*="st-key-home_search_bar"] [data-testid="column"]:nth-child(2) { grid-column:2 !important; width:56px !important; min-width:56px !important; }
+div[class*="st-key-home_search_bar"] [data-testid="stHorizontalBlock"] { display:flex !important; flex-wrap:nowrap !important; gap:0 !important; column-gap:0 !important; align-items:stretch !important; width:100% !important; margin:0 !important; padding:0 !important; }
+div[class*="st-key-home_search_bar"] [data-testid="column"]:nth-child(1) { flex:1 1 0% !important; width:calc(100% - 56px) !important; max-width:calc(100% - 56px) !important; min-width:0 !important; }
+div[class*="st-key-home_search_bar"] [data-testid="column"]:nth-child(2) { flex:0 0 56px !important; width:56px !important; max-width:56px !important; min-width:56px !important; }
 div[class*="st-key-home_search_bar"] [data-testid="column"] > div, div[class*="st-key-home_search_bar"] [data-testid="stTextInput"], div[class*="st-key-home_search_bar"] [data-testid="stTextInput"] > div { width:100% !important; min-width:0 !important; max-width:100% !important; margin:0 !important; }
 div[class*="st-key-home_search_bar"] [data-testid="column"] { display:block !important; width:100% !important; max-width:100% !important; min-width:0 !important; flex:none !important; padding:0 !important; }
 div[class*="st-key-home_search_bar"] input {
@@ -2240,6 +2240,23 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
     <style>
       /* PALETA CLARA FOOTBALL LAB — solo se activa al elegir ☀️ Claro. */
       :root { color-scheme:light; --fl-bg:#F4F6F9; --fl-surface:#FFFFFF; --fl-text:#20242C; --fl-muted:#68717F; --fl-gold:#B58A00; --fl-border:#DDE2E9; }
+      /* Buscador fijo: paleta clara y unión real entre campo y lupa. */
+      html body .stApp div[class*="st-key-home_search_bar"] { background:rgba(244,246,249,.98) !important; box-shadow:none !important; }
+      html body .stApp div[class*="st-key-home_search_bar"] [data-testid="stHorizontalBlock"] { gap:0 !important; column-gap:0 !important; }
+      html body .stApp div[class*="st-key-home_search_bar"] [data-testid="column"] { padding:0 !important; margin:0 !important; }
+      html body .stApp div[class*="st-key-home_search_bar"] input {
+        background:linear-gradient(135deg,#FFFFFF 0%,#F8F9FB 62%,#FFF8E6 100%) !important;
+        color:#303744 !important; -webkit-text-fill-color:#303744 !important;
+        border:1.5px solid #C7A43A !important; border-right:0 !important;
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.95) !important;
+      }
+      html body .stApp div[class*="st-key-home_search_bar"] input::placeholder { color:#7A8492 !important; -webkit-text-fill-color:#7A8492 !important; }
+      html body .stApp div[class*="st-key-home_search_button"] button {
+        background:linear-gradient(145deg,#FFE98A 0%,#F2C94C 52%,#DDAA16 100%) !important;
+        color:#242424 !important; border:1.5px solid #C7A43A !important; border-left:0 !important;
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.65) !important;
+      }
+      html body .stApp div[class*="st-key-home_search_button"] button [data-testid="stIconMaterial"] { color:#242424 !important; }
       /* CTA principal: adaptar únicamente el color de los dos textos secundarios al modo claro. */
       html body .stApp [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(2) {
         color:#303744 !important;
