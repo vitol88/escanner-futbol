@@ -161,7 +161,7 @@ def build_automatic_history(
                 gf.append(float(own_goals)); ga.append(float(opp_goals))
             old_id = (old.get("fixture") or {}).get("id")
             full_stats_key = f"historical-stats-full-v1:{old_id}"
-            half_stats_key = f"historical-stats-halves-v4:{old_id}"
+            half_stats_key = f"historical-stats-halves-v5:{old_id}"
             half_retry_key = f"{half_stats_key}:retry_after"
             full_retry_key = f"{full_stats_key}:retry_after"
             if old_id and full_stats_key not in cache and time.time() >= float(cache.get(full_retry_key, 0) or 0) and request_budget[0] > 0 and not cache.get("_automatic_history_rate_limited"):
