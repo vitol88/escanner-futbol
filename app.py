@@ -2251,6 +2251,25 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       html body .stApp .corner-h2h-row.corner-history-grid:not(.corner-history-header):nth-child(even) {
         background:rgba(238,241,245,.42) !important;
       }
+      /* Promedio total de córners: adaptar solo colores en modo claro; conservar animación del valor. */
+      html body .stApp .corner-total-average {
+        background:linear-gradient(135deg,#FFFFFF 0%,#F5F7FA 58%,#FBF6E6 100%) !important;
+        border-color:#D8C27A !important;
+        box-shadow:0 0 0 1px rgba(216,194,122,.16),0 3px 12px rgba(31,41,55,.08) !important;
+        color:#394354 !important;
+      }
+      html body .stApp .corner-total-average b {
+        color:#68717F !important;
+        -webkit-text-fill-color:#68717F !important;
+      }
+      html body .stApp .corner-total-average span {
+        background:#F5E7B0 !important;
+        background-color:#F5E7B0 !important;
+        border-color:#D8C27A !important;
+        color:#806000 !important;
+        -webkit-text-fill-color:#806000 !important;
+        /* Se conserva intacta la animación de titileo original. */
+      }
       html body .stApp .corner-period-card { background:linear-gradient(145deg,#FFFFFF 0%,#F5F7FA 100%) !important; border-color:#D8C27A !important; }
       /* Botón VER HISTÓRICO de córners: forzar paleta clara en todos los niveles de Streamlit. */
       html body .stApp div[class*="st-key-corner_h2h_"] button,
