@@ -2139,7 +2139,16 @@ div[class*="st-key-home_search_bar"] [data-testid="stHorizontalBlock"] { display
 div[class*="st-key-home_search_bar"] [data-testid="column"]:nth-child(1) { flex:1 1 0% !important; width:calc(100% - 56px) !important; max-width:calc(100% - 56px) !important; min-width:0 !important; }
 div[class*="st-key-home_search_bar"] [data-testid="column"]:nth-child(2) { flex:0 0 56px !important; width:56px !important; max-width:56px !important; min-width:56px !important; }
 div[class*="st-key-home_search_bar"] [data-testid="column"] > div, div[class*="st-key-home_search_bar"] [data-testid="stTextInput"], div[class*="st-key-home_search_bar"] [data-testid="stTextInput"] > div { width:100% !important; min-width:0 !important; max-width:100% !important; margin:0 !important; }
-div[class*="st-key-home_search_bar"] [data-testid="column"] { display:block !important; width:100% !important; max-width:100% !important; min-width:0 !important; flex:none !important; padding:0 !important; }
+div[class*="st-key-home_search_bar"] [data-testid="column"] { display:block !important; min-width:0 !important; padding:0 !important; margin:0 !important; }
+div[class*="st-key-home_search_bar"] [data-testid="column"]:nth-child(1) { flex:1 1 0% !important; width:auto !important; max-width:none !important; }
+div[class*="st-key-home_search_bar"] [data-testid="column"]:nth-child(2) { flex:0 0 56px !important; width:56px !important; max-width:56px !important; min-width:56px !important; }
+div[class*="st-key-home_search_bar"] [data-testid="column"]:nth-child(2) > div,
+div[class*="st-key-home_search_bar"] [class*="st-key-home_search_button"],
+div[class*="st-key-home_search_bar"] [class*="st-key-home_search_button"] > div,
+div[class*="st-key-home_search_bar"] [class*="st-key-home_search_button"] [data-testid="stButton"] { width:56px !important; min-width:56px !important; max-width:56px !important; margin:0 !important; padding:0 !important; }
+div[class*="st-key-home_search_bar"] [data-testid="stHorizontalBlock"] > div { background:transparent !important; box-shadow:none !important; }
+div[class*="st-key-home_search_bar"] [data-testid="stTextInput"] > div { border-radius:12px 0 0 12px !important; overflow:hidden !important; }
+div[class*="st-key-home_search_button"] button { display:flex !important; align-items:center !important; justify-content:center !important; overflow:visible !important; }
 div[class*="st-key-home_search_bar"] input {
  min-height:48px !important; height:48px !important; padding:0 13px !important;
  border:1.5px solid #A88632 !important; border-right:0 !important; border-radius:12px 0 0 12px !important;
@@ -2243,7 +2252,7 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       /* Buscador fijo: paleta clara y unión real entre campo y lupa. */
       html body .stApp div[class*="st-key-home_search_bar"] { background:rgba(244,246,249,.98) !important; box-shadow:none !important; }
       html body .stApp div[class*="st-key-home_search_bar"] [data-testid="stHorizontalBlock"] { gap:0 !important; column-gap:0 !important; }
-      html body .stApp div[class*="st-key-home_search_bar"] [data-testid="column"] { padding:0 !important; margin:0 !important; }
+      html body .stApp div[class*="st-key-home_search_bar"] [data-testid="column"] { padding:0 !important; margin:0 !important; background:transparent !important; box-shadow:none !important; }
       html body .stApp div[class*="st-key-home_search_bar"] input {
         background:linear-gradient(135deg,#FFFFFF 0%,#F8F9FB 62%,#FFF8E6 100%) !important;
         color:#303744 !important; -webkit-text-fill-color:#303744 !important;
