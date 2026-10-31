@@ -3896,11 +3896,8 @@ with st.container(key="scan_actions_row"):
     }
     /* El balón recorre una órbita circular dentro del radar; nunca abandona su perímetro. */
     @keyframes fl-cta-ball {
-      0%   { transform:translate(-50%,-50%) translate(39px,0) rotate(0deg); }
-      25%  { transform:translate(-50%,-50%) translate(0,39px) rotate(90deg); }
-      50%  { transform:translate(-50%,-50%) translate(-39px,0) rotate(180deg); }
-      75%  { transform:translate(-50%,-50%) translate(0,-39px) rotate(270deg); }
-      100% { transform:translate(-50%,-50%) translate(39px,0) rotate(360deg); }
+      0%   { transform:translate(-50%,-50%) rotate(0deg); }
+      100% { transform:translate(-50%,-50%) rotate(360deg); }
     }
     @media(max-width:640px) {
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
