@@ -2059,7 +2059,7 @@ div[class*="st-key-home_nav_bar"] {
  box-shadow:0 8px 18px rgba(0,0,0,.28) !important;
 }
 @media(max-width:640px) {
- div[class*="st-key-home_nav_bar"] { top:304px !important; padding:0 10px !important; }
+ div[class*="st-key-home_nav_bar"] { top:268px !important; padding:0 10px !important; }
 }
 div[class*="st-key-home_nav_bar"] [data-testid="stHorizontalBlock"] { display:grid !important; grid-template-columns:repeat(5,minmax(0,1fr)) !important; grid-auto-flow:column !important; gap:0 !important; column-gap:0 !important; width:100% !important; min-width:0 !important; margin:0 !important; padding:0 !important; box-sizing:border-box !important; overflow:visible !important; }
 div[class*="st-key-home_nav_bar"] [data-testid="column"] { display:block !important; flex:none !important; width:100% !important; max-width:100% !important; min-width:0 !important; padding:0 !important; margin:0 !important; box-sizing:border-box !important; }
