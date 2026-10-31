@@ -2160,11 +2160,16 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         grid-template-columns:82px minmax(0,1fr) 70px minmax(0,1fr) !important;
         position:relative !important; isolation:isolate !important;
       }
-      /* El marcador queda visualmente por encima del separador entre partidos. */
+      /* Mantener cada marcador H2H completo y por encima de las líneas divisorias.
+         El score crea su propia capa para que ningún separador lo atraviese. */
       html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-score {
-        position:relative !important; z-index:3 !important;
-        background:#F5F7FA !important; box-shadow:0 0 0 3px #FFFFFF !important;
-        margin:2px 0 !important;
+        position:relative !important; z-index:30 !important; isolation:isolate !important;
+        display:inline-flex !important; align-items:center !important; justify-content:center !important;
+        background:#F5F7FA !important;
+        border:1px solid #D6B84C !important;
+        outline:3px solid #FFFFFF !important; outline-offset:1px !important;
+        box-shadow:0 1px 4px rgba(138,104,0,.16) !important;
+        margin:5px 0 !important; transform:translateZ(0) !important;
       }
       html body .stApp [class*="st-key-h2h_history_row_"] [class*="st-key-h2h_goal_timeline_btn_"] {
         position:absolute !important; right:7px !important; top:12px !important;
