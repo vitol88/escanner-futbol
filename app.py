@@ -2214,6 +2214,22 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         -webkit-text-fill-color:#987300 !important;
       }
       html body .stApp .corner-period-card { background:linear-gradient(145deg,#FFFFFF 0%,#F5F7FA 100%) !important; border-color:#D8C27A !important; }
+      /* Promedio de córners: adaptar el distintivo al modo claro. */
+      html body .stApp .corner-average-pill {
+        background:linear-gradient(145deg,#FFFFFF 0%,#F5F7FA 100%) !important;
+        border-color:#D8C27A !important;
+        box-shadow:0 3px 10px rgba(31,41,55,.08) !important;
+      }
+      html body .stApp .corner-average-pill span:first-child {
+        color:#68717F !important;
+        -webkit-text-fill-color:#68717F !important;
+      }
+      html body .stApp .corner-average-pill span:last-child {
+        background:#F5E7B0 !important;
+        border-color:#D8C27A !important;
+        color:#806000 !important;
+        -webkit-text-fill-color:#806000 !important;
+      }
       html body .stApp .corner-period-label { color:#68717F !important; -webkit-text-fill-color:#68717F !important; }
       html body .stApp .corner-period-value { color:#987300 !important; -webkit-text-fill-color:#987300 !important; }
       html body .stApp .corner-period-note { color:#586170 !important; -webkit-text-fill-color:#586170 !important; }
@@ -6193,7 +6209,7 @@ else:
                                                     competition_corner_average = projected_home_corners + projected_away_corners
                                                     st.markdown(
                                                         f"""
-                                                        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+                                                        <div class="corner-average-pill" style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;
                                                                     margin:16px 0 18px;padding:7px 10px;
                                                                     border:1px solid #51451D;border-radius:9px;
                                                                     background:linear-gradient(135deg,#17191f,#20232b);
@@ -6350,7 +6366,7 @@ else:
                                                             h2h_second_avg = sum(valid_second_periods) / len(valid_second_periods) if valid_second_periods else None
                                                             st.markdown(
                                                                 f"""
-                                                                <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+                                                                <div class="corner-average-pill" style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;
                                                                             margin:16px 0 18px;padding:7px 10px;
                                                                             border:1px solid #51451D;border-radius:9px;
                                                                             background:linear-gradient(135deg,#17191f,#20232b);
