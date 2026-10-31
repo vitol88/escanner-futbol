@@ -3949,19 +3949,22 @@ if manual_scan:
     # Mantener el balón girando mientras se ejecuta este escaneo, no solo mientras se pulsa.
     st.markdown("""
     <style>
-      /* Durante el escaneo, la posición queda fija y solo cambia la propiedad rotate. */
-      [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::after {
+      /* Centro común único: espiral y balón quedan superpuestos en el mismo punto del botón. */
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before,
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
+        position:absolute !important;
         left:50% !important; top:66% !important;
         transform:translate(-50%,-50%) !important;
         transform-origin:50% 50% !important;
-        animation:fl-ball-spin-in-place .72s linear infinite !important;
       }
-      [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before {
-        left:50% !important; top:66% !important;
-        transform:translate(-50%,-50%) !important;
-        transform-origin:50% 50% !important;
-        animation:fl-radar-spin-in-place 1.05s linear infinite !important;
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
+        width:142px !important; height:142px !important; max-width:none !important;
+        animation:fl-radar-spin-in-place 2.4s linear infinite !important;
         box-shadow:0 0 26px rgba(250,204,21,.72),inset 0 0 22px rgba(250,204,21,.38) !important;
+      }
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
+        width:48px !important; height:48px !important; font-size:43px !important;
+        animation:fl-ball-spin-in-place .72s linear infinite !important;
       }
       @keyframes fl-ball-spin-in-place {
         from { rotate:0deg; }
