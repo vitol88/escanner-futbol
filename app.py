@@ -738,7 +738,7 @@ st.markdown("""
     .brand-mark svg { width:25px !important; height:25px !important; }
     .brand-title { font-size:clamp(1.05rem,4.8vw,1.45rem) !important; letter-spacing:0 !important; }
     .brand-subtitle { font-size:.62rem !important; letter-spacing:.7px !important; margin-top:2px !important; }
-    .brand-pill { position:absolute !important; right:12px !important; top:78px !important; margin:0 !important; padding:3px 7px !important; font-size:.58rem !important; }
+    .brand-pill { position:absolute !important; right:clamp(112px,20vw,145px) !important; top:5px !important; margin:0 !important; padding:3px 7px !important; font-size:.58rem !important; }
     [data-testid="stSidebar"] { z-index:1000 !important; }\n    [data-testid="stSidebar"] > div:first-child { padding-top:96px !important; }
     section.main > div.block-container { padding-top:214px !important; }
   }
@@ -757,7 +757,7 @@ st.markdown("""
   .brand-title { font-size:clamp(1.45rem,3.8vw,2.2rem); line-height:1.12; letter-spacing:.5px; font-weight:600; color:#F4F4F5; white-space:nowrap; }
   .brand-title span { color:#FACC15; }
   .brand-subtitle { color:#A1A1AA; font-size:clamp(.78rem,2vw,1.1rem); letter-spacing:1.5px; margin-top:4px; white-space:nowrap; }
-  .brand-pill { margin-left:auto; white-space:nowrap; color:#22C55E; border:1px solid #103B25; background:#062719; border-radius:999px; padding:6px 11px; font-size:.78rem; font-weight:700; }
+  .brand-pill { position:absolute !important; right:145px !important; top:62px !important; margin:0 !important; white-space:nowrap; color:#22C55E; border:1px solid #103B25; background:#062719; border-radius:999px; padding:6px 11px; font-size:.78rem; font-weight:700; }
   .brand-divider { height:1px; background:#292B30; margin:10px 0 8px; }
   .brand-update { display:flex; align-items:center; gap:9px; min-width:0; min-height:34px; padding:5px 9px; border:1px solid #2C2A20; border-radius:10px; background:linear-gradient(90deg,#141610,#101216); transform-origin:center left; }
   .brand-update-intro { animation:update-arrive .9s cubic-bezier(.16,1,.3,1) 5.75s both; }
