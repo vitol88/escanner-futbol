@@ -3653,27 +3653,37 @@ with st.container(key="scan_actions_row"):
   width:100% !important; max-width:100% !important; margin:0 auto !important;
 }
 [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
-  position:relative !important; display:flex !important; flex-direction:column !important;
-  align-items:center !important; justify-content:flex-end !important;
+  position:relative !important; display:block !important; flex-direction:column !important;
+  align-items:center !important; justify-content:flex-start !important;
   width:100% !important; max-width:100% !important; min-width:0 !important;
-  height:224px !important; min-height:224px !important; max-height:none !important;
-  box-sizing:border-box !important; padding:132px 18px 16px !important;
+  height:270px !important; min-height:270px !important; max-height:none !important;
+  box-sizing:border-box !important; padding:0 18px !important;
   overflow:hidden !important; text-align:center !important;
 }
+/* Radar y balón comparten el centro geométrico del CTA. */
 [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
-  left:50% !important; top:43% !important; width:126px !important; max-width:42% !important;
-  transform:translate(-50%,-50%) !important; animation:scanner-radar-spin 3s linear infinite !important;
+  left:50% !important; top:59% !important; width:132px !important; height:132px !important; max-width:42% !important;
+  transform:translate(-50%,-50%) !important; transform-origin:center !important;
+  animation:scanner-radar-spin 3s linear infinite !important;
 }
 [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
-  left:50% !important; top:43% !important; width:54px !important; height:54px !important;
-  transform:translate(-50%,-50%) !important; animation:scanner-ball-orbit 2s ease-in-out infinite !important;
+  left:50% !important; top:59% !important; width:54px !important; height:54px !important;
+  transform:translate(-50%,-50%) !important; transform-origin:center !important;
+  animation:scanner-ball-orbit 2s ease-in-out infinite !important;
 }
+/* Orden visual: títulos arriba, radar al centro y lema abajo. */
 [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p {
-  position:relative !important; z-index:3 !important; width:100% !important;
-  text-align:center !important; margin:0 0 4px !important;
+  position:absolute !important; left:10px !important; width:calc(100% - 20px) !important;
+  z-index:4 !important; text-align:center !important; margin:0 !important;
+}
+[class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:first-of-type {
+  top:auto !important; bottom:10px !important;
+}
+[class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(2) {
+  top:10px !important; bottom:auto !important;
 }
 [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) {
-  top:0 !important; margin-top:0 !important;
+  top:54px !important; bottom:auto !important;
 }
 @media(max-width:640px) {
   [class*="st-key-scan_actions_row"] { padding-top:30px !important; }
@@ -3689,29 +3699,31 @@ with st.container(key="scan_actions_row"):
     width:100% !important; max-width:270px !important; margin:0 auto !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
-    display:flex !important; flex-direction:column !important;
-    align-items:center !important; justify-content:flex-end !important;
-    width:100% !important; max-width:270px !important;
-    height:170px !important; min-height:170px !important;
-    padding:92px 8px 10px !important; margin:0 auto !important;
+    display:block !important; width:100% !important; max-width:270px !important;
+    height:230px !important; min-height:230px !important;
+    padding:0 8px !important; margin:0 auto !important;
     position:relative !important; overflow:hidden !important;
   }
-  /* El rótulo principal queda arriba del radar, dentro del borde dorado. */
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
+    top:59% !important; width:112px !important; height:112px !important;
+  }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
+    top:59% !important; width:48px !important; height:48px !important;
+  }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:first-of-type {
-    position:absolute !important; top:9px !important; left:8px !important;
+    top:auto !important; bottom:10px !important; left:8px !important;
     width:calc(100% - 16px) !important; margin:0 !important;
     text-align:center !important; z-index:4 !important;
   }
-  /* Los textos de acción y apoyo quedan debajo del balón, sin cruzarlo. */
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(2) {
-    position:absolute !important; top:48px !important; left:8px !important;
+    top:10px !important; left:8px !important; bottom:auto !important;
     width:calc(100% - 16px) !important; margin:0 !important;
-    z-index:4 !important; text-align:center !important;
+    text-align:center !important; z-index:4 !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) {
-    position:absolute !important; bottom:10px !important; left:8px !important;
+    top:48px !important; left:8px !important; bottom:auto !important;
     width:calc(100% - 16px) !important; margin:0 !important;
-    z-index:4 !important; text-align:center !important;
+    text-align:center !important; z-index:4 !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
     width:108px !important; height:108px !important; max-width:42% !important;
