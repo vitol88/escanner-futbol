@@ -2147,7 +2147,8 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       }
       @media(max-width:640px) {
         html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-timeline { grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:4px !important; padding:5px !important; }
-        html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-event-row { grid-template-columns:27px 13px minmax(0,1fr) auto !important; gap:3px !important; padding:4px !important; }
+        html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-event-row { grid-template-columns:24px 12px minmax(0,1fr) 40px !important; gap:3px !important; padding:4px !important; }
+        html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-score { min-width:38px !important; font-size:.60rem !important; padding:4px 3px !important; }
         html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-event-row strong { font-size:.59rem !important; }
         html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-event-row small { font-size:.52rem !important; }
       }
@@ -2171,17 +2172,17 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         background:linear-gradient(145deg,#20232B,#12151A);
       }
       .h2h-goal-event-row {
-        display:grid; grid-template-columns:30px 16px minmax(0,1fr) auto;
-        align-items:center; gap:5px; min-width:0; padding:5px 6px;
+        display:grid; grid-template-columns:27px 14px minmax(0,1fr) 42px;
+        align-items:center; gap:4px; min-width:0; padding:4px 5px;
         border:1px solid rgba(255,255,255,.10); border-radius:7px;
-        background:rgba(255,255,255,.045);
+        background:rgba(255,255,255,.045); box-sizing:border-box;
       }
       .h2h-goal-event-row:last-child { border-bottom:1px solid rgba(255,255,255,.10); }
       .h2h-goal-minute { color:#FACC15; font-size:.65rem; white-space:nowrap; }
       .h2h-goal-event-row > div { display:flex; flex-direction:column; min-width:0; gap:1px; }
       .h2h-goal-event-row strong { color:#F4F4F5; font-size:.65rem; line-height:1.15; overflow-wrap:anywhere; }
       .h2h-goal-event-row small { color:#A1A1AA; font-size:.56rem; line-height:1.1; overflow-wrap:anywhere; }
-      .h2h-goal-score { color:#FACC15; font-size:.68rem; white-space:nowrap; }
+      .h2h-goal-score { color:#FACC15; font-size:.64rem; white-space:nowrap; display:inline-flex; align-items:center; justify-content:center; justify-self:end; min-width:40px; box-sizing:border-box; padding:4px 5px; line-height:1.15; border:1px solid rgba(250,204,21,.42); border-radius:6px; background:rgba(250,204,21,.08); overflow:visible; }
       html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-timeline {
         background:linear-gradient(145deg,#FFFFFF,#F5F7FA) !important;
         border-color:#D8C27A !important;
