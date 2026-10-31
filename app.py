@@ -3887,7 +3887,7 @@ with st.container(key="scan_actions_row"):
       content:"⚽" !important; position:absolute !important; left:50% !important; top:66% !important;
       width:62px !important; height:62px !important; display:flex !important;
       align-items:center !important; justify-content:center !important; font-size:54px !important;
-      transform:translate(-50%,-50%) rotate(0deg) !important; transform-origin:center !important;
+      transform:translate(-50%,-50%) !important; rotate:0deg; transform-origin:center !important;
       filter:sepia(1) saturate(6) hue-rotate(355deg) brightness(1.12) drop-shadow(0 0 13px rgba(255,195,20,.95)) !important;
       animation:fl-cta-ball var(--fl-cta-speed) linear infinite !important; z-index:3 !important; pointer-events:none !important;
     }
@@ -3903,8 +3903,8 @@ with st.container(key="scan_actions_row"):
     }
     /* El balón gira sobre su propio eje en el centro fijo del espiral; no describe una órbita. */
     @keyframes fl-cta-ball {
-      0%   { transform:translate(-50%,-50%) rotate(0deg); }
-      100% { transform:translate(-50%,-50%) rotate(360deg); }
+      from { rotate:0deg; }
+      to   { rotate:360deg; }
     }
     @media(max-width:640px) {
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
@@ -3922,11 +3922,6 @@ with st.container(key="scan_actions_row"):
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
         left:50% !important; top:67% !important;
         width:48px !important; height:48px !important; font-size:43px !important;
-      }
-      @keyframes fl-cta-ball {
-        0%   { transform:translate(-50%,-50%) rotate(0deg) scale(1); }
-        50%  { transform:translate(-50%,-50%) rotate(180deg) scale(1.04); }
-        100% { transform:translate(-50%,-50%) rotate(360deg) scale(1); }
       }
     }
     @media(prefers-reduced-motion:reduce) {
