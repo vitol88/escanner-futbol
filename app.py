@@ -3958,7 +3958,7 @@ with st.container(key="scan_actions_row"):
     with st.container(key="scan_cta_card"):
         manual_scan = st.button(
             "**ESCANEAR EN VIVO**\nActualizar y analizar partidos\nEstadísticas · Goles · Córners · Empates · BTTS",
-            type="primary",
+            type="secondary",
             key="scan_all_live",
         )
 # El balón ejecuta ahora la actualización general y el análisis completo en una sola secuencia.
@@ -3980,6 +3980,17 @@ if manual_scan:
       /* Una sola variable controla la velocidad del haz y del balón. */
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
         --fl-cta-speed:1.05s !important;
+      [class*="st-key-scan_cta_card"] button,
+      [class*="st-key-scan_cta_card"] button:hover,
+      [class*="st-key-scan_cta_card"] button:active,
+      [class*="st-key-scan_cta_card"] button:focus,
+      [class*="st-key-scan_cta_card"] button:focus-visible {
+        background:transparent !important; background-color:transparent !important;
+        background-image:none !important; border:0 !important; box-shadow:none !important;
+        outline:0 !important; -webkit-tap-highlight-color:transparent !important;
+      }
+      [class*="st-key-scan_cta_card"] button:active { transform:none !important; }
+
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
         box-shadow:0 0 26px rgba(250,204,21,.72),inset 0 0 22px rgba(250,204,21,.38) !important;
