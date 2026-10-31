@@ -211,8 +211,9 @@ def build_automatic_history(
                                 own_second += 1
                             elif event_team_id == opponent_id:
                                 opp_second += 1
-                    cf_first.append(float(own_first)); ca_first.append(float(opp_first))
-                    cf_second.append(float(own_second)); ca_second.append(float(opp_second))
+                    if own_first + opp_first + own_second + opp_second == own_c + opp_c:
+                        cf_first.append(float(own_first)); ca_first.append(float(opp_first))
+                        cf_second.append(float(own_second)); ca_second.append(float(opp_second))
             used += 1
         return {"matches": used, "gf": _mean(gf), "ga": _mean(ga), "cf": _mean(cf), "ca": _mean(ca), "corner_sample": len(cf), "goal_sample": len(gf), "cf_first": _mean(cf_first), "ca_first": _mean(ca_first), "cf_second": _mean(cf_second), "ca_second": _mean(ca_second), "corner_period_sample": len(cf_first), "goal_sample": len(gf), "stats_attempted": stats_attempted, "stats_nonempty": stats_nonempty, "stats_with_corners": stats_with_corners, "stats_errors": stats_errors}
 
