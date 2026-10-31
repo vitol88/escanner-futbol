@@ -3874,23 +3874,18 @@ with st.container(key="scan_actions_row"):
       color:#FFE17A !important; box-shadow:none !important;
       text-align:center !important;
     }
+    /* Texto en una sola columna a la derecha del radar: sin invadir los círculos. */
     [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p {
-      position:absolute !important; top:0 !important; left:34% !important;
-      width:64% !important; margin:0 !important; padding:0 !important;
-      color:#F5D77A !important; text-align:left !important; line-height:1.25 !important;
-      font-size:14px !important; font-weight:700 !important; z-index:5 !important;
+      position:absolute !important; top:50% !important; left:34% !important;
+      width:63% !important; margin:0 !important; padding:0 !important;
+      transform:translateY(-50%) !important;
+      color:#D6D3C5 !important; text-align:left !important; line-height:1.55 !important;
+      font-size:clamp(11px,1.45vw,14px) !important; font-weight:600 !important; z-index:5 !important;
     }
-    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:first-of-type {
-      top:25px !important; color:#FFD84D !important; font-size:clamp(17px,2.6vw,23px) !important;
-      font-weight:950 !important; letter-spacing:.045em !important;
-    }
-    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(2) {
-      top:59px !important; color:#F4D477 !important; font-size:clamp(13px,1.9vw,17px) !important;
-      font-weight:750 !important;
-    }
-    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) {
-      top:91px !important; bottom:auto !important; color:#D6D3C5 !important;
-      font-size:clamp(10px,1.35vw,12px) !important; font-weight:600 !important;
+    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p strong {
+      display:block !important; margin:0 0 9px !important;
+      color:#FFD84D !important; font-size:clamp(17px,2.6vw,23px) !important;
+      line-height:1.2 !important; font-weight:950 !important; letter-spacing:.045em !important;
     }
     [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
       content:"" !important; position:absolute !important; left:13% !important; top:50% !important;
@@ -3934,12 +3929,12 @@ with st.container(key="scan_actions_row"):
         min-height:184px !important; border:0 !important; border-radius:0 !important; background:transparent !important; box-shadow:none !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p {
-        top:0 !important; left:34% !important; width:64% !important;
-        font-size:12px !important; line-height:1.25 !important; text-align:left !important;
+        top:50% !important; left:36% !important; width:61% !important;
+        transform:translateY(-50%) !important; font-size:11px !important; line-height:1.45 !important;
       }
-      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:first-of-type { top:22px !important; font-size:16px !important; }
-      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(2) { top:52px !important; font-size:12px !important; }
-      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) { top:82px !important; font-size:9px !important; }
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p strong {
+        margin-bottom:7px !important; font-size:clamp(14px,4vw,18px) !important; line-height:1.2 !important;
+      }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
         left:13% !important; top:50% !important; width:140px !important; height:140px !important; max-width:58% !important;
       }
