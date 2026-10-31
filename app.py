@@ -2145,6 +2145,12 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
           height:24px !important; min-height:24px !important;
         }
       }
+      @media(max-width:640px) {
+        html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-timeline { grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:4px !important; padding:5px !important; }
+        html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-event-row { grid-template-columns:27px 13px minmax(0,1fr) auto !important; gap:3px !important; padding:4px !important; }
+        html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-event-row strong { font-size:.59rem !important; }
+        html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-event-row small { font-size:.52rem !important; }
+      }
       [class*="st-key-h2h_goal_timeline_btn_"] button {
         width:25px !important; min-width:25px !important;
         height:25px !important; min-height:25px !important;
@@ -2159,21 +2165,23 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         box-shadow:0 0 0 3px #FACC1535,0 0 17px #FACC1580 !important;
       }
       .h2h-goal-timeline {
-        margin:5px 0 12px; padding:8px 10px;
-        border:1px solid rgba(250,204,21,.32); border-radius:11px;
+        display:grid !important; grid-template-columns:repeat(auto-fit,minmax(145px,1fr)) !important;
+        gap:6px !important; margin:0 0 8px !important; padding:7px !important;
+        border:1px solid rgba(250,204,21,.32); border-radius:10px;
         background:linear-gradient(145deg,#20232B,#12151A);
       }
       .h2h-goal-event-row {
-        display:grid; grid-template-columns:42px 20px minmax(0,1fr) auto;
-        align-items:center; gap:7px; padding:8px 2px;
-        border-bottom:1px solid rgba(255,255,255,.08);
+        display:grid; grid-template-columns:30px 16px minmax(0,1fr) auto;
+        align-items:center; gap:5px; min-width:0; padding:5px 6px;
+        border:1px solid rgba(255,255,255,.10); border-radius:7px;
+        background:rgba(255,255,255,.045);
       }
-      .h2h-goal-event-row:last-child { border-bottom:0; }
-      .h2h-goal-minute { color:#FACC15; font-size:.72rem; white-space:nowrap; }
-      .h2h-goal-event-row > div { display:flex; flex-direction:column; min-width:0; gap:2px; }
-      .h2h-goal-event-row strong { color:#F4F4F5; font-size:.72rem; overflow-wrap:anywhere; }
-      .h2h-goal-event-row small { color:#A1A1AA; font-size:.62rem; overflow-wrap:anywhere; }
-      .h2h-goal-score { color:#FACC15; font-size:.78rem; white-space:nowrap; }
+      .h2h-goal-event-row:last-child { border-bottom:1px solid rgba(255,255,255,.10); }
+      .h2h-goal-minute { color:#FACC15; font-size:.65rem; white-space:nowrap; }
+      .h2h-goal-event-row > div { display:flex; flex-direction:column; min-width:0; gap:1px; }
+      .h2h-goal-event-row strong { color:#F4F4F5; font-size:.65rem; line-height:1.15; overflow-wrap:anywhere; }
+      .h2h-goal-event-row small { color:#A1A1AA; font-size:.56rem; line-height:1.1; overflow-wrap:anywhere; }
+      .h2h-goal-score { color:#FACC15; font-size:.68rem; white-space:nowrap; }
       html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-timeline {
         background:linear-gradient(145deg,#FFFFFF,#F5F7FA) !important;
         border-color:#D8C27A !important;
@@ -4920,7 +4928,7 @@ else:
                                                 _h2h_is_open = st.session_state.get(_h2h_timeline_key) == str(_h2h_fixture_id) if _h2h_fixture_id else False
                                                 with st.container(key=f"h2h_history_row_{h2h_key}_{_h2h_fixture_id or _h2h_row['date_html']}"):
                                                     st.markdown(
-                                                        f'<div class="h2h-match-row h2h-match-row-full{' h2h-row-front-open' if _h2h_is_open else ''}"><span class="h2h-date">{_h2h_row["date_html"]}</span><span class="h2h-team"><img src="{_h2h_row["home_logo"]}" alt="" onerror="this.style.display=\'none\'"><span class="h2h-team-name">{_h2h_row["home_html"]}</span></span><span class="h2h-score">{_h2h_row["home_goals"] if _h2h_row["home_goals"] is not None else "—"} – {_h2h_row["away_goals"] if _h2h_row["away_goals"] is not None else "—"}</span><span class="h2h-team"><img src="{_h2h_row["away_logo"]}" alt="" onerror="this.style.display=\'none\'"><span class="h2h-team-name">{_h2h_row["away_html"]}</span></span></div>',
+                                                        f'<div class="h2h-match-row h2h-match-row-full' + (' h2h-row-front-open' if _h2h_is_open else '') + '"><span class="h2h-date">{_h2h_row["date_html"]}</span><span class="h2h-team"><img src="{_h2h_row["home_logo"]}" alt="" onerror="this.style.display=\'none\'"><span class="h2h-team-name">{_h2h_row["home_html"]}</span></span><span class="h2h-score">{_h2h_row["home_goals"] if _h2h_row["home_goals"] is not None else "—"} – {_h2h_row["away_goals"] if _h2h_row["away_goals"] is not None else "—"}</span><span class="h2h-team"><img src="{_h2h_row["away_logo"]}" alt="" onerror="this.style.display=\'none\'"><span class="h2h-team-name">{_h2h_row["away_html"]}</span></span></div>',
                                                         unsafe_allow_html=True,
                                                     )
                                                     if _h2h_fixture_id:
