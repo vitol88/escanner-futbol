@@ -6408,14 +6408,6 @@ else:
                                                         """,
                                                         unsafe_allow_html=True,
                                                     )
-                                                    st.markdown(
-                                                        corner_period_cards_html(
-                                                            competition_first_average,
-                                                            competition_second_average,
-                                                            f"Estadísticas oficiales por tiempo · {min(int(history.get('home_corner_period_sample') or 0), int(history.get('away_corner_period_sample') or 0))} por localía",
-                                                        ),
-                                                        unsafe_allow_html=True,
-                                                    )
                                                 # El diagnóstico se conserva internamente en history para depuración,
                                                 # pero no se muestra en la interfaz normal del usuario.
 
