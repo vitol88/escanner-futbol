@@ -1883,12 +1883,13 @@ div[class*="st-key-home_nav_bar"] {
 @media(max-width:640px) {
  div[class*="st-key-home_nav_bar"] { top:154px !important; padding:0 10px !important; }
 }
-div[class*="st-key-home_nav_bar"] [data-testid="stHorizontalBlock"] { display:grid !important; grid-template-columns:repeat(4,minmax(0,1fr)) !important; grid-auto-flow:column !important; gap:0 !important; column-gap:0 !important; width:100% !important; min-width:0 !important; margin:0 !important; padding:0 !important; box-sizing:border-box !important; overflow:visible !important; }
+div[class*="st-key-home_nav_bar"] [data-testid="stHorizontalBlock"] { display:grid !important; grid-template-columns:repeat(5,minmax(0,1fr)) !important; grid-auto-flow:column !important; gap:0 !important; column-gap:0 !important; width:100% !important; min-width:0 !important; margin:0 !important; padding:0 !important; box-sizing:border-box !important; overflow:visible !important; }
 div[class*="st-key-home_nav_bar"] [data-testid="column"] { display:block !important; flex:none !important; width:100% !important; max-width:100% !important; min-width:0 !important; padding:0 !important; margin:0 !important; box-sizing:border-box !important; }
 div[class*="st-key-home_nav_bar"] [data-testid="column"]:nth-child(1) { grid-column:1 !important; }
 div[class*="st-key-home_nav_bar"] [data-testid="column"]:nth-child(2) { grid-column:2 !important; }
 div[class*="st-key-home_nav_bar"] [data-testid="column"]:nth-child(3) { grid-column:3 !important; }
 div[class*="st-key-home_nav_bar"] [data-testid="column"]:nth-child(4) { grid-column:4 !important; }
+div[class*="st-key-home_nav_bar"] [data-testid="column"]:nth-child(5) { grid-column:5 !important; }
 div[class*="st-key-home_nav_bar"] [data-testid="column"] > div { width:100% !important; min-width:0 !important; margin:0 !important; }
 div[class*="st-key-home_topnav_stats"] button, div[class*="st-key-home_topnav_goals"] button, div[class*="st-key-home_topnav_corners"] button, div[class*="st-key-home_topnav_h2h"] button, div[class*="st-key-home_topnav_tracker"] button {
  box-sizing:border-box !important; display:flex !important; align-items:center !important; justify-content:center !important;
