@@ -116,6 +116,10 @@ def build_automatic_history(
         ga: list[float] = []
         cf: list[float] = []
         ca: list[float] = []
+        cf_first: list[float] = []
+        ca_first: list[float] = []
+        cf_second: list[float] = []
+        ca_second: list[float] = []
         used = 0
         stats_attempted = 0
         stats_nonempty = 0
@@ -177,8 +181,40 @@ def build_automatic_history(
                 cf.append(own_c); ca.append(opp_c)
                 stats_with_corners += 1
                 diagnostics["historical_stats"]["responses_with_corners"] += 1
+                events_key = f"historical-corner-events-v1:{old_id}"
+                if old_id and events_key not in cache and not cache.get("_automatic_history_rate_limited"):
+                    try:
+                        events_payload = api_get("fixtures/events", {"fixture": old_id})
+                        cache[events_key] = events_payload.get("response") or []
+                    except Exception as exc:
+                        cache[events_key] = None
+                        diagnostics["historical_stats"]["errors"].append({"fixture_id": old_id, "events_error": str(exc)})
+                        if "HTTP 429" in str(exc):
+                            cache["_automatic_history_rate_limited"] = True
+                events = cache.get(events_key)
+                if isinstance(events, list):
+                    own_first = opp_first = own_second = opp_second = 0
+                    for event in events:
+                        if str(event.get("type") or "").strip().casefold() != "corner":
+                            continue
+                        event_team_id = (event.get("team") or {}).get("id")
+                        elapsed = (event.get("time") or {}).get("elapsed")
+                        if not isinstance(elapsed, (int, float)) or elapsed < 1 or elapsed > 90:
+                            continue
+                        if elapsed <= 45:
+                            if event_team_id == team_id:
+                                own_first += 1
+                            elif event_team_id == opponent_id:
+                                opp_first += 1
+                        else:
+                            if event_team_id == team_id:
+                                own_second += 1
+                            elif event_team_id == opponent_id:
+                                opp_second += 1
+                    cf_first.append(float(own_first)); ca_first.append(float(opp_first))
+                    cf_second.append(float(own_second)); ca_second.append(float(opp_second))
             used += 1
-        return {"matches": used, "gf": _mean(gf), "ga": _mean(ga), "cf": _mean(cf), "ca": _mean(ca), "corner_sample": len(cf), "goal_sample": len(gf), "stats_attempted": stats_attempted, "stats_nonempty": stats_nonempty, "stats_with_corners": stats_with_corners, "stats_errors": stats_errors}
+        return {"matches": used, "gf": _mean(gf), "ga": _mean(ga), "cf": _mean(cf), "ca": _mean(ca), "corner_sample": len(cf), "goal_sample": len(gf), "cf_first": _mean(cf_first), "ca_first": _mean(ca_first), "cf_second": _mean(cf_second), "ca_second": _mean(ca_second), "corner_period_sample": len(cf_first), "goal_sample": len(gf), "stats_attempted": stats_attempted, "stats_nonempty": stats_nonempty, "stats_with_corners": stats_with_corners, "stats_errors": stats_errors}
 
     h = averages(home_fixtures, home["id"], "home", home_budget)
     # Si el local tuvo menos partidos consultables de los previstos, transferir
@@ -192,7 +228,12 @@ def build_automatic_history(
         "away_goals_for": a["gf"], "away_goals_against": a["ga"],
         "home_corners_for": h["cf"], "home_corners_against": h["ca"],
         "away_corners_for": a["cf"], "away_corners_against": a["ca"],
+        "home_corners_for_first": h["cf_first"], "home_corners_against_first": h["ca_first"],
+        "away_corners_for_first": a["cf_first"], "away_corners_against_first": a["ca_first"],
+        "home_corners_for_second": h["cf_second"], "home_corners_against_second": h["ca_second"],
+        "away_corners_for_second": a["cf_second"], "away_corners_against_second": a["ca_second"],
         "home_corner_sample": h["corner_sample"], "away_corner_sample": a["corner_sample"],
+        "home_corner_period_sample": h["corner_period_sample"], "away_corner_period_sample": a["corner_period_sample"],
         "home_goal_sample": h["goal_sample"], "away_goal_sample": a["goal_sample"],
         "diagnostics": {**diagnostics, "home_venue_matches_checked": h["matches"], "away_venue_matches_checked": a["matches"], "home_stats_attempted": h["stats_attempted"], "away_stats_attempted": a["stats_attempted"], "home_stats_nonempty": h["stats_nonempty"], "away_stats_nonempty": a["stats_nonempty"], "home_stats_with_corners": h["stats_with_corners"], "away_stats_with_corners": a["stats_with_corners"], "stats_budget_remaining": away_budget[0]},
         "note": "Promedios calculados con partidos finalizados de la misma competición y temporada. La muestra cuenta únicamente partidos con estadísticas de córners disponibles.",
