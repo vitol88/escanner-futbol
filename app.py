@@ -3676,29 +3676,29 @@ with st.container(key="scan_actions_row"):
   top:0 !important; margin-top:0 !important;
 }
 @media(max-width:640px) {
-  [class*="st-key-scan_actions_row"] { padding-top:18px !important; }
-  /* En celular, CTA compacto y centrado: evita que ocupe todo el ancho. */
+  [class*="st-key-scan_actions_row"] { padding-top:30px !important; }
+  /* CTA móvil más compacto y separado del menú superior. */
   [class*="st-key-scan_actions_row"] [class*="st-key-scan_cta_card"] {
-    display:block !important; width: min(360px, calc(100vw - 48px)) !important;
-    max-width:360px !important; min-width:0 !important;
-    flex:0 1 360px !important; margin:12px auto 0 !important;
-    justify-self:center !important;
+    display:block !important; width: min(270px, calc(100vw - 64px)) !important;
+    max-width:270px !important; min-width:0 !important;
+    flex:0 1 270px !important; margin:34px auto 0 !important;
+    justify-self:center !important; position:relative !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"],
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > div {
-    width:100% !important; max-width:360px !important; margin:0 auto !important;
+    width:100% !important; max-width:270px !important; margin:0 auto !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
-    display:flex !important; width:100% !important; max-width:360px !important;
-    height:190px !important; min-height:190px !important;
-    padding:108px 10px 12px !important; margin:0 auto !important;
+    display:flex !important; width:100% !important; max-width:270px !important;
+    height:158px !important; min-height:158px !important;
+    padding:88px 8px 10px !important; margin:0 auto !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
-    width:88px !important; max-width:42% !important; top:39% !important;
+    width:72px !important; max-width:38% !important; top:36% !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
-    width:40px !important; height:40px !important; top:39% !important;
-    font-size:2rem !important;
+    width:32px !important; height:32px !important; top:36% !important;
+    font-size:1.65rem !important;
   }
 }""", unsafe_allow_html=True)
     with st.container(key="scan_cta_card"):
