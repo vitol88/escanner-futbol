@@ -1164,7 +1164,7 @@ st.markdown("""
   .fl-match-live::before { content:""; width:5px; height:5px; flex:0 0 5px; border-radius:50%; background:#F04438; box-shadow:0 0 6px rgba(240,68,56,.45); }
   .fl-match-teams { min-width:0; display:flex; flex-direction:column; gap:9px; }
   .fl-match-team {
-    display:grid; grid-template-columns:34px 26px minmax(0,1fr); align-items:center; gap:8px;
+    display:grid; grid-template-columns:34px 26px minmax(0,1fr) auto; align-items:center; gap:8px;
     min-width:0; min-height:34px; color:#F4F4F5; font-size:.92rem; font-weight:600; line-height:1.15;
   }
   /* Jerarquía del marcador: el resultado debe leerse primero, seguido del escudo y el equipo. */
@@ -1178,6 +1178,7 @@ st.markdown("""
   .fl-match-crest { display:block; width:25px; height:25px; object-fit:contain; justify-self:center; }
   .fl-match-crest-empty { display:block; width:25px; text-align:center; color:#FACC15; justify-self:center; }
   .fl-match-team-name { display:block; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; letter-spacing:.05px; }
+  .fl-red-card-badge { display:inline-flex; align-items:center; justify-self:start; white-space:nowrap; line-height:1; }
   /* Botones compactos: solo iconos; el nombre aparece con el tooltip al pasar/tocar */
   [class*="st-key-live_match_"] [data-testid="stHorizontalBlock"] { gap:.55rem !important; }
   [class*="st-key-live_match_"] [data-testid="stButton"] > button {
@@ -1220,7 +1221,7 @@ st.markdown("""
     .fl-match-seconds { font-size:.84rem; }
     .fl-match-live { gap:4px; padding:3px 6px; font-size:.5rem; letter-spacing:.5px; }
     .fl-match-live::before { width:4px; height:4px; flex-basis:4px; }
-    .fl-match-team { grid-template-columns:29px 21px minmax(0,1fr); gap:5px; min-height:30px; font-size:.77rem; }
+    .fl-match-team { grid-template-columns:29px 21px minmax(0,1fr) auto; gap:5px; min-height:30px; font-size:.77rem; }
     .fl-match-teams { gap:7px; }
     .fl-match-goals { min-width:27px; min-height:27px; padding:2px; border-radius:7px; font-size:1.28rem; }
     .fl-match-crest { width:21px; height:21px; }
