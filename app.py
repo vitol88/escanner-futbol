@@ -681,7 +681,7 @@ st.markdown("""
   @media(max-width:640px) {
     [class*="st-key-live_now_section"] { padding-left:0 !important; padding-right:0 !important; margin-left:0 !important; margin-right:0 !important; }
     [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] { width:100% !important; max-width:100% !important; margin-left:0 !important; margin-right:0 !important; }
-    [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details > summary { min-height:62px !important; padding:9px 10px 9px 14px !important; }
+    [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details > summary { min-height:58px !important; padding:8px 10px 8px 14px !important; }
     [class*="st-key-live_now_section"] > div > [data-testid="stExpander"] > details > summary::after { min-width:78px; height:40px; font-size:19px; padding:0 9px; }
     [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] { width:100% !important; max-width:100% !important; margin:0 !important; padding:0 !important; }
     [class*="st-key-live_now_section"] [data-testid="stExpander"] [data-testid="stExpander"] summary { min-height:34px !important; padding:3px 10px !important; border-radius:4px !important; }
