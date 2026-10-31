@@ -3984,6 +3984,26 @@ if manual_scan:
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
         box-shadow:0 0 26px rgba(250,204,21,.72),inset 0 0 22px rgba(250,204,21,.38) !important;
       }
+      /* El estado de escaneo no debe recuperar el fondo nativo del botón primario. */
+      [class*="st-key-scan_cta_card"],
+      [class*="st-key-scan_cta_card"] > div,
+      [class*="st-key-scan_cta_card"] [data-testid="stVerticalBlock"],
+      [class*="st-key-scan_cta_card"] [data-testid="stElementContainer"],
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"],
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > div,
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button,
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button:hover,
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button:active,
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button:focus,
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button:focus-visible {
+        background:transparent !important;
+        background-color:transparent !important;
+        background-image:none !important;
+        box-shadow:none !important;
+        border-color:transparent !important;
+        outline:0 !important;
+      }
+
       @keyframes scanner-ball-orbit {
         0% { transform:translate(-50%,-50%) rotate(0deg) scale(1); }
         50% { transform:translate(-50%,-50%) rotate(180deg) scale(1.08); }
