@@ -1789,7 +1789,14 @@ st.markdown("""
   }
   html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-score {
     position:relative !important; z-index:3 !important;
-    box-shadow:0 0 0 3px #17191E !important;
+    display:inline-flex !important; align-items:center !important; justify-content:center !important;
+    min-width:76px !important; min-height:36px !important; box-sizing:border-box !important;
+    padding:6px 12px !important; border:1px solid #D6B84C !important; border-radius:9px !important;
+    background:linear-gradient(145deg,rgba(250,204,21,.22),rgba(250,204,21,.10)) !important;
+    color:#FFE566 !important; font-size:1rem !important; font-weight:900 !important;
+    line-height:1 !important; font-variant-numeric:tabular-nums !important;
+    box-shadow:0 0 0 3px #17191E,0 1px 5px rgba(250,204,21,.12) !important;
+    text-shadow:0 0 10px rgba(250,204,21,.14) !important;
   }
   @media(max-width:640px) {
     html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full {
@@ -2245,10 +2252,14 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-event-row small { color:#586170 !important; }
       html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-minute,
       html body .stApp [class*="st-key-h2h_history_row_"] .h2h-goal-score { color:#806000 !important; background:#FFFFFF !important; border-color:#D8C27A !important; }
-      html body .stApp .h2h-score {
-        background:#F5F7FA !important;
-        color:#263142 !important;
-        border:1px solid #D8C27A !important;
+      html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-score {
+        display:inline-flex !important; align-items:center !important; justify-content:center !important;
+        min-width:76px !important; min-height:36px !important; box-sizing:border-box !important;
+        padding:6px 12px !important; border:1px solid #D6B84C !important; border-radius:9px !important;
+        background:linear-gradient(145deg,#FFF7DC,#F5E9BD) !important;
+        color:#8A6800 !important; font-size:1rem !important; font-weight:900 !important;
+        line-height:1 !important; font-variant-numeric:tabular-nums !important;
+        box-shadow:0 1px 3px rgba(138,104,0,.12) !important;
       }
       html,body,.stApp,[data-testid="stAppViewContainer"],section.main,.main,.block-container {
         background:#F4F6F9 !important; color:#20242C !important;
