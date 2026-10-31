@@ -3681,7 +3681,7 @@ with st.container(key="scan_actions_row"):
   [class*="st-key-scan_actions_row"] [class*="st-key-scan_cta_card"] {
     display:block !important; width: min(270px, calc(100vw - 64px)) !important;
     max-width:270px !important; min-width:0 !important;
-    flex:0 1 270px !important; margin:34px auto 0 !important;
+    flex:0 1 270px !important; margin:112px auto 0 !important;
     justify-self:center !important; position:relative !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"],
