@@ -3448,6 +3448,20 @@ def safe_stat(
             return item.get("value")
     return None
 
+def safe_corner_parts(stats: list[dict[str, Any]], team_index: int = 0):
+    """Return official full-match, first-half and second-half corner counts."""
+    if team_index < 0 or team_index >= len(stats or []):
+        return None, None, None
+    row = (stats or [])[team_index] or {}
+    raw = row.get("statistics") or {}
+    if isinstance(raw, dict):
+        full = raw.get("corner_kicks")
+    else:
+        full = safe_stat(stats, "Corner Kicks", team_index)
+    first = (row.get("first_half") or {}).get("corner_kicks")
+    second = (row.get("second_half") or {}).get("corner_kicks")
+    return full, first, second
+
 def fixture_label(fixture: dict[str, Any]) -> str:
     teams = fixture.get("teams") or {}
     home = (teams.get("home") or {}).get("name", "Local")
@@ -6270,44 +6284,17 @@ else:
                                                                     past_id = (past.get("fixture") or {}).get("id")
                                                                     if not past_id:
                                                                         continue
-                                                                    stats_key = f"corner-h2h-stats:{past_id}"
+                                                                    stats_key = f"corner-h2h-stats-halves-v2:{past_id}"
                                                                     if stats_key not in st.session_state.stats_cache:
-                                                                        st.session_state.stats_cache[stats_key] = (api_get("fixtures/statistics", {"fixture": past_id}).get("response") or [])
+                                                                        st.session_state.stats_cache[stats_key] = (api_get("fixtures/statistics", {"fixture": past_id, "half": "true"}).get("response") or [])
                                                                     past_stats = st.session_state.stats_cache.get(stats_key) or []
-                                                                    past_home_c = safe_stat(past_stats, "Corner Kicks", 0)
-                                                                    past_away_c = safe_stat(past_stats, "Corner Kicks", 1)
+                                                                    past_home_c, _past_home_first, _past_home_second = safe_corner_parts(past_stats, 0)
+                                                                    past_away_c, _past_away_first, _past_away_second = safe_corner_parts(past_stats, 1)
                                                                     past_first_half_total = past_second_half_total = None
-                                                                    events_key = f"corner-h2h-events-v1:{past_id}"
-                                                                    if events_key not in st.session_state.stats_cache:
-                                                                        try:
-                                                                            st.session_state.stats_cache[events_key] = (api_get("fixtures/events", {"fixture": past_id}).get("response") or [])
-                                                                        except Exception:
-                                                                            st.session_state.stats_cache[events_key] = None
-                                                                    past_events = st.session_state.stats_cache.get(events_key)
-                                                                    if isinstance(past_events, list) and past_home_c is not None and past_away_c is not None:
-                                                                        _first_home = _first_away = _second_home = _second_away = 0
-                                                                        _past_home_id = ((past.get("teams") or {}).get("home") or {}).get("id")
-                                                                        _past_away_id = ((past.get("teams") or {}).get("away") or {}).get("id")
-                                                                        for _event in past_events:
-                                                                            if str(_event.get("type") or "").strip().casefold() != "corner":
-                                                                                continue
-                                                                            _elapsed = ((_event.get("time") or {}).get("elapsed"))
-                                                                            _team_id = (_event.get("team") or {}).get("id")
-                                                                            if not isinstance(_elapsed, (int, float)) or _elapsed < 1 or _elapsed > 90:
-                                                                                continue
-                                                                            if _elapsed <= 45:
-                                                                                if _team_id == _past_home_id:
-                                                                                    _first_home += 1
-                                                                                elif _team_id == _past_away_id:
-                                                                                    _first_away += 1
-                                                                            else:
-                                                                                if _team_id == _past_home_id:
-                                                                                    _second_home += 1
-                                                                                elif _team_id == _past_away_id:
-                                                                                    _second_away += 1
-                                                                        if _first_home + _first_away + _second_home + _second_away == past_home_c + past_away_c:
-                                                                            past_first_half_total = _first_home + _first_away
-                                                                            past_second_half_total = _second_home + _second_away
+                                                                    if all(value is not None for value in (_past_home_first, _past_home_second, _past_away_first, _past_away_second, past_home_c, past_away_c)):
+                                                                        if abs((_past_home_first + _past_home_second) - past_home_c) < 0.01 and abs((_past_away_first + _past_away_second) - past_away_c) < 0.01:
+                                                                            past_first_half_total = _past_home_first + _past_away_first
+                                                                            past_second_half_total = _past_home_second + _past_away_second
                                                                     past_fixture = past.get("fixture") or {}
                                                                     past_teams = past.get("teams") or {}
                                                                     past_goals = past.get("goals") or {}
