@@ -3853,7 +3853,7 @@ with st.container(key="scan_actions_row"):
     [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
       --fl-cta-speed:4s;
       position:relative !important; display:block !important; width:100% !important;
-      max-width:560px !important; height:270px !important; min-height:270px !important;
+      max-width:560px !important; height:166px !important; min-height:166px !important;
       margin:0 auto !important; padding:0 14px !important; box-sizing:border-box !important;
       overflow:hidden !important; border:2px solid #E7C447 !important; border-radius:30px !important;
       background:radial-gradient(ellipse at 50% 68%,rgba(255,197,35,.16),transparent 48%),
@@ -3862,18 +3862,26 @@ with st.container(key="scan_actions_row"):
       text-align:center !important;
     }
     [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p {
-      position:absolute !important; top:15px !important; left:10px !important;
-      width:calc(100% - 20px) !important; margin:0 !important; padding:0 !important;
-      color:#F5D77A !important; text-align:center !important; line-height:1.35 !important;
-      font-size:15px !important; font-weight:700 !important; z-index:5 !important;
+      position:absolute !important; top:0 !important; left:36% !important;
+      width:60% !important; margin:0 !important; padding:0 !important;
+      color:#F5D77A !important; text-align:left !important; line-height:1.25 !important;
+      font-size:14px !important; font-weight:700 !important; z-index:5 !important;
     }
-    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button strong {
-      display:block !important; margin:0 0 5px !important; color:#FFD84D !important;
-      font-size:clamp(21px,4vw,30px) !important; font-weight:950 !important; letter-spacing:.045em !important;
+    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:first-of-type {
+      top:25px !important; color:#FFD84D !important; font-size:clamp(17px,2.6vw,23px) !important;
+      font-weight:950 !important; letter-spacing:.045em !important;
+    }
+    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(2) {
+      top:59px !important; color:#F4D477 !important; font-size:clamp(13px,1.9vw,17px) !important;
+      font-weight:750 !important;
+    }
+    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) {
+      top:91px !important; bottom:auto !important; color:#D6D3C5 !important;
+      font-size:clamp(10px,1.35vw,12px) !important; font-weight:600 !important;
     }
     [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
-      content:"" !important; position:absolute !important; left:50% !important; top:66% !important;
-      width:154px !important; height:154px !important; max-width:58% !important;
+      content:"" !important; position:absolute !important; left:18% !important; top:50% !important;
+      width:116px !important; height:116px !important; max-width:58% !important;
       box-sizing:border-box !important; border:4px solid #F5C928 !important; border-radius:50% !important;
       background:
         radial-gradient(circle,transparent 0 34%,rgba(255,214,60,.12) 35% 37%,transparent 38%),
@@ -3884,9 +3892,9 @@ with st.container(key="scan_actions_row"):
       animation:fl-cta-light-sweep var(--fl-cta-speed) linear infinite !important; z-index:2 !important; pointer-events:none !important;
     }
     [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
-      content:"⚽" !important; position:absolute !important; left:50% !important; top:66% !important;
-      width:62px !important; height:62px !important; display:flex !important;
-      align-items:center !important; justify-content:center !important; font-size:54px !important;
+      content:"⚽" !important; position:absolute !important; left:18% !important; top:50% !important;
+      width:48px !important; height:48px !important; display:flex !important;
+      align-items:center !important; justify-content:center !important; font-size:42px !important;
       transform:none !important; translate:-50% -50% !important; rotate:0deg; transform-origin:center !important;
       filter:sepia(1) saturate(6) hue-rotate(355deg) brightness(1.12) drop-shadow(0 0 13px rgba(255,195,20,.95)) !important;
       animation:fl-cta-ball var(--fl-cta-speed) linear infinite !important; z-index:3 !important; pointer-events:none !important;
@@ -3908,20 +3916,22 @@ with st.container(key="scan_actions_row"):
     }
     @media(max-width:640px) {
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
-        width:100% !important; max-width:430px !important; height:250px !important;
-        min-height:250px !important; border-radius:26px !important;
+        width:100% !important; max-width:430px !important; height:156px !important;
+        min-height:156px !important; border-radius:24px !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p {
-        top:13px !important; left:8px !important; width:calc(100% - 16px) !important;
-        font-size:14px !important; line-height:1.32 !important;
+        top:0 !important; left:35% !important; width:61% !important;
+        font-size:12px !important; line-height:1.25 !important; text-align:left !important;
       }
-      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button strong { font-size:22px !important; }
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:first-of-type { top:22px !important; font-size:16px !important; }
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(2) { top:52px !important; font-size:12px !important; }
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) { top:82px !important; font-size:9px !important; }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
-        top:67% !important; width:142px !important; height:142px !important; max-width:58% !important;
+        left:18% !important; top:50% !important; width:104px !important; height:104px !important; max-width:58% !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
-        left:50% !important; top:67% !important;
-        width:48px !important; height:48px !important; font-size:43px !important;
+        left:18% !important; top:50% !important;
+        width:44px !important; height:44px !important; font-size:39px !important;
         transform:none !important; translate:-50% -50% !important;
       }
     }
