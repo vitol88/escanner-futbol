@@ -3714,11 +3714,15 @@ with st.container(key="scan_actions_row"):
     z-index:4 !important; text-align:center !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
-    width:62px !important; max-width:36% !important; top:70% !important;
+    width:108px !important; height:108px !important; max-width:42% !important; top:70% !important;
+    animation:scanner-radar-spin 3s linear infinite !important;
+    box-shadow:0 0 20px rgba(250,204,21,.45),inset 0 0 18px rgba(250,204,21,.25) !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
-    width:28px !important; height:28px !important; top:70% !important;
-    font-size:1.45rem !important;
+    width:46px !important; height:46px !important; top:70% !important;
+    font-size:2.35rem !important; line-height:1 !important;
+    animation:scanner-ball-orbit 2s ease-in-out infinite !important;
+    filter:drop-shadow(0 0 10px rgba(250,204,21,.75)) !important;
   }
 }""", unsafe_allow_html=True)
     with st.container(key="scan_cta_card"):
