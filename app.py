@@ -4715,45 +4715,8 @@ else:
                                                 away_score = current_goals.get("away")
                                                 home_name = str(match_home.get("name") or "Local")
                                                 away_name = str(match_away.get("name") or "Visitante")
-                                                home_shots = safe_stat(live_stats, "Total Shots", 0)
-                                                away_shots = safe_stat(live_stats, "Total Shots", 1)
                                                 home_on = safe_stat(live_stats, "Shots on Goal", 0)
                                                 away_on = safe_stat(live_stats, "Shots on Goal", 1)
-                                                home_poss = safe_stat(live_stats, "Ball Possession", 0)
-                                                away_poss = safe_stat(live_stats, "Ball Possession", 1)
-                                                home_corners = safe_stat(live_stats, "Corner Kicks", 0)
-                                                away_corners = safe_stat(live_stats, "Corner Kicks", 1)
-                                                def pct_value(value):
-                                                    if isinstance(value, str):
-                                                        try: return float(value.replace("%", "").strip())
-                                                        except ValueError: return None
-                                                    return float(value) if isinstance(value, (int, float)) else None
-                                                home_poss_n, away_poss_n = pct_value(home_poss), pct_value(away_poss)
-                                                live_bits = []
-                                                if isinstance(home_score, int) and isinstance(away_score, int):
-                                                    live_bits.append(f"Marcador {home_score}–{away_score} al minuto {current_minute if current_minute is not None else 'N/D'}")
-                                                if isinstance(home_shots, (int, float)) and isinstance(away_shots, (int, float)):
-                                                    live_bits.append(f"tiros {home_name} {home_shots}–{away_shots} {away_name}")
-                                                if isinstance(home_on, (int, float)) and isinstance(away_on, (int, float)):
-                                                    live_bits.append(f"tiros a puerta {home_on}–{away_on}")
-                                                if home_poss_n is not None and away_poss_n is not None:
-                                                    leader = home_name if home_poss_n > away_poss_n else away_name if away_poss_n > home_poss_n else "ninguno"
-                                                    if leader != "ninguno": live_bits.append(f"{leader} controla la posesión ({max(home_poss_n, away_poss_n):.0f}%)")
-                                                if isinstance(home_corners, (int, float)) and isinstance(away_corners, (int, float)):
-                                                    live_bits.append(f"córners {home_corners}–{away_corners}")
-                                                if live_bits:
-                                                    summary = "; ".join(live_bits[:3])
-                                                    summary += "."
-                                                    if isinstance(home_on, (int, float)) and isinstance(away_on, (int, float)):
-                                                        if home_on + away_on == 0:
-                                                            summary += " Aún no hay tiros a puerta; falta evidencia ofensiva clara para respaldar una entrada agresiva."
-                                                        elif abs(home_on - away_on) >= 2:
-                                                            summary += f" La amenaza más clara hasta ahora favorece a {home_name if home_on > away_on else away_name}."
-                                                        else:
-                                                            summary += " La producción a puerta está relativamente equilibrada."
-                                                else:
-                                                    summary = "La API no entregó estadísticas detalladas suficientes para describir la presión ofensiva sin especular."
-                                                st.markdown('<div class="goal-live-summary"><div class="goal-live-summary-title">◉ LECTURA EN VIVO</div><p>' + html.escape(summary) + '</p></div>', unsafe_allow_html=True)
                                                 goal_history_rows = [
                                                     (f"{home_name} · goles a favor en casa", history.get("home_goals_for"), history.get("home_goal_sample", 0)),
                                                     (f"{home_name} · goles recibidos en casa", history.get("home_goals_against"), history.get("home_goal_sample", 0)),
