@@ -3935,6 +3935,22 @@ with st.container(key="scan_actions_row"):
         transform:none !important; translate:-50% -50% !important;
       }
     }
+    /* Fondo realmente transparente: el CTA debe integrarse con el fondo del tema, oscuro o claro. */
+    [class*="st-key-scan_cta_card"],
+    [class*="st-key-scan_cta_card"] > div,
+    [class*="st-key-scan_cta_card"] [data-testid="stVerticalBlock"],
+    [class*="st-key-scan_cta_card"] [data-testid="stElementContainer"],
+    [class*="st-key-scan_cta_card"] [data-testid="stButton"],
+    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > div,
+    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
+      background:transparent !important;
+      background-color:transparent !important;
+      box-shadow:none !important;
+      outline:0 !important;
+    }
+    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
+      border:0 !important;
+    }
     @media(prefers-reduced-motion:reduce) {
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button { --fl-cta-speed:8s; }
     }
