@@ -3939,7 +3939,7 @@ with st.container(key="scan_actions_row"):
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:first-of-type {
         left:54% !important; width:45% !important;
-        top:18px !important; font-size:clamp(15px,4vw,18px) !important;
+        top:28px !important; font-size:clamp(15px,4vw,18px) !important;
         white-space:nowrap !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(2) {
@@ -3948,7 +3948,7 @@ with st.container(key="scan_actions_row"):
         white-space:nowrap !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) {
-        left:57% !important; width:43% !important;
+        left:58% !important; width:42% !important;
         top:64px !important; bottom:auto !important;
         font-size:clamp(9px,2.5vw,10px) !important;
         white-space:nowrap !important;
