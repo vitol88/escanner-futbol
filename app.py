@@ -5487,6 +5487,8 @@ else:
                                             h2h_period_sample_size = min(len(first_half_goal_totals), len(second_half_goal_totals))
                                             first_half_average = sum(first_half_goal_totals) / h2h_period_sample_size if h2h_period_sample_size else None
                                             second_half_average = sum(second_half_goal_totals) / h2h_period_sample_size if h2h_period_sample_size else None
+                                            first_half_average_label = f"{first_half_average:.2f}" if first_half_average is not None else "—"
+                                            second_half_average_label = f"{second_half_average:.2f}" if second_half_average is not None else "—"
                                             if h2h_sample_size:
                                                 home_pct = round(home_wins_count / h2h_sample_size * 100, 1)
                                                 draw_pct = round(draw_count / h2h_sample_size * 100, 1)
@@ -5518,8 +5520,8 @@ else:
                                                 f'<div class="h2h-secondary-card"><div class="h2h-summary-label">PROMEDIO DE GOLES</div><div class="h2h-secondary-value">{average_goals:.2f}</div><div class="h2h-secondary-note">Goles por partido</div></div>'
                                                 '</div>'
                                                 '<div class="h2h-period-grid">'
-                                                f'<div class="h2h-period-card"><div class="h2h-summary-label">PROMEDIO · PRIMER TIEMPO</div><div class="h2h-period-value">{first_half_average:.2f if first_half_average is not None else "—"}</div><div class="h2h-period-note">Goles por partido · {h2h_period_sample_size}/{len(h2h_matches)} con descanso disponible</div></div>'
-                                                f'<div class="h2h-period-card"><div class="h2h-summary-label">PROMEDIO · SEGUNDO TIEMPO</div><div class="h2h-period-value">{second_half_average:.2f if second_half_average is not None else "—"}</div><div class="h2h-period-note">Goles por partido · {h2h_period_sample_size}/{len(h2h_matches)} con descanso disponible</div></div>'
+                                                f'<div class="h2h-period-card"><div class="h2h-summary-label">PROMEDIO · PRIMER TIEMPO</div><div class="h2h-period-value">{first_half_average_label}</div><div class="h2h-period-note">Goles por partido · {h2h_period_sample_size}/{len(h2h_matches)} con descanso disponible</div></div>'
+                                                f'<div class="h2h-period-card"><div class="h2h-summary-label">PROMEDIO · SEGUNDO TIEMPO</div><div class="h2h-period-value">{second_half_average_label}</div><div class="h2h-period-note">Goles por partido · {h2h_period_sample_size}/{len(h2h_matches)} con descanso disponible</div></div>'
                                                 '</div>'
                                                 '</div>'
                                             )
