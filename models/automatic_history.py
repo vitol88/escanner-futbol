@@ -26,6 +26,27 @@ def _mean(values: list[float]) -> float | None:
     return round(sum(values) / len(values), 2) if values else None
 
 
+def _corner_parts(stats: list[dict[str, Any]], team_index: int) -> tuple[float | None, float | None, float | None]:
+    """Return full-match, first-half and second-half corners for one team."""
+    if team_index < 0 or team_index >= len(stats or []):
+        return None, None, None
+    row = stats[team_index] or {}
+    raw = row.get("statistics") or {}
+    if isinstance(raw, dict):
+        full = _num(raw.get("corner_kicks"))
+    else:
+        full = _stat(stats, team_index, "Corner Kicks")
+    first = _num((row.get("first_half") or {}).get("corner_kicks"))
+    second = _num((row.get("second_half") or {}).get("corner_kicks"))
+    # Compatibility with older response variants that expose half stats as
+    # nested objects in the statistics field.
+    if first is None:
+        first = _num((raw.get("first_half") or {}).get("corner_kicks")) if isinstance(raw, dict) else None
+    if second is None:
+        second = _num((raw.get("second_half") or {}).get("corner_kicks")) if isinstance(raw, dict) else None
+    return full, first, second
+
+
 def build_automatic_history(
     fixture: dict[str, Any],
     *,
@@ -138,10 +159,10 @@ def build_automatic_history(
             if isinstance(own_goals, (int, float)) and isinstance(opp_goals, (int, float)):
                 gf.append(float(own_goals)); ga.append(float(opp_goals))
             old_id = (old.get("fixture") or {}).get("id")
-            stats_key = f"historical-stats-v2:{old_id}"
+            stats_key = f"historical-stats-halves-v3:{old_id}"
             if old_id and stats_key not in cache and request_budget[0] > 0 and not cache.get("_automatic_history_rate_limited"):
                 try:
-                    stats_payload = api_get("fixtures/statistics", {"fixture": old_id})
+                    stats_payload = api_get("fixtures/statistics", {"fixture": old_id, "half": "true"})
                     stats_response = stats_payload.get("response") or []
                     stats_attempted += 1
                     diagnostics["historical_stats"]["requested"] += 1
@@ -175,45 +196,18 @@ def build_automatic_history(
                  if (row.get("team") or {}).get("id") == opponent_id),
                 1 - own_stats_index,
             )
-            own_c = _stat(stats, own_stats_index, "Corner Kicks")
-            opp_c = _stat(stats, opponent_stats_index, "Corner Kicks")
+            own_c, own_first, own_second = _corner_parts(stats, own_stats_index)
+            opp_c, opp_first, opp_second = _corner_parts(stats, opponent_stats_index)
             if own_c is not None and opp_c is not None:
                 cf.append(own_c); ca.append(opp_c)
                 stats_with_corners += 1
                 diagnostics["historical_stats"]["responses_with_corners"] += 1
-                events_key = f"historical-corner-events-v1:{old_id}"
-                if old_id and events_key not in cache and not cache.get("_automatic_history_rate_limited"):
-                    try:
-                        events_payload = api_get("fixtures/events", {"fixture": old_id})
-                        cache[events_key] = events_payload.get("response") or []
-                    except Exception as exc:
-                        cache[events_key] = None
-                        diagnostics["historical_stats"]["errors"].append({"fixture_id": old_id, "events_error": str(exc)})
-                        if "HTTP 429" in str(exc):
-                            cache["_automatic_history_rate_limited"] = True
-                events = cache.get(events_key)
-                if isinstance(events, list):
-                    own_first = opp_first = own_second = opp_second = 0
-                    for event in events:
-                        if str(event.get("type") or "").strip().casefold() != "corner":
-                            continue
-                        event_team_id = (event.get("team") or {}).get("id")
-                        elapsed = (event.get("time") or {}).get("elapsed")
-                        if not isinstance(elapsed, (int, float)) or elapsed < 1 or elapsed > 90:
-                            continue
-                        if elapsed <= 45:
-                            if event_team_id == team_id:
-                                own_first += 1
-                            elif event_team_id == opponent_id:
-                                opp_first += 1
-                        else:
-                            if event_team_id == team_id:
-                                own_second += 1
-                            elif event_team_id == opponent_id:
-                                opp_second += 1
-                    if own_first + opp_first + own_second + opp_second == own_c + opp_c:
-                        cf_first.append(float(own_first)); ca_first.append(float(opp_first))
-                        cf_second.append(float(own_second)); ca_second.append(float(opp_second))
+                # Half splits come directly from API-Football's official half=true
+                # statistics, not from the events endpoint (which has no corner events).
+                if all(value is not None for value in (own_first, own_second, opp_first, opp_second)):
+                    if abs((own_first + own_second) - own_c) < 0.01 and abs((opp_first + opp_second) - opp_c) < 0.01:
+                        cf_first.append(own_first); ca_first.append(opp_first)
+                        cf_second.append(own_second); ca_second.append(opp_second)
             used += 1
         return {"matches": used, "gf": _mean(gf), "ga": _mean(ga), "cf": _mean(cf), "ca": _mean(ca), "corner_sample": len(cf), "goal_sample": len(gf), "cf_first": _mean(cf_first), "ca_first": _mean(ca_first), "cf_second": _mean(cf_second), "ca_second": _mean(ca_second), "corner_period_sample": len(cf_first), "goal_sample": len(gf), "stats_attempted": stats_attempted, "stats_nonempty": stats_nonempty, "stats_with_corners": stats_with_corners, "stats_errors": stats_errors}
 
