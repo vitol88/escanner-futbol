@@ -3943,8 +3943,9 @@ with st.container(key="scan_actions_row"):
         white-space:nowrap !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(2) {
-        left:65% !important; width:34% !important;
+        left:54% !important; width:45% !important;
         top:75px !important; font-size:clamp(11px,3.1vw,13px) !important;
+        white-space:nowrap !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) {
         top:112px !important; font-size:clamp(9px,2.5vw,10px) !important;
