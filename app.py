@@ -2008,6 +2008,67 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
     <style>
       /* PALETA CLARA FOOTBALL LAB — solo se activa al elegir ☀️ Claro. */
       :root { color-scheme:light; --fl-bg:#F4F6F9; --fl-surface:#FFFFFF; --fl-text:#20242C; --fl-muted:#68717F; --fl-gold:#B58A00; --fl-border:#DDE2E9; }
+      /* H2H: adaptar tarjetas y métricas al modo claro sin alterar estructura ni cálculos. */
+      html body .stApp .h2h-sample-card,
+      html body .stApp .h2h-result-card,
+      html body .stApp .h2h-secondary-card {
+        background:linear-gradient(145deg,#FFFFFF 0%,#F5F7FA 100%) !important;
+        border:1px solid #D8C27A !important;
+        box-shadow:0 4px 12px rgba(31,41,55,.07) !important;
+        color:#303744 !important;
+      }
+      html body .stApp .h2h-summary-label {
+        color:#68717F !important;
+        -webkit-text-fill-color:#68717F !important;
+      }
+      html body .stApp .h2h-sample-value,
+      html body .stApp .h2h-result-count,
+      html body .stApp .h2h-secondary-value {
+        color:#987300 !important;
+        -webkit-text-fill-color:#987300 !important;
+      }
+      html body .stApp .h2h-result-pct,
+      html body .stApp .h2h-secondary-pct,
+      html body .stApp .h2h-secondary-note {
+        color:#586170 !important;
+        -webkit-text-fill-color:#586170 !important;
+      }
+      html body .stApp .h2h-distribution {
+        background:linear-gradient(135deg,#FFFFFF 0%,#F5F7FA 100%) !important;
+        border:1px solid #D8C27A !important;
+        box-shadow:0 4px 12px rgba(31,41,55,.06) !important;
+      }
+      html body .stApp .h2h-distribution-heading,
+      html body .stApp .h2h-distribution-legend {
+        color:#586170 !important;
+        -webkit-text-fill-color:#586170 !important;
+      }
+      html body .stApp .h2h-distribution-heading strong {
+        color:#FFFFFF !important;
+        -webkit-text-fill-color:#FFFFFF !important;
+        background:linear-gradient(135deg,#B58A00,#987300) !important;
+        border-color:#B58A00 !important;
+      }
+      html body .stApp .h2h-distribution-track {
+        background:#E5E9EF !important;
+        box-shadow:inset 0 1px 3px rgba(31,41,55,.12) !important;
+      }
+      html body .stApp .h2h-history-list,
+      html body .stApp .h2h-match-row {
+        background:#FFFFFF !important;
+        color:#303744 !important;
+        border-color:#DDE2E9 !important;
+      }
+      html body .stApp .h2h-date,
+      html body .stApp .h2h-team {
+        color:#586170 !important;
+        -webkit-text-fill-color:#586170 !important;
+      }
+      html body .stApp .h2h-score {
+        background:#F5F7FA !important;
+        color:#263142 !important;
+        border:1px solid #D8C27A !important;
+      }
       html,body,.stApp,[data-testid="stAppViewContainer"],section.main,.main,.block-container {
         background:#F4F6F9 !important; color:#20242C !important;
       }
