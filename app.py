@@ -4853,11 +4853,8 @@ else:
                                                                 st.rerun()
                                                             if is_flipped:
                                                                 recent_matches = (form_data.get("recent_matches") or [])[:3]
-                                                                recent_html = [
-                                                                    '<div class="goal-form-back">',
-                                                                ]
                                                                 if not recent_matches:
-                                                                    recent_html.append('<div class="goal-form-line">No hay partidos recientes disponibles para esta condición.</div>')
+                                                                    st.caption("No hay partidos recientes disponibles para esta condición.")
                                                                 st.caption("⚽ Toca un partido para ver la secuencia de goles.")
                                                                 active_goal_match_key = f"goal_timeline_open_{match_id}"
                                                                 for recent in recent_matches:
@@ -4922,7 +4919,6 @@ else:
                                                                                     st.markdown("".join(_timeline_html), unsafe_allow_html=True)
                                                                     else:
                                                                         st.caption("Detalle de goles no disponible para este partido.")
-                                                                st.markdown("".join(recent_html), unsafe_allow_html=True)
                                                             else:
                                                                 st.markdown(
                                                                     f'<div class="goal-form-record">{html.escape(str(form_data.get("record", "N/D")))}</div>'
