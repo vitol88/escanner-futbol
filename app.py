@@ -1918,6 +1918,30 @@ st.markdown("""
     .h2h-match-row .h2h-score { min-width:48px !important; padding:5px 3px !important; font-size:.78rem !important; border-radius:7px !important; }
   }
 
+  /* H2H: Streamlit dibuja los marcos largos en stVerticalBlockBorderWrapper.
+     Quitar SOLO esos contenedores estructurales; conservar las tarjetas internas. */
+  html body .stApp section.main:has(.h2h-page-kicker) [data-testid="stVerticalBlockBorderWrapper"],
+  html body .stApp section.main:has(.h2h-page-kicker) [data-testid="stVerticalBlockBorderWrapper"] > div {
+    border:0 !important;
+    outline:0 !important;
+    box-shadow:none !important;
+    background-image:none !important;
+  }
+  html body .stApp section.main:has(.h2h-page-kicker) [data-testid="stVerticalBlockBorderWrapper"]::before,
+  html body .stApp section.main:has(.h2h-page-kicker) [data-testid="stVerticalBlockBorderWrapper"]::after {
+    content:none !important;
+    border:0 !important;
+    outline:0 !important;
+    box-shadow:none !important;
+    background:none !important;
+  }
+  html body .stApp section.main:has(.h2h-page-kicker) > div.block-container {
+    border-left:0 !important;
+    border-right:0 !important;
+    outline:0 !important;
+    box-shadow:none !important;
+  }
+
   /* H2H móvil: anular las dos reglas que reintroducían los marcos laterales. */
   @media(max-width:640px) {
     html body .stApp section.main > div.block-container:has(.h2h-page-kicker) {
