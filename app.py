@@ -4817,8 +4817,10 @@ else:
                                                     "date_html": date_label,
                                                     "home_html": ph_name,
                                                     "home_logo": ph_logo,
+                                                    "home_id": ph.get("id"),
                                                     "away_html": pa_name,
                                                     "away_logo": pa_logo,
+                                                    "away_id": pa.get("id"),
                                                     "home_goals": home_goals,
                                                     "away_goals": away_goals,
                                                 })
@@ -4897,8 +4899,8 @@ else:
                                                             if not _h2h_goal_events:
                                                                 st.caption("Eventos de gol no disponibles para este encuentro.")
                                                             else:
-                                                                _h2h_home_id = next((team.get("id") for team in (past.get("teams") or {}).values() if isinstance(team, dict) and team.get("name") == _h2h_row["home_html"]), None)
-                                                                _h2h_away_id = next((team.get("id") for team in (past.get("teams") or {}).values() if isinstance(team, dict) and team.get("name") == _h2h_row["away_html"]), None)
+                                                                _h2h_home_id = _h2h_row.get("home_id")
+                                                                _h2h_away_id = _h2h_row.get("away_id")
                                                                 _h2h_home_score, _h2h_away_score = 0, 0
                                                                 _h2h_timeline_html = ['<div class="h2h-goal-timeline">']
                                                                 for _h2h_event in _h2h_goal_events:
