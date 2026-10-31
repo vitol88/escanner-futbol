@@ -3704,19 +3704,21 @@ with st.container(key="scan_actions_row"):
   }
   /* Los textos de acción y apoyo quedan debajo del balón, sin cruzarlo. */
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(2) {
-    position:relative !important; margin:0 0 3px !important;
+    position:absolute !important; top:48px !important; left:8px !important;
+    width:calc(100% - 16px) !important; margin:0 !important;
     z-index:4 !important; text-align:center !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) {
-    position:relative !important; margin:0 !important;
+    position:absolute !important; bottom:10px !important; left:8px !important;
+    width:calc(100% - 16px) !important; margin:0 !important;
     z-index:4 !important; text-align:center !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
-    width:68px !important; max-width:38% !important; top:58% !important;
+    width:62px !important; max-width:36% !important; top:70% !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
-    width:30px !important; height:30px !important; top:58% !important;
-    font-size:1.55rem !important;
+    width:28px !important; height:28px !important; top:70% !important;
+    font-size:1.45rem !important;
   }
 }""", unsafe_allow_html=True)
     with st.container(key="scan_cta_card"):
