@@ -3949,21 +3949,27 @@ if manual_scan:
     # Mantener el balón girando mientras se ejecuta este escaneo, no solo mientras se pulsa.
     st.markdown("""
     <style>
+      /* Durante el escaneo, la posición queda fija y solo cambia la propiedad rotate. */
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::after {
-        left:50% !important; top:67% !important;
-        animation: football-lab-ball-spin 1.8s linear infinite !important;
-        transform-origin:center !important;
+        left:50% !important; top:66% !important;
+        transform:translate(-50%,-50%) !important;
+        transform-origin:50% 50% !important;
+        animation:fl-ball-spin-in-place .72s linear infinite !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before {
-        /* Mantener el centrado X/Y mientras gira: scanner-radar-spin elimina translateX(-50%). */
-        animation: fl-cta-radar 1.05s linear infinite !important;
-        transform-origin:center center !important;
+        left:50% !important; top:66% !important;
+        transform:translate(-50%,-50%) !important;
+        transform-origin:50% 50% !important;
+        animation:fl-radar-spin-in-place 1.05s linear infinite !important;
         box-shadow:0 0 26px rgba(250,204,21,.72),inset 0 0 22px rgba(250,204,21,.38) !important;
       }
-      @keyframes football-lab-ball-spin {
-        0%   { transform:translate(-50%,-50%) rotate(0deg) scale(1); }
-        50%  { transform:translate(-50%,-50%) rotate(180deg) scale(1.04); }
-        100% { transform:translate(-50%,-50%) rotate(360deg) scale(1); }
+      @keyframes fl-ball-spin-in-place {
+        from { rotate:0deg; }
+        to { rotate:360deg; }
+      }
+      @keyframes fl-radar-spin-in-place {
+        from { rotate:0deg; }
+        to { rotate:360deg; }
       }
       @keyframes scanner-ball-orbit {
         0% { transform:translate(-50%,-50%) rotate(0deg) scale(1); }
