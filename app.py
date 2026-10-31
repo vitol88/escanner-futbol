@@ -3454,7 +3454,7 @@ def safe_stat(
     return None
 
 def safe_corner_parts(stats: list[dict[str, Any]], team_index: int = 0):
-    """Return official full-match, first-half and second-half corner counts."""
+    """Return official full-match and half corner counts across API response variants."""
     if team_index < 0 or team_index >= len(stats or []):
         return None, None, None
     row = (stats or [])[team_index] or {}
@@ -3465,6 +3465,12 @@ def safe_corner_parts(stats: list[dict[str, Any]], team_index: int = 0):
         full = safe_stat(stats, "Corner Kicks", team_index)
     first = (row.get("first_half") or {}).get("corner_kicks")
     second = (row.get("second_half") or {}).get("corner_kicks")
+    # Some API/cache response variants nest the split under statistics.
+    if isinstance(raw, dict):
+        if first is None:
+            first = (raw.get("first_half") or {}).get("corner_kicks")
+        if second is None:
+            second = (raw.get("second_half") or {}).get("corner_kicks")
     return full, first, second
 
 def fixture_label(fixture: dict[str, Any]) -> str:
@@ -6273,7 +6279,7 @@ else:
                                                     st.markdown("### ⌁ Histórico de córners")
                                                 home_team = (match.get("teams") or {}).get("home") or {}
                                                 away_team = (match.get("teams") or {}).get("away") or {}
-                                                h2h_key = f"corner-h2h-v5-home-{home_team.get('id')}-{away_team.get('id')}"
+                                                h2h_key = f"corner-h2h-v6-home-{home_team.get('id')}-{away_team.get('id')}"
                                                 if "corner_h2h_cache" not in st.session_state:
                                                     st.session_state.corner_h2h_cache = {}
                                                 with history_button_col:
@@ -6319,7 +6325,7 @@ else:
                                                                     past_home_c, _, _ = safe_corner_parts(past_stats, 0)
                                                                     past_away_c, _, _ = safe_corner_parts(past_stats, 1)
 
-                                                                    half_stats_key = f"corner-h2h-stats-halves-v3:{past_id}"
+                                                                    half_stats_key = f"corner-h2h-stats-halves-v4:{past_id}"
                                                                     half_retry_key = f"{half_stats_key}:retry_after"
                                                                     half_stats = st.session_state.stats_cache.get(half_stats_key)
                                                                     retry_after = float(st.session_state.stats_cache.get(half_retry_key, 0) or 0)
