@@ -3851,6 +3851,7 @@ with st.container(key="scan_actions_row"):
     # Override único del CTA: elimina los estilos heredados que desplazaban el radar y mezclaban los textos.
     st.markdown("""<style>
     [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
+      --fl-cta-speed:4s;
       position:relative !important; display:block !important; width:100% !important;
       max-width:560px !important; height:270px !important; min-height:270px !important;
       margin:0 auto !important; padding:0 14px !important; box-sizing:border-box !important;
@@ -3880,7 +3881,7 @@ with st.container(key="scan_actions_row"):
         conic-gradient(from var(--fl-cta-angle),transparent 0 8%,rgba(255,213,52,.98) 13%,rgba(255,232,130,.12) 22%,transparent 30% 48%,rgba(255,193,28,.78) 55%,transparent 68% 100%) !important;
       box-shadow:0 0 25px rgba(255,199,35,.48),inset 0 0 20px rgba(255,208,45,.20) !important;
       transform:translate(-50%,-50%) !important; transform-origin:center !important;
-      animation:fl-cta-light-sweep 4s linear infinite !important; z-index:2 !important; pointer-events:none !important;
+      animation:fl-cta-light-sweep var(--fl-cta-speed) linear infinite !important; z-index:2 !important; pointer-events:none !important;
     }
     [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
       content:"⚽" !important; position:absolute !important; left:50% !important; top:66% !important;
@@ -3888,7 +3889,7 @@ with st.container(key="scan_actions_row"):
       align-items:center !important; justify-content:center !important; font-size:54px !important;
       transform:translate(-50%,-50%) rotate(0deg) !important; transform-origin:center !important;
       filter:sepia(1) saturate(6) hue-rotate(355deg) brightness(1.12) drop-shadow(0 0 13px rgba(255,195,20,.95)) !important;
-      animation:fl-cta-ball 4s linear infinite !important; z-index:3 !important; pointer-events:none !important;
+      animation:fl-cta-ball var(--fl-cta-speed) linear infinite !important; z-index:3 !important; pointer-events:none !important;
     }
     /* El aro y los círculos quedan inmóviles; solo cambia el ángulo del haz dorado. */
     @property --fl-cta-angle {
@@ -3929,8 +3930,7 @@ with st.container(key="scan_actions_row"):
       }
     }
     @media(prefers-reduced-motion:reduce) {
-      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before,
-      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after { animation-duration:8s !important; }
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button { --fl-cta-speed:8s; }
     }
     </style>""", unsafe_allow_html=True)
     with st.container(key="scan_cta_card"):
@@ -3955,22 +3955,17 @@ if manual_scan:
     # Mantener el balón girando mientras se ejecuta este escaneo, no solo mientras se pulsa.
     st.markdown("""
     <style>
-      /* Al escanear se acelera el haz y el balón, sin mover el aro ni sus círculos. */
-      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
-        animation-duration:1.05s !important;
-        box-shadow:0 0 26px rgba(250,204,21,.72),inset 0 0 22px rgba(250,204,21,.38) !important;
+      /* Una sola variable controla la velocidad del haz y del balón. */
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
+        --fl-cta-speed:1.05s !important;
       }
-      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
-        animation-duration:1.05s !important;
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
+        box-shadow:0 0 26px rgba(250,204,21,.72),inset 0 0 22px rgba(250,204,21,.38) !important;
       }
       @keyframes scanner-ball-orbit {
         0% { transform:translate(-50%,-50%) rotate(0deg) scale(1); }
         50% { transform:translate(-50%,-50%) rotate(180deg) scale(1.08); }
         100% { transform:translate(-50%,-50%) rotate(360deg) scale(1); }
-      }
-      @media(prefers-reduced-motion:reduce) {
-        [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::after,
-        [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before { animation-duration:1.5s !important; }
       }
     </style>
     """, unsafe_allow_html=True)
