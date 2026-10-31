@@ -4854,7 +4854,6 @@ else:
                                                                 recent_matches = (form_data.get("recent_matches") or [])[:3]
                                                                 recent_html = [
                                                                     '<div class="goal-form-back">',
-                                                                    '<div class="goal-form-back-title">ÚLTIMOS 3 PARTIDOS</div>',
                                                                 ]
                                                                 if not recent_matches:
                                                                     recent_html.append('<div class="goal-form-line">No hay partidos recientes disponibles para esta condición.</div>')
