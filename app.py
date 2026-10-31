@@ -1868,8 +1868,8 @@ st.markdown("""
       padding-top:14px !important; padding-left:12px !important; padding-right:12px !important;
       width:100% !important; max-width:100vw !important; box-sizing:border-box !important;
       overflow-x:hidden !important;
-      border-left:1px solid rgba(232,204,112,.24) !important;
-      border-right:1px solid rgba(232,204,112,.24) !important;
+      border-left:0 !important;
+      border-right:0 !important;
     }
     .h2h-page-kicker {
       width:calc(100% - 16px) !important; max-width:calc(100% - 16px) !important;
@@ -1916,6 +1916,23 @@ st.markdown("""
     .h2h-match-row .h2h-team { min-width:0 !important; gap:3px !important; font-size:.65rem !important; }
     .h2h-match-row .h2h-team img { width:16px !important; height:16px !important; flex-basis:16px !important; }
     .h2h-match-row .h2h-score { min-width:48px !important; padding:5px 3px !important; font-size:.78rem !important; border-radius:7px !important; }
+  }
+
+  /* H2H móvil: anular las dos reglas que reintroducían los marcos laterales. */
+  @media(max-width:640px) {
+    html body .stApp section.main > div.block-container:has(.h2h-page-kicker) {
+      border-left:0 !important;
+      border-right:0 !important;
+    }
+    html body .stApp .h2h-history-list {
+      border-left:0 !important;
+      border-right:0 !important;
+    }
+    html body .stApp .h2h-page-kicker {
+      border-right:0 !important;
+      border-bottom:0 !important;
+      box-shadow:none !important;
+    }
   }
 
   /* Corrección de foco: texto sólido sobre fondo opaco mientras se escribe. */
