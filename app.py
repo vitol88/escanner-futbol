@@ -3920,11 +3920,9 @@ with st.container(key="scan_actions_row"):
         width:48px !important; height:48px !important; font-size:43px !important;
       }
       @keyframes fl-cta-ball {
-        0%   { transform:translate(-50%,-50%) translate(37px,0) rotate(0deg); }
-        25%  { transform:translate(-50%,-50%) translate(0,37px) rotate(90deg); }
-        50%  { transform:translate(-50%,-50%) translate(-37px,0) rotate(180deg); }
-        75%  { transform:translate(-50%,-50%) translate(0,-37px) rotate(270deg); }
-        100% { transform:translate(-50%,-50%) translate(37px,0) rotate(360deg); }
+        0%   { transform:translate(-50%,-50%) rotate(0deg) scale(1); }
+        50%  { transform:translate(-50%,-50%) rotate(180deg) scale(1.04); }
+        100% { transform:translate(-50%,-50%) rotate(360deg) scale(1); }
       }
     }
     @media(prefers-reduced-motion:reduce) {
@@ -3964,11 +3962,9 @@ if manual_scan:
         box-shadow:0 0 26px rgba(250,204,21,.72),inset 0 0 22px rgba(250,204,21,.38) !important;
       }
       @keyframes football-lab-ball-spin {
-        0%   { transform:translate(-50%,-50%) translate(37px,0) rotate(0deg); }
-        25%  { transform:translate(-50%,-50%) translate(0,37px) rotate(90deg); }
-        50%  { transform:translate(-50%,-50%) translate(-37px,0) rotate(180deg); }
-        75%  { transform:translate(-50%,-50%) translate(0,-37px) rotate(270deg); }
-        100% { transform:translate(-50%,-50%) translate(37px,0) rotate(360deg); }
+        0%   { transform:translate(-50%,-50%) rotate(0deg) scale(1); }
+        50%  { transform:translate(-50%,-50%) rotate(180deg) scale(1.04); }
+        100% { transform:translate(-50%,-50%) rotate(360deg) scale(1); }
       }
       @keyframes scanner-ball-orbit {
         0% { transform:translate(-50%,-50%) rotate(0deg) scale(1); }
