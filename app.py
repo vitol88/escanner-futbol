@@ -1890,7 +1890,7 @@ div[class*="st-key-home_nav_bar"] [data-testid="column"]:nth-child(2) { grid-col
 div[class*="st-key-home_nav_bar"] [data-testid="column"]:nth-child(3) { grid-column:3 !important; }
 div[class*="st-key-home_nav_bar"] [data-testid="column"]:nth-child(4) { grid-column:4 !important; }
 div[class*="st-key-home_nav_bar"] [data-testid="column"] > div { width:100% !important; min-width:0 !important; margin:0 !important; }
-div[class*="st-key-home_topnav_stats"] button, div[class*="st-key-home_topnav_goals"] button, div[class*="st-key-home_topnav_corners"] button, div[class*="st-key-home_topnav_h2h"] button {
+div[class*="st-key-home_topnav_stats"] button, div[class*="st-key-home_topnav_goals"] button, div[class*="st-key-home_topnav_corners"] button, div[class*="st-key-home_topnav_h2h"] button, div[class*="st-key-home_topnav_tracker"] button {
  box-sizing:border-box !important; display:flex !important; align-items:center !important; justify-content:center !important;
  width:100% !important; min-width:0 !important; height:58px !important; min-height:58px !important; padding:5px 2px !important;
  border:1px solid #80661B !important; border-radius:12px !important; background:linear-gradient(145deg,#20242C,#111419) !important;
@@ -1931,11 +1931,11 @@ div[class*="st-key-home_nav_bar"] button [data-testid="stMarkdownContainer"] p {
  div[class*="st-key-home_nav_bar"] button [data-testid="stMarkdownContainer"] p { font-size:.62rem !important; }
 }
 div[class*="st-key-home_topnav_stats"] button:hover, div[class*="st-key-home_topnav_goals"] button:hover,
-div[class*="st-key-home_topnav_corners"] button:hover, div[class*="st-key-home_topnav_h2h"] button:hover {
+div[class*="st-key-home_topnav_corners"] button:hover, div[class*="st-key-home_topnav_h2h"] button:hover, div[class*="st-key-home_topnav_tracker"] button:hover {
  border-color:#D5B33D !important; background:linear-gradient(145deg,#302A19,#191A1D) !important;
  color:#FFE477 !important; transform:translateY(-1px) !important;
 }
-div[class*="st-key-home_topnav_stats"] button[kind="primary"], div[class*="st-key-home_topnav_goals"] button[kind="primary"], div[class*="st-key-home_topnav_corners"] button[kind="primary"], div[class*="st-key-home_topnav_h2h"] button[kind="primary"] {
+div[class*="st-key-home_topnav_stats"] button[kind="primary"], div[class*="st-key-home_topnav_goals"] button[kind="primary"], div[class*="st-key-home_topnav_corners"] button[kind="primary"], div[class*="st-key-home_topnav_h2h"] button[kind="primary"], div[class*="st-key-home_topnav_tracker"] button[kind="primary"] {
  background:#E8CC70 !important; background-color:#E8CC70 !important;
  border:2px solid #F5E3A4 !important; color:#111419 !important;
  box-shadow:0 0 0 1px rgba(232,204,112,.16),0 0 12px rgba(232,204,112,.20) !important;
@@ -1944,13 +1944,13 @@ div[class*="st-key-home_topnav_stats"] button[kind="primary"], div[class*="st-ke
 div[class*="st-key-home_topnav_stats"] button[kind="primary"]:hover,
 div[class*="st-key-home_topnav_goals"] button[kind="primary"]:hover,
 div[class*="st-key-home_topnav_corners"] button[kind="primary"]:hover,
-div[class*="st-key-home_topnav_h2h"] button[kind="primary"]:hover {
+div[class*="st-key-home_topnav_h2h"] button[kind="primary"]:hover, div[class*="st-key-home_topnav_tracker"] button[kind="primary"]:hover {
  background:#EED88F !important; border-color:#F8EBC1 !important;
  color:#111419 !important; box-shadow:0 0 15px rgba(232,204,112,.28) !important;
 }
 @media(max-width:640px) {
- div[class*="st-key-home_nav_bar"] [data-testid="stHorizontalBlock"] { grid-template-columns:repeat(4,minmax(0,1fr)) !important; gap:7px !important; column-gap:7px !important; }
- div[class*="st-key-home_topnav_stats"] button, div[class*="st-key-home_topnav_goals"] button, div[class*="st-key-home_topnav_corners"] button, div[class*="st-key-home_topnav_h2h"] button {
+ div[class*="st-key-home_nav_bar"] [data-testid="stHorizontalBlock"] { grid-template-columns:repeat(5,minmax(0,1fr)) !important; gap:5px !important; column-gap:7px !important; }
+ div[class*="st-key-home_topnav_stats"] button, div[class*="st-key-home_topnav_goals"] button, div[class*="st-key-home_topnav_corners"] button, div[class*="st-key-home_topnav_h2h"] button, div[class*="st-key-home_topnav_tracker"] button {
   height:54px !important; min-height:54px !important; padding:4px 2px !important; font-size:1rem !important; letter-spacing:0 !important; border-radius:13px !important;
   box-shadow:0 3px 10px rgba(15,23,42,.10),inset 0 1px 0 rgba(255,255,255,.12) !important;
  }
@@ -1963,7 +1963,7 @@ _home_tool_state = st.session_state.get("main_fixture_tool") or {}
 _home_active_tool = _home_tool_state.get("tool") if str(_home_tool_state.get("fixture_id")) == _home_selected_id else None
 _home_active_market = _home_tool_state.get("market") if str(_home_tool_state.get("fixture_id")) == _home_selected_id else None
 with st.container(key="home_nav_bar"):
-    _home_nav_cols = st.columns(4, gap="small")
+    _home_nav_cols = st.columns(5, gap="small")
     with _home_nav_cols[0]:
         _home_stats_clicked = st.button("STATS", key="home_topnav_stats", icon=":material/query_stats:", use_container_width=True, type="primary" if _home_active_tool in {"stats", "standings"} else "secondary", disabled=not bool(_home_selected_id))
     with _home_nav_cols[1]:
@@ -1972,6 +1972,8 @@ with st.container(key="home_nav_bar"):
         _home_corners_clicked = st.button("CÓRNERS", key="home_topnav_corners", icon=":material/flag:", use_container_width=True, type="primary" if _home_active_market == "corners" else "secondary", disabled=not bool(_home_selected_id))
     with _home_nav_cols[3]:
         _home_h2h_clicked = st.button("H2H", key="home_topnav_h2h", icon=":material/groups:", use_container_width=True, type="primary" if _home_active_tool == "h2h" else "secondary", disabled=not bool(_home_selected_id))
+    with _home_nav_cols[4]:
+        _home_tracker_clicked = st.button("TRACKER", key="home_topnav_tracker", icon=":material/sports_soccer:", use_container_width=True, type="primary" if _home_active_tool == "tracker" else "secondary", disabled=not bool(_home_selected_id))
     if _home_stats_clicked:
         st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "stats"}
         st.rerun()
@@ -1983,6 +1985,9 @@ with st.container(key="home_nav_bar"):
         st.rerun()
     if _home_h2h_clicked:
         st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "h2h"}
+        st.rerun()
+    if _home_tracker_clicked:
+        st.session_state["main_fixture_tool"] = {"fixture_id": _home_selected_id, "tool": "tracker"}
         st.rerun()
 
 # Selector de apariencia: ubicado debajo de la navegación fija, visible en móvil y escritorio.
@@ -2031,10 +2036,10 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       .brand-subtitle { color:#737B89 !important; }
       .brand-pill { color:#16834B !important; background:#E8F7EF !important; border-color:#B8E4C9 !important; }
       div[class*="st-key-home_nav_bar"] { background:rgba(255,255,255,.98) !important; box-shadow:0 7px 18px rgba(31,41,55,.10) !important; }
-      div[class*="st-key-home_topnav_stats"] button,div[class*="st-key-home_topnav_goals"] button,div[class*="st-key-home_topnav_corners"] button,div[class*="st-key-home_topnav_h2h"] button {
+      div[class*="st-key-home_topnav_stats"] button,div[class*="st-key-home_topnav_goals"] button,div[class*="st-key-home_topnav_corners"] button,div[class*="st-key-home_topnav_h2h"] button, div[class*="st-key-home_topnav_tracker"] button {
         background:linear-gradient(145deg,#FFFFFF,#F0F2F5) !important; color:#947000 !important; border-color:#C7A43A !important;
       }
-      div[class*="st-key-home_topnav_stats"] button[kind="primary"],div[class*="st-key-home_topnav_goals"] button[kind="primary"],div[class*="st-key-home_topnav_corners"] button[kind="primary"],div[class*="st-key-home_topnav_h2h"] button[kind="primary"] {
+      div[class*="st-key-home_topnav_stats"] button[kind="primary"],div[class*="st-key-home_topnav_goals"] button[kind="primary"],div[class*="st-key-home_topnav_corners"] button[kind="primary"],div[class*="st-key-home_topnav_h2h"] button[kind="primary"], div[class*="st-key-home_topnav_tracker"] button[kind="primary"] {
         background:#F6E6A8 !important; color:#332800 !important; border-color:#C49A20 !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
@@ -2737,8 +2742,8 @@ with st.sidebar:
     _sidebar_tool_market = str(_sidebar_tool_page.get("market") or "")
     _sidebar_tool_active = bool(_sidebar_tool_id and _sidebar_tool_page.get("tool"))
     _sidebar_dedicated_view = bool(_sidebar_tool_active)
-    _sidebar_section_title = ({"stats": "Estadísticas", "standings": "Clasificación", "h2h": "H2H"}.get(str(_sidebar_tool_page.get("tool") or ""), {"goals": "Goles y señales", "corners": "Córners y señales"}.get(_sidebar_tool_market, "Configuración")))
-    _sidebar_section_icon = "🏆" if _sidebar_tool_page.get("tool") == "standings" else "📊" if _sidebar_tool_page.get("tool") == "stats" else "🛡" if _sidebar_tool_page.get("tool") == "h2h" else "⚽" if _sidebar_tool_market == "goals" else "🚩" if _sidebar_tool_market == "corners" else "⚙"
+    _sidebar_section_title = ({"stats": "Estadísticas", "standings": "Clasificación", "h2h": "H2H", "tracker": "Live Tracker"}.get(str(_sidebar_tool_page.get("tool") or ""), {"goals": "Goles y señales", "corners": "Córners y señales"}.get(_sidebar_tool_market, "Configuración")))
+    _sidebar_section_icon = "🏆" if _sidebar_tool_page.get("tool") == "standings" else "📊" if _sidebar_tool_page.get("tool") == "stats" else "🛡" if _sidebar_tool_page.get("tool") == "h2h" else "⚽" if _sidebar_tool_page.get("tool") == "tracker" else "⚽" if _sidebar_tool_market == "goals" else "🚩" if _sidebar_tool_market == "corners" else "⚙"
     st.markdown(
         f'<div style="margin:0 0 18px 0;padding:4px 0 12px 0;border-bottom:1px solid rgba(250,204,21,.32);">'+
         f'<div style="font-size:.68rem;font-weight:850;letter-spacing:.19em;text-transform:uppercase;color:#B9A35A;margin-bottom:7px;">FOOTBALL LAB <span style="color:#FACC15;">/ ANÁLISIS</span></div>'+
@@ -2803,6 +2808,7 @@ with st.sidebar:
         _menu_goals = st.button("GOLES Y SEÑALES", icon=":material/sports_soccer:", help="Goles y señales", key=f"main_market_{_selected_fixture_for_menu_id}_goals", type="primary" if _menu_active_market == "goals" else "secondary", use_container_width=True)
         _menu_corners = st.button("CÓRNERS", icon=":material/flag:", help="Córners y señales", key=f"main_market_{_selected_fixture_for_menu_id}_corners", type="primary" if _menu_active_market == "corners" else "secondary", use_container_width=True)
         _menu_h2h = st.button("H2H", icon=":material/shield:", help="Historial de enfrentamientos (H2H)", key=f"main_h2h_{_selected_fixture_for_menu_id}", type="primary" if _menu_active_tool == "h2h" else "secondary", use_container_width=True)
+        _menu_tracker = st.button("LIVE TRACKER", icon=":material/sports_soccer:", help="Mapa animado de dominio territorial estimado", key=f"main_tracker_{_selected_fixture_for_menu_id}", type="primary" if _menu_active_tool == "tracker" else "secondary", use_container_width=True)
         if _menu_stats:
             st.session_state["main_fixture_tool"] = {"fixture_id": _selected_fixture_for_menu_id, "tool": "stats"}
             st.rerun()
@@ -2814,6 +2820,9 @@ with st.sidebar:
             st.rerun()
         if _menu_h2h:
             st.session_state["main_fixture_tool"] = {"fixture_id": _selected_fixture_for_menu_id, "tool": "h2h"}
+            st.rerun()
+        if _menu_tracker:
+            st.session_state["main_fixture_tool"] = {"fixture_id": _selected_fixture_for_menu_id, "tool": "tracker"}
             st.rerun()
         if _sidebar_tool_active:
             st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
@@ -4494,6 +4503,78 @@ else:
                                                         )
                                                         st.markdown(_standings_table_html, unsafe_allow_html=True)
                                                     st.caption("Local en azul y visitante en dorado. G = ganados, E = empates y D = derrotas; la columna FORMA usa las mismas letras y colores. Desliza horizontalmente para ver todas las columnas en el celular.")
+                                    elif tool_name == "tracker":
+                                        # LIVE TRACKER: animación ilustrativa guiada por posesión; no representa coordenadas reales.
+                                        _tracker_id = str(match_id)
+                                        if _tracker_id not in st.session_state.stats_cache or _tracker_id in st.session_state.get("stats_errors", {}):
+                                            try:
+                                                _tracker_payload = api_get("fixtures/statistics", {"fixture": match_id})
+                                                st.session_state.stats_cache[_tracker_id] = _tracker_payload.get("response") or []
+                                                st.session_state.setdefault("stats_errors", {}).pop(_tracker_id, None)
+                                            except Exception as _tracker_exc:
+                                                st.session_state.stats_cache[_tracker_id] = []
+                                                st.session_state.setdefault("stats_errors", {})[_tracker_id] = str(_tracker_exc)
+                                        _tracker_data = st.session_state.stats_cache.get(_tracker_id, [])
+                                        _tracker_home_stats = {entry.get("type"): entry.get("value") for entry in ((_tracker_data[0].get("statistics") or []) if len(_tracker_data) > 0 else [])}
+                                        _tracker_away_stats = {entry.get("type"): entry.get("value") for entry in ((_tracker_data[1].get("statistics") or []) if len(_tracker_data) > 1 else [])}
+                                        def _tracker_num(value, fallback):
+                                            try:
+                                                return float(str(value).replace("%", "").replace(",", "."))
+                                            except (TypeError, ValueError):
+                                                return fallback
+                                        _tracker_hp = _tracker_num(_tracker_home_stats.get("Ball Possession"), 50.0)
+                                        _tracker_ap = _tracker_num(_tracker_away_stats.get("Ball Possession"), 100.0 - _tracker_hp)
+                                        _tracker_total = max(1.0, _tracker_hp + _tracker_ap)
+                                        _tracker_hpct = max(0, min(100, round(_tracker_hp / _tracker_total * 100)))
+                                        _tracker_apct = 100 - _tracker_hpct
+                                        _tracker_minute = ((match.get("fixture") or {}).get("status") or {}).get("elapsed")
+                                        _tracker_minute_label = f"{_tracker_minute}′" if _tracker_minute is not None else "EN VIVO"
+                                        _tracker_home = html.escape(str(match_home.get("name") or "Local"))
+                                        _tracker_away = html.escape(str(match_away.get("name") or "Visitante"))
+                                        _tracker_home_logo = html.escape(str(match_home.get("logo") or ""), quote=True)
+                                        _tracker_away_logo = html.escape(str(match_away.get("logo") or ""), quote=True)
+                                        _tracker_home_badge = f'<img src="{_tracker_home_logo}" alt="">' if _tracker_home_logo else "⚽"
+                                        _tracker_away_badge = f'<img src="{_tracker_away_logo}" alt="">' if _tracker_away_logo else "⚽"
+                                        _tracker_home_shots = _tracker_num(_tracker_home_stats.get("Total Shots"), 0)
+                                        _tracker_away_shots = _tracker_num(_tracker_away_stats.get("Total Shots"), 0)
+                                        _tracker_home_corners = _tracker_num(_tracker_home_stats.get("Corner Kicks"), 0)
+                                        _tracker_away_corners = _tracker_num(_tracker_away_stats.get("Corner Kicks"), 0)
+                                        _tracker_home_activity = min(100, round(_tracker_hpct * .55 + min(100, _tracker_home_shots * 5) * .25 + min(100, _tracker_home_corners * 12) * .20))
+                                        _tracker_away_activity = min(100, round(_tracker_apct * .55 + min(100, _tracker_away_shots * 5) * .25 + min(100, _tracker_away_corners * 12) * .20))
+                                        _tracker_ball_left = max(12, min(88, 50 + (_tracker_hpct - 50) * .62))
+                                        _tracker_direction = "Local" if _tracker_hpct >= 50 else "Visitante"
+                                        _tracker_event = "Actividad equilibrada" if abs(_tracker_hpct - 50) < 7 else f"Mayor iniciativa: {_tracker_direction}"
+                                        st.markdown(
+                                            f'<section class="fl-tracker-wrap">'
+                                            f'<div class="fl-tracker-head"><div><div class="fl-tracker-kicker">FOOTBALL LAB · LIVE EXPERIENCE</div><div class="fl-tracker-title">LIVE TRACKER</div><div class="fl-tracker-subtitle">Dominio territorial animado · {html.escape(_tracker_minute_label)}</div></div><span class="fl-tracker-live"><i></i> EN VIVO</span></div>'
+                                            f'<div class="fl-tracker-score"><div class="fl-tracker-team">{_tracker_home_badge}<strong>{_tracker_home}</strong><small>LOCAL</small></div><div class="fl-tracker-score-mid"><b>{match_goals.get("home") if match_goals.get("home") is not None else "—"} – {match_goals.get("away") if match_goals.get("away") is not None else "—"}</b><small>{html.escape(_tracker_minute_label)}</small></div><div class="fl-tracker-team away">{_tracker_away_badge}<strong>{_tracker_away}</strong><small>VISITANTE</small></div></div>'
+                                            f'<div class="fl-tracker-possession"><div><span>{_tracker_home}</span><b>{_tracker_hpct}%</b></div><div class="fl-tracker-possession-track"><i style="width:{_tracker_hpct}%"></i></div><div><span>{_tracker_away}</span><b>{_tracker_apct}%</b></div></div>'
+                                            f'<div class="fl-tracker-pitch-card"><div class="fl-tracker-pitch-label"><span>← {_tracker_home} ataca</span><span>{_tracker_away} ataca →</span></div>'
+                                            f'<div class="fl-tracker-pitch"><div class="fl-tracker-pitch-mid"></div><div class="fl-tracker-circle"></div><div class="fl-tracker-box left"></div><div class="fl-tracker-box right"></div><div class="fl-tracker-goal left"></div><div class="fl-tracker-goal right"></div><div class="fl-tracker-lane lane-a"></div><div class="fl-tracker-lane lane-b"></div><div class="fl-tracker-ball" style="--ball-x:{_tracker_ball_left}%"><span>⚽</span></div><div class="fl-tracker-pulse"></div></div>'
+                                            f'<div class="fl-tracker-pitch-legend"><span><i class="home"></i> Actividad local</span><span><i class="away"></i> Actividad visitante</span></div></div>'
+                                            f'<div class="fl-tracker-metrics"><div><small>ACTIVIDAD LOCAL</small><b>{_tracker_home_activity}%</b><span>{_tracker_home_shots:.0f} tiros · {_tracker_home_corners:.0f} córners</span></div><div><small>ACTIVIDAD VISITANTE</small><b>{_tracker_away_activity}%</b><span>{_tracker_away_shots:.0f} tiros · {_tracker_away_corners:.0f} córners</span></div></div>'
+                                            f'<div class="fl-tracker-status"><span class="fl-tracker-status-dot"></span>{html.escape(_tracker_event)}</div>'
+                                            f'<div class="fl-tracker-disclaimer">DEMO ANIMADA · La posición del balón es ilustrativa y se desplaza según la posesión y la actividad estadística disponible. No es seguimiento GPS ni una ubicación real del balón. Las estadísticas pueden tener retraso o no estar disponibles.</div></section>',
+                                            unsafe_allow_html=True,
+                                        )
+                                        st.markdown("""<style>
+                                        .fl-tracker-wrap{background:linear-gradient(145deg,#171A20,#0D1015);border:1px solid #69551D;border-radius:20px;padding:clamp(13px,2.5vw,24px);color:#F8FAFC;box-shadow:0 14px 38px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.04);margin:4px 0 20px}
+                                        .fl-tracker-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}.fl-tracker-kicker{font-size:9px;letter-spacing:.2em;font-weight:900;color:#BFA34A}.fl-tracker-title{font-size:clamp(22px,4vw,32px);font-weight:950;letter-spacing:.04em;color:#FFE16A}.fl-tracker-subtitle{font-size:12px;color:#9CA3AF;margin-top:2px}.fl-tracker-live{font-size:10px;font-weight:900;letter-spacing:.1em;color:#FF7474;border:1px solid #71363A;background:#35191D;border-radius:99px;padding:7px 10px;white-space:nowrap}.fl-tracker-live i{display:inline-block;width:6px;height:6px;background:#FF5252;border-radius:50%;margin-right:5px;box-shadow:0 0 9px #FF5252;animation:flTrackerBlink 1s infinite}
+                                        .fl-tracker-score{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;padding:13px 0;border-top:1px solid #292D34;border-bottom:1px solid #292D34}.fl-tracker-team{display:flex;align-items:center;gap:8px;min-width:0;font-weight:800}.fl-tracker-team img{width:30px;height:30px;object-fit:contain}.fl-tracker-team strong{font-size:clamp(10px,1.5vw,14px);overflow-wrap:anywhere}.fl-tracker-team small{font-size:8px;color:#A1A1AA;letter-spacing:.12em}.fl-tracker-team.away{justify-content:flex-end;text-align:right}.fl-tracker-score-mid{text-align:center}.fl-tracker-score-mid b{font-size:clamp(19px,3vw,26px);color:#FFE16A;white-space:nowrap}.fl-tracker-score-mid small{display:block;color:#A1A1AA;font-size:10px}
+                                        .fl-tracker-possession{display:grid;grid-template-columns:1fr 1fr;gap:7px 14px;margin:17px 0}.fl-tracker-possession>div:not(.fl-tracker-possession-track){display:flex;justify-content:space-between;gap:8px;font-size:11px;color:#D1D5DB}.fl-tracker-possession b{color:#FFE16A;font-size:15px}.fl-tracker-possession-track{grid-column:1/3;height:9px;border-radius:99px;background:#1766B6;overflow:hidden}.fl-tracker-possession-track i{display:block;height:100%;background:linear-gradient(90deg,#FF3D4F,#FF9A62);border-radius:99px;transition:width .8s ease}
+                                        .fl-tracker-pitch-card{border:1px solid #343A42;border-radius:15px;background:#101B17;padding:10px}.fl-tracker-pitch-label,.fl-tracker-pitch-legend{display:flex;justify-content:space-between;gap:8px;color:#E5C85B;font-size:10px;font-weight:800;margin:2px 3px 9px}.fl-tracker-pitch{position:relative;width:100%;aspect-ratio:1.72/1;overflow:hidden;border:1.5px solid rgba(231,240,230,.72);border-radius:7px;background:repeating-linear-gradient(90deg,#174A35 0%,#174A35 12.5%,#1A513A 12.5%,#1A513A 25%);isolation:isolate}
+                                        .fl-tracker-pitch:before,.fl-tracker-pitch:after{content:"";position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.65);left:50%;z-index:1}.fl-tracker-pitch:after{top:50%;bottom:auto;left:50%;width:10px;height:10px;border:1px solid rgba(255,255,255,.65);border-radius:50%;transform:translate(-50%,-50%);background:transparent}
+                                        .fl-tracker-pitch-mid{position:absolute;left:50%;top:0;bottom:0;border-left:1px solid rgba(255,255,255,.55)}.fl-tracker-circle{position:absolute;left:50%;top:50%;width:23%;aspect-ratio:1;border:1px solid rgba(255,255,255,.55);border-radius:50%;transform:translate(-50%,-50%)}
+                                        .fl-tracker-box{position:absolute;top:25%;height:50%;width:16%;border:1px solid rgba(255,255,255,.58)}.fl-tracker-box.left{left:0;border-left:0}.fl-tracker-box.right{right:0;border-right:0}.fl-tracker-goal{position:absolute;top:40%;height:20%;width:2.2%;border:1px solid rgba(255,255,255,.5)}.fl-tracker-goal.left{left:-1px}.fl-tracker-goal.right{right:-1px}
+                                        .fl-tracker-lane{position:absolute;top:0;bottom:0;width:38%;filter:blur(19px);opacity:.52;z-index:0;animation:flTrackerGlow 5s ease-in-out infinite alternate}.fl-tracker-lane.lane-a{left:0;background:radial-gradient(ellipse at 65% 50%,rgba(255,55,72,.85),transparent 68%)}.fl-tracker-lane.lane-b{right:0;background:radial-gradient(ellipse at 35% 50%,rgba(34,139,255,.9),transparent 68%);animation-delay:-2.5s}
+                                        .fl-tracker-ball{position:absolute;z-index:4;left:var(--ball-x);top:50%;transform:translate(-50%,-50%);animation:flTrackerBall 4.5s ease-in-out infinite alternate;filter:drop-shadow(0 0 9px rgba(255,255,255,.9))}.fl-tracker-ball span{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.96);font-size:23px;box-shadow:0 0 0 5px rgba(255,255,255,.12),0 0 22px rgba(255,255,255,.48)}
+                                        .fl-tracker-pulse{position:absolute;z-index:2;left:var(--ball-x);top:50%;width:55px;height:55px;border:1px solid rgba(255,255,255,.55);border-radius:50%;transform:translate(-50%,-50%);animation:flTrackerPulse 2s ease-out infinite}
+                                        .fl-tracker-pitch-legend{margin:9px 3px 1px;color:#BFC7C2;font-weight:600}.fl-tracker-pitch-legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}.fl-tracker-pitch-legend i.home{background:#FF5364}.fl-tracker-pitch-legend i.away{background:#269BFF}
+                                        .fl-tracker-metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.fl-tracker-metrics>div{border:1px solid #343A42;border-radius:12px;padding:12px;background:#141920;min-width:0}.fl-tracker-metrics small{display:block;color:#A6AAB2;font-size:9px;letter-spacing:.1em;font-weight:850}.fl-tracker-metrics b{display:block;color:#FFE16A;font-size:23px;margin:4px 0}.fl-tracker-metrics span{display:block;color:#C4C9D1;font-size:10px}.fl-tracker-status{margin-top:12px;padding:11px 13px;border-radius:10px;background:#1B2027;color:#F4D66E;font-weight:750;font-size:12px}.fl-tracker-status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#FACC15;margin-right:8px;box-shadow:0 0 9px #FACC15}.fl-tracker-disclaimer{margin-top:11px;color:#8F98A6;font-size:9px;line-height:1.5;letter-spacing:.02em}
+                                        @keyframes flTrackerBall{0%{left:calc(var(--ball-x) - 8%);top:43%}50%{top:58%}100%{left:calc(var(--ball-x) + 8%);top:48%}}@keyframes flTrackerGlow{from{opacity:.25}to{opacity:.72}}@keyframes flTrackerPulse{0%{opacity:.75;transform:translate(-50%,-50%) scale(.45)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.8)}}@keyframes flTrackerBlink{50%{opacity:.35}}
+                                        @media(max-width:640px){.fl-tracker-wrap{padding:12px;border-radius:15px}.fl-tracker-team{flex-wrap:wrap;gap:4px}.fl-tracker-team img{width:24px;height:24px}.fl-tracker-team small{display:none}.fl-tracker-pitch-label{font-size:9px}.fl-tracker-ball span{width:29px;height:29px;font-size:20px}.fl-tracker-metrics{gap:7px}.fl-tracker-metrics>div{padding:9px}.fl-tracker-metrics b{font-size:19px}.fl-tracker-disclaimer{font-size:8px}}
+                                        @media(prefers-reduced-motion:reduce){.fl-tracker-ball,.fl-tracker-pulse,.fl-tracker-lane,.fl-tracker-live i{animation:none!important}}
+                                        </style>""", unsafe_allow_html=True)
                                     elif tool_name == "h2h":
                                         _match_league = match.get("league") or {}
                                         h2h_key = f"h2h-v3-home-{match_home_id}-{match_away_id}-{_match_league.get('id') or 'all'}"
