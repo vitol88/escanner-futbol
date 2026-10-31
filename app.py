@@ -2285,7 +2285,9 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       }
       /* El marcador queda visualmente por encima del separador entre partidos. */
       html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-score {
-        position:relative !important; z-index:3 !important;
+        position:relative !important; z-index:30 !important;
+        justify-self:center !important; transform:translateX(-16px) !important;
+        white-space:nowrap !important;
         background:#F5F7FA !important; box-shadow:0 0 0 3px #FFFFFF !important;
         margin:2px 0 !important;
       }
@@ -2324,6 +2326,7 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         }
         html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-score {
           z-index:30 !important; min-width:54px !important; justify-self:center !important;
+          transform:translateX(-12px) !important;
           white-space:nowrap !important; padding:5px 4px !important;
         }
         html body .stApp [class*="st-key-h2h_history_row_"] [class*="st-key-h2h_goal_timeline_btn_"] {
