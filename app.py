@@ -3642,7 +3642,58 @@ def update_scan_progress(value, title, detail, done=False):
     )
 
 with st.container(key="scan_actions_row"):
-    st.markdown('<style>[class*="st-key-scan_actions_row"] { display:block !important; width:100% !important; max-width:100% !important; min-width:0 !important; box-sizing:border-box !important; } [class*="st-key-scan_actions_row"] > div, [class*="st-key-scan_actions_row"] [data-testid="stVerticalBlock"], [class*="st-key-scan_actions_row"] [data-testid="stElementContainer"] { width:100% !important; max-width:100% !important; min-width:0 !important; box-sizing:border-box !important; } [class*="st-key-scan_actions_row"] [data-testid="stHorizontalBlock"] { display:grid !important; grid-template-columns:minmax(0,1fr) !important; width:100% !important; max-width:100% !important; } [class*="st-key-scan_actions_row"] [data-testid="column"] { width:100% !important; min-width:0 !important; } [class*="st-key-scan_actions_row"] [class*="st-key-scan_cta_card"] { display:block !important; width:100% !important; max-width:560px !important; min-width:0 !important; margin:0 auto !important; box-sizing:border-box !important; } [class*="st-key-scan_actions_row"]:has([class*="st-key-scan_cta_card"]), [class*="st-key-scan_actions_row"]:has([class*="st-key-scan_cta_card"]) > div, [class*="st-key-scan_actions_row"]:has([class*="st-key-scan_cta_card"]) [data-testid="stVerticalBlock"], [class*="st-key-scan_actions_row"]:has([class*="st-key-scan_cta_card"]) [data-testid="stElementContainer"], [class*="st-key-scan_actions_row"]:has([class*="st-key-scan_cta_card"]) [data-testid="stHorizontalBlock"], [class*="st-key-scan_actions_row"]:has([class*="st-key-scan_cta_card"]) [data-testid="column"] { width:100% !important; max-width:100% !important; min-width:0 !important; flex:1 1 100% !important; box-sizing:border-box !important; } [class*="st-key-scan_actions_row"] [class*="st-key-scan_cta_card"] { justify-self:stretch !important; margin-left:0 !important; margin-right:0 !important; } [class*="st-key-scan_cta_card"] > div, [class*="st-key-scan_cta_card"] [data-testid="stVerticalBlock"], [class*="st-key-scan_cta_card"] [data-testid="stElementContainer"], [class*="st-key-scan_cta_card"] [data-testid="stButton"], [class*="st-key-scan_cta_card"] [data-testid="stButton"] > div, [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button { display:block !important; width:100% !important; max-width:100% !important; min-width:0 !important; box-sizing:border-box !important; } @media(max-width:640px) { [class*="st-key-scan_actions_row"] { padding-top:46px !important; } [class*="st-key-scan_actions_row"] [data-testid="stHorizontalBlock"] { margin-top:18px !important; } [class*="st-key-scan_actions_row"] [class*="st-key-scan_cta_card"] { display:block !important; flex:0 0 280px !important; width:280px !important; max-width:280px !important; min-width:0 !important; margin:32px auto 0 !important; justify-self:center !important; } [class*="st-key-scan_cta_card"] [data-testid="stButton"] { width:280px !important; max-width:280px !important; margin:0 auto !important; } [class*="st-key-scan_cta_card"] [data-testid="stButton"] > div { width:100% !important; max-width:100% !important; } [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button { display:block !important; width:100% !important; max-width:280px !important; min-width:0 !important; min-height:145px !important; height:145px !important; padding:12px 10px 12px 46% !important; box-sizing:border-box !important; } [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before { left:4% !important; width:38% !important; } [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::after { left:23% !important; } }</style>', unsafe_allow_html=True)
+    st.markdown('<style>[class*="st-key-scan_actions_row"] { display:block !important; width:100% !important; max-width:100% !important; min-width:0 !important; box-sizing:border-box !important; } [class*="st-key-scan_actions_row"] > div, [class*="st-key-scan_actions_row"] [data-testid="stVerticalBlock"], [class*="st-key-scan_actions_row"] [data-testid="stElementContainer"] { width:100% !important; max-width:100% !important; min-width:0 !important; box-sizing:border-box !important; } [class*="st-key-scan_actions_row"] [data-testid="stHorizontalBlock"] { display:grid !important; grid-template-columns:minmax(0,1fr) !important; width:100% !important; max-width:100% !important; } [class*="st-key-scan_actions_row"] [data-testid="column"] { width:100% !important; min-width:0 !important; } [class*="st-key-scan_actions_row"] [class*="st-key-scan_cta_card"] { display:block !important; width:100% !important; max-width:560px !important; min-width:0 !important; margin:0 auto !important; box-sizing:border-box !important; } [class*="st-key-scan_actions_row"]:has([class*="st-key-scan_cta_card"]), [class*="st-key-scan_actions_row"]:has([class*="st-key-scan_cta_card"]) > div, [class*="st-key-scan_actions_row"]:has([class*="st-key-scan_cta_card"]) [data-testid="stVerticalBlock"], [class*="st-key-scan_actions_row"]:has([class*="st-key-scan_cta_card"]) [data-testid="stElementContainer"], [class*="st-key-scan_actions_row"]:has([class*="st-key-scan_cta_card"]) [data-testid="stHorizontalBlock"], [class*="st-key-scan_actions_row"]:has([class*="st-key-scan_cta_card"]) [data-testid="column"] { width:100% !important; max-width:100% !important; min-width:0 !important; flex:1 1 100% !important; box-sizing:border-box !important; } [class*="st-key-scan_actions_row"] [class*="st-key-scan_cta_card"] { justify-self:stretch !important; margin-left:0 !important; margin-right:0 !important; } [class*="st-key-scan_cta_card"] > div, [class*="st-key-scan_cta_card"] [data-testid="stVerticalBlock"], [class*="st-key-scan_cta_card"] [data-testid="stElementContainer"], [class*="st-key-scan_cta_card"] [data-testid="stButton"], [class*="st-key-scan_cta_card"] [data-testid="stButton"] > div, [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button { display:block !important; width:100% !important; max-width:100% !important; min-width:0 !important; box-sizing:border-box !important; } @media(max-width:640px) { [class*="st-key-scan_actions_row"] { padding-top:46px !important; } [class*="st-key-scan_actions_row"] [data-testid="stHorizontalBlock"] { margin-top:18px !important; } [class*="st-key-scan_actions_row"] [class*="st-key-scan_cta_card"] { display:block !important; flex:0 0 280px !important; width:280px !important; max-width:280px !important; min-width:0 !important; margin:32px auto 0 !important; justify-self:center !important; } [class*="st-key-scan_cta_card"] [data-testid="stButton"] { width:280px !important; max-width:280px !important; margin:0 auto !important; } [class*="st-key-scan_cta_card"] [data-testid="stButton"] > div { width:100% !important; max-width:100% !important; } [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button { display:block !important; width:100% !important; max-width:280px !important; min-width:0 !important; min-height:145px !important; height:145px !important; padding:12px 10px 12px 46% !important; box-sizing:border-box !important; } [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before { left:4% !important; width:38% !important; } [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::after { left:23% !important; }
+/* Ajuste final del CTA principal: radar y balón centrados, botón completo en escritorio y móvil. */
+[class*="st-key-scan_actions_row"] [class*="st-key-scan_cta_card"] {
+  display:block !important; width:100% !important; max-width:720px !important;
+  min-width:0 !important; margin:0 auto !important; justify-self:center !important;
+}
+[class*="st-key-scan_cta_card"] [data-testid="stButton"],
+[class*="st-key-scan_cta_card"] [data-testid="stButton"] > div {
+  width:100% !important; max-width:100% !important; margin:0 auto !important;
+}
+[class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
+  position:relative !important; display:flex !important; flex-direction:column !important;
+  align-items:center !important; justify-content:flex-end !important;
+  width:100% !important; max-width:100% !important; min-width:0 !important;
+  height:224px !important; min-height:224px !important; max-height:none !important;
+  box-sizing:border-box !important; padding:132px 18px 16px !important;
+  overflow:hidden !important; text-align:center !important;
+}
+[class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
+  left:50% !important; top:43% !important; width:126px !important; max-width:42% !important;
+  transform:translate(-50%,-50%) !important; animation:scanner-radar-spin 3s linear infinite !important;
+}
+[class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
+  left:50% !important; top:43% !important; width:54px !important; height:54px !important;
+  transform:translate(-50%,-50%) !important; animation:scanner-ball-orbit 2s ease-in-out infinite !important;
+}
+[class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p {
+  position:relative !important; z-index:3 !important; width:100% !important;
+  text-align:center !important; margin:0 0 4px !important;
+}
+[class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) {
+  top:0 !important; margin-top:0 !important;
+}
+@media(max-width:640px) {
+  [class*="st-key-scan_actions_row"] { padding-top:18px !important; }
+  [class*="st-key-scan_actions_row"] [class*="st-key-scan_cta_card"] {
+    width:100% !important; max-width:100% !important; min-width:0 !important;
+    flex:1 1 100% !important; margin:12px auto 0 !important;
+  }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
+    width:100% !important; max-width:100% !important; height:208px !important;
+    min-height:208px !important; padding:122px 10px 13px !important;
+  }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
+    width:108px !important; max-width:44% !important; top:41% !important;
+  }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
+    width:46px !important; height:46px !important; top:41% !important;
+    font-size:2.35rem !important;
+  }
+}
+</style>', unsafe_allow_html=True)
     with st.container(key="scan_cta_card"):
         manual_scan = st.button(
             "**TOCA EL BALÓN**\n\nActualizar y analizar\n\nUn toque. Todo el análisis.",
