@@ -3753,16 +3753,15 @@ with st.container(key="scan_actions_row"):
   }
 
   /* Composición final del botón: textos en zonas independientes y radar centrado. */
+  /* Fondo y marco antiguos retirados: el CTA debe ser completamente transparente. */
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
     height:270px !important; min-height:270px !important;
     padding:0 18px !important; position:relative !important;
     overflow:hidden !important; text-align:center !important;
-    background:
-      radial-gradient(ellipse at 50% 58%,rgba(245,185,20,.14),transparent 52%),
-      linear-gradient(115deg,#17150d 0%,#111114 55%,#17140b 100%) !important;
-    border:2px solid #eac43c !important;
-    border-radius:34px !important;
-    box-shadow:0 0 20px rgba(255,204,45,.25),inset 0 0 28px rgba(255,204,45,.08) !important;
+    background:transparent !important; background-color:transparent !important;
+    background-image:none !important;
+    border:0 !important; border-radius:0 !important;
+    box-shadow:none !important;
   }
   [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button [data-testid="stMarkdownContainer"] {
     position:static !important;
