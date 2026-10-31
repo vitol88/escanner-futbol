@@ -2135,7 +2135,10 @@ div[class*="st-key-home_search_bar"] {
  background:rgba(11,13,16,.98) !important;
 }
 
-div[class*="st-key-home_search_bar"] [data-testid="stHorizontalBlock"] { display:grid !important; grid-template-columns:minmax(0,1fr) 56px !important; gap:0 !important; align-items:stretch !important; width:100% !important; margin:0 !important; padding:0 !important; }
+div[class*="st-key-home_search_bar"] [data-testid="stHorizontalBlock"] { display:grid !important; grid-template-columns:minmax(0,1fr) 56px !important; grid-template-rows:48px !important; gap:0 !important; column-gap:0 !important; row-gap:0 !important; align-items:stretch !important; width:100% !important; margin:0 !important; padding:0 !important; }
+div[class*="st-key-home_search_bar"] [data-testid="column"]:nth-child(1) { grid-column:1 !important; width:100% !important; min-width:0 !important; }
+div[class*="st-key-home_search_bar"] [data-testid="column"]:nth-child(2) { grid-column:2 !important; width:56px !important; min-width:56px !important; }
+div[class*="st-key-home_search_bar"] [data-testid="column"] > div, div[class*="st-key-home_search_bar"] [data-testid="stTextInput"], div[class*="st-key-home_search_bar"] [data-testid="stTextInput"] > div { width:100% !important; min-width:0 !important; max-width:100% !important; margin:0 !important; }
 div[class*="st-key-home_search_bar"] [data-testid="column"] { display:block !important; width:100% !important; max-width:100% !important; min-width:0 !important; flex:none !important; padding:0 !important; }
 div[class*="st-key-home_search_bar"] input {
  min-height:48px !important; height:48px !important; padding:0 13px !important;
@@ -2173,7 +2176,7 @@ def _handle_live_search_change():
 
 search_clicked = False
 with st.container(key="home_search_bar"):
-    _home_search_cols = st.columns([12, 1], gap="small")
+    _home_search_cols = st.columns([12, 1], gap=None)
     with _home_search_cols[0]:
         st.text_input(
             "Buscar equipo o liga",
