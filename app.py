@@ -2160,16 +2160,11 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         grid-template-columns:82px minmax(0,1fr) 70px minmax(0,1fr) !important;
         position:relative !important; isolation:isolate !important;
       }
-      /* Mantener cada marcador H2H completo y por encima de las líneas divisorias.
-         El score crea su propia capa para que ningún separador lo atraviese. */
+      /* El marcador queda visualmente por encima del separador entre partidos. */
       html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-score {
-        position:relative !important; z-index:30 !important; isolation:isolate !important;
-        display:inline-flex !important; align-items:center !important; justify-content:center !important;
-        background:#F5F7FA !important;
-        border:1px solid #D6B84C !important;
-        outline:3px solid #FFFFFF !important; outline-offset:1px !important;
-        box-shadow:0 1px 4px rgba(138,104,0,.16) !important;
-        margin:5px 0 !important; transform:translateZ(0) !important;
+        position:relative !important; z-index:3 !important;
+        background:#F5F7FA !important; box-shadow:0 0 0 3px #FFFFFF !important;
+        margin:2px 0 !important;
       }
       html body .stApp [class*="st-key-h2h_history_row_"] [class*="st-key-h2h_goal_timeline_btn_"] {
         position:absolute !important; right:7px !important; top:12px !important;
@@ -4998,67 +4993,7 @@ else:
                                             )
                                             st.markdown(summary_html, unsafe_allow_html=True)
                                             st.markdown('<div class="h2h-history-list">', unsafe_allow_html=True)
-                                            # H2H: normalización única de filas y marcadores para ambos temas.
-                  _h2h_light_theme = st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}
-                  _h2h_even_bg = "#FFFFFF" if _h2h_light_theme else "#15191F"
-                  _h2h_odd_bg = "#F6F7F9" if _h2h_light_theme else "#1B2027"
-                  st.markdown("""
-                  <style>
-                    html body .stApp [class*="st-key-h2h_history_row_"] {
-                      margin:0 !important; padding:0 !important; overflow:visible !important;
-                      border:0 !important; box-shadow:none !important;
-                    }
-                    html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full {
-                      display:grid !important;
-                      grid-template-columns:82px minmax(0,1fr) 70px minmax(0,1fr) !important;
-                      align-items:center !important; gap:8px !important;
-                      width:100% !important; min-height:52px !important; height:52px !important;
-                      box-sizing:border-box !important; padding:6px 48px 6px 10px !important;
-                      margin:0 !important; border:0 !important; border-bottom:0 !important;
-                      outline:0 !important; box-shadow:none !important; overflow:visible !important;
-                      position:relative !important; isolation:isolate !important;
-                    }
-                    html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full.h2h-stripe-even { background:__H2H_EVEN_BG__ !important; }
-                    html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full.h2h-stripe-odd { background:__H2H_ODD_BG__ !important; }
-                    html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-score {
-                      display:inline-flex !important; align-items:center !important; justify-content:center !important;
-                      justify-self:center !important; flex:none !important;
-                      width:70px !important; min-width:70px !important; max-width:70px !important;
-                      height:34px !important; min-height:34px !important; max-height:34px !important;
-                      box-sizing:border-box !important; padding:0 5px !important; margin:0 !important;
-                      position:relative !important; z-index:100 !important; isolation:isolate !important;
-                      border:1.5px solid #D6B84C !important; border-radius:9px !important;
-                      outline:2px solid #15191F !important; outline-offset:1px !important;
-                      background:linear-gradient(145deg,#F8E7A5 0%,#E8C85A 100%) !important;
-                      color:#493600 !important; -webkit-text-fill-color:#493600 !important;
-                      font-size:.92rem !important; font-weight:900 !important; line-height:1 !important;
-                      font-variant-numeric:tabular-nums !important; white-space:nowrap !important;
-                      box-shadow:0 1px 4px rgba(0,0,0,.22) !important;
-                      text-shadow:none !important; transform:translateZ(1px) !important;
-                    }
-                    html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-date,
-                    html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-team { min-width:0 !important; }
-                    html body .stApp [class*="st-key-h2h_history_row_"] [class*="st-key-h2h_goal_timeline_btn_"] {
-                      top:50% !important; right:7px !important; transform:translateY(-50%) !important; z-index:110 !important;
-                    }
-                    @media(max-width:640px) {
-                      html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full {
-                        grid-template-columns:60px minmax(0,1fr) 58px minmax(0,1fr) !important;
-                        gap:4px !important; min-height:48px !important; height:48px !important;
-                        padding:5px 36px 5px 5px !important;
-                      }
-                      html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-score {
-                        width:58px !important; min-width:58px !important; max-width:58px !important;
-                        height:32px !important; min-height:32px !important; max-height:32px !important;
-                        padding:0 3px !important; font-size:.80rem !important; border-radius:8px !important;
-                      }
-                      html body .stApp [class*="st-key-h2h_history_row_"] [class*="st-key-h2h_goal_timeline_btn_"] { right:4px !important; }
-                    }
-                    html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full.h2h-stripe-even .h2h-score { outline-color:__H2H_EVEN_BG__ !important; }
-                    html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full.h2h-stripe-odd .h2h-score { outline-color:__H2H_ODD_BG__ !important; }
-                  </style>
-                  """.replace("__H2H_EVEN_BG__", _h2h_even_bg).replace("__H2H_ODD_BG__", _h2h_odd_bg), unsafe_allow_html=True)
-                  for _h2h_index, _h2h_row in enumerate(h2h_rows):
+                                            for _h2h_index, _h2h_row in enumerate(h2h_rows):
                                                 _h2h_fixture_id = _h2h_row.get("fixture_id")
                                                 _h2h_timeline_key = f"h2h_goal_timeline_open_{h2h_key}"
                                                 _h2h_is_open = st.session_state.get(_h2h_timeline_key) == str(_h2h_fixture_id) if _h2h_fixture_id else False
