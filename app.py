@@ -3894,10 +3894,13 @@ with st.container(key="scan_actions_row"):
       from { transform:translate(-50%,-50%) rotate(0deg); }
       to { transform:translate(-50%,-50%) rotate(360deg); }
     }
+    /* El balón recorre una órbita circular dentro del radar; nunca abandona su perímetro. */
     @keyframes fl-cta-ball {
-      0% { transform:translate(-50%,-50%) rotate(0deg) scale(1); }
-      50% { transform:translate(-50%,-50%) rotate(180deg) scale(1.06); }
-      100% { transform:translate(-50%,-50%) rotate(360deg) scale(1); }
+      0%   { transform:translate(-50%,-50%) translate(39px,0) rotate(0deg); }
+      25%  { transform:translate(-50%,-50%) translate(0,39px) rotate(90deg); }
+      50%  { transform:translate(-50%,-50%) translate(-39px,0) rotate(180deg); }
+      75%  { transform:translate(-50%,-50%) translate(0,-39px) rotate(270deg); }
+      100% { transform:translate(-50%,-50%) translate(39px,0) rotate(360deg); }
     }
     @media(max-width:640px) {
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
@@ -3913,7 +3916,15 @@ with st.container(key="scan_actions_row"):
         top:67% !important; width:142px !important; height:142px !important; max-width:58% !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
-        top:67% !important; width:56px !important; height:56px !important; font-size:49px !important;
+        left:50% !important; top:67% !important;
+        width:48px !important; height:48px !important; font-size:43px !important;
+      }
+      @keyframes fl-cta-ball {
+        0%   { transform:translate(-50%,-50%) translate(37px,0) rotate(0deg); }
+        25%  { transform:translate(-50%,-50%) translate(0,37px) rotate(90deg); }
+        50%  { transform:translate(-50%,-50%) translate(-37px,0) rotate(180deg); }
+        75%  { transform:translate(-50%,-50%) translate(0,-37px) rotate(270deg); }
+        100% { transform:translate(-50%,-50%) translate(37px,0) rotate(360deg); }
       }
     }
     @media(prefers-reduced-motion:reduce) {
@@ -3944,7 +3955,8 @@ if manual_scan:
     st.markdown("""
     <style>
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::after {
-        animation: football-lab-ball-spin .62s linear infinite !important;
+        left:50% !important; top:67% !important;
+        animation: football-lab-ball-spin 1.8s linear infinite !important;
         transform-origin:center !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] button::before {
@@ -3952,9 +3964,11 @@ if manual_scan:
         box-shadow:0 0 26px rgba(250,204,21,.72),inset 0 0 22px rgba(250,204,21,.38) !important;
       }
       @keyframes football-lab-ball-spin {
-        0% { transform:translate(-50%,-50%) rotate(0deg) scale(1); }
-        50% { transform:translate(-50%,-50%) rotate(180deg) scale(1.08); }
-        100% { transform:translate(-50%,-50%) rotate(360deg) scale(1); }
+        0%   { transform:translate(-50%,-50%) translate(37px,0) rotate(0deg); }
+        25%  { transform:translate(-50%,-50%) translate(0,37px) rotate(90deg); }
+        50%  { transform:translate(-50%,-50%) translate(-37px,0) rotate(180deg); }
+        75%  { transform:translate(-50%,-50%) translate(0,-37px) rotate(270deg); }
+        100% { transform:translate(-50%,-50%) translate(37px,0) rotate(360deg); }
       }
       @keyframes scanner-ball-orbit {
         0% { transform:translate(-50%,-50%) rotate(0deg) scale(1); }
