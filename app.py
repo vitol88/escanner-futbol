@@ -6585,8 +6585,6 @@ else:
                                                     period_sources = []
                                                     if isinstance(competition_first_average, (int, float)) and isinstance(competition_second_average, (int, float)):
                                                         period_sources.append((competition_first_average, competition_second_average))
-                                                    if isinstance(h2h_first_avg, (int, float)) and isinstance(h2h_second_avg, (int, float)):
-                                                        period_sources.append((h2h_first_avg, h2h_second_avg))
                                                     if period_sources:
                                                         raw_first_period = sum(pair[0] for pair in period_sources) / len(period_sources)
                                                         raw_second_period = sum(pair[1] for pair in period_sources) / len(period_sources)
