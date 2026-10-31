@@ -3751,6 +3751,102 @@ with st.container(key="scan_actions_row"):
     50% { transform:translate(-50%,-50%) rotate(180deg) scale(1.09); }
     100% { transform:translate(-50%,-50%) rotate(360deg) scale(1); }
   }
+
+  /* Composición final del botón: textos en zonas independientes y radar centrado. */
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
+    height:270px !important; min-height:270px !important;
+    padding:0 18px !important; position:relative !important;
+    overflow:hidden !important; text-align:center !important;
+    background:
+      radial-gradient(ellipse at 50% 58%,rgba(245,185,20,.14),transparent 52%),
+      linear-gradient(115deg,#17150d 0%,#111114 55%,#17140b 100%) !important;
+    border:2px solid #eac43c !important;
+    border-radius:34px !important;
+    box-shadow:0 0 20px rgba(255,204,45,.25),inset 0 0 28px rgba(255,204,45,.08) !important;
+  }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button [data-testid="stMarkdownContainer"] {
+    position:static !important;
+  }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p {
+    position:absolute !important; left:12px !important;
+    width:calc(100% - 24px) !important; margin:0 !important;
+    padding:0 !important; text-align:center !important;
+    line-height:1.2 !important; z-index:5 !important;
+  }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:first-of-type {
+    top:16px !important; bottom:auto !important;
+    color:#ffd84d !important; font-size:clamp(20px,3vw,34px) !important;
+    font-weight:900 !important; letter-spacing:.04em !important;
+  }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(2) {
+    top:62px !important; bottom:auto !important;
+    color:#f4d477 !important; font-size:clamp(16px,2.2vw,25px) !important;
+    font-weight:750 !important;
+  }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) {
+    top:auto !important; bottom:15px !important;
+    color:#fff !important; font-size:clamp(13px,1.7vw,20px) !important;
+    font-weight:650 !important;
+  }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
+    content:"" !important; position:absolute !important;
+    left:50% !important; top:57% !important;
+    width:174px !important; height:174px !important; max-width:48% !important;
+    transform:translate(-50%,-50%) !important; transform-origin:center !important;
+    border:5px solid rgba(255,211,42,.98) !important; border-radius:50% !important;
+    background:
+      radial-gradient(circle at center,rgba(255,220,75,.12) 0 30%,transparent 31%),
+      repeating-radial-gradient(circle at center,transparent 0 25px,rgba(255,211,55,.72) 26px 29px,transparent 30px 43px),
+      conic-gradient(from 0deg,transparent 0 8%,rgba(255,214,65,.98) 13%,rgba(255,238,145,.12) 20%,transparent 28% 43%,rgba(255,198,35,.8) 50%,transparent 62% 100%) !important;
+    box-shadow:0 0 24px rgba(255,204,35,.7),inset 0 0 24px rgba(255,204,35,.22) !important;
+    animation:scanner-radar-spin 3s linear infinite !important;
+    z-index:2 !important; pointer-events:none !important;
+  }
+  [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
+    content:"⚽" !important; position:absolute !important;
+    left:50% !important; top:57% !important;
+    width:66px !important; height:66px !important;
+    display:flex !important; align-items:center !important; justify-content:center !important;
+    font-size:58px !important; line-height:1 !important;
+    transform:translate(-50%,-50%) !important; transform-origin:center !important;
+    filter:sepia(1) saturate(6) hue-rotate(355deg) brightness(1.12) drop-shadow(0 0 14px rgba(255,202,35,.98)) !important;
+    text-shadow:0 0 16px rgba(255,213,65,.98) !important;
+    animation:football-lab-ball-spin 1.8s linear infinite !important;
+    z-index:3 !important; pointer-events:none !important;
+  }
+  @keyframes football-lab-ball-spin {
+    0% { transform:translate(-50%,-50%) rotate(0deg) scale(1); }
+    50% { transform:translate(-50%,-50%) rotate(180deg) scale(1.08); }
+    100% { transform:translate(-50%,-50%) rotate(360deg) scale(1); }
+  }
+  @media(max-width:640px) {
+    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
+      height:250px !important; min-height:250px !important;
+      border-radius:28px !important; padding:0 8px !important;
+    }
+    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:first-of-type {
+      top:14px !important; left:8px !important;
+      width:calc(100% - 16px) !important; font-size:21px !important;
+    }
+    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(2) {
+      top:49px !important; left:8px !important;
+      width:calc(100% - 16px) !important; font-size:16px !important;
+    }
+    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) {
+      bottom:13px !important; left:8px !important;
+      width:calc(100% - 16px) !important; font-size:13px !important;
+    }
+    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
+      top:57% !important; width:136px !important; height:136px !important;
+      max-width:55% !important; border-width:4px !important;
+      animation:fl-mobile-radar-revolve 2.4s linear infinite !important;
+    }
+    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
+      top:57% !important; width:54px !important; height:54px !important;
+      font-size:48px !important;
+      animation:fl-mobile-golden-ball 1.8s linear infinite !important;
+    }
+  }
 }""", unsafe_allow_html=True)
     with st.container(key="scan_cta_card"):
         manual_scan = st.button(
