@@ -6408,6 +6408,16 @@ else:
                                                         total_match_average = int(adjusted_corner_average) + 0.5
                                                     else:
                                                         total_match_average = int(adjusted_corner_average) + 1
+                                                    match_first_half_corners = None
+                                                    match_second_half_corners = None
+                                                    if all(isinstance(v, (int, float)) for v in (competition_first_average, competition_second_average, h2h_first_avg, h2h_second_avg)):
+                                                        raw_first_period = (competition_first_average + h2h_first_avg) / 2
+                                                        raw_second_period = (competition_second_average + h2h_second_avg) / 2
+                                                        raw_period_sum = raw_first_period + raw_second_period
+                                                        if raw_period_sum > 0:
+                                                            match_first_half_corners = round((total_match_average * raw_first_period / raw_period_sum) * 2) / 2
+                                                            match_first_half_corners = min(float(total_match_average), max(0.0, match_first_half_corners))
+                                                            match_second_half_corners = float(total_match_average) - match_first_half_corners
                                                     st.markdown(
                                                         f"""
                                                         <div class="corner-total-average">
@@ -6415,6 +6425,14 @@ else:
                                                           <span>{total_match_average:.2f}</span>
                                                         </div>
                                                         """,
+                                                        unsafe_allow_html=True,
+                                                    )
+                                                    st.markdown(
+                                                        corner_period_cards_html(
+                                                            match_first_half_corners,
+                                                            match_second_half_corners,
+                                                            "Proyección combinada · ambos tiempos suman el total del partido",
+                                                        ),
                                                         unsafe_allow_html=True,
                                                     )
 
