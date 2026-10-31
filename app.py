@@ -2135,17 +2135,17 @@ div[class*="st-key-home_search_bar"] {
  background:rgba(11,13,16,.98) !important;
 }
 
-div[class*="st-key-home_search_bar"] [data-testid="stHorizontalBlock"] { display:flex !important; flex-wrap:nowrap !important; gap:0 !important; column-gap:0 !important; align-items:stretch !important; width:100% !important; margin:0 !important; padding:0 !important; }
-div[class*="st-key-home_search_bar"] [data-testid="column"]:nth-child(1) { flex:1 1 0% !important; width:calc(100% - 56px) !important; max-width:calc(100% - 56px) !important; min-width:0 !important; }
-div[class*="st-key-home_search_bar"] [data-testid="column"]:nth-child(2) { flex:0 0 56px !important; width:56px !important; max-width:56px !important; min-width:56px !important; }
+div[class*="st-key-home_search_bar"] [data-testid="stHorizontalBlock"] { display:grid !important; grid-template-columns:minmax(0,1fr) 48px !important; grid-template-rows:48px !important; gap:0 !important; width:100vw !important; max-width:100vw !important; box-sizing:border-box !important; overflow:hidden !important; margin:0 !important; padding:0 !important; }
+div[class*="st-key-home_search_bar"] [data-testid="column"]:nth-child(1) { grid-column:1 !important; width:100% !important; max-width:100% !important; min-width:0 !important; }
+div[class*="st-key-home_search_bar"] [data-testid="column"]:nth-child(2) { grid-column:2 !important; width:48px !important; max-width:48px !important; min-width:48px !important; }
 div[class*="st-key-home_search_bar"] [data-testid="column"] > div, div[class*="st-key-home_search_bar"] [data-testid="stTextInput"], div[class*="st-key-home_search_bar"] [data-testid="stTextInput"] > div { width:100% !important; min-width:0 !important; max-width:100% !important; margin:0 !important; }
 div[class*="st-key-home_search_bar"] [data-testid="column"] { display:block !important; min-width:0 !important; padding:0 !important; margin:0 !important; }
-div[class*="st-key-home_search_bar"] [data-testid="column"]:nth-child(1) { flex:1 1 0% !important; width:auto !important; max-width:none !important; }
-div[class*="st-key-home_search_bar"] [data-testid="column"]:nth-child(2) { flex:0 0 56px !important; width:56px !important; max-width:56px !important; min-width:56px !important; }
+div[class*="st-key-home_search_bar"] [data-testid="column"]:nth-child(1) { grid-column:1 !important; width:100% !important; max-width:100% !important; min-width:0 !important; }
+div[class*="st-key-home_search_bar"] [data-testid="column"]:nth-child(2) { grid-column:2 !important; width:48px !important; max-width:48px !important; min-width:48px !important; }
 div[class*="st-key-home_search_bar"] [data-testid="column"]:nth-child(2) > div,
 div[class*="st-key-home_search_bar"] [class*="st-key-home_search_button"],
 div[class*="st-key-home_search_bar"] [class*="st-key-home_search_button"] > div,
-div[class*="st-key-home_search_bar"] [class*="st-key-home_search_button"] [data-testid="stButton"] { width:56px !important; min-width:56px !important; max-width:56px !important; margin:0 !important; padding:0 !important; }
+div[class*="st-key-home_search_bar"] [class*="st-key-home_search_button"] [data-testid="stButton"] { width:48px !important; min-width:48px !important; max-width:48px !important; margin:0 !important; padding:0 !important; }
 div[class*="st-key-home_search_bar"] [data-testid="stHorizontalBlock"] > div { background:transparent !important; box-shadow:none !important; }
 div[class*="st-key-home_search_bar"] [data-testid="stTextInput"] > div { border-radius:12px 0 0 12px !important; overflow:hidden !important; }
 div[class*="st-key-home_search_button"] button { display:flex !important; align-items:center !important; justify-content:center !important; overflow:visible !important; }
@@ -2159,7 +2159,7 @@ div[class*="st-key-home_search_bar"] input {
 div[class*="st-key-home_search_bar"] input::placeholder { color:#A5AAB4 !important; -webkit-text-fill-color:#A5AAB4 !important; opacity:1 !important; }
 div[class*="st-key-home_search_button"] { margin:0 !important; }
 div[class*="st-key-home_search_button"] button {
- min-height:48px !important; height:48px !important; width:56px !important; min-width:56px !important; padding:0 !important;
+ min-height:48px !important; height:48px !important; width:48px !important; min-width:48px !important; max-width:48px !important; padding:0 !important; box-sizing:border-box !important;
  border:1.5px solid #D4AD37 !important; border-left:0 !important; border-radius:0 12px 12px 0 !important;
  background:linear-gradient(145deg,#FFE566,#E6AD08) !important; color:#171717 !important;
 }
