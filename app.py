@@ -965,7 +965,7 @@ st.markdown("""
   .goal-form-match-outcome { display:flex; align-items:center; justify-content:flex-end; gap:6px; white-space:nowrap; }
   .goal-form-match-score { color:#F4F4F5; font-size:.8rem; font-weight:950; white-space:nowrap; }
   .goal-form-match .goal-form-result { min-width:20px; }
-   .goal-event-timeline{margin:5px 0 12px;padding:8px 10px;border:1px solid rgba(250,204,21,.28);border-radius:11px;background:rgba(17,20,25,.72)}.goal-event-row{display:grid;grid-template-columns:42px 20px minmax(0,1fr) auto;align-items:center;gap:7px;padding:8px 2px;border-bottom:1px solid rgba(255,255,255,.08)}.goal-event-row:last-child{border-bottom:0}.goal-event-minute{color:#FACC15;font-size:.72rem;white-space:nowrap}.goal-event-ball{font-size:14px}.goal-event-info{display:flex;flex-direction:column;min-width:0;gap:2px}.goal-event-info strong{color:#F4F4F5;font-size:.72rem;overflow-wrap:anywhere}.goal-event-info span,.goal-event-info small{color:#A1A1AA;font-size:.62rem;overflow-wrap:anywhere}.goal-event-score{color:#FACC15;font-size:.78rem;white-space:nowrap}
+   [class*="st-key-goal_form_back_"]{box-sizing:border-box;border:1px solid #FACC15;border-radius:11px;padding:11px;margin-top:5px;background:linear-gradient(145deg,#20232B,#12151A);min-height:170px;animation:goal-card-flip-in .62s cubic-bezier(.2,.75,.25,1) both;transform-origin:center;transform-style:preserve-3d;backface-visibility:visible}[class*="st-key-goal_timeline_btn_"] button{width:30px!important;min-width:30px!important;height:30px!important;min-height:30px!important;padding:0!important;border-radius:50%!important;border:1px solid #FACC15!important;background:radial-gradient(circle at 35% 25%,#FFF1A6 0%,#FACC15 55%,#9A7000 100%)!important;color:#171717!important;font-size:15px!important;box-shadow:0 0 10px #FACC1550!important}[class*="st-key-goal_timeline_btn_"] button:hover{transform:rotate(-10deg) scale(1.08)!important;box-shadow:0 0 0 3px #FACC1535,0 0 17px #FACC1580!important}.goal-event-timeline{margin:5px 0 12px;padding:8px 10px;border:1px solid rgba(250,204,21,.28);border-radius:11px;background:rgba(17,20,25,.72)}.goal-event-row{display:grid;grid-template-columns:42px 20px minmax(0,1fr) auto;align-items:center;gap:7px;padding:8px 2px;border-bottom:1px solid rgba(255,255,255,.08)}.goal-event-row:last-child{border-bottom:0}.goal-event-minute{color:#FACC15;font-size:.72rem;white-space:nowrap}.goal-event-ball{font-size:14px}.goal-event-info{display:flex;flex-direction:column;min-width:0;gap:2px}.goal-event-info strong{color:#F4F4F5;font-size:.72rem;overflow-wrap:anywhere}.goal-event-info span,.goal-event-info small{color:#A1A1AA;font-size:.62rem;overflow-wrap:anywhere}.goal-event-score{color:#FACC15;font-size:.78rem;white-space:nowrap}
   @media (max-width: 700px) { .goal-form-match { grid-template-columns:minmax(0,1fr) auto; gap:4px 6px; padding:8px 0; } .goal-form-match-teams { font-size:.66rem; } }
   .goal-form-result { display:inline-flex; justify-content:center; min-width:22px; padding:2px 5px; border-radius:5px; font-size:.65rem; font-weight:900; }
   .goal-form-result-v { color:#FFFFFF; background:#16A34A; }
@@ -4853,27 +4853,34 @@ else:
                                                                 st.rerun()
                                                             if is_flipped:
                                                                 recent_matches = (form_data.get("recent_matches") or [])[:3]
-                                                                if not recent_matches:
-                                                                    st.caption("No hay partidos recientes disponibles para esta condición.")
-                                                                st.caption("⚽ Toca un partido para ver la secuencia de goles.")
-                                                                active_goal_match_key = f"goal_timeline_open_{match_id}"
-                                                                for recent in recent_matches:
-                                                                    result_code = str(recent.get("result") or "?").upper()
-                                                                    result_class = {"V": "v", "E": "e", "D": "d"}.get(result_code, "e")
-                                                                    date_label = html.escape(str(recent.get("date") or "Fecha N/D"))
-                                                                    home_label = html.escape(str(recent.get("home_name") or "Local"))
-                                                                    away_label = html.escape(str(recent.get("away_name") or "Visitante"))
-                                                                    hg, ag = recent.get("home_goals"), recent.get("away_goals")
-                                                                    score_label = f"{hg}–{ag}" if isinstance(hg, int) and isinstance(ag, int) else "—"
-                                                                    recent_id = recent.get("fixture_id")
-                                                                    match_row_key = f"{match_id}_{recent_id or date_label}_{team.get('id') or label}"
-                                                                    is_timeline_open = st.session_state.get(active_goal_match_key) == str(recent_id) if recent_id else False
-                                                                    st.markdown(f'<div class="goal-form-match"><div class="goal-form-match-opponent"><div class="goal-form-match-meta">{date_label}</div><div class="goal-form-match-teams">{home_label} <span style="color:#FACC15">·</span> {away_label}</div></div><div class="goal-form-match-outcome"><span class="goal-form-match-score">{html.escape(score_label)}</span><span class="goal-form-result goal-form-result-{result_class}">{html.escape(result_code)}</span></div></div>', unsafe_allow_html=True)
-                                                                    if recent_id:
-                                                                        if st.button("⚽  VER GOLES" if not is_timeline_open else "⌃  OCULTAR GOLES", key=f"goal_timeline_btn_{match_row_key}", help="Consultar los goles y sus minutos de este partido", use_container_width=True):
-                                                                            st.session_state[active_goal_match_key] = None if is_timeline_open else str(recent_id)
-                                                                            st.rerun()
-                                                                        if is_timeline_open:
+                                                                with st.container(key=f"goal_form_back_{match_id}_{team.get('id') or label}"):
+                                                                    if not recent_matches:
+                                                                        st.caption("No hay partidos recientes disponibles para esta condición.")
+                                                                    else:
+                                                                        st.caption("⚽ Toca el mini balón de un partido para ver sus goles.")
+                                                                    active_goal_match_key = f"goal_timeline_open_{match_id}"
+                                                                    for recent in recent_matches:
+                                                                        result_code = str(recent.get("result") or "?").upper()
+                                                                        result_class = {"V": "v", "E": "e", "D": "d"}.get(result_code, "e")
+                                                                        date_label = html.escape(str(recent.get("date") or "Fecha N/D"))
+                                                                        home_label = html.escape(str(recent.get("home_name") or "Local"))
+                                                                        away_label = html.escape(str(recent.get("away_name") or "Visitante"))
+                                                                        hg, ag = recent.get("home_goals"), recent.get("away_goals")
+                                                                        score_label = f"{hg}–{ag}" if isinstance(hg, int) and isinstance(ag, int) else "—"
+                                                                        recent_id = recent.get("fixture_id")
+                                                                        match_row_key = f"{match_id}_{recent_id or date_label}_{team.get('id') or label}"
+                                                                        is_timeline_open = st.session_state.get(active_goal_match_key) == str(recent_id) if recent_id else False
+                                                                        match_cols = st.columns([0.88, 0.12], gap="small", vertical_alignment="center")
+                                                                        with match_cols[0]:
+                                                                            st.markdown(f'<div class="goal-form-match"><div class="goal-form-match-opponent"><div class="goal-form-match-meta">{date_label}</div><div class="goal-form-match-teams">{home_label} <span style="color:#FACC15">·</span> {away_label}</div></div><div class="goal-form-match-outcome"><span class="goal-form-match-score">{html.escape(score_label)}</span><span class="goal-form-result goal-form-result-{result_class}">{html.escape(result_code)}</span></div></div>', unsafe_allow_html=True)
+                                                                        with match_cols[1]:
+                                                                            if recent_id:
+                                                                                if st.button("⚽", key=f"goal_timeline_btn_{match_row_key}", help="Ver goles y minutos de este partido"):
+                                                                                    st.session_state[active_goal_match_key] = None if is_timeline_open else str(recent_id)
+                                                                                    st.rerun()
+                                                                            else:
+                                                                                st.caption("—")
+                                                                        if is_timeline_open and recent_id:
                                                                             _goal_events_cache = st.session_state.setdefault("goal_recent_events_cache", {})
                                                                             _goal_events_key = str(recent_id)
                                                                             if _goal_events_key not in _goal_events_cache:
@@ -4917,8 +4924,6 @@ else:
                                                                                         _timeline_html.append(f'<div class="goal-event-row {_timeline_side}"><b class="goal-event-minute">{html.escape(str(_event_minute))}</b><span class="goal-event-ball">⚽</span><div class="goal-event-info"><strong>{_event_player}</strong><span>{_event_team_name}{_event_note}</span>{_event_assist_html}</div><b class="goal-event-score">{_timeline_home_score}–{_timeline_away_score}</b></div>')
                                                                                     _timeline_html.append("</div>")
                                                                                     st.markdown("".join(_timeline_html), unsafe_allow_html=True)
-                                                                    else:
-                                                                        st.caption("Detalle de goles no disponible para este partido.")
                                                             else:
                                                                 st.markdown(
                                                                     f'<div class="goal-form-record">{html.escape(str(form_data.get("record", "N/D")))}</div>'
