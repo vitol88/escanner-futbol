@@ -3848,9 +3848,82 @@ with st.container(key="scan_actions_row"):
     }
   }
 }""", unsafe_allow_html=True)
+    # Override único del CTA: elimina los estilos heredados que desplazaban el radar y mezclaban los textos.
+    st.markdown("""<style>
+    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
+      position:relative !important; display:block !important; width:100% !important;
+      max-width:560px !important; height:270px !important; min-height:270px !important;
+      margin:0 auto !important; padding:0 14px !important; box-sizing:border-box !important;
+      overflow:hidden !important; border:2px solid #E7C447 !important; border-radius:30px !important;
+      background:radial-gradient(ellipse at 50% 68%,rgba(255,197,35,.16),transparent 48%),
+                 linear-gradient(145deg,#17150F,#0D0F13 58%,#17140B) !important;
+      color:#FFE17A !important; box-shadow:0 0 22px rgba(230,185,38,.22),inset 0 0 26px rgba(255,210,55,.07) !important;
+      text-align:center !important;
+    }
+    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p {
+      position:absolute !important; top:15px !important; left:10px !important;
+      width:calc(100% - 20px) !important; margin:0 !important; padding:0 !important;
+      color:#F5D77A !important; text-align:center !important; line-height:1.35 !important;
+      font-size:15px !important; font-weight:700 !important; z-index:5 !important;
+    }
+    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button strong {
+      display:block !important; margin:0 0 5px !important; color:#FFD84D !important;
+      font-size:clamp(21px,4vw,30px) !important; font-weight:950 !important; letter-spacing:.045em !important;
+    }
+    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
+      content:"" !important; position:absolute !important; left:50% !important; top:66% !important;
+      width:154px !important; height:154px !important; max-width:58% !important;
+      box-sizing:border-box !important; border:4px solid #F5C928 !important; border-radius:50% !important;
+      background:
+        radial-gradient(circle,transparent 0 34%,rgba(255,214,60,.12) 35% 37%,transparent 38%),
+        repeating-radial-gradient(circle,transparent 0 18px,rgba(255,207,43,.62) 19px 21px,transparent 22px 29px),
+        conic-gradient(from 0deg,transparent 0 8%,rgba(255,213,52,.98) 13%,rgba(255,232,130,.12) 22%,transparent 30% 48%,rgba(255,193,28,.78) 55%,transparent 68% 100%) !important;
+      box-shadow:0 0 25px rgba(255,199,35,.48),inset 0 0 20px rgba(255,208,45,.20) !important;
+      transform:translate(-50%,-50%) rotate(0deg) !important; transform-origin:center !important;
+      animation:fl-cta-radar 4s linear infinite !important; z-index:2 !important; pointer-events:none !important;
+    }
+    [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
+      content:"⚽" !important; position:absolute !important; left:50% !important; top:66% !important;
+      width:62px !important; height:62px !important; display:flex !important;
+      align-items:center !important; justify-content:center !important; font-size:54px !important;
+      transform:translate(-50%,-50%) rotate(0deg) !important; transform-origin:center !important;
+      filter:sepia(1) saturate(6) hue-rotate(355deg) brightness(1.12) drop-shadow(0 0 13px rgba(255,195,20,.95)) !important;
+      animation:fl-cta-ball 2s linear infinite !important; z-index:3 !important; pointer-events:none !important;
+    }
+    @keyframes fl-cta-radar {
+      from { transform:translate(-50%,-50%) rotate(0deg); }
+      to { transform:translate(-50%,-50%) rotate(360deg); }
+    }
+    @keyframes fl-cta-ball {
+      0% { transform:translate(-50%,-50%) rotate(0deg) scale(1); }
+      50% { transform:translate(-50%,-50%) rotate(180deg) scale(1.06); }
+      100% { transform:translate(-50%,-50%) rotate(360deg) scale(1); }
+    }
+    @media(max-width:640px) {
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button {
+        width:100% !important; max-width:430px !important; height:250px !important;
+        min-height:250px !important; border-radius:26px !important;
+      }
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p {
+        top:13px !important; left:8px !important; width:calc(100% - 16px) !important;
+        font-size:14px !important; line-height:1.32 !important;
+      }
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button strong { font-size:22px !important; }
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
+        top:67% !important; width:142px !important; height:142px !important; max-width:58% !important;
+      }
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
+        top:67% !important; width:56px !important; height:56px !important; font-size:49px !important;
+      }
+    }
+    @media(prefers-reduced-motion:reduce) {
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before,
+      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after { animation-duration:8s !important; }
+    }
+    </style>""", unsafe_allow_html=True)
     with st.container(key="scan_cta_card"):
         manual_scan = st.button(
-            "**TOCA EL BALÓN**\n\nActualizar y analizar\n\nUn toque. Todo el análisis.",
+            "**TOCA EL BALÓN**\nActualizar y analizar\nUn toque. Todo el análisis.",
             type="primary",
             key="scan_all_live",
         )
