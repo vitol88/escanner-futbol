@@ -3877,10 +3877,10 @@ with st.container(key="scan_actions_row"):
       background:
         radial-gradient(circle,transparent 0 34%,rgba(255,214,60,.12) 35% 37%,transparent 38%),
         repeating-radial-gradient(circle,transparent 0 18px,rgba(255,207,43,.62) 19px 21px,transparent 22px 29px),
-        conic-gradient(from 0deg,transparent 0 8%,rgba(255,213,52,.98) 13%,rgba(255,232,130,.12) 22%,transparent 30% 48%,rgba(255,193,28,.78) 55%,transparent 68% 100%) !important;
+        conic-gradient(from var(--fl-cta-angle),transparent 0 8%,rgba(255,213,52,.98) 13%,rgba(255,232,130,.12) 22%,transparent 30% 48%,rgba(255,193,28,.78) 55%,transparent 68% 100%) !important;
       box-shadow:0 0 25px rgba(255,199,35,.48),inset 0 0 20px rgba(255,208,45,.20) !important;
-      transform:translate(-50%,-50%) rotate(0deg) !important; transform-origin:center !important;
-      animation:fl-cta-radar 4s linear infinite !important; z-index:2 !important; pointer-events:none !important;
+      transform:translate(-50%,-50%) !important; transform-origin:center !important;
+      animation:fl-cta-light-sweep 4s linear infinite !important; z-index:2 !important; pointer-events:none !important;
     }
     [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
       content:"⚽" !important; position:absolute !important; left:50% !important; top:66% !important;
@@ -3890,9 +3890,15 @@ with st.container(key="scan_actions_row"):
       filter:sepia(1) saturate(6) hue-rotate(355deg) brightness(1.12) drop-shadow(0 0 13px rgba(255,195,20,.95)) !important;
       animation:fl-cta-ball 2s linear infinite !important; z-index:3 !important; pointer-events:none !important;
     }
-    @keyframes fl-cta-radar {
-      from { transform:translate(-50%,-50%) rotate(0deg); }
-      to { transform:translate(-50%,-50%) rotate(360deg); }
+    /* El aro y los círculos quedan inmóviles; solo cambia el ángulo del haz dorado. */
+    @property --fl-cta-angle {
+      syntax: "<angle>";
+      inherits: false;
+      initial-value: 0deg;
+    }
+    @keyframes fl-cta-light-sweep {
+      from { --fl-cta-angle:0deg; }
+      to { --fl-cta-angle:360deg; }
     }
     /* El balón recorre una órbita circular dentro del radar; nunca abandona su perímetro. */
     @keyframes fl-cta-ball {
@@ -3949,30 +3955,13 @@ if manual_scan:
     # Mantener el balón girando mientras se ejecuta este escaneo, no solo mientras se pulsa.
     st.markdown("""
     <style>
-      /* Centro común único: espiral y balón quedan superpuestos en el mismo punto del botón. */
-      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before,
-      [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
-        position:absolute !important;
-        left:50% !important; top:66% !important;
-        transform:translate(-50%,-50%) !important;
-        transform-origin:50% 50% !important;
-      }
+      /* Al escanear se acelera el haz y el balón, sin mover el aro ni sus círculos. */
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::before {
-        width:142px !important; height:142px !important; max-width:none !important;
-        animation:fl-radar-spin-in-place 2.4s linear infinite !important;
+        animation-duration:1.05s !important;
         box-shadow:0 0 26px rgba(250,204,21,.72),inset 0 0 22px rgba(250,204,21,.38) !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button::after {
-        width:48px !important; height:48px !important; font-size:43px !important;
-        animation:fl-ball-spin-in-place .72s linear infinite !important;
-      }
-      @keyframes fl-ball-spin-in-place {
-        from { rotate:0deg; }
-        to { rotate:360deg; }
-      }
-      @keyframes fl-radar-spin-in-place {
-        from { rotate:0deg; }
-        to { rotate:360deg; }
+        animation-duration:.72s !important;
       }
       @keyframes scanner-ball-orbit {
         0% { transform:translate(-50%,-50%) rotate(0deg) scale(1); }
