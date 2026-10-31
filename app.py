@@ -2213,6 +2213,44 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         color:#987300 !important;
         -webkit-text-fill-color:#987300 !important;
       }
+      /* Histórico de córners: reducir el amarillo y priorizar lectura en modo claro. */
+      html body .stApp .corner-h2h-row.corner-history-grid {
+        color:#394354 !important;
+        border-bottom:1px solid #DDE2E9 !important;
+        background:transparent !important;
+      }
+      html body .stApp .corner-h2h-row.corner-history-grid.corner-history-header {
+        color:#68717F !important;
+        background:#EEF1F5 !important;
+        border-bottom:1px solid #D4DAE3 !important;
+      }
+      html body .stApp .corner-h2h-row.corner-history-grid.corner-history-header > span {
+        color:#68717F !important;
+        -webkit-text-fill-color:#68717F !important;
+        font-weight:800 !important;
+      }
+      html body .stApp .corner-h2h-row.corner-history-grid:not(.corner-history-header) > span {
+        color:#394354 !important;
+        -webkit-text-fill-color:#394354 !important;
+      }
+      html body .stApp .corner-h2h-row.corner-history-grid .h2h-team {
+        color:#586170 !important;
+        -webkit-text-fill-color:#586170 !important;
+        font-weight:600 !important;
+      }
+      html body .stApp .corner-h2h-row.corner-history-grid .corner-h2h-value {
+        color:#394354 !important;
+        -webkit-text-fill-color:#394354 !important;
+        font-weight:750 !important;
+      }
+      html body .stApp .corner-h2h-row.corner-history-grid .corner-h2h-total {
+        color:#987300 !important;
+        -webkit-text-fill-color:#987300 !important;
+        font-weight:850 !important;
+      }
+      html body .stApp .corner-h2h-row.corner-history-grid:not(.corner-history-header):nth-child(even) {
+        background:rgba(238,241,245,.42) !important;
+      }
       html body .stApp .corner-period-card { background:linear-gradient(145deg,#FFFFFF 0%,#F5F7FA 100%) !important; border-color:#D8C27A !important; }
       /* Botón VER HISTÓRICO de córners: forzar paleta clara en todos los niveles de Streamlit. */
       html body .stApp div[class*="st-key-corner_h2h_"] button,
