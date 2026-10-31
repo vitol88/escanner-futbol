@@ -2272,9 +2272,16 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
        html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full.h2h-stripe-odd { background:#F6F7F9 !important; border:0 !important; border-bottom:0 !important; }
       html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full {
         width:100% !important; min-height:52px !important; box-sizing:border-box !important;
-        padding:8px 48px 8px 10px !important; gap:8px !important;
+        /* Canal exclusivo para el botón del balón: nunca invade el marcador. */
+        padding:8px 78px 8px 10px !important; gap:8px !important;
         grid-template-columns:82px minmax(0,1fr) 70px minmax(0,1fr) !important;
         position:relative !important; isolation:isolate !important;
+      }
+      html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-score {
+        position:relative !important; z-index:30 !important; justify-self:center !important;
+        display:inline-flex !important; white-space:nowrap !important;
+        background:#20232B !important; border:1px solid #D6B84C !important;
+        border-radius:9px !important; padding:6px 10px !important;
       }
       /* El marcador queda visualmente por encima del separador entre partidos. */
       html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-score {
@@ -2283,9 +2290,9 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         margin:2px 0 !important;
       }
       html body .stApp [class*="st-key-h2h_history_row_"] [class*="st-key-h2h_goal_timeline_btn_"] {
-        position:absolute !important; right:7px !important; top:12px !important;
+        position:absolute !important; right:8px !important; top:12px !important;
         transform:none !important; width:29px !important;
-        min-width:29px !important; z-index:5 !important;
+        min-width:29px !important; z-index:8 !important;
         margin:0 !important; padding:0 !important;
       }
       html body .stApp [class*="st-key-h2h_history_row_"] [class*="st-key-h2h_goal_timeline_btn_"] button {
@@ -2311,11 +2318,17 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       @media(max-width:640px) {
         html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full {
           min-height:46px !important;
-          grid-template-columns:60px minmax(0,1fr) 48px minmax(0,1fr) !important;
-          padding:8px 40px 8px 5px !important; gap:3px !important;
+          grid-template-columns:60px minmax(0,1fr) 54px minmax(0,1fr) !important;
+          /* Reserva mayor en móvil para que el balón quede fuera del marcador. */
+          padding:8px 58px 8px 5px !important; gap:3px !important;
+        }
+        html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-score {
+          z-index:30 !important; min-width:54px !important; justify-self:center !important;
+          white-space:nowrap !important; padding:5px 4px !important;
         }
         html body .stApp [class*="st-key-h2h_history_row_"] [class*="st-key-h2h_goal_timeline_btn_"] {
-          right:4px !important; top:9px !important; width:25px !important; min-width:25px !important;
+          right:7px !important; top:9px !important; width:25px !important; min-width:25px !important;
+          z-index:8 !important;
         }
         html body .stApp [class*="st-key-h2h_history_row_"] [class*="st-key-h2h_goal_timeline_btn_"] button {
           width:24px !important; min-width:24px !important;
