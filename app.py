@@ -6233,7 +6233,7 @@ else:
                                                     st.markdown("### ⌁ Histórico de córners")
                                                 home_team = (match.get("teams") or {}).get("home") or {}
                                                 away_team = (match.get("teams") or {}).get("away") or {}
-                                                h2h_key = f"corner-h2h-v3-home-{home_team.get('id')}-{away_team.get('id')}"
+                                                h2h_key = f"corner-h2h-v4-home-{home_team.get('id')}-{away_team.get('id')}"
                                                 if "corner_h2h_cache" not in st.session_state:
                                                     st.session_state.corner_h2h_cache = {}
                                                 with history_button_col:
