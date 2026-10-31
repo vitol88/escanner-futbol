@@ -2483,6 +2483,51 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         color:#303744 !important;
         border-top:1px solid #E7EAF0 !important;
       }
+      [class*="st-key-goal_form_back_"] {
+        background:linear-gradient(145deg,#FFFFFF 0%,#F5F7FA 100%) !important;
+        border:1px solid #D6B84C !important;
+        box-shadow:0 5px 16px rgba(31,41,55,.07) !important;
+        color:#303744 !important;
+      }
+      [class*="st-key-goal_form_back_"] [data-testid="stMarkdownContainer"] p,
+      [class*="st-key-goal_form_back_"] [data-testid="stCaptionContainer"] {
+        color:#586170 !important;
+        -webkit-text-fill-color:#586170 !important;
+      }
+      [class*="st-key-goal_form_back_"] .goal-form-match {
+        color:#303744 !important;
+        border-top:1px solid #E7EAF0 !important;
+      }
+      [class*="st-key-goal_form_back_"] .goal-form-match-meta {
+        color:#947000 !important;
+        -webkit-text-fill-color:#947000 !important;
+      }
+      [class*="st-key-goal_form_back_"] .goal-form-match-teams,
+      [class*="st-key-goal_form_back_"] .goal-form-match-score {
+        color:#263142 !important;
+        -webkit-text-fill-color:#263142 !important;
+      }
+      [class*="st-key-goal_form_back_"] .goal-event-timeline {
+        background:linear-gradient(145deg,#FFFFFF,#F5F7FA) !important;
+        border:1px solid #D6B84C !important;
+      }
+      [class*="st-key-goal_form_back_"] .goal-event-row {
+        border-bottom-color:#E7EAF0 !important;
+      }
+      [class*="st-key-goal_form_back_"] .goal-event-info strong {
+        color:#263142 !important;
+        -webkit-text-fill-color:#263142 !important;
+      }
+      [class*="st-key-goal_form_back_"] .goal-event-info span,
+      [class*="st-key-goal_form_back_"] .goal-event-info small {
+        color:#586170 !important;
+        -webkit-text-fill-color:#586170 !important;
+      }
+      [class*="st-key-goal_form_back_"] .goal-event-minute,
+      [class*="st-key-goal_form_back_"] .goal-event-score {
+        color:#806000 !important;
+        -webkit-text-fill-color:#806000 !important;
+      }
       .goal-form-match-meta {
         color:#947000 !important;
         -webkit-text-fill-color:#947000 !important;
