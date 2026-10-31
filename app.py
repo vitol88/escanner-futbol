@@ -5071,7 +5071,7 @@ else:
                                                     manual_scan = True
                                                     internal_scan_requested = True
                                                     # El estado de escaneo se muestra una sola vez debajo de los botones superiores.
-                                            st.markdown('<div class="match-analysis-kicker">Mercado seleccionado · córners</div><div class="match-analysis-title">Ritmo y proyección de córners</div>', unsafe_allow_html=True)
+                                            st.markdown('<div class="match-analysis-title goals-section-title">🚩 Córners y señales</div>', unsafe_allow_html=True)
                                             # Reutilizar primero las estadísticas que ya consultó el escáner en vivo.
                                             live_corner_stats = st.session_state.stats_cache.get(str(match_id))
                                             known_stats_error = str(match_id) in st.session_state.get("stats_errors", {})
