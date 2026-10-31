@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from typing import Any, Callable
+import time
 
 
 def _num(value: Any) -> float | None:
@@ -159,30 +160,51 @@ def build_automatic_history(
             if isinstance(own_goals, (int, float)) and isinstance(opp_goals, (int, float)):
                 gf.append(float(own_goals)); ga.append(float(opp_goals))
             old_id = (old.get("fixture") or {}).get("id")
-            stats_key = f"historical-stats-halves-v3:{old_id}"
-            if old_id and stats_key not in cache and request_budget[0] > 0 and not cache.get("_automatic_history_rate_limited"):
+            full_stats_key = f"historical-stats-full-v1:{old_id}"
+            half_stats_key = f"historical-stats-halves-v4:{old_id}"
+            half_retry_key = f"{half_stats_key}:retry_after"
+            full_retry_key = f"{full_stats_key}:retry_after"
+            if old_id and full_stats_key not in cache and time.time() >= float(cache.get(full_retry_key, 0) or 0) and request_budget[0] > 0 and not cache.get("_automatic_history_rate_limited"):
                 try:
-                    stats_payload = api_get("fixtures/statistics", {"fixture": old_id, "half": "true"})
-                    stats_response = stats_payload.get("response") or []
+                    full_response = (api_get("fixtures/statistics", {"fixture": old_id}).get("response") or [])
                     stats_attempted += 1
                     diagnostics["historical_stats"]["requested"] += 1
-                    cache["_automatic_history_stats_calls"] = cache.get("_automatic_history_stats_calls", 0) + 1
                     request_budget[0] -= 1
-                    # Guardar también respuestas vacías: evita repetir la misma
-                    # consulta en cada rerun de Streamlit.
-                    cache[stats_key] = stats_response
-                    if stats_response:
+                    if full_response:
+                        cache[full_stats_key] = full_response
                         stats_nonempty += 1
                         diagnostics["historical_stats"]["nonempty_responses"] += 1
                     else:
+                        cache[full_retry_key] = time.time() + 900
                         diagnostics["historical_stats"]["empty_responses"] += 1
                 except Exception as exc:
                     stats_errors.append(str(exc))
-                    diagnostics["historical_stats"]["errors"].append({"fixture_id": old_id, "error": str(exc)})
+                    diagnostics["historical_stats"]["errors"].append({"fixture_id": old_id, "source": "full", "error": str(exc)})
+                    cache[full_retry_key] = time.time() + (300 if "429" in str(exc) else 180)
                     if "HTTP 429" in str(exc):
                         cache["_automatic_history_rate_limited"] = True
-                        break
-            stats = cache.get(stats_key, [])
+            stats = cache.get(full_stats_key, [])
+
+            half_stats = cache.get(half_stats_key)
+            if old_id and full_stats_key in cache and half_stats is None and time.time() >= float(cache.get(half_retry_key, 0) or 0) and request_budget[0] > 0 and not cache.get("_automatic_history_rate_limited"):
+                try:
+                    half_response = (api_get("fixtures/statistics", {"fixture": old_id, "half": "true"}).get("response") or [])
+                    stats_attempted += 1
+                    diagnostics["historical_stats"]["requested"] += 1
+                    request_budget[0] -= 1
+                    if half_response:
+                        cache[half_stats_key] = half_response
+                        half_stats = half_response
+                    else:
+                        cache[half_retry_key] = time.time() + 1800
+                        diagnostics["historical_stats"]["empty_responses"] += 1
+                except Exception as exc:
+                    stats_errors.append(str(exc))
+                    diagnostics["historical_stats"]["errors"].append({"fixture_id": old_id, "source": "halves", "error": str(exc)})
+                    cache[half_retry_key] = time.time() + (300 if "429" in str(exc) else 900)
+                    if "HTTP 429" in str(exc):
+                        cache["_automatic_history_rate_limited"] = True
+            half_stats = half_stats or []
             # API-Football normalmente ordena local/visitante, pero identificar por ID
             # evita asociar córners al equipo equivocado si la respuesta cambia de orden.
             own_stats_index = next(
@@ -196,18 +218,17 @@ def build_automatic_history(
                  if (row.get("team") or {}).get("id") == opponent_id),
                 1 - own_stats_index,
             )
-            own_c, own_first, own_second = _corner_parts(stats, own_stats_index)
-            opp_c, opp_first, opp_second = _corner_parts(stats, opponent_stats_index)
+            own_c, _, _ = _corner_parts(stats, own_stats_index)
+            opp_c, _, _ = _corner_parts(stats, opponent_stats_index)
+            _, own_first, own_second = _corner_parts(half_stats, own_stats_index)
+            _, opp_first, opp_second = _corner_parts(half_stats, opponent_stats_index)
             if own_c is not None and opp_c is not None:
                 cf.append(own_c); ca.append(opp_c)
                 stats_with_corners += 1
                 diagnostics["historical_stats"]["responses_with_corners"] += 1
-                # Half splits come directly from API-Football's official half=true
-                # statistics, not from the events endpoint (which has no corner events).
                 if all(value is not None for value in (own_first, own_second, opp_first, opp_second)):
-                    if abs((own_first + own_second) - own_c) < 0.01 and abs((opp_first + opp_second) - opp_c) < 0.01:
-                        cf_first.append(own_first); ca_first.append(opp_first)
-                        cf_second.append(own_second); ca_second.append(opp_second)
+                    cf_first.append(own_first); ca_first.append(opp_first)
+                    cf_second.append(own_second); ca_second.append(opp_second)
             used += 1
         return {"matches": used, "gf": _mean(gf), "ga": _mean(ga), "cf": _mean(cf), "ca": _mean(ca), "corner_sample": len(cf), "goal_sample": len(gf), "cf_first": _mean(cf_first), "ca_first": _mean(ca_first), "cf_second": _mean(cf_second), "ca_second": _mean(ca_second), "corner_period_sample": len(cf_first), "goal_sample": len(gf), "stats_attempted": stats_attempted, "stats_nonempty": stats_nonempty, "stats_with_corners": stats_with_corners, "stats_errors": stats_errors}
 
