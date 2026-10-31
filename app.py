@@ -2261,6 +2261,12 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         line-height:1 !important; font-variant-numeric:tabular-nums !important;
         box-shadow:0 1px 3px rgba(138,104,0,.12) !important;
       }
+      @media(max-width:640px) {
+        html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-score {
+          min-width:54px !important; min-height:30px !important; padding:5px 4px !important;
+          font-size:.82rem !important; border-radius:8px !important;
+        }
+      }
       html,body,.stApp,[data-testid="stAppViewContainer"],section.main,.main,.block-container {
         background:#F4F6F9 !important; color:#20242C !important;
       }
