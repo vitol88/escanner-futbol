@@ -6514,8 +6514,6 @@ else:
                                                             st.session_state.corner_h2h_cache[h2h_key] = {"error": str(h2h_exc)}
                                                 h2h_rows = st.session_state.corner_h2h_cache.get(h2h_key)
                                                 h2h_avg = None
-                                                h2h_first_avg = None
-                                                h2h_second_avg = None
                                                 if isinstance(h2h_rows, dict) and h2h_rows.get("error"):
                                                     st.caption("No se pudo cargar el histórico de córners: " + str(h2h_rows["error"]))
                                                 elif isinstance(h2h_rows, list):
@@ -6543,10 +6541,6 @@ else:
                                                         valid_totals = [row["Total"] for row in h2h_rows if isinstance(row.get("Total"), (int, float))]
                                                         if valid_totals:
                                                             h2h_avg = sum(valid_totals) / len(valid_totals)
-                                                            valid_first_periods = [row.get("PrimerTiempo") for row in h2h_rows if isinstance(row.get("PrimerTiempo"), (int, float))]
-                                                            valid_second_periods = [row.get("SegundoTiempo") for row in h2h_rows if isinstance(row.get("SegundoTiempo"), (int, float))]
-                                                            h2h_first_avg = sum(valid_first_periods) / len(valid_first_periods) if valid_first_periods else None
-                                                            h2h_second_avg = sum(valid_second_periods) / len(valid_second_periods) if valid_second_periods else None
                                                             st.markdown(
                                                                 f"""
                                                                 <div class="corner-average-pill" style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;
@@ -6565,14 +6559,6 @@ else:
                                                                   </span>
                                                                 </div>
                                                                 """,
-                                                                unsafe_allow_html=True,
-                                                            )
-                                                            st.markdown(
-                                                                corner_period_cards_html(
-                                                                    h2h_first_avg,
-                                                                    h2h_second_avg,
-                                                                    f"Estadísticas oficiales por tiempo · {min(len(valid_first_periods), len(valid_second_periods))} partidos",
-                                                                ),
                                                                 unsafe_allow_html=True,
                                                             )
                                                         else:
