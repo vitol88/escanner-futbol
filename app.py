@@ -1959,6 +1959,32 @@ st.markdown("""
     }
   }
 
+  /* H2H oscuro: quitar el marco del contenedor padre que envuelve el análisis.
+     Las tarjetas de muestra, distribución y resultados mantienen sus bordes. */
+  @media (prefers-color-scheme: dark) {
+    html body .stApp section.main:has(.h2h-page-kicker) div[data-testid="stVerticalBlock"]:has(.h2h-page-kicker),
+    html body .stApp section.main:has(.h2h-page-kicker) div[data-testid="stVerticalBlockBorderWrapper"],
+    html body .stApp section.main:has(.h2h-page-kicker) [data-testid="column"]:has(.h2h-page-kicker),
+    html body .stApp section.main:has(.h2h-page-kicker) .stColumn:has(.h2h-page-kicker) {
+      border-left:0 !important;
+      border-right:0 !important;
+      outline-left:0 !important;
+      outline-right:0 !important;
+      box-shadow:none !important;
+      background-image:none !important;
+    }
+    html body .stApp section.main:has(.h2h-page-kicker) div[data-testid="stVerticalBlock"]:has(.h2h-page-kicker)::before,
+    html body .stApp section.main:has(.h2h-page-kicker) div[data-testid="stVerticalBlock"]:has(.h2h-page-kicker)::after,
+    html body .stApp section.main:has(.h2h-page-kicker) [data-testid="column"]:has(.h2h-page-kicker)::before,
+    html body .stApp section.main:has(.h2h-page-kicker) [data-testid="column"]:has(.h2h-page-kicker)::after {
+      border:0 !important;
+      outline:0 !important;
+      box-shadow:none !important;
+      background:none !important;
+      content:none !important;
+    }
+  }
+
   /* Corrección de foco: texto sólido sobre fondo opaco mientras se escribe. */
   html body [data-testid="stSidebar"] div[class*="st-key-search_goal_matches"] input[type="text"],
   html body [data-testid="stSidebar"] div[class*="st-key-search_goal_matches"] input[type="text"]:focus,
