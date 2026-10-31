@@ -2542,9 +2542,9 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       }
       .goal-last-goal {
         background:linear-gradient(135deg,#FFFFFF 0%,#FFF9E8 100%) !important;
-        border:1px solid #D6B84C !important;
-        border-left:4px solid #B58A00 !important;
-        box-shadow:0 4px 12px rgba(31,41,55,.07) !important;
+        border:2px solid #D6B84C !important;
+        border-left:2px solid #D6B84C !important;
+        box-shadow:0 0 0 1px rgba(214,184,76,.16),0 4px 12px rgba(31,41,55,.07) !important;
         color:#303744 !important;
       }
       .goal-last-goal b,
