@@ -2139,7 +2139,7 @@ div[class*="st-key-home_search_bar"] [data-testid="stHorizontalBlock"] { display
 div[class*="st-key-home_search_bar"] [data-testid="column"] { display:block !important; width:100% !important; max-width:100% !important; min-width:0 !important; flex:none !important; padding:0 !important; }
 div[class*="st-key-home_search_bar"] input {
  min-height:48px !important; height:48px !important; padding:0 13px !important;
- border:1.5px solid #A88632 !important; border-right:0 !important; border-radius:0 !important;
+ border:1.5px solid #A88632 !important; border-right:0 !important; border-radius:12px 0 0 12px !important;
  background:linear-gradient(135deg,#202329,#111419) !important; color:#F5F5F5 !important;
  -webkit-text-fill-color:#F5F5F5 !important; font-size:.86rem !important; font-weight:550 !important;
  box-shadow:inset 0 1px 0 #ffffff0a,0 3px 12px #0004 !important;
@@ -2148,7 +2148,7 @@ div[class*="st-key-home_search_bar"] input::placeholder { color:#A5AAB4 !importa
 div[class*="st-key-home_search_button"] { margin:0 !important; }
 div[class*="st-key-home_search_button"] button {
  min-height:48px !important; height:48px !important; width:56px !important; min-width:56px !important; padding:0 !important;
- border:1.5px solid #D4AD37 !important; border-radius:0 0 0 0 !important;
+ border:1.5px solid #D4AD37 !important; border-left:0 !important; border-radius:0 12px 12px 0 !important;
  background:linear-gradient(145deg,#FFE566,#E6AD08) !important; color:#171717 !important;
 }
 div[class*="st-key-home_search_button"] button [data-testid="stIconMaterial"] { color:#171717 !important; }
