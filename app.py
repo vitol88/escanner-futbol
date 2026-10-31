@@ -1791,6 +1791,22 @@ st.markdown("""
     position:relative !important; z-index:3 !important;
     box-shadow:0 0 0 3px #17191E !important;
   }
+      html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-score {
+        min-width:76px !important; min-height:36px !important; padding:6px 12px !important;
+        border:1px solid #D8C27A !important; border-radius:9px !important;
+        background:linear-gradient(145deg,#F7F1D9,#EEE5C5) !important;
+        color:#806000 !important; font-size:1rem !important; font-weight:900 !important;
+        line-height:1 !important; font-variant-numeric:tabular-nums !important;
+        box-shadow:0 1px 2px rgba(128,96,0,.08) !important;
+      }
+  html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-score {
+    min-width:76px !important; min-height:36px !important; padding:6px 12px !important;
+    border:1px solid rgba(250,204,21,.62) !important; border-radius:9px !important;
+    background:linear-gradient(145deg,rgba(250,204,21,.19),rgba(250,204,21,.075)) !important;
+    color:#FFE566 !important; font-size:1rem !important; font-weight:900 !important;
+    line-height:1 !important; font-variant-numeric:tabular-nums !important;
+    text-shadow:0 0 10px rgba(250,204,21,.14) !important;
+  }
   @media(max-width:640px) {
     html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full {
       grid-template-columns:60px minmax(0,1fr) 48px minmax(0,1fr) !important;
