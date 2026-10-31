@@ -3939,17 +3939,17 @@ with st.container(key="scan_actions_row"):
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:first-of-type {
         left:54% !important; width:45% !important;
-        top:35px !important; font-size:clamp(15px,4vw,18px) !important;
+        top:18px !important; font-size:clamp(15px,4vw,18px) !important;
         white-space:nowrap !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(2) {
         left:54% !important; width:45% !important;
-        top:75px !important; font-size:clamp(11px,3.1vw,13px) !important;
+        top:76px !important; font-size:clamp(11px,3.1vw,13px) !important;
         white-space:nowrap !important;
       }
       [class*="st-key-scan_cta_card"] [data-testid="stButton"] > button p:nth-of-type(3) {
         left:54% !important; width:45% !important;
-        top:94px !important; bottom:auto !important;
+        top:134px !important; bottom:auto !important;
         font-size:clamp(9px,2.5vw,10px) !important;
         white-space:nowrap !important;
       }
