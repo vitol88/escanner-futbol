@@ -4999,7 +4999,10 @@ else:
                                             st.markdown(summary_html, unsafe_allow_html=True)
                                             st.markdown('<div class="h2h-history-list">', unsafe_allow_html=True)
                                             # H2H: normalización única de filas y marcadores para ambos temas.
-                  st.markdown("""
+                  _h2h_light_theme = st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}
+                  _h2h_even_bg = "#FFFFFF" if _h2h_light_theme else "#15191F"
+                  _h2h_odd_bg = "#F6F7F9" if _h2h_light_theme else "#1B2027"
+                  st.markdown(f"""
                   <style>
                     html body .stApp [class*="st-key-h2h_history_row_"] {
                       margin:0 !important; padding:0 !important; overflow:visible !important;
@@ -5015,8 +5018,8 @@ else:
                       outline:0 !important; box-shadow:none !important; overflow:visible !important;
                       position:relative !important; isolation:isolate !important;
                     }
-                    html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full.h2h-stripe-even { background:#15191F !important; }
-                    html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full.h2h-stripe-odd { background:#1B2027 !important; }
+                    html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full.h2h-stripe-even { background:{_h2h_even_bg} !important; }
+                    html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full.h2h-stripe-odd { background:{_h2h_odd_bg} !important; }
                     html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-score {
                       display:inline-flex !important; align-items:center !important; justify-content:center !important;
                       justify-self:center !important; flex:none !important;
@@ -5051,10 +5054,8 @@ else:
                       }
                       html body .stApp [class*="st-key-h2h_history_row_"] [class*="st-key-h2h_goal_timeline_btn_"] { right:4px !important; }
                     }
-                    html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full.h2h-stripe-even .h2h-score { outline-color:#15191F !important; }
-                    html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full.h2h-stripe-odd .h2h-score { outline-color:#1B2027 !important; }
-                    body:has(.h2h-page-kicker) html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full.h2h-stripe-even .h2h-score { outline-color:#FFFFFF !important; }
-                    body:has(.h2h-page-kicker) html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full.h2h-stripe-odd .h2h-score { outline-color:#F6F7F9 !important; }
+                    html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full.h2h-stripe-even .h2h-score { outline-color:{_h2h_even_bg} !important; }
+                    html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full.h2h-stripe-odd .h2h-score { outline-color:{_h2h_odd_bg} !important; }
                   </style>
                   """, unsafe_allow_html=True)
                   for _h2h_index, _h2h_row in enumerate(h2h_rows):
