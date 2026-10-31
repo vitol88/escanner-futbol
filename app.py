@@ -6289,32 +6289,32 @@ else:
                                                                     past_id = (past.get("fixture") or {}).get("id")
                                                                     if not past_id:
                                                                         continue
-                                                                     # Totales y desglose por tiempos usan consultas independientes.
-                                                                     # La falta de half=true nunca debe borrar los córners totales.
-                                                                     full_stats_key = f"corner-h2h-stats-full-v3:{past_id}"
-                                                                     if full_stats_key not in st.session_state.stats_cache:
-                                                                         st.session_state.stats_cache[full_stats_key] = (api_get("fixtures/statistics", {"fixture": past_id}).get("response") or [])
-                                                                     past_stats = st.session_state.stats_cache.get(full_stats_key) or []
-                                                                     past_home_c, _, _ = safe_corner_parts(past_stats, 0)
-                                                                     past_away_c, _, _ = safe_corner_parts(past_stats, 1)
+                                                                    # Totales y desglose por tiempos usan consultas independientes.
+                                                                    # La falta de half=true nunca debe borrar los córners totales.
+                                                                    full_stats_key = f"corner-h2h-stats-full-v3:{past_id}"
+                                                                    if full_stats_key not in st.session_state.stats_cache:
+                                                                        st.session_state.stats_cache[full_stats_key] = (api_get("fixtures/statistics", {"fixture": past_id}).get("response") or [])
+                                                                    past_stats = st.session_state.stats_cache.get(full_stats_key) or []
+                                                                    past_home_c, _, _ = safe_corner_parts(past_stats, 0)
+                                                                    past_away_c, _, _ = safe_corner_parts(past_stats, 1)
 
-                                                                     half_stats_key = f"corner-h2h-stats-halves-v3:{past_id}"
-                                                                     half_retry_key = f"{half_stats_key}:retry_after"
-                                                                     half_stats = st.session_state.stats_cache.get(half_stats_key)
-                                                                     retry_after = float(st.session_state.stats_cache.get(half_retry_key, 0) or 0)
-                                                                     if half_stats is None and time.time() >= retry_after:
-                                                                         try:
-                                                                             half_stats = api_get("fixtures/statistics", {"fixture": past_id, "half": "true"}).get("response") or []
-                                                                             if half_stats:
-                                                                                 st.session_state.stats_cache[half_stats_key] = half_stats
-                                                                             else:
-                                                                                 st.session_state.stats_cache[half_retry_key] = time.time() + 1800
-                                                                         except Exception:
-                                                                             st.session_state.stats_cache[half_retry_key] = time.time() + 300
-                                                                             half_stats = []
-                                                                     half_stats = half_stats or []
-                                                                     _, _past_home_first, _past_home_second = safe_corner_parts(half_stats, 0)
-                                                                     _, _past_away_first, _past_away_second = safe_corner_parts(half_stats, 1)
+                                                                    half_stats_key = f"corner-h2h-stats-halves-v3:{past_id}"
+                                                                    half_retry_key = f"{half_stats_key}:retry_after"
+                                                                    half_stats = st.session_state.stats_cache.get(half_stats_key)
+                                                                    retry_after = float(st.session_state.stats_cache.get(half_retry_key, 0) or 0)
+                                                                    if half_stats is None and time.time() >= retry_after:
+                                                                        try:
+                                                                            half_stats = api_get("fixtures/statistics", {"fixture": past_id, "half": "true"}).get("response") or []
+                                                                            if half_stats:
+                                                                                st.session_state.stats_cache[half_stats_key] = half_stats
+                                                                            else:
+                                                                                st.session_state.stats_cache[half_retry_key] = time.time() + 1800
+                                                                        except Exception:
+                                                                            st.session_state.stats_cache[half_retry_key] = time.time() + 300
+                                                                            half_stats = []
+                                                                    half_stats = half_stats or []
+                                                                    _, _past_home_first, _past_home_second = safe_corner_parts(half_stats, 0)
+                                                                    _, _past_away_first, _past_away_second = safe_corner_parts(half_stats, 1)
                                                                     past_first_half_total = past_second_half_total = None
                                                                     if all(value is not None for value in (_past_home_first, _past_home_second, _past_away_first, _past_away_second, past_home_c, past_away_c)):
                                                                         if abs((_past_home_first + _past_home_second) - past_home_c) < 0.01 and abs((_past_away_first + _past_away_second) - past_away_c) < 0.01:
