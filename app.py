@@ -6168,7 +6168,9 @@ else:
                                             )
 
                                             corner_item = next((item for item in st.session_state.get("corner_scan_results", []) if str(((item.get("fixture") or {}).get("fixture") or {}).get("id")) == str(match_id)), None)
-                                            if corner_item and not corner_item.get("error"):
+                                            if corner_item:
+                                                if corner_item.get("error"):
+                                                    st.caption("Las estadísticas en vivo no están disponibles en este momento; se mostrarán los indicadores históricos que sí puedan calcularse.")
                                                 home_c, away_c = corner_item.get("home_corners"), corner_item.get("away_corners")
                                                 current_minute = (match_fixture.get("status") or {}).get("elapsed")
                                                 current_total = (home_c + away_c) if isinstance(home_c, (int, float)) and isinstance(away_c, (int, float)) else None
@@ -6825,8 +6827,8 @@ else:
             key=lambda item: 0 if str(((item.get("fixture") or {}).get("fixture") or {}).get("id") or "") == selected_history_fixture_id else 1
         )
         for corner_item in corner_results:
-            if corner_item.get("error"):
-                continue
+            # El historial es independiente de las estadísticas en vivo:
+            # aunque falle el dato actual, intentamos construir tablas históricas.
             try:
                 used_history_stats = int(history_cache.get("_automatic_history_stats_calls", 0))
                 history_budget = 8 if auto_scan_due and not manual_scan else 20
