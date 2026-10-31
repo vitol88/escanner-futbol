@@ -2273,7 +2273,7 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full {
         width:100% !important; min-height:52px !important; box-sizing:border-box !important;
         /* Canal exclusivo para el botón del balón: nunca invade el marcador. */
-        padding:8px 78px 8px 10px !important; gap:8px !important;
+        padding:8px 48px 8px 10px !important; gap:8px !important;
         grid-template-columns:82px minmax(0,1fr) 70px minmax(0,1fr) !important;
         position:relative !important; isolation:isolate !important;
       }
@@ -2286,7 +2286,7 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       /* El marcador queda visualmente por encima del separador entre partidos. */
       html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-score {
         position:relative !important; z-index:30 !important;
-        justify-self:center !important; transform:translateX(-16px) !important;
+        justify-self:center !important;
         white-space:nowrap !important;
         background:#F5F7FA !important; box-shadow:0 0 0 3px #FFFFFF !important;
         margin:2px 0 !important;
@@ -2320,13 +2320,11 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       @media(max-width:640px) {
         html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full {
           min-height:46px !important;
-          grid-template-columns:60px minmax(0,1fr) 54px minmax(0,1fr) !important;
-          /* Reserva mayor en móvil para que el balón quede fuera del marcador. */
-          padding:8px 58px 8px 5px !important; gap:3px !important;
+          grid-template-columns:60px minmax(0,1fr) 48px minmax(0,1fr) !important;
+          padding:8px 40px 8px 5px !important; gap:3px !important;
         }
         html body .stApp [class*="st-key-h2h_history_row_"] .h2h-match-row-full .h2h-score {
           z-index:30 !important; min-width:54px !important; justify-self:center !important;
-          transform:translateX(-12px) !important;
           white-space:nowrap !important; padding:5px 4px !important;
         }
         html body .stApp [class*="st-key-h2h_history_row_"] [class*="st-key-h2h_goal_timeline_btn_"] {
