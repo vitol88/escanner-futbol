@@ -720,7 +720,7 @@ st.markdown("""
     padding:10px clamp(18px,3.2vw,48px) !important;
     border:0 !important;
     border-top:1px solid rgba(250,204,21,.42) !important;
-    border-bottom:1px solid rgba(250,204,21,.62) !important;
+    border-bottom:0 !important;
     border-radius:0 !important;
     background:linear-gradient(105deg,#0B0D10 0%,#15171B 48%,#0B0D10 100%) !important;
     box-shadow:0 10px 28px rgba(0,0,0,.42),inset 0 1px 0 rgba(250,204,21,.08),inset 0 -1px 0 rgba(250,204,21,.12) !important;
@@ -2057,14 +2057,16 @@ st.markdown(f"""
 st.markdown("""
 <style>
 div[class*="st-key-home_nav_bar"] {
- position:fixed !important; top:300px !important; left:0 !important; right:0 !important;
+ position:fixed !important; top:150px !important; left:0 !important; right:0 !important;
  z-index:2147483001 !important; width:100vw !important; max-width:100vw !important;
- padding:0 clamp(18px,3.2vw,48px) !important; margin:0 !important;
- box-sizing:border-box !important; background:rgba(11,13,16,.98) !important;
- box-shadow:0 8px 18px rgba(0,0,0,.28) !important;
+ padding:6px clamp(18px,3.2vw,48px) 10px !important; margin:0 !important;
+ box-sizing:border-box !important; background:linear-gradient(105deg,#0B0D10 0%,#15171B 48%,#0B0D10 100%) !important;
+ border-bottom:1px solid rgba(250,204,21,.62) !important;
+ box-shadow:0 10px 22px rgba(0,0,0,.34),inset 0 -1px 0 rgba(250,204,21,.10) !important;
+ backdrop-filter:blur(12px) !important;
 }
 @media(max-width:640px) {
- div[class*="st-key-home_nav_bar"] { top:140px !important; padding:0 10px !important; }
+ div[class*="st-key-home_nav_bar"] { top:154px !important; padding:6px 10px 10px !important; }
 }
 div[class*="st-key-home_nav_bar"] [data-testid="stHorizontalBlock"] { display:grid !important; grid-template-columns:repeat(5,minmax(0,1fr)) !important; grid-auto-flow:column !important; gap:0 !important; column-gap:0 !important; width:100% !important; min-width:0 !important; margin:0 !important; padding:0 !important; box-sizing:border-box !important; overflow:visible !important; }
 div[class*="st-key-home_nav_bar"] [data-testid="column"] { display:block !important; flex:none !important; width:100% !important; max-width:100% !important; min-width:0 !important; padding:0 !important; margin:0 !important; box-sizing:border-box !important; }
