@@ -71,7 +71,7 @@ st.markdown("""
   html body .stApp div[class*="st-key-home_search_bar"] input:focus,
   html body .stApp div[class*="st-key-home_search_bar"] input:focus-visible {
     color:#F8FAFC !important;
-    -webkit-text-fill-color:initial !important;
+    -webkit-text-fill-color:#F8FAFC !important;
     -webkit-text-stroke:0 !important;
     text-shadow:none !important;
     mix-blend-mode:normal !important;
