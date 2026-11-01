@@ -66,13 +66,13 @@ st.markdown("""
     background: #FFE566; border-color: #FFE566; color: #111111;
   }
 
-  /* Buscador principal: texto nativo y visible durante la escritura en Safari/iOS. */
+  /* Buscador principal: permitir el pintado nativo del texto en Safari/iOS. */
   html body .stApp div[class*="st-key-home_search_bar"] input,
   html body .stApp div[class*="st-key-home_search_bar"] input:focus,
   html body .stApp div[class*="st-key-home_search_bar"] input:focus-visible {
     color:#F8FAFC !important;
-    -webkit-text-fill-color:#F8FAFC !important;
-    -webkit-text-stroke:0 transparent !important;
+    -webkit-text-fill-color:initial !important;
+    -webkit-text-stroke:0 !important;
     text-shadow:none !important;
     mix-blend-mode:normal !important;
     filter:none !important;
@@ -2290,8 +2290,8 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       html body .stApp div[class*="st-key-home_search_bar"] input:active,
       html body .stApp div[class*="st-key-home_search_bar"] input:not(:placeholder-shown) {
         background:linear-gradient(135deg,#FFFFFF 0%,#F8F9FB 62%,#FFF8E6 100%) !important;
-        color:#303744 !important; -webkit-text-fill-color:#303744 !important;
-        -webkit-text-stroke:0 transparent !important; mix-blend-mode:normal !important;
+        color:#303744 !important; -webkit-text-fill-color:initial !important;
+        -webkit-text-stroke:0 !important; mix-blend-mode:normal !important;
         caret-color:#303744 !important; opacity:1 !important; visibility:visible !important;
         text-shadow:none !important; filter:none !important;
         border:1.5px solid #C7A43A !important; border-right:0 !important;
