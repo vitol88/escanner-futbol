@@ -2203,29 +2203,20 @@ div[class*="st-key-home_search_button"] button [data-testid="stIconMaterial"] { 
 }
 </style>
 """, unsafe_allow_html=True)
-def _handle_live_search_change():
-    """Enter confirma la búsqueda; vaciar el campo restablece los partidos en vivo."""
-    query = str(st.session_state.get("search_goal_matches", "") or "").strip()
-    if not query:
-        st.session_state.pop("live_search_query", None)
-        st.session_state.pop("live_search_message", None)
-        st.session_state.pop("live_search_submit_requested", None)
-    else:
-        st.session_state["live_search_submit_requested"] = True
-
+# El formulario evita reruns por cada carácter: solo envía la consulta al pulsar Enter o la lupa.
 search_clicked = False
-with st.container(key="home_search_bar"):
-    _home_search_cols = st.columns([12, 1], gap=None)
-    with _home_search_cols[0]:
-        st.text_input(
-            "Buscar equipo o liga",
-            key="search_goal_matches",
-            placeholder="Buscar equipo, liga o partido...",
-            label_visibility="collapsed",
-            on_change=_handle_live_search_change,
-        )
-    with _home_search_cols[1]:
-        search_clicked = st.button("", key="home_search_button", icon=":material/search:", help="Buscar equipo o liga", use_container_width=True)
+with st.form(key="home_search_form", clear_on_submit=False, border=False):
+    with st.container(key="home_search_bar"):
+        _home_search_cols = st.columns([12, 1], gap=None)
+        with _home_search_cols[0]:
+            st.text_input(
+                "Buscar equipo o liga",
+                key="search_goal_matches",
+                placeholder="Buscar equipo, liga o partido...",
+                label_visibility="collapsed",
+            )
+        with _home_search_cols[1]:
+            search_clicked = st.form_submit_button("", key="home_search_button", icon=":material/search:", help="Buscar equipo o liga", use_container_width=True)
 if not str(st.session_state.get("search_goal_matches", "") or "").strip():
     st.session_state.pop("live_search_query", None)
     st.session_state.pop("live_search_message", None)
@@ -5161,8 +5152,8 @@ if _analysis_page_active:
         unsafe_allow_html=True,
     )
 
-# La lupa y Enter ejecutan la búsqueda; el callback de Enter deja la solicitud en session_state.
-search_clicked = bool(search_clicked or st.session_state.pop("live_search_submit_requested", False))
+# El formulario envía la búsqueda solo al pulsar Enter o la lupa.
+st.session_state.pop("live_search_submit_requested", None)
 
 fixtures = st.session_state.live_fixtures
 
