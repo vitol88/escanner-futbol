@@ -2148,20 +2148,18 @@ div[class*="st-key-home_topnav_h2h"] button[kind="primary"]:hover, div[class*="s
  background:#EED88F !important; border-color:#F8EBC1 !important;
  color:#111419 !important; box-shadow:0 0 15px rgba(232,204,112,.28) !important;
 }
-/* Buscador principal: fijar el formulario completo, no solo el campo interno.
-   Así el input y su cursor comparten el mismo sistema de coordenadas en Safari/iOS. */
+/* Buscador principal debajo de la marca, en su posición fija original. */
 div[class*="st-key-home_search_form"] {
- position:fixed !important; top:215px !important; left:0 !important; right:0 !important;
- z-index:2147483002 !important; display:block !important;
- width:100vw !important; max-width:100vw !important;
- margin:0 !important; padding:0 !important; box-sizing:border-box !important;
- background:rgba(11,13,16,.98) !important;
-}
-div[class*="st-key-home_search_bar"] {
- position:relative !important; top:auto !important; left:auto !important; right:auto !important;
- z-index:auto !important; width:100% !important; max-width:100% !important;
+ position:static !important; top:auto !important; left:auto !important; right:auto !important;
+ z-index:auto !important; width:auto !important; max-width:none !important;
  margin:0 !important; padding:0 !important; box-sizing:border-box !important;
  background:transparent !important;
+}
+div[class*="st-key-home_search_bar"] {
+ position:fixed !important; top:215px !important; left:0 !important; right:0 !important;
+ z-index:2147483002 !important; width:100vw !important; max-width:100vw !important;
+ margin:0 !important; padding:0 !important; box-sizing:border-box !important;
+ background:rgba(11,13,16,.98) !important;
 }
 
 div[class*="st-key-home_search_bar"] [data-testid="stHorizontalBlock"] { display:grid !important; grid-template-columns:minmax(0,1fr) 48px !important; grid-template-rows:48px !important; gap:0 !important; width:100vw !important; max-width:100vw !important; box-sizing:border-box !important; overflow:hidden !important; margin:0 !important; padding:0 !important; }
