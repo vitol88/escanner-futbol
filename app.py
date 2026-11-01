@@ -2185,7 +2185,7 @@ div[class*="st-key-home_search_bar"] input:not(:placeholder-shown) {
  border:1.5px solid #A88632 !important; border-right:0 !important; border-radius:12px 0 0 12px !important;
  background:linear-gradient(135deg,#202329,#111419) !important;
  color:#F5F5F5 !important;
- -webkit-text-fill-color:currentColor !important;
+ -webkit-text-fill-color:#F5F5F5 !important;
  -webkit-text-stroke:0 !important; mix-blend-mode:normal !important;
  caret-color:#F5F5F5 !important; opacity:1 !important; visibility:visible !important;
  text-shadow:none !important; filter:none !important;
@@ -2286,7 +2286,7 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       html body .stApp div[class*="st-key-home_search_bar"] input:active,
       html body .stApp div[class*="st-key-home_search_bar"] input:not(:placeholder-shown) {
         background:linear-gradient(135deg,#FFFFFF 0%,#F8F9FB 62%,#FFF8E6 100%) !important;
-        color:#303744 !important; -webkit-text-fill-color:currentColor !important;
+        color:#303744 !important; -webkit-text-fill-color:#303744 !important;
         -webkit-text-stroke:0 !important; mix-blend-mode:normal !important;
         caret-color:#303744 !important; opacity:1 !important; visibility:visible !important;
         text-shadow:none !important; filter:none !important;
