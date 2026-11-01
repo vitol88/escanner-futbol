@@ -2168,8 +2168,6 @@ div[class*="st-key-home_search_bar"] input:not(:placeholder-shown) {
  -webkit-text-stroke:0.35px #F5F5F5 !important; mix-blend-mode:normal !important;
  caret-color:#F5F5F5 !important; opacity:1 !important; visibility:visible !important;
  -webkit-appearance:none !important; background-clip:padding-box !important;
- -webkit-transform:translate3d(0,0,0) !important; transform:translate3d(0,0,0) !important;
- -webkit-backface-visibility:hidden !important; backface-visibility:hidden !important;
 
  -webkit-background-clip:padding-box !important; text-shadow:0 0 0 #F5F5F5 !important;
  font-size:.86rem !important; font-weight:550 !important;
@@ -2282,8 +2280,7 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         -webkit-text-stroke:0.35px #303744 !important; mix-blend-mode:normal !important;
         caret-color:#303744 !important; opacity:1 !important; visibility:visible !important;
         -webkit-appearance:none !important; background-clip:padding-box !important;
-        -webkit-transform:translate3d(0,0,0) !important; transform:translate3d(0,0,0) !important;
-        -webkit-backface-visibility:hidden !important; backface-visibility:hidden !important;
+
         -webkit-background-clip:padding-box !important; text-shadow:0 0 0 #303744 !important;
         border:1.5px solid #C7A43A !important; border-right:0 !important;
         box-shadow:inset 0 1px 0 rgba(255,255,255,.95) !important;
