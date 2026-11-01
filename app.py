@@ -2156,11 +2156,14 @@ div[class*="st-key-home_search_bar"] [class*="st-key-home_search_button"] [data-
 div[class*="st-key-home_search_bar"] [data-testid="stHorizontalBlock"] > div { background:transparent !important; box-shadow:none !important; }
 div[class*="st-key-home_search_bar"] [data-testid="stTextInput"] > div { border-radius:12px 0 0 12px !important; overflow:hidden !important; }
 div[class*="st-key-home_search_button"] button { display:flex !important; align-items:center !important; justify-content:center !important; overflow:visible !important; }
-div[class*="st-key-home_search_bar"] input {
+div[class*="st-key-home_search_bar"] input,
+div[class*="st-key-home_search_bar"] input:focus,
+div[class*="st-key-home_search_bar"] input:active {
  min-height:48px !important; height:48px !important; padding:0 13px !important;
  border:1.5px solid #A88632 !important; border-right:0 !important; border-radius:12px 0 0 12px !important;
  background:linear-gradient(135deg,#202329,#111419) !important; color:#F5F5F5 !important;
- -webkit-text-fill-color:#F5F5F5 !important; font-size:.86rem !important; font-weight:550 !important;
+ -webkit-text-fill-color:#F5F5F5 !important; caret-color:#F5F5F5 !important;
+ opacity:1 !important; font-size:.86rem !important; font-weight:550 !important;
  box-shadow:inset 0 1px 0 #ffffff0a,0 3px 12px #0004 !important;
 }
 div[class*="st-key-home_search_bar"] input::placeholder { color:#A5AAB4 !important; -webkit-text-fill-color:#A5AAB4 !important; opacity:1 !important; }
@@ -2260,9 +2263,12 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       html body .stApp div[class*="st-key-home_search_bar"] { background:rgba(244,246,249,.98) !important; box-shadow:none !important; }
       html body .stApp div[class*="st-key-home_search_bar"] [data-testid="stHorizontalBlock"] { gap:0 !important; column-gap:0 !important; }
       html body .stApp div[class*="st-key-home_search_bar"] [data-testid="column"] { padding:0 !important; margin:0 !important; background:transparent !important; box-shadow:none !important; }
-      html body .stApp div[class*="st-key-home_search_bar"] input {
+      html body .stApp div[class*="st-key-home_search_bar"] input,
+      html body .stApp div[class*="st-key-home_search_bar"] input:focus,
+      html body .stApp div[class*="st-key-home_search_bar"] input:active {
         background:linear-gradient(135deg,#FFFFFF 0%,#F8F9FB 62%,#FFF8E6 100%) !important;
         color:#303744 !important; -webkit-text-fill-color:#303744 !important;
+        caret-color:#303744 !important; opacity:1 !important;
         border:1.5px solid #C7A43A !important; border-right:0 !important;
         box-shadow:inset 0 1px 0 rgba(255,255,255,.95) !important;
       }
