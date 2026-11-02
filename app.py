@@ -5535,13 +5535,13 @@ else:
                                         _card_away_count = (_card_result.get("away") or {}).get("matches", 0)
                                         _card_h2h_count = (_card_result.get("h2h") or {}).get("matches", 0)
                                         _card_html = (
-                                            '<section class="fl-yellow-analysis"><header><span>🟨</span><strong>ANÁLISIS DE TARJETAS AMARILLAS</strong></header>'
+                                            '<section class="fl-yellow-analysis"><header><span>🟨</span><strong>PROYECCIÓN DE TARJETAS</strong></header>'
                                             '<div class="fl-yellow-grid">'
                                             f'<article><small>{home_name} · LOCAL</small><b>{_card_fmt(_card_home_avg)}</b><span>{_card_home_count} partidos analizados</span></article>'
                                             f'<article><small>{away_name} · VISITANTE</small><b>{_card_fmt(_card_away_avg)}</b><span>{_card_away_count} partidos analizados</span></article>'
                                             f'<article><small>HISTORIAL DIRECTO · MISMA LOCALÍA · TOTAL</small><b>{_card_fmt(_card_h2h_avg)}</b><span>{_card_h2h_count} enfrentamientos con datos</span></article>'
                                             '</div>'
-                                            f'<div class="fl-yellow-estimate"><small>TOTAL TARJETAS PARA HOY</small><strong>{_card_fmt(_card_total_today)} 🟨</strong></div>'
+                                            f'<div class="fl-yellow-estimate"><small>TOTAL TARJETAS PARA HOY</small><div class="fl-yellow-total"><strong>{_card_fmt(_card_total_today)}</strong><span class="fl-yellow-card-icon">🟨</span></div></div>'
                                             '<p>Estimación calculada con los promedios de local y visitante, el historial directo con la misma localía y un margen conservador de 0,3.</p></section>'
                                         )
                                         st.markdown(_card_html + """
@@ -5554,11 +5554,15 @@ else:
                                         .fl-yellow-grid small,.fl-yellow-estimate small{font-size:9px;color:#AEB5C0}
                                         .fl-yellow-grid b{font-size:22px;color:#F2C94C}
                                         .fl-yellow-grid span{font-size:10px;color:#AEB5C0}
-                                        .fl-yellow-estimate{display:grid;grid-template-columns:1fr;gap:6px;margin-top:10px;padding:12px;border-radius:10px;background:#29251A}
+                                        .fl-yellow-estimate{display:grid;grid-template-columns:1fr;gap:9px;margin-top:10px;padding:14px;border:1px solid #A88632;border-radius:12px;background:linear-gradient(115deg,#302817 0%,#211F19 55%,#29251A 100%);box-shadow:inset 0 0 0 1px rgba(242,201,76,.12),0 0 15px rgba(242,201,76,.12)}
                                         .fl-yellow-estimate b{font-size:19px;color:#F8FAFC}
-                                        .fl-yellow-estimate strong{font-size:22px;color:#F2C94C}
+                                        .fl-yellow-estimate strong{font-size:30px;line-height:1;color:#F2C94C;font-variant-numeric:tabular-nums;text-shadow:0 0 12px rgba(242,201,76,.22)}
+                                        .fl-yellow-total{display:flex;align-items:center;justify-content:center;gap:10px;min-height:48px}
+                                        .fl-yellow-card-icon{display:inline-flex;align-items:center;justify-content:center;font-size:34px;line-height:1;filter:drop-shadow(0 0 7px rgba(250,204,21,.55));animation:fl-yellow-card-pulse 1.15s ease-in-out infinite}
+                                        @keyframes fl-yellow-card-pulse{0%,100%{transform:scale(1);filter:drop-shadow(0 0 4px rgba(250,204,21,.35));opacity:.88}50%{transform:scale(1.13);filter:drop-shadow(0 0 12px rgba(250,204,21,.9));opacity:1}}
                                         .fl-yellow-analysis p{font-size:10px;color:#AEB5C0;margin:10px 0 0}
-                                        @media(prefers-color-scheme:light){.fl-yellow-analysis{background:linear-gradient(145deg,#FFFFFF,#F3F6FA);color:#303744}.fl-yellow-grid article{background:#FFFFFF;border-color:#DDE2E9}.fl-yellow-grid small,.fl-yellow-estimate small,.fl-yellow-grid span,.fl-yellow-analysis p{color:#68717F}.fl-yellow-grid b,.fl-yellow-estimate strong,.fl-yellow-analysis header{color:#987300}.fl-yellow-estimate{background:#FFF7DC}.fl-yellow-estimate b{color:#303744}}
+                                        @media(prefers-reduced-motion:reduce){.fl-yellow-card-icon{animation:none}}
+                                        @media(prefers-color-scheme:light){.fl-yellow-analysis{background:linear-gradient(145deg,#FFFFFF,#F3F6FA);color:#303744}.fl-yellow-grid article{background:#FFFFFF;border-color:#DDE2E9}.fl-yellow-grid small,.fl-yellow-estimate small,.fl-yellow-grid span,.fl-yellow-analysis p{color:#68717F}.fl-yellow-grid b,.fl-yellow-estimate strong,.fl-yellow-analysis header{color:#987300}.fl-yellow-estimate{background:linear-gradient(115deg,#FFF3C4,#FFF9E8);border-color:#D4A91F;box-shadow:inset 0 0 0 1px rgba(212,169,31,.16),0 0 14px rgba(212,169,31,.14)}.fl-yellow-estimate b{color:#303744}}
                                         </style>
                                         """, unsafe_allow_html=True)
                                         st.markdown("""
