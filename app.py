@@ -2672,6 +2672,28 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       html,body,.stApp,[data-testid="stAppViewContainer"],section.main,.main,.block-container {
         background:#F4F6F9 !important; color:#20242C !important;
       }
+      /* Proyección de tarjetas: adaptar el panel completo a la paleta clara. */
+      html body .stApp .fl-yellow-analysis {
+        background:linear-gradient(145deg,#FFFFFF,#F3F6FA) !important;
+        color:#303744 !important;border-color:#D6B84C !important;
+      }
+      html body .stApp .fl-yellow-analysis header { color:#806000 !important; }
+      html body .stApp .fl-yellow-analysis .fl-yellow-grid article {
+        background:#FFFFFF !important;border-color:#DDE2E9 !important;
+      }
+      html body .stApp .fl-yellow-analysis .fl-yellow-grid small,
+      html body .stApp .fl-yellow-analysis .fl-yellow-grid span,
+      html body .stApp .fl-yellow-analysis p { color:#68717F !important; }
+      html body .stApp .fl-yellow-analysis .fl-yellow-grid b,
+      html body .stApp .fl-yellow-analysis .fl-yellow-estimate strong { color:#987300 !important; }
+      html body .stApp .fl-yellow-analysis .fl-yellow-estimate {
+        background:linear-gradient(135deg,#FFF3C4,#FFF9E8) !important;
+        border:2px solid #D4A91F !important;
+        box-shadow:0 0 0 1px rgba(212,169,31,.16),0 0 14px rgba(212,169,31,.14) !important;
+      }
+      html body .stApp .fl-yellow-analysis .fl-yellow-estimate small { color:#806000 !important; }
+      html body .stApp .fl-yellow-analysis .fl-yellow-estimate strong { text-shadow:none !important; }
+      html body .stApp .fl-yellow-analysis .fl-yellow-card-icon { filter:drop-shadow(0 0 7px rgba(212,169,31,.45)) !important; }
       [data-testid="stHeader"] { background:rgba(244,246,249,.96) !important; }
       [data-testid="stSidebar"],[data-testid="stSidebar"] > div:first-child { background:#FFFFFF !important; border-right:1px solid #DDE2E9 !important; }
       html body .stApp p,html body .stApp label,html body .stApp li,html body .stApp [data-testid="stMarkdownContainer"] { color:#303744; }
