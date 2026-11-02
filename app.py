@@ -5499,6 +5499,12 @@ else:
                                                 _h2h_fixtures = _h2h_payload.get("response") or []
                                                 _h2h_values = []
                                                 for _fx in _h2h_fixtures:
+                                                    _fx_teams = _fx.get("teams") or {}
+                                                    _fx_home_id = (_fx_teams.get("home") or {}).get("id")
+                                                    _fx_away_id = (_fx_teams.get("away") or {}).get("id")
+                                                    # Comparar solo enfrentamientos con la misma condición de localía del partido actual.
+                                                    if _fx_home_id != _card_home_id or _fx_away_id != _card_away_id:
+                                                        continue
                                                     _fx_id = ((_fx.get("fixture") or {}).get("id"))
                                                     if not _fx_id:
                                                         continue
@@ -5534,7 +5540,7 @@ else:
                                             '<div class="fl-yellow-grid">'
                                             f'<article><small>{home_name} · LOCAL</small><b>{_card_fmt(_card_home_avg)}</b><span>{_card_home_count} partidos analizados</span></article>'
                                             f'<article><small>{away_name} · VISITANTE</small><b>{_card_fmt(_card_away_avg)}</b><span>{_card_away_count} partidos analizados</span></article>'
-                                            f'<article><small>HISTORIAL DIRECTO · TOTAL</small><b>{_card_fmt(_card_h2h_avg)}</b><span>{_card_h2h_count} enfrentamientos con datos</span></article>'
+                                            f'<article><small>HISTORIAL DIRECTO · MISMA LOCALÍA · TOTAL</small><b>{_card_fmt(_card_h2h_avg)}</b><span>{_card_h2h_count} enfrentamientos con datos</span></article>'
                                             '</div>'
                                             f'<div class="fl-yellow-estimate"><small>PROMEDIO COMBINADO</small><b>{_card_fmt(_card_raw)}</b>'
                                             f'<small>PROMEDIO AJUSTADO (−0,5)</small><strong>{_card_fmt(_card_adjusted)} 🟨</strong></div>'
