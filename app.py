@@ -3318,6 +3318,44 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         text-shadow:none !important;
         font-weight:800 !important;
       }
+      /* LIVE TRACKER: adaptar exclusivamente su tarjeta al tema claro. */
+      html body .stApp .fl-tracker-wrap {
+        background:linear-gradient(145deg,#FFFFFF 0%,#F3F6FA 100%) !important;
+        border:1px solid #D8C27A !important;
+        color:#303744 !important;
+        box-shadow:0 8px 24px rgba(31,41,55,.09),inset 0 1px 0 rgba(255,255,255,.95) !important;
+      }
+      html body .stApp .fl-tracker-kicker { color:#987300 !important; }
+      html body .stApp .fl-tracker-title,
+      html body .stApp .fl-tracker-score-mid b,
+      html body .stApp .fl-tracker-possession b,
+      html body .stApp .fl-tracker-metrics b { color:#987300 !important; }
+      html body .stApp .fl-tracker-subtitle,
+      html body .stApp .fl-tracker-team small,
+      html body .stApp .fl-tracker-score-mid small,
+      html body .stApp .fl-tracker-disclaimer { color:#68717F !important; }
+      html body .stApp .fl-tracker-team,
+      html body .stApp .fl-tracker-possession>div:not(.fl-tracker-possession-track) { color:#394354 !important; }
+      html body .stApp .fl-tracker-score { border-color:#DDE2E9 !important; }
+      html body .stApp .fl-tracker-live {
+        color:#B42332 !important; background:#FFF0F1 !important; border-color:#E8B8BE !important;
+      }
+      html body .stApp .fl-tracker-pitch-card {
+        background:linear-gradient(145deg,#FFFFFF 0%,#F2F7F3 100%) !important;
+        border-color:#D5DFD8 !important;
+      }
+      html body .stApp .fl-tracker-pitch-label,
+      html body .stApp .fl-tracker-pitch-legend { color:#806000 !important; }
+      html body .stApp .fl-tracker-metrics>div {
+        background:linear-gradient(145deg,#FFFFFF 0%,#F5F7FA 100%) !important;
+        border-color:#DDE2E9 !important;
+      }
+      html body .stApp .fl-tracker-metrics small { color:#68717F !important; }
+      html body .stApp .fl-tracker-metrics span { color:#586170 !important; }
+      html body .stApp .fl-tracker-status {
+        background:#FFF7DC !important; color:#705400 !important; border:1px solid #E5D18A !important;
+      }
+      html body .stApp .fl-tracker-status-dot { box-shadow:0 0 8px #D6A91A !important; }
 </style>
     """, unsafe_allow_html=True)
 if st.session_state.get("appearance_mode") not in {"☀️", "☀️ Claro"}:
