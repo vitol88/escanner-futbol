@@ -5458,6 +5458,105 @@ else:
                                                 st.info("La API no entregó estadísticas detalladas para este partido.")
                                         else:
                                             st.info("La API no entregó estadísticas para este partido.")
+
+                                        # TARJETAS AMARILLAS: promedios de localía, visitante e H2H.
+                                        _card_league = match.get("league") or {}
+                                        _card_league_id = _card_league.get("id")
+                                        _card_season = _card_league.get("season")
+                                        _card_home_id, _card_away_id = match_home.get("id"), match_away.get("id")
+                                        _card_cache = st.session_state.setdefault("yellow_card_analysis_cache", {})
+                                        _card_cache_key = f"{_card_league_id}:{_card_season}:{_card_home_id}:{_card_away_id}"
+                                        if _card_cache_key not in _card_cache:
+                                            _card_result = {"home": [], "away": [], "h2h": []}
+                                            def _card_fixture_average(team_id, venue):
+                                                _fixtures_payload = api_get("fixtures", {"team": team_id, "league": _card_league_id, "season": _card_season, "last": 20})
+                                                _fixtures_list = _fixtures_payload.get("response") or []
+                                                _selected_fixtures = []
+                                                for _fx in _fixtures_list:
+                                                    _fx_teams = _fx.get("teams") or {}
+                                                    _is_home = (_fx_teams.get("home") or {}).get("id") == team_id
+                                                    if (_is_home and venue == "home") or ((not _is_home) and venue == "away"):
+                                                        _selected_fixtures.append(_fx)
+                                                _values = []
+                                                for _fx in _selected_fixtures[:10]:
+                                                    _fx_id = ((_fx.get("fixture") or {}).get("id"))
+                                                    if not _fx_id:
+                                                        continue
+                                                    _st_payload = api_get("fixtures/statistics", {"fixture": _fx_id})
+                                                    _st_response = _st_payload.get("response") or []
+                                                    for _team_stats in _st_response:
+                                                        if ((_team_stats.get("team") or {}).get("id")) == team_id:
+                                                            _yellow = next((x.get("value") for x in (_team_stats.get("statistics") or []) if x.get("type") == "Yellow Cards"), None)
+                                                            if _yellow is not None:
+                                                                try: _values.append(float(str(_yellow).replace(",", ".")))
+                                                                except (TypeError, ValueError): pass
+                                                            break
+                                                return {"average": (sum(_values) / len(_values)) if _values else None, "matches": len(_values)}
+                                            try:
+                                                _card_result["home"] = _card_fixture_average(_card_home_id, "home")
+                                                _card_result["away"] = _card_fixture_average(_card_away_id, "away")
+                                                _h2h_payload = api_get("fixtures/headtohead", {"h2h": f"{_card_home_id}-{_card_away_id}", "last": 10})
+                                                _h2h_fixtures = _h2h_payload.get("response") or []
+                                                _h2h_values = []
+                                                for _fx in _h2h_fixtures:
+                                                    _fx_id = ((_fx.get("fixture") or {}).get("id"))
+                                                    if not _fx_id:
+                                                        continue
+                                                    _st_payload = api_get("fixtures/statistics", {"fixture": _fx_id})
+                                                    _st_response = _st_payload.get("response") or []
+                                                    _yellow_total = 0.0
+                                                    _has_yellow = False
+                                                    for _team_stats in _st_response:
+                                                        _yellow = next((x.get("value") for x in (_team_stats.get("statistics") or []) if x.get("type") == "Yellow Cards"), None)
+                                                        if _yellow is not None:
+                                                            try:
+                                                                _yellow_total += float(str(_yellow).replace(",", "."))
+                                                                _has_yellow = True
+                                                            except (TypeError, ValueError): pass
+                                                    if _has_yellow: _h2h_values.append(_yellow_total)
+                                                _card_result["h2h"] = {"average": (sum(_h2h_values) / len(_h2h_values)) if _h2h_values else None, "matches": len(_h2h_values)}
+                                            except Exception:
+                                                _card_result["error"] = True
+                                            _card_cache[_card_cache_key] = _card_result
+                                        _card_result = _card_cache[_card_cache_key]
+                                        _card_home_avg = (_card_result.get("home") or {}).get("average")
+                                        _card_away_avg = (_card_result.get("away") or {}).get("average")
+                                        _card_h2h_avg = (_card_result.get("h2h") or {}).get("average")
+                                        _card_raw = ((_card_home_avg + _card_away_avg) / 2) if _card_home_avg is not None and _card_away_avg is not None else None
+                                        _card_adjusted = max(0, _card_raw - 0.5) if _card_raw is not None else None
+                                        def _card_fmt(value):
+                                            return f"{value:.2f}" if value is not None else "N/D"
+                                        _card_home_count = (_card_result.get("home") or {}).get("matches", 0)
+                                        _card_away_count = (_card_result.get("away") or {}).get("matches", 0)
+                                        _card_h2h_count = (_card_result.get("h2h") or {}).get("matches", 0)
+                                        _card_html = (
+                                            '<section class="fl-yellow-analysis"><header><span>🟨</span><strong>ANÁLISIS DE TARJETAS AMARILLAS</strong></header>'
+                                            '<div class="fl-yellow-grid">'
+                                            f'<article><small>{home_name} · LOCAL</small><b>{_card_fmt(_card_home_avg)}</b><span>{_card_home_count} partidos analizados</span></article>'
+                                            f'<article><small>{away_name} · VISITANTE</small><b>{_card_fmt(_card_away_avg)}</b><span>{_card_away_count} partidos analizados</span></article>'
+                                            f'<article><small>HISTORIAL DIRECTO · TOTAL</small><b>{_card_fmt(_card_h2h_avg)}</b><span>{_card_h2h_count} enfrentamientos con datos</span></article>'
+                                            '</div>'
+                                            f'<div class="fl-yellow-estimate"><small>PROMEDIO COMBINADO</small><b>{_card_fmt(_card_raw)}</b>'
+                                            f'<small>PROMEDIO AJUSTADO (−0,5)</small><strong>{_card_fmt(_card_adjusted)} 🟨</strong></div>'
+                                            '<p>El ajuste de 0,5 es un margen conservador aplicado al promedio combinado. El historial directo se muestra como referencia adicional.</p></section>'
+                                        )
+                                        st.markdown(_card_html + """
+                                        <style>
+                                        .fl-yellow-analysis{margin:16px 0;padding:15px;border:1px solid #A88632;border-radius:16px;background:linear-gradient(145deg,#171A20,#0D1015);color:#F8FAFC}
+                                        .fl-yellow-analysis header{display:flex;gap:9px;align-items:center;color:#F2C94C;font-size:13px;letter-spacing:.04em;margin-bottom:12px}
+                                        .fl-yellow-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+                                        .fl-yellow-grid article{display:flex;flex-direction:column;gap:4px;padding:10px;border:1px solid #343944;border-radius:10px;background:#20242B;min-width:0}
+                                        .fl-yellow-grid article:nth-child(3){grid-column:1/-1}
+                                        .fl-yellow-grid small,.fl-yellow-estimate small{font-size:9px;color:#AEB5C0}
+                                        .fl-yellow-grid b{font-size:22px;color:#F2C94C}
+                                        .fl-yellow-grid span{font-size:10px;color:#AEB5C0}
+                                        .fl-yellow-estimate{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;padding:12px;border-radius:10px;background:#29251A}
+                                        .fl-yellow-estimate b{font-size:19px;color:#F8FAFC}
+                                        .fl-yellow-estimate strong{font-size:22px;color:#F2C94C}
+                                        .fl-yellow-analysis p{font-size:10px;color:#AEB5C0;margin:10px 0 0}
+                                        @media(prefers-color-scheme:light){.fl-yellow-analysis{background:linear-gradient(145deg,#FFFFFF,#F3F6FA);color:#303744}.fl-yellow-grid article{background:#FFFFFF;border-color:#DDE2E9}.fl-yellow-grid small,.fl-yellow-estimate small,.fl-yellow-grid span,.fl-yellow-analysis p{color:#68717F}.fl-yellow-grid b,.fl-yellow-estimate strong,.fl-yellow-analysis header{color:#987300}.fl-yellow-estimate{background:#FFF7DC}.fl-yellow-estimate b{color:#303744}}
+                                        </style>
+                                        """, unsafe_allow_html=True)
                                         st.markdown("""
                                         <style>
                                         [class*="st-key-league_standings_cta"] {
