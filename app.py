@@ -5528,8 +5528,7 @@ else:
                                         _card_home_avg = (_card_result.get("home") or {}).get("average")
                                         _card_away_avg = (_card_result.get("away") or {}).get("average")
                                         _card_h2h_avg = (_card_result.get("h2h") or {}).get("average")
-                                        _card_raw = ((_card_home_avg + _card_away_avg) / 2) if _card_home_avg is not None and _card_away_avg is not None else None
-                                        _card_adjusted = max(0, _card_raw - 0.5) if _card_raw is not None else None
+                                        _card_total_today = max(0, (_card_home_avg + _card_away_avg + _card_h2h_avg) / 2 - 0.3) if _card_home_avg is not None and _card_away_avg is not None and _card_h2h_avg is not None else None
                                         def _card_fmt(value):
                                             return f"{value:.2f}" if value is not None else "N/D"
                                         _card_home_count = (_card_result.get("home") or {}).get("matches", 0)
@@ -5542,9 +5541,8 @@ else:
                                             f'<article><small>{away_name} · VISITANTE</small><b>{_card_fmt(_card_away_avg)}</b><span>{_card_away_count} partidos analizados</span></article>'
                                             f'<article><small>HISTORIAL DIRECTO · MISMA LOCALÍA · TOTAL</small><b>{_card_fmt(_card_h2h_avg)}</b><span>{_card_h2h_count} enfrentamientos con datos</span></article>'
                                             '</div>'
-                                            f'<div class="fl-yellow-estimate"><small>PROMEDIO COMBINADO</small><b>{_card_fmt(_card_raw)}</b>'
-                                            f'<small>PROMEDIO AJUSTADO (−0,5)</small><strong>{_card_fmt(_card_adjusted)} 🟨</strong></div>'
-                                            '<p>El ajuste de 0,5 es un margen conservador aplicado al promedio combinado. El historial directo se muestra como referencia adicional.</p></section>'
+                                            f'<div class="fl-yellow-estimate"><small>TOTAL TARJETAS PARA HOY</small><strong>{_card_fmt(_card_total_today)} 🟨</strong></div>'
+                                            '<p>Estimación calculada con los promedios de local y visitante, el historial directo con la misma localía y un margen conservador de 0,3.</p></section>'
                                         )
                                         st.markdown(_card_html + """
                                         <style>
@@ -5556,7 +5554,7 @@ else:
                                         .fl-yellow-grid small,.fl-yellow-estimate small{font-size:9px;color:#AEB5C0}
                                         .fl-yellow-grid b{font-size:22px;color:#F2C94C}
                                         .fl-yellow-grid span{font-size:10px;color:#AEB5C0}
-                                        .fl-yellow-estimate{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;padding:12px;border-radius:10px;background:#29251A}
+                                        .fl-yellow-estimate{display:grid;grid-template-columns:1fr;gap:6px;margin-top:10px;padding:12px;border-radius:10px;background:#29251A}
                                         .fl-yellow-estimate b{font-size:19px;color:#F8FAFC}
                                         .fl-yellow-estimate strong{font-size:22px;color:#F2C94C}
                                         .fl-yellow-analysis p{font-size:10px;color:#AEB5C0;margin:10px 0 0}
