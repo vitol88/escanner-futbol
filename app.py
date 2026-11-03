@@ -3305,6 +3305,7 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       [class*="st-key-goal_form_front_"]{border-bottom-color:rgba(181,138,0,.22)!important}
       .goal-deep-heading { color:#A87900 !important; -webkit-text-fill-color:#A87900 !important; }
       .goal-form-team-lines > div { color:#263142 !important; -webkit-text-fill-color:#263142 !important; }
+      .goal-form-score-lines > div { color:#263247 !important; -webkit-text-fill-color:#263247 !important; font-weight:950 !important; }
       .goal-form-team {
         color:#263142 !important;
         -webkit-text-fill-color:#263142 !important;
