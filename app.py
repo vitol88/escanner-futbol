@@ -988,11 +988,13 @@ st.markdown("""
   @media (prefers-reduced-motion: reduce) { .goal-form-card, .goal-form-back { animation:none; } }
   .goal-form-back-title { color:#FACC15; font-size:.72rem; font-weight:900; margin-bottom:8px; line-height:1.35; }
   .goal-form-back { animation:goal-card-flip-in .62s cubic-bezier(.2,.75,.25,1) both; transform-origin:center; }
-  .goal-form-match { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:5px 9px; align-items:center; padding:9px 0; border-top:1px solid #34302A; color:#E4E4E7; font-size:.7rem; line-height:1.35; }
-  .goal-form-match-meta { grid-column:1/-1; color:#FACC15; font-size:.63rem; font-weight:800; letter-spacing:.25px; margin-bottom:0; }
-  .goal-form-match-opponent { min-width:0; overflow:hidden; }
-  .goal-form-match-teams { color:#E4E4E7; font-weight:650; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .goal-form-match-outcome { display:flex; align-items:center; justify-content:flex-end; gap:6px; white-space:nowrap; }
+  .goal-form-match { display:block; padding:9px 0 3px; border-top:1px solid #34302A; color:#E4E4E7; font-size:.7rem; line-height:1.35; }
+  .goal-form-match-meta { color:#FACC15; font-size:.63rem; font-weight:800; letter-spacing:.25px; margin-bottom:5px; white-space:nowrap; }
+  .goal-form-match-opponent { width:100%; min-width:0; overflow:hidden; }
+  .goal-form-match-teams { width:100%; color:#E4E4E7; font-weight:700; font-size:.78rem; line-height:1.35; white-space:nowrap; overflow:hidden; text-overflow:clip; }
+  .goal-form-match-outcome { display:flex; align-items:center; justify-content:flex-start; gap:6px; white-space:nowrap; min-height:29px; }
+  [class*="st-key-goal_timeline_btn_"] {display:flex;justify-content:flex-end;width:100%}
+  [class*="st-key-goal_timeline_btn_"] button {margin-left:auto!important}
   .goal-form-match-score { color:#F4F4F5; font-size:.8rem; font-weight:950; white-space:nowrap; }
   .goal-form-match .goal-form-result { min-width:20px; }
    [class*="st-key-goal_form_back_"]{box-sizing:border-box;border:1px solid #FACC15;border-radius:11px;padding:11px;margin-top:5px;background:linear-gradient(145deg,#20232B,#12151A);min-height:170px;animation:goal-card-flip-in .62s cubic-bezier(.2,.75,.25,1) both;transform-origin:center;transform-style:preserve-3d;backface-visibility:visible}[class*="st-key-goal_timeline_btn_"] button{width:25px!important;min-width:25px!important;height:25px!important;min-height:25px!important;padding:0!important;border-radius:50%!important;border:1px solid #FACC15!important;background:radial-gradient(circle at 35% 25%,#FFF1A6 0%,#FACC15 55%,#9A7000 100%)!important;color:#171717!important;font-size:12px!important;box-shadow:0 0 7px #FACC1545!important}[class*="st-key-goal_timeline_btn_"] button:hover{transform:rotate(-10deg) scale(1.08)!important;box-shadow:0 0 0 3px #FACC1535,0 0 17px #FACC1580!important}.goal-event-timeline{margin:5px 0 12px;padding:8px 10px;border:1px solid rgba(250,204,21,.28);border-radius:11px;background:rgba(17,20,25,.72)}.goal-event-row{display:grid;grid-template-columns:42px 20px minmax(0,1fr) auto;align-items:center;gap:7px;padding:8px 2px;border-bottom:1px solid rgba(255,255,255,.08)}.goal-event-row:last-child{border-bottom:0}.goal-event-minute{color:#FACC15;font-size:.72rem;white-space:nowrap}.goal-event-ball{font-size:14px}.goal-event-info{display:flex;flex-direction:column;min-width:0;gap:2px}.goal-event-info strong{color:#F4F4F5;font-size:.72rem;overflow-wrap:anywhere}.goal-event-info span,.goal-event-info small{color:#A1A1AA;font-size:.62rem;overflow-wrap:anywhere}.goal-event-score{color:#FACC15;font-size:.78rem;white-space:nowrap}
@@ -1002,11 +1004,11 @@ st.markdown("""
     .goal-form-header{gap:11px;margin:3px 0 8px}
     .goal-form-logo{width:42px;height:42px;flex-basis:42px}
     .goal-form-team{font-size:.88rem;line-height:1.25;overflow-wrap:normal;word-break:normal}
-    .goal-form-match{grid-template-columns:minmax(0,1fr) auto;gap:6px 8px;padding:10px 0}
-    .goal-form-match-opponent{min-width:0;overflow:hidden}
-    .goal-form-match-teams{font-size:.72rem;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .goal-form-match-meta{font-size:.67rem;margin-bottom:4px}
-    .goal-form-match-outcome{gap:5px}
+    .goal-form-match{padding:9px 0 2px}
+    .goal-form-match-opponent{width:100%;min-width:0;overflow:hidden}
+    .goal-form-match-teams{font-size:.76rem;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:clip}
+    .goal-form-match-meta{font-size:.67rem;margin-bottom:5px}
+    .goal-form-match-outcome{gap:6px;min-height:29px}
     .goal-form-match-score{font-size:.82rem}
     [class*="st-key-goal_timeline_btn_"]{display:flex;justify-content:flex-end;width:100%}
     [class*="st-key-goal_timeline_btn_"] button{margin-left:auto!important}
@@ -6653,10 +6655,11 @@ else:
                                                                         recent_id = recent.get("fixture_id")
                                                                         match_row_key = f"{match_id}_{recent_id or date_label}_{team.get('id') or label}"
                                                                         is_timeline_open = st.session_state.get(active_goal_match_key) == str(recent_id) if recent_id else False
-                                                                        match_cols = st.columns([0.92, 0.08], gap="small", vertical_alignment="center")
-                                                                        with match_cols[0]:
-                                                                            st.markdown(f'<div class="goal-form-match"><div class="goal-form-match-meta">{date_label}</div><div class="goal-form-match-opponent"><div class="goal-form-match-teams">{home_label} <span style="color:#FACC15">·</span> {away_label}</div></div><div class="goal-form-match-outcome"><span class="goal-form-match-score">{html.escape(score_label)}</span><span class="goal-form-result goal-form-result-{result_class}">{html.escape(result_code)}</span></div></div>', unsafe_allow_html=True)
-                                                                        with match_cols[1]:
+                                                                        st.markdown(f'<div class="goal-form-match"><div class="goal-form-match-meta">{date_label}</div><div class="goal-form-match-opponent"><div class="goal-form-match-teams">{home_label} <span style="color:#FACC15">·</span> {away_label}</div></div></div>', unsafe_allow_html=True)
+                                                                        match_action_cols = st.columns([0.82, 0.18], gap="small", vertical_alignment="center")
+                                                                        with match_action_cols[0]:
+                                                                            st.markdown(f'<div class="goal-form-match-outcome"><span class="goal-form-match-score">{html.escape(score_label)}</span><span class="goal-form-result goal-form-result-{result_class}">{html.escape(result_code)}</span></div>', unsafe_allow_html=True)
+                                                                        with match_action_cols[1]:
                                                                             if recent_id:
                                                                                 if st.button("📊", key=f"goal_timeline_btn_{match_row_key}", help="Ver estadísticas completas de este partido"):
                                                                                     st.session_state[active_goal_match_key] = None if is_timeline_open else str(recent_id)
