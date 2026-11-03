@@ -5462,7 +5462,7 @@ else:
                                 _home_red_badge = f'<span class="fl-red-card-badge" title="Tarjeta roja">🟥{(" ×" + str(_home_red_cards)) if _home_red_cards > 1 else ""}</span>' if _home_red_cards else ""
                                 _away_red_badge = f'<span class="fl-red-card-badge" title="Tarjeta roja">🟥{(" ×" + str(_away_red_cards)) if _away_red_cards > 1 else ""}</span>' if _away_red_cards else ""
                                 _status_short = str((match_fixture.get("status") or {}).get("short") or "")
-                                _live_badge = '<span class="fl-match-live">EN VIVO</span>' if _status_short in {"1H", "HT", "2H", "ET", "BT", "P", "LIVE"} or match_minute is not None else ""
+                                _live_badge = ('<span class="fl-match-live">PRÓXIMO</span>' if st.session_state.get("fixture_mode", "live") == "upcoming" else ('<span class="fl-match-live">EN VIVO</span>' if _status_short in {"1H", "HT", "2H", "ET", "BT", "P", "LIVE"} or match_minute is not None else ""))
                                 _is_selected_fixture = str(st.session_state.get("selected_live_fixture_id") or "") == str(match_id)
                                 _scoreboard_class = "fl-match-scoreboard is-selected" if _is_selected_fixture else "fl-match-scoreboard"
                                 st.markdown(
@@ -5486,15 +5486,20 @@ else:
                                     if tool_name != "stats" and not _analysis_page_active:
                                         st.markdown('<div class="match-analysis-kicker">PARTIDO SELECCIONADO</div>', unsafe_allow_html=True)
                                     if tool_name == "stats":
-                                        if str(match_id) not in st.session_state.stats_cache or str(match_id) in st.session_state.get("stats_errors", {}):
-                                            try:
-                                                _stats_payload = api_get("fixtures/statistics", {"fixture": match_id})
-                                                st.session_state.stats_cache[str(match_id)] = _stats_payload.get("response") or []
-                                                st.session_state.setdefault("stats_errors", {}).pop(str(match_id), None)
-                                            except Exception as _stats_exc:
-                                                st.session_state.stats_cache[str(match_id)] = []
-                                                st.session_state.setdefault("stats_errors", {})[str(match_id)] = str(_stats_exc)
-                                        stat_data = st.session_state.stats_cache.get(str(match_id), [])
+                                        if st.session_state.get("fixture_mode", "live") == "upcoming":
+                                            stat_data = []
+                                            stats_error = None
+                                        else:
+                                            if str(match_id) not in st.session_state.stats_cache or str(match_id) in st.session_state.get("stats_errors", {}):
+                                                try:
+                                                    _stats_payload = api_get("fixtures/statistics", {"fixture": match_id})
+                                                    st.session_state.stats_cache[str(match_id)] = _stats_payload.get("response") or []
+                                                    st.session_state.setdefault("stats_errors", {}).pop(str(match_id), None)
+                                                except Exception as _stats_exc:
+                                                    st.session_state.stats_cache[str(match_id)] = []
+                                                    st.session_state.setdefault("stats_errors", {})[str(match_id)] = str(_stats_exc)
+                                            stat_data = st.session_state.stats_cache.get(str(match_id), [])
+                                            stats_error = st.session_state.get("stats_errors", {}).get(str(match_id))
                                         stats_error = st.session_state.get("stats_errors", {}).get(str(match_id))
                                         if stats_error:
                                             st.warning(f"No se pudieron cargar las estadísticas: {stats_error}")
@@ -5555,7 +5560,10 @@ else:
                                             else:
                                                 st.info("La API no entregó estadísticas detalladas para este partido.")
                                         else:
-                                            st.info("La API no entregó estadísticas para este partido.")
+                                            if st.session_state.get("fixture_mode", "live") == "upcoming":
+                                                st.info("El partido aún no comienza. Las estadísticas en vivo aparecerán al iniciar; mientras tanto puedes consultar los indicadores históricos y las proyecciones.")
+                                            else:
+                                                st.info("La API no entregó estadísticas para este partido.")
 
                                         # TARJETAS AMARILLAS: promedios de localía, visitante e H2H.
                                         _card_league = match.get("league") or {}
@@ -5876,105 +5884,108 @@ else:
                                                         st.markdown(_standings_table_html, unsafe_allow_html=True)
                                                     st.caption("Local en azul y visitante en dorado. G = ganados, E = empates y D = derrotas; la columna FORMA usa las mismas letras y colores. Desliza horizontalmente para ver todas las columnas en el celular.")
                                     elif tool_name == "tracker":
-                                        # LIVE TRACKER: animación ilustrativa guiada por posesión; no representa coordenadas reales.
-                                        _tracker_id = str(match_id)
-                                        if _tracker_id not in st.session_state.stats_cache or _tracker_id in st.session_state.get("stats_errors", {}):
-                                            try:
-                                                _tracker_payload = api_get("fixtures/statistics", {"fixture": match_id})
-                                                st.session_state.stats_cache[_tracker_id] = _tracker_payload.get("response") or []
-                                                st.session_state.setdefault("stats_errors", {}).pop(_tracker_id, None)
-                                            except Exception as _tracker_exc:
-                                                st.session_state.stats_cache[_tracker_id] = []
-                                                st.session_state.setdefault("stats_errors", {})[_tracker_id] = str(_tracker_exc)
-                                        _tracker_data = st.session_state.stats_cache.get(_tracker_id, [])
-                                        _tracker_home_stats = {entry.get("type"): entry.get("value") for entry in ((_tracker_data[0].get("statistics") or []) if len(_tracker_data) > 0 else [])}
-                                        _tracker_away_stats = {entry.get("type"): entry.get("value") for entry in ((_tracker_data[1].get("statistics") or []) if len(_tracker_data) > 1 else [])}
-                                        def _tracker_num(value, fallback):
-                                            try:
-                                                return float(str(value).replace("%", "").replace(",", "."))
-                                            except (TypeError, ValueError):
-                                                return fallback
-                                        _tracker_hp = _tracker_num(_tracker_home_stats.get("Ball Possession"), 50.0)
-                                        _tracker_ap = _tracker_num(_tracker_away_stats.get("Ball Possession"), 100.0 - _tracker_hp)
-                                        _tracker_total = max(1.0, _tracker_hp + _tracker_ap)
-                                        _tracker_hpct = max(0, min(100, round(_tracker_hp / _tracker_total * 100)))
-                                        _tracker_apct = 100 - _tracker_hpct
-                                        _tracker_minute = ((match.get("fixture") or {}).get("status") or {}).get("elapsed")
-                                        _tracker_minute_label = f"{_tracker_minute}′" if _tracker_minute is not None else "EN VIVO"
-                                        _tracker_home = html.escape(str(match_home.get("name") or "Local"))
-                                        _tracker_away = html.escape(str(match_away.get("name") or "Visitante"))
-                                        _tracker_home_logo = html.escape(str(match_home.get("logo") or ""), quote=True)
-                                        _tracker_away_logo = html.escape(str(match_away.get("logo") or ""), quote=True)
-                                        _tracker_home_badge = f'<img src="{_tracker_home_logo}" alt="">' if _tracker_home_logo else "⚽"
-                                        _tracker_away_badge = f'<img src="{_tracker_away_logo}" alt="">' if _tracker_away_logo else "⚽"
+                                        if st.session_state.get("fixture_mode", "live") == "upcoming":
+                                            st.info("El Tracker en vivo estará disponible cuando comience este partido. Puedes consultar desde ahora Stats, Goles, Córners y H2H.")
+                                        else:
+                                            # LIVE TRACKER: animación ilustrativa guiada por posesión; no representa coordenadas reales.
+                                            _tracker_id = str(match_id)
+                                            if _tracker_id not in st.session_state.stats_cache or _tracker_id in st.session_state.get("stats_errors", {}):
+                                                try:
+                                                    _tracker_payload = api_get("fixtures/statistics", {"fixture": match_id})
+                                                    st.session_state.stats_cache[_tracker_id] = _tracker_payload.get("response") or []
+                                                    st.session_state.setdefault("stats_errors", {}).pop(_tracker_id, None)
+                                                except Exception as _tracker_exc:
+                                                    st.session_state.stats_cache[_tracker_id] = []
+                                                    st.session_state.setdefault("stats_errors", {})[_tracker_id] = str(_tracker_exc)
+                                            _tracker_data = st.session_state.stats_cache.get(_tracker_id, [])
+                                            _tracker_home_stats = {entry.get("type"): entry.get("value") for entry in ((_tracker_data[0].get("statistics") or []) if len(_tracker_data) > 0 else [])}
+                                            _tracker_away_stats = {entry.get("type"): entry.get("value") for entry in ((_tracker_data[1].get("statistics") or []) if len(_tracker_data) > 1 else [])}
+                                            def _tracker_num(value, fallback):
+                                                try:
+                                                    return float(str(value).replace("%", "").replace(",", "."))
+                                                except (TypeError, ValueError):
+                                                    return fallback
+                                            _tracker_hp = _tracker_num(_tracker_home_stats.get("Ball Possession"), 50.0)
+                                            _tracker_ap = _tracker_num(_tracker_away_stats.get("Ball Possession"), 100.0 - _tracker_hp)
+                                            _tracker_total = max(1.0, _tracker_hp + _tracker_ap)
+                                            _tracker_hpct = max(0, min(100, round(_tracker_hp / _tracker_total * 100)))
+                                            _tracker_apct = 100 - _tracker_hpct
+                                            _tracker_minute = ((match.get("fixture") or {}).get("status") or {}).get("elapsed")
+                                            _tracker_minute_label = f"{_tracker_minute}′" if _tracker_minute is not None else "EN VIVO"
+                                            _tracker_home = html.escape(str(match_home.get("name") or "Local"))
+                                            _tracker_away = html.escape(str(match_away.get("name") or "Visitante"))
+                                            _tracker_home_logo = html.escape(str(match_home.get("logo") or ""), quote=True)
+                                            _tracker_away_logo = html.escape(str(match_away.get("logo") or ""), quote=True)
+                                            _tracker_home_badge = f'<img src="{_tracker_home_logo}" alt="">' if _tracker_home_logo else "⚽"
+                                            _tracker_away_badge = f'<img src="{_tracker_away_logo}" alt="">' if _tracker_away_logo else "⚽"
 
-                                        # Eventos reales de gol agrupados por equipo.
-                                        _tracker_events_cache = st.session_state.setdefault("tracker_goal_events_cache", {})
-                                        _tracker_events_key = str(match_id)
-                                        if _tracker_events_key not in _tracker_events_cache:
-                                            try:
-                                                _tracker_events_payload = api_get("fixtures/events", {"fixture": match_id})
-                                                _tracker_events_cache[_tracker_events_key] = _tracker_events_payload.get("response") or []
-                                            except Exception:
-                                                _tracker_events_cache[_tracker_events_key] = []
-                                        _tracker_goal_events = [ev for ev in (_tracker_events_cache.get(_tracker_events_key) or []) if str(ev.get("type") or "").casefold() == "goal" and str(ev.get("detail") or "").casefold() not in {"missed penalty", "penalty missed"}]
-                                        _tracker_goal_events.sort(key=lambda ev: (int(((ev.get("time") or {}).get("elapsed")) or 0), int(((ev.get("time") or {}).get("extra")) or 0)))
-                                        _tracker_home_scorers, _tracker_away_scorers = [], []
-                                        for _tracker_goal in _tracker_goal_events:
-                                            _tracker_goal_team_id = (_tracker_goal.get("team") or {}).get("id")
-                                            _tracker_goal_time = _tracker_goal.get("time") or {}
-                                            _tracker_goal_elapsed, _tracker_goal_extra = _tracker_goal_time.get("elapsed"), _tracker_goal_time.get("extra")
-                                            _tracker_goal_minute = f"{_tracker_goal_elapsed}+{_tracker_goal_extra}′" if _tracker_goal_extra else f"{_tracker_goal_elapsed}′" if _tracker_goal_elapsed is not None else ""
-                                            _tracker_goal_player = html.escape(str((_tracker_goal.get("player") or {}).get("name") or "Autor no disponible"))
-                                            _tracker_goal_detail = str(_tracker_goal.get("detail") or "")
-                                            _tracker_goal_note = " · " + html.escape(_tracker_goal_detail) if _tracker_goal_detail and _tracker_goal_detail.casefold() not in {"normal goal", "goal"} else ""
-                                            _tracker_goal_line = f'<span class="fl-tracker-scorer">⚽ {_tracker_goal_player} <b>{html.escape(_tracker_goal_minute)}</b>{_tracker_goal_note}</span>'
-                                            if _tracker_goal_team_id == match_home.get("id"):
-                                                _tracker_home_scorers.append(_tracker_goal_line)
-                                            elif _tracker_goal_team_id == match_away.get("id"):
-                                                _tracker_away_scorers.append(_tracker_goal_line)
-                                        _tracker_home_scorers_html = '<div class="fl-tracker-scorers">' + "".join(_tracker_home_scorers) + "</div>" if _tracker_home_scorers else ""
-                                        _tracker_away_scorers_html = '<div class="fl-tracker-scorers">' + "".join(_tracker_away_scorers) + "</div>" if _tracker_away_scorers else ""
-                                        _tracker_home_shots = _tracker_num(_tracker_home_stats.get("Total Shots"), 0)
-                                        _tracker_away_shots = _tracker_num(_tracker_away_stats.get("Total Shots"), 0)
-                                        _tracker_home_corners = _tracker_num(_tracker_home_stats.get("Corner Kicks"), 0)
-                                        _tracker_away_corners = _tracker_num(_tracker_away_stats.get("Corner Kicks"), 0)
-                                        _tracker_home_activity = min(100, round(_tracker_hpct * .55 + min(100, _tracker_home_shots * 5) * .25 + min(100, _tracker_home_corners * 12) * .20))
-                                        _tracker_away_activity = min(100, round(_tracker_apct * .55 + min(100, _tracker_away_shots * 5) * .25 + min(100, _tracker_away_corners * 12) * .20))
-                                        _tracker_ball_left = max(12, min(88, 50 + (_tracker_hpct - 50) * .62))
-                                        _tracker_direction = "Local" if _tracker_hpct >= 50 else "Visitante"
-                                        _tracker_event = "Actividad equilibrada" if abs(_tracker_hpct - 50) < 7 else f"Mayor iniciativa: {_tracker_direction}"
-                                        st.markdown(
-                                            f'<section class="fl-tracker-wrap">'
-                                            f'<div class="fl-tracker-head"><div><div class="fl-tracker-kicker">FOOTBALL LAB · LIVE EXPERIENCE</div><div class="fl-tracker-title">LIVE TRACKER</div><div class="fl-tracker-subtitle">Dominio territorial animado · {html.escape(_tracker_minute_label)}</div></div><span class="fl-tracker-live"><i></i> EN VIVO</span></div>'
-                                            f'<div class="fl-tracker-score"><div class="fl-tracker-team">{_tracker_home_badge}<strong>{_tracker_home}</strong><small>LOCAL</small>{_tracker_home_scorers_html}</div><div class="fl-tracker-score-mid"><b>{match_goals.get("home") if match_goals.get("home") is not None else "—"} – {match_goals.get("away") if match_goals.get("away") is not None else "—"}</b><small>{html.escape(_tracker_minute_label)}</small></div><div class="fl-tracker-team away">{_tracker_away_badge}<strong>{_tracker_away}</strong><small>VISITANTE</small>{_tracker_away_scorers_html}</div></div>'
-                                            f'<div class="fl-tracker-possession"><div><span>{_tracker_home}</span><b>{_tracker_hpct}%</b></div><div class="fl-tracker-possession-track"><i style="width:{_tracker_hpct}%"></i></div><div><span>{_tracker_away}</span><b>{_tracker_apct}%</b></div></div>'
-                                            f'<div class="fl-tracker-pitch-card"><div class="fl-tracker-pitch-label"><span>← {_tracker_home} ataca</span><span>{_tracker_away} ataca →</span></div>'
-                                            f'<div class="fl-tracker-pitch"><div class="fl-tracker-pitch-mid"></div><div class="fl-tracker-circle"></div><div class="fl-tracker-box left"></div><div class="fl-tracker-box right"></div><div class="fl-tracker-goal left"></div><div class="fl-tracker-goal right"></div><div class="fl-tracker-lane lane-a"></div><div class="fl-tracker-lane lane-b"></div><div class="fl-tracker-ball" style="--ball-x:{_tracker_ball_left}%"><span>⚽</span></div><div class="fl-tracker-pulse"></div></div>'
-                                            f'<div class="fl-tracker-pitch-legend"><span><i class="home"></i> Actividad local</span><span><i class="away"></i> Actividad visitante</span></div></div>'
-                                            f'<div class="fl-tracker-metrics"><div><small>ACTIVIDAD LOCAL</small><b>{_tracker_home_activity}%</b><span>{_tracker_home_shots:.0f} tiros · {_tracker_home_corners:.0f} córners</span></div><div><small>ACTIVIDAD VISITANTE</small><b>{_tracker_away_activity}%</b><span>{_tracker_away_shots:.0f} tiros · {_tracker_away_corners:.0f} córners</span></div></div>'
-                                            f'<div class="fl-tracker-status"><span class="fl-tracker-status-dot"></span>{html.escape(_tracker_event)}</div>'
-                                            f'<div class="fl-tracker-disclaimer">DEMO ANIMADA · La posición del balón es ilustrativa y se desplaza según la posesión y la actividad estadística disponible. No es seguimiento GPS ni una ubicación real del balón. Las estadísticas pueden tener retraso o no estar disponibles.</div></section>',
-                                            unsafe_allow_html=True,
-                                        )
-                                        st.markdown("""<style>
-                                        .fl-tracker-wrap{background:linear-gradient(145deg,#171A20,#0D1015);border:1px solid #69551D;border-radius:20px;padding:clamp(13px,2.5vw,24px);color:#F8FAFC;box-shadow:0 14px 38px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.04);margin:4px 0 20px}
-                                        .fl-tracker-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}.fl-tracker-kicker{font-size:9px;letter-spacing:.2em;font-weight:900;color:#BFA34A}.fl-tracker-title{font-size:clamp(22px,4vw,32px);font-weight:950;letter-spacing:.04em;color:#FFE16A}.fl-tracker-subtitle{font-size:12px;color:#9CA3AF;margin-top:2px}.fl-tracker-live{font-size:10px;font-weight:900;letter-spacing:.1em;color:#FF7474;border:1px solid #71363A;background:#35191D;border-radius:99px;padding:7px 10px;white-space:nowrap}.fl-tracker-live i{display:inline-block;width:6px;height:6px;background:#FF5252;border-radius:50%;margin-right:5px;box-shadow:0 0 9px #FF5252;animation:flTrackerBlink 1s infinite}
-                                        .fl-tracker-score{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;padding:13px 0;border-top:1px solid #292D34;border-bottom:1px solid #292D34}.fl-tracker-team{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-width:0;font-weight:800}.fl-tracker-team img{width:30px;height:30px;object-fit:contain}.fl-tracker-team strong{font-size:clamp(10px,1.5vw,14px);overflow-wrap:anywhere}.fl-tracker-team small{font-size:8px;color:#A1A1AA;letter-spacing:.12em}.fl-tracker-team.away{justify-content:flex-end;text-align:right}.fl-tracker-score-mid{text-align:center}.fl-tracker-scorers{display:flex;flex-direction:column;gap:3px;width:100%;flex-basis:100%;font-weight:500}.fl-tracker-scorer{font-size:10px;line-height:1.3;color:#D1D5DB;overflow-wrap:anywhere}.fl-tracker-scorer b{color:#FFE16A;font-weight:800;white-space:nowrap}.fl-tracker-team.away .fl-tracker-scorers{align-items:flex-end}.fl-tracker-score-mid b{font-size:clamp(19px,3vw,26px);color:#FFE16A;white-space:nowrap}.fl-tracker-score-mid small{display:block;color:#A1A1AA;font-size:10px}
-                                        .fl-tracker-possession{display:grid;grid-template-columns:1fr 1fr;gap:7px 14px;margin:17px 0}.fl-tracker-possession>div:not(.fl-tracker-possession-track){display:flex;justify-content:space-between;gap:8px;font-size:11px;color:#D1D5DB}.fl-tracker-possession b{color:#FFE16A;font-size:15px}.fl-tracker-possession-track{grid-column:1/3;height:9px;border-radius:99px;background:#1766B6;overflow:hidden}.fl-tracker-possession-track i{display:block;height:100%;background:linear-gradient(90deg,#FF3D4F,#FF9A62);border-radius:99px;transition:width .8s ease}
-                                        .fl-tracker-pitch-card{border:1px solid #343A42;border-radius:15px;background:#101B17;padding:10px}.fl-tracker-pitch-label,.fl-tracker-pitch-legend{display:flex;justify-content:space-between;gap:8px;color:#E5C85B;font-size:10px;font-weight:800;margin:2px 3px 9px}.fl-tracker-pitch{position:relative;width:100%;aspect-ratio:1.72/1;overflow:hidden;border:1.5px solid rgba(231,240,230,.72);border-radius:7px;background:repeating-linear-gradient(90deg,#174A35 0%,#174A35 12.5%,#1A513A 12.5%,#1A513A 25%);isolation:isolate}
-                                        .fl-tracker-pitch:before,.fl-tracker-pitch:after{content:"";position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.65);left:50%;z-index:1}.fl-tracker-pitch:after{top:50%;bottom:auto;left:50%;width:10px;height:10px;border:1px solid rgba(255,255,255,.65);border-radius:50%;transform:translate(-50%,-50%);background:transparent}
-                                        .fl-tracker-pitch-mid{position:absolute;left:50%;top:0;bottom:0;border-left:1px solid rgba(255,255,255,.55)}.fl-tracker-circle{position:absolute;left:50%;top:50%;width:23%;aspect-ratio:1;border:1px solid rgba(255,255,255,.55);border-radius:50%;transform:translate(-50%,-50%)}
-                                        .fl-tracker-box{position:absolute;top:25%;height:50%;width:16%;border:1px solid rgba(255,255,255,.58)}.fl-tracker-box.left{left:0;border-left:0}.fl-tracker-box.right{right:0;border-right:0}.fl-tracker-goal{position:absolute;top:40%;height:20%;width:2.2%;border:1px solid rgba(255,255,255,.5)}.fl-tracker-goal.left{left:-1px}.fl-tracker-goal.right{right:-1px}
-                                        .fl-tracker-lane{position:absolute;top:0;bottom:0;width:38%;filter:blur(19px);opacity:.52;z-index:0;animation:flTrackerGlow 5s ease-in-out infinite alternate}.fl-tracker-lane.lane-a{left:0;background:radial-gradient(ellipse at 65% 50%,rgba(255,55,72,.85),transparent 68%)}.fl-tracker-lane.lane-b{right:0;background:radial-gradient(ellipse at 35% 50%,rgba(34,139,255,.9),transparent 68%);animation-delay:-2.5s}
-                                        .fl-tracker-ball{position:absolute;z-index:4;left:var(--ball-x);top:50%;transform:translate(-50%,-50%);animation:flTrackerBall 4.5s ease-in-out infinite alternate;filter:drop-shadow(0 0 9px rgba(255,255,255,.9))}.fl-tracker-ball span{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.96);font-size:23px;box-shadow:0 0 0 5px rgba(255,255,255,.12),0 0 22px rgba(255,255,255,.48)}
-                                        .fl-tracker-pulse{position:absolute;z-index:2;left:var(--ball-x);top:50%;width:55px;height:55px;border:1px solid rgba(255,255,255,.55);border-radius:50%;transform:translate(-50%,-50%);animation:flTrackerPulse 2s ease-out infinite}
-                                        .fl-tracker-pitch-legend{margin:9px 3px 1px;color:#BFC7C2;font-weight:600}.fl-tracker-pitch-legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}.fl-tracker-pitch-legend i.home{background:#FF5364}.fl-tracker-pitch-legend i.away{background:#269BFF}
-                                        .fl-tracker-metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.fl-tracker-metrics>div{border:1px solid #343A42;border-radius:12px;padding:12px;background:#141920;min-width:0}.fl-tracker-metrics small{display:block;color:#A6AAB2;font-size:9px;letter-spacing:.1em;font-weight:850}.fl-tracker-metrics b{display:block;color:#FFE16A;font-size:23px;margin:4px 0}.fl-tracker-metrics span{display:block;color:#C4C9D1;font-size:10px}.fl-tracker-status{margin-top:12px;padding:11px 13px;border-radius:10px;background:#1B2027;color:#F4D66E;font-weight:750;font-size:12px}.fl-tracker-status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#FACC15;margin-right:8px;box-shadow:0 0 9px #FACC15}.fl-tracker-disclaimer{margin-top:11px;color:#8F98A6;font-size:9px;line-height:1.5;letter-spacing:.02em}
-                                        @keyframes flTrackerBall{0%{left:calc(var(--ball-x) - 8%);top:43%}50%{top:58%}100%{left:calc(var(--ball-x) + 8%);top:48%}}@keyframes flTrackerGlow{from{opacity:.25}to{opacity:.72}}@keyframes flTrackerPulse{0%{opacity:.75;transform:translate(-50%,-50%) scale(.45)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.8)}}@keyframes flTrackerBlink{50%{opacity:.35}}
-                                        @media(max-width:640px){.fl-tracker-wrap{padding:12px;border-radius:15px}.fl-tracker-team{flex-wrap:wrap;gap:4px}.fl-tracker-team img{width:24px;height:24px}.fl-tracker-team small{display:none}.fl-tracker-pitch-label{font-size:9px}.fl-tracker-ball span{width:29px;height:29px;font-size:20px}.fl-tracker-metrics{gap:7px}.fl-tracker-metrics>div{padding:9px}.fl-tracker-metrics b{font-size:19px}.fl-tracker-disclaimer{font-size:8px}}
-                                        @media(prefers-reduced-motion:reduce){.fl-tracker-ball,.fl-tracker-pulse,.fl-tracker-lane,.fl-tracker-live i{animation:none!important}}
-                                        </style>""", unsafe_allow_html=True)
+                                            # Eventos reales de gol agrupados por equipo.
+                                            _tracker_events_cache = st.session_state.setdefault("tracker_goal_events_cache", {})
+                                            _tracker_events_key = str(match_id)
+                                            if _tracker_events_key not in _tracker_events_cache:
+                                                try:
+                                                    _tracker_events_payload = api_get("fixtures/events", {"fixture": match_id})
+                                                    _tracker_events_cache[_tracker_events_key] = _tracker_events_payload.get("response") or []
+                                                except Exception:
+                                                    _tracker_events_cache[_tracker_events_key] = []
+                                            _tracker_goal_events = [ev for ev in (_tracker_events_cache.get(_tracker_events_key) or []) if str(ev.get("type") or "").casefold() == "goal" and str(ev.get("detail") or "").casefold() not in {"missed penalty", "penalty missed"}]
+                                            _tracker_goal_events.sort(key=lambda ev: (int(((ev.get("time") or {}).get("elapsed")) or 0), int(((ev.get("time") or {}).get("extra")) or 0)))
+                                            _tracker_home_scorers, _tracker_away_scorers = [], []
+                                            for _tracker_goal in _tracker_goal_events:
+                                                _tracker_goal_team_id = (_tracker_goal.get("team") or {}).get("id")
+                                                _tracker_goal_time = _tracker_goal.get("time") or {}
+                                                _tracker_goal_elapsed, _tracker_goal_extra = _tracker_goal_time.get("elapsed"), _tracker_goal_time.get("extra")
+                                                _tracker_goal_minute = f"{_tracker_goal_elapsed}+{_tracker_goal_extra}′" if _tracker_goal_extra else f"{_tracker_goal_elapsed}′" if _tracker_goal_elapsed is not None else ""
+                                                _tracker_goal_player = html.escape(str((_tracker_goal.get("player") or {}).get("name") or "Autor no disponible"))
+                                                _tracker_goal_detail = str(_tracker_goal.get("detail") or "")
+                                                _tracker_goal_note = " · " + html.escape(_tracker_goal_detail) if _tracker_goal_detail and _tracker_goal_detail.casefold() not in {"normal goal", "goal"} else ""
+                                                _tracker_goal_line = f'<span class="fl-tracker-scorer">⚽ {_tracker_goal_player} <b>{html.escape(_tracker_goal_minute)}</b>{_tracker_goal_note}</span>'
+                                                if _tracker_goal_team_id == match_home.get("id"):
+                                                    _tracker_home_scorers.append(_tracker_goal_line)
+                                                elif _tracker_goal_team_id == match_away.get("id"):
+                                                    _tracker_away_scorers.append(_tracker_goal_line)
+                                            _tracker_home_scorers_html = '<div class="fl-tracker-scorers">' + "".join(_tracker_home_scorers) + "</div>" if _tracker_home_scorers else ""
+                                            _tracker_away_scorers_html = '<div class="fl-tracker-scorers">' + "".join(_tracker_away_scorers) + "</div>" if _tracker_away_scorers else ""
+                                            _tracker_home_shots = _tracker_num(_tracker_home_stats.get("Total Shots"), 0)
+                                            _tracker_away_shots = _tracker_num(_tracker_away_stats.get("Total Shots"), 0)
+                                            _tracker_home_corners = _tracker_num(_tracker_home_stats.get("Corner Kicks"), 0)
+                                            _tracker_away_corners = _tracker_num(_tracker_away_stats.get("Corner Kicks"), 0)
+                                            _tracker_home_activity = min(100, round(_tracker_hpct * .55 + min(100, _tracker_home_shots * 5) * .25 + min(100, _tracker_home_corners * 12) * .20))
+                                            _tracker_away_activity = min(100, round(_tracker_apct * .55 + min(100, _tracker_away_shots * 5) * .25 + min(100, _tracker_away_corners * 12) * .20))
+                                            _tracker_ball_left = max(12, min(88, 50 + (_tracker_hpct - 50) * .62))
+                                            _tracker_direction = "Local" if _tracker_hpct >= 50 else "Visitante"
+                                            _tracker_event = "Actividad equilibrada" if abs(_tracker_hpct - 50) < 7 else f"Mayor iniciativa: {_tracker_direction}"
+                                            st.markdown(
+                                                f'<section class="fl-tracker-wrap">'
+                                                f'<div class="fl-tracker-head"><div><div class="fl-tracker-kicker">FOOTBALL LAB · LIVE EXPERIENCE</div><div class="fl-tracker-title">LIVE TRACKER</div><div class="fl-tracker-subtitle">Dominio territorial animado · {html.escape(_tracker_minute_label)}</div></div><span class="fl-tracker-live"><i></i> EN VIVO</span></div>'
+                                                f'<div class="fl-tracker-score"><div class="fl-tracker-team">{_tracker_home_badge}<strong>{_tracker_home}</strong><small>LOCAL</small>{_tracker_home_scorers_html}</div><div class="fl-tracker-score-mid"><b>{match_goals.get("home") if match_goals.get("home") is not None else "—"} – {match_goals.get("away") if match_goals.get("away") is not None else "—"}</b><small>{html.escape(_tracker_minute_label)}</small></div><div class="fl-tracker-team away">{_tracker_away_badge}<strong>{_tracker_away}</strong><small>VISITANTE</small>{_tracker_away_scorers_html}</div></div>'
+                                                f'<div class="fl-tracker-possession"><div><span>{_tracker_home}</span><b>{_tracker_hpct}%</b></div><div class="fl-tracker-possession-track"><i style="width:{_tracker_hpct}%"></i></div><div><span>{_tracker_away}</span><b>{_tracker_apct}%</b></div></div>'
+                                                f'<div class="fl-tracker-pitch-card"><div class="fl-tracker-pitch-label"><span>← {_tracker_home} ataca</span><span>{_tracker_away} ataca →</span></div>'
+                                                f'<div class="fl-tracker-pitch"><div class="fl-tracker-pitch-mid"></div><div class="fl-tracker-circle"></div><div class="fl-tracker-box left"></div><div class="fl-tracker-box right"></div><div class="fl-tracker-goal left"></div><div class="fl-tracker-goal right"></div><div class="fl-tracker-lane lane-a"></div><div class="fl-tracker-lane lane-b"></div><div class="fl-tracker-ball" style="--ball-x:{_tracker_ball_left}%"><span>⚽</span></div><div class="fl-tracker-pulse"></div></div>'
+                                                f'<div class="fl-tracker-pitch-legend"><span><i class="home"></i> Actividad local</span><span><i class="away"></i> Actividad visitante</span></div></div>'
+                                                f'<div class="fl-tracker-metrics"><div><small>ACTIVIDAD LOCAL</small><b>{_tracker_home_activity}%</b><span>{_tracker_home_shots:.0f} tiros · {_tracker_home_corners:.0f} córners</span></div><div><small>ACTIVIDAD VISITANTE</small><b>{_tracker_away_activity}%</b><span>{_tracker_away_shots:.0f} tiros · {_tracker_away_corners:.0f} córners</span></div></div>'
+                                                f'<div class="fl-tracker-status"><span class="fl-tracker-status-dot"></span>{html.escape(_tracker_event)}</div>'
+                                                f'<div class="fl-tracker-disclaimer">DEMO ANIMADA · La posición del balón es ilustrativa y se desplaza según la posesión y la actividad estadística disponible. No es seguimiento GPS ni una ubicación real del balón. Las estadísticas pueden tener retraso o no estar disponibles.</div></section>',
+                                                unsafe_allow_html=True,
+                                            )
+                                            st.markdown("""<style>
+                                            .fl-tracker-wrap{background:linear-gradient(145deg,#171A20,#0D1015);border:1px solid #69551D;border-radius:20px;padding:clamp(13px,2.5vw,24px);color:#F8FAFC;box-shadow:0 14px 38px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.04);margin:4px 0 20px}
+                                            .fl-tracker-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}.fl-tracker-kicker{font-size:9px;letter-spacing:.2em;font-weight:900;color:#BFA34A}.fl-tracker-title{font-size:clamp(22px,4vw,32px);font-weight:950;letter-spacing:.04em;color:#FFE16A}.fl-tracker-subtitle{font-size:12px;color:#9CA3AF;margin-top:2px}.fl-tracker-live{font-size:10px;font-weight:900;letter-spacing:.1em;color:#FF7474;border:1px solid #71363A;background:#35191D;border-radius:99px;padding:7px 10px;white-space:nowrap}.fl-tracker-live i{display:inline-block;width:6px;height:6px;background:#FF5252;border-radius:50%;margin-right:5px;box-shadow:0 0 9px #FF5252;animation:flTrackerBlink 1s infinite}
+                                            .fl-tracker-score{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;padding:13px 0;border-top:1px solid #292D34;border-bottom:1px solid #292D34}.fl-tracker-team{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-width:0;font-weight:800}.fl-tracker-team img{width:30px;height:30px;object-fit:contain}.fl-tracker-team strong{font-size:clamp(10px,1.5vw,14px);overflow-wrap:anywhere}.fl-tracker-team small{font-size:8px;color:#A1A1AA;letter-spacing:.12em}.fl-tracker-team.away{justify-content:flex-end;text-align:right}.fl-tracker-score-mid{text-align:center}.fl-tracker-scorers{display:flex;flex-direction:column;gap:3px;width:100%;flex-basis:100%;font-weight:500}.fl-tracker-scorer{font-size:10px;line-height:1.3;color:#D1D5DB;overflow-wrap:anywhere}.fl-tracker-scorer b{color:#FFE16A;font-weight:800;white-space:nowrap}.fl-tracker-team.away .fl-tracker-scorers{align-items:flex-end}.fl-tracker-score-mid b{font-size:clamp(19px,3vw,26px);color:#FFE16A;white-space:nowrap}.fl-tracker-score-mid small{display:block;color:#A1A1AA;font-size:10px}
+                                            .fl-tracker-possession{display:grid;grid-template-columns:1fr 1fr;gap:7px 14px;margin:17px 0}.fl-tracker-possession>div:not(.fl-tracker-possession-track){display:flex;justify-content:space-between;gap:8px;font-size:11px;color:#D1D5DB}.fl-tracker-possession b{color:#FFE16A;font-size:15px}.fl-tracker-possession-track{grid-column:1/3;height:9px;border-radius:99px;background:#1766B6;overflow:hidden}.fl-tracker-possession-track i{display:block;height:100%;background:linear-gradient(90deg,#FF3D4F,#FF9A62);border-radius:99px;transition:width .8s ease}
+                                            .fl-tracker-pitch-card{border:1px solid #343A42;border-radius:15px;background:#101B17;padding:10px}.fl-tracker-pitch-label,.fl-tracker-pitch-legend{display:flex;justify-content:space-between;gap:8px;color:#E5C85B;font-size:10px;font-weight:800;margin:2px 3px 9px}.fl-tracker-pitch{position:relative;width:100%;aspect-ratio:1.72/1;overflow:hidden;border:1.5px solid rgba(231,240,230,.72);border-radius:7px;background:repeating-linear-gradient(90deg,#174A35 0%,#174A35 12.5%,#1A513A 12.5%,#1A513A 25%);isolation:isolate}
+                                            .fl-tracker-pitch:before,.fl-tracker-pitch:after{content:"";position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.65);left:50%;z-index:1}.fl-tracker-pitch:after{top:50%;bottom:auto;left:50%;width:10px;height:10px;border:1px solid rgba(255,255,255,.65);border-radius:50%;transform:translate(-50%,-50%);background:transparent}
+                                            .fl-tracker-pitch-mid{position:absolute;left:50%;top:0;bottom:0;border-left:1px solid rgba(255,255,255,.55)}.fl-tracker-circle{position:absolute;left:50%;top:50%;width:23%;aspect-ratio:1;border:1px solid rgba(255,255,255,.55);border-radius:50%;transform:translate(-50%,-50%)}
+                                            .fl-tracker-box{position:absolute;top:25%;height:50%;width:16%;border:1px solid rgba(255,255,255,.58)}.fl-tracker-box.left{left:0;border-left:0}.fl-tracker-box.right{right:0;border-right:0}.fl-tracker-goal{position:absolute;top:40%;height:20%;width:2.2%;border:1px solid rgba(255,255,255,.5)}.fl-tracker-goal.left{left:-1px}.fl-tracker-goal.right{right:-1px}
+                                            .fl-tracker-lane{position:absolute;top:0;bottom:0;width:38%;filter:blur(19px);opacity:.52;z-index:0;animation:flTrackerGlow 5s ease-in-out infinite alternate}.fl-tracker-lane.lane-a{left:0;background:radial-gradient(ellipse at 65% 50%,rgba(255,55,72,.85),transparent 68%)}.fl-tracker-lane.lane-b{right:0;background:radial-gradient(ellipse at 35% 50%,rgba(34,139,255,.9),transparent 68%);animation-delay:-2.5s}
+                                            .fl-tracker-ball{position:absolute;z-index:4;left:var(--ball-x);top:50%;transform:translate(-50%,-50%);animation:flTrackerBall 4.5s ease-in-out infinite alternate;filter:drop-shadow(0 0 9px rgba(255,255,255,.9))}.fl-tracker-ball span{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.96);font-size:23px;box-shadow:0 0 0 5px rgba(255,255,255,.12),0 0 22px rgba(255,255,255,.48)}
+                                            .fl-tracker-pulse{position:absolute;z-index:2;left:var(--ball-x);top:50%;width:55px;height:55px;border:1px solid rgba(255,255,255,.55);border-radius:50%;transform:translate(-50%,-50%);animation:flTrackerPulse 2s ease-out infinite}
+                                            .fl-tracker-pitch-legend{margin:9px 3px 1px;color:#BFC7C2;font-weight:600}.fl-tracker-pitch-legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}.fl-tracker-pitch-legend i.home{background:#FF5364}.fl-tracker-pitch-legend i.away{background:#269BFF}
+                                            .fl-tracker-metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.fl-tracker-metrics>div{border:1px solid #343A42;border-radius:12px;padding:12px;background:#141920;min-width:0}.fl-tracker-metrics small{display:block;color:#A6AAB2;font-size:9px;letter-spacing:.1em;font-weight:850}.fl-tracker-metrics b{display:block;color:#FFE16A;font-size:23px;margin:4px 0}.fl-tracker-metrics span{display:block;color:#C4C9D1;font-size:10px}.fl-tracker-status{margin-top:12px;padding:11px 13px;border-radius:10px;background:#1B2027;color:#F4D66E;font-weight:750;font-size:12px}.fl-tracker-status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#FACC15;margin-right:8px;box-shadow:0 0 9px #FACC15}.fl-tracker-disclaimer{margin-top:11px;color:#8F98A6;font-size:9px;line-height:1.5;letter-spacing:.02em}
+                                            @keyframes flTrackerBall{0%{left:calc(var(--ball-x) - 8%);top:43%}50%{top:58%}100%{left:calc(var(--ball-x) + 8%);top:48%}}@keyframes flTrackerGlow{from{opacity:.25}to{opacity:.72}}@keyframes flTrackerPulse{0%{opacity:.75;transform:translate(-50%,-50%) scale(.45)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.8)}}@keyframes flTrackerBlink{50%{opacity:.35}}
+                                            @media(max-width:640px){.fl-tracker-wrap{padding:12px;border-radius:15px}.fl-tracker-team{flex-wrap:wrap;gap:4px}.fl-tracker-team img{width:24px;height:24px}.fl-tracker-team small{display:none}.fl-tracker-pitch-label{font-size:9px}.fl-tracker-ball span{width:29px;height:29px;font-size:20px}.fl-tracker-metrics{gap:7px}.fl-tracker-metrics>div{padding:9px}.fl-tracker-metrics b{font-size:19px}.fl-tracker-disclaimer{font-size:8px}}
+                                            @media(prefers-reduced-motion:reduce){.fl-tracker-ball,.fl-tracker-pulse,.fl-tracker-lane,.fl-tracker-live i{animation:none!important}}
+                                            </style>""", unsafe_allow_html=True)
                                     elif tool_name == "h2h":
                                         _match_league = match.get("league") or {}
                                         h2h_key = f"h2h-v3-home-{match_home_id}-{match_away_id}-{_match_league.get('id') or 'all'}"
