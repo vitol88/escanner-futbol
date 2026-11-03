@@ -970,6 +970,8 @@ st.markdown("""
   .goal-match-stats-table thead th{padding:11px 9px;background:linear-gradient(180deg,#292F3A,#222833);color:#F4C928;font-size:10px;font-weight:900;letter-spacing:.45px;text-align:center;border-bottom:1px solid #515866;line-height:1.25}
   .goal-match-stats-table thead th:first-child{text-align:left;width:42%}
   .goal-match-stats-table thead th:not(:first-child){width:29%;overflow-wrap:anywhere}
+  .goal-stats-team-heading{display:inline-flex;align-items:center;justify-content:center;gap:6px;max-width:100%;vertical-align:middle;white-space:normal}
+  .goal-stats-team-score{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:6px;background:linear-gradient(180deg,#FFE477,#FACC15);color:#171717;font-size:11px;font-weight:950;line-height:1;box-shadow:0 1px 5px rgba(250,204,21,.22);font-variant-numeric:tabular-nums}
   .goal-match-stats-table tbody th,.goal-match-stats-table tbody td{padding:10px 9px;border-bottom:1px solid rgba(148,163,184,.14);line-height:1.25}
   .goal-match-stats-table tbody tr:nth-child(even){background:rgba(255,255,255,.035)}
   .goal-match-stats-table tbody tr:last-child th,.goal-match-stats-table tbody tr:last-child td{border-bottom:0}
@@ -6730,7 +6732,11 @@ else:
                                                                                 _values = _stat_map.get(_api_key, {})
                                                                                 _left, _right = _values.get(_team_names[0]), _values.get(_team_names[1])
                                                                                 _table_rows.append(f'<tr><th>{_label}</th><td>{html.escape(str(_left if _left is not None else "N/D"))}</td><td>{html.escape(str(_right if _right is not None else "N/D"))}</td></tr>')
-                                                                            _stats_table = '<div class="goal-match-stats-table"><table><thead><tr><th>Estadística</th><th>' + html.escape(_team_names[0]) + '</th><th>' + html.escape(_team_names[1]) + '</th></tr></thead><tbody>' + "".join(_table_rows[1:]) + '</tbody></table><div class="goal-match-goals"><b>⚽ Goles y minutos:</b> ' + _goal_minute_text + '</div></div>'
+                                                                            _home_score_badge = html.escape(str(recent.get("home_goals"))) if isinstance(recent.get("home_goals"), int) else "—"
+                                                                            _away_score_badge = html.escape(str(recent.get("away_goals"))) if isinstance(recent.get("away_goals"), int) else "—"
+                                                                            _home_stats_heading = '<span class="goal-stats-team-heading">' + html.escape(_team_names[0]) + '<b class="goal-stats-team-score">' + _home_score_badge + '</b></span>'
+                                                                            _away_stats_heading = '<span class="goal-stats-team-heading">' + html.escape(_team_names[1]) + '<b class="goal-stats-team-score">' + _away_score_badge + '</b></span>'
+                                                                            _stats_table = '<div class="goal-match-stats-table"><table><thead><tr><th>Estadística</th><th>' + _home_stats_heading + '</th><th>' + _away_stats_heading + '</th></tr></thead><tbody>' + "".join(_table_rows[1:]) + '</tbody></table><div class="goal-match-goals"><b>⚽ Goles y minutos:</b> ' + _goal_minute_text + '</div></div>'
                                                                             if _match_data.get("stats_error") and not _match_data.get("statistics"):
                                                                                 st.caption("No fue posible consultar las estadísticas de este partido.")
                                                                             else:
