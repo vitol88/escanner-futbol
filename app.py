@@ -6627,7 +6627,7 @@ else:
                                                     form_cols = st.columns(1, gap="small")
                                                     for col, team, label, form_data in (
                                                         (form_cols[0], match_home, home_name, deep_context.get("home_form") or {}),
-                                                        (form_cols[1], match_away, away_name, deep_context.get("away_form") or {}),
+                                                        (form_cols[0], match_away, away_name, deep_context.get("away_form") or {}),
                                                     ):
                                                         team_logo = html.escape(str(team.get("logo") or ""), quote=True)
                                                         logo_html = f'<img class="goal-form-logo" src="{team_logo}" alt="">' if team_logo else ""
