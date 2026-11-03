@@ -5215,8 +5215,9 @@ if _analysis_page_active:
           background:linear-gradient(145deg,#252117 0%,#111419 72%) !important;
           box-shadow:0 0 0 1px rgba(250,204,21,.12),0 5px 18px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,229,102,.12) !important;
           color:#FACC15 !important; -webkit-text-fill-color:#FACC15 !important;
-          font-size:38px !important; line-height:1 !important; font-weight:900 !important;
-          letter-spacing:0 !important; text-align:center !important; white-space:nowrap !important;
+          font-size:48px !important; line-height:1 !important; font-weight:900 !important;
+          text-shadow:0 0 2px rgba(250,204,21,.95),0 0 9px rgba(250,204,21,.48) !important;
+          letter-spacing:-.06em !important; text-align:center !important; white-space:nowrap !important;
           transition:color .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease,background .18s ease !important;
         }}
         [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button:hover {{
@@ -5273,7 +5274,7 @@ if _analysis_page_active:
           [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button {{
             width:68px !important; max-width:68px !important; min-width:68px !important;
             height:68px !important; min-height:68px !important; padding:0 !important;
-            box-sizing:border-box !important; font-size:38px !important;
+            box-sizing:border-box !important; font-size:48px !important;
           }}
         }}
 </style>
@@ -5284,7 +5285,7 @@ if _analysis_page_active:
         # Acceso de regreso sin abrir el panel lateral.
         _is_standings_page = _analysis_page_tool == "standings"
         _back_help = "Volver a la pantalla principal de partidos"
-        _back_clicked = st.button("←", key=f"topnav_back_{_analysis_page_id}", help=_back_help)
+        _back_clicked = st.button("⟵", key=f"topnav_back_{_analysis_page_id}", help=_back_help)
         if _back_clicked:
             if _is_standings_page:
                 st.session_state["main_fixture_tool"] = {"fixture_id": _analysis_page_id, "tool": "stats"}
