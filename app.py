@@ -966,13 +966,19 @@ st.markdown("""
   .goal-live-summary-title { color:#FACC15; font-weight:900; font-size:.78rem; letter-spacing:1.2px; margin-bottom:6px; }
   .goal-live-summary p { color:#D4D4D8; font-size:.88rem; line-height:1.45; margin:0; }
   .goal-deep-heading { display:block; clear:both; position:relative; z-index:1; color:#FACC15; font-size:.78rem; letter-spacing:1.1px; font-weight:900; margin:1.9rem 0 1.1rem; padding:0 0 .2rem; line-height:1.6; }
-  .goal-match-stats-table{margin:8px 0 12px;padding:9px;border:1px solid #49402A;border-radius:10px;background:linear-gradient(145deg,#1B2028,#111419);overflow-x:auto}
-  .goal-match-stats-table table{width:100%;border-collapse:collapse;font-size:11px;color:#E5E7EB}
-  .goal-match-stats-table th,.goal-match-stats-table td{padding:7px 6px;border-bottom:1px solid #343944;text-align:center;white-space:normal}
-  .goal-match-stats-table thead th{color:#FACC15;font-weight:800}
-  .goal-match-stats-table tbody th{text-align:left;color:#C7CDD6;font-weight:650}
-  .goal-match-goals{padding:8px 4px 2px;color:#E5E7EB;font-size:11px;line-height:1.5}
-  .goal-match-goals b{color:#FACC15}
+  .goal-match-stats-table{box-sizing:border-box;margin:10px 0 13px;padding:0;border:1px solid #3B414D;border-top:2px solid #D6A900;border-radius:13px;background:linear-gradient(155deg,#1B2029 0%,#12161D 100%);overflow:hidden;box-shadow:0 5px 16px rgba(0,0,0,.18)}
+  .goal-match-stats-table table{width:100%;border-collapse:separate;border-spacing:0;font-size:12px;color:#E8ECF2;font-variant-numeric:tabular-nums}
+  .goal-match-stats-table thead th{padding:11px 9px;background:linear-gradient(180deg,#292F3A,#222833);color:#F4C928;font-size:10px;font-weight:900;letter-spacing:.45px;text-align:center;border-bottom:1px solid #515866;line-height:1.25}
+  .goal-match-stats-table thead th:first-child{text-align:left;width:42%}
+  .goal-match-stats-table thead th:not(:first-child){width:29%;overflow-wrap:anywhere}
+  .goal-match-stats-table tbody th,.goal-match-stats-table tbody td{padding:10px 9px;border-bottom:1px solid rgba(148,163,184,.14);line-height:1.25}
+  .goal-match-stats-table tbody tr:nth-child(even){background:rgba(255,255,255,.035)}
+  .goal-match-stats-table tbody tr:last-child th,.goal-match-stats-table tbody tr:last-child td{border-bottom:0}
+  .goal-match-stats-table tbody th{text-align:left;color:#BFC8D5;font-size:11px;font-weight:650}
+  .goal-match-stats-table tbody td{text-align:center;color:#F4F6FA;font-size:12px;font-weight:800}
+  .goal-match-goals{margin:0 10px 10px;padding:10px 11px;border:1px solid rgba(250,204,21,.2);border-radius:9px;background:rgba(250,204,21,.055);color:#D5DCE6;font-size:11px;line-height:1.6;overflow-wrap:anywhere}
+  .goal-match-goals b{color:#F4C928;font-weight:900}
+  @media(max-width:480px){.goal-match-stats-table table{font-size:11px}.goal-match-stats-table thead th{padding:10px 6px;font-size:9px}.goal-match-stats-table tbody th,.goal-match-stats-table tbody td{padding:9px 6px}.goal-match-stats-table tbody th{font-size:10px}.goal-match-stats-table tbody td{font-size:11px}}
   .goal-form-card { box-sizing:border-box; border:1px solid #393326; border-radius:11px; padding:12px; margin-top:5px; background:linear-gradient(145deg,#191D24,#101216); min-height:170px; height:100%; }
   .goal-form-back { box-sizing:border-box; border:1px solid #FACC15; border-radius:11px; padding:11px; margin-top:5px; background:linear-gradient(145deg,#20232B,#12151A); min-height:170px; height:100%; }
   @keyframes goal-card-flip-in { 0% { opacity:.15; transform:perspective(900px) rotateY(-180deg) scale(.94); } 70% { opacity:1; transform:perspective(900px) rotateY(12deg) scale(1.01); } 100% { opacity:1; transform:perspective(900px) rotateY(0deg) scale(1); } }
@@ -3358,11 +3364,14 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         border-bottom:1px solid #B8CDE3 !important;
       }
 
-      html body .stApp .goal-match-stats-table{background:linear-gradient(145deg,#FFFFFF,#F3F6FA)!important;border-color:#DDE2E9!important}
-      html body .stApp .goal-match-stats-table table{color:#303744!important}
-      html body .stApp .goal-match-stats-table th,html body .stApp .goal-match-stats-table td{border-bottom-color:#DDE2E9!important}
-      html body .stApp .goal-match-stats-table thead th,html body .stApp .goal-match-goals b{color:#806000!important}
-      html body .stApp .goal-match-stats-table tbody th,html body .stApp .goal-match-goals{color:#394354!important}
+      html body .stApp .goal-match-stats-table{background:linear-gradient(155deg,#FFFFFF 0%,#F4F6FA 100%)!important;border:1px solid #D8DEE8!important;border-top:2px solid #B58A00!important;box-shadow:0 5px 15px rgba(31,45,61,.07)!important}
+      html body .stApp .goal-match-stats-table thead th{background:linear-gradient(180deg,#E9EEF5,#DFE6EF)!important;color:#765900!important;border-bottom-color:#CDD5E0!important}
+      html body .stApp .goal-match-stats-table tbody th,html body .stApp .goal-match-stats-table tbody td{border-bottom-color:#E4E8EF!important}
+      html body .stApp .goal-match-stats-table tbody tr:nth-child(even){background:#F0F3F8!important}
+      html body .stApp .goal-match-stats-table tbody th{color:#536071!important}
+      html body .stApp .goal-match-stats-table tbody td{color:#202B3A!important}
+      html body .stApp .goal-match-goals{background:#F8F5E9!important;border-color:#E8DDB5!important;color:#394354!important}
+      html body .stApp .goal-match-goals b{color:#806000!important}
       .goals-section-title {
         color:#263449 !important;
         -webkit-text-fill-color:#263449 !important;
