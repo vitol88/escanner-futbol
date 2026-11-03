@@ -3224,6 +3224,20 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         box-shadow:0 5px 16px rgba(31,41,55,.07) !important;
         color:#303744 !important;
       }
+      /* Marcador histórico: adaptar únicamente el encabezado al tema claro. */
+      .goal-stats-scoreboard {
+        background:#EEF1F7 !important;
+        border-bottom:1px solid #D6B84C !important;
+      }
+      .goal-stats-live-team { color:#263142 !important; }
+      .goal-stats-scorer { color:#4B5568 !important; }
+      .goal-stats-no-scorer { color:#647084 !important; }
+      .goal-stats-live-score {
+        background:#FFFFFF !important;
+        color:#B58A00 !important;
+        border-color:#C49A24 !important;
+        box-shadow:0 2px 8px rgba(31,41,55,.07) !important;
+      }
       .goal-form-back-title {
         color:#806000 !important;
         -webkit-text-fill-color:#806000 !important;
