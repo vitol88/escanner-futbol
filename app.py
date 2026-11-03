@@ -972,6 +972,16 @@ st.markdown("""
   .goal-match-stats-table thead th:not(:first-child){width:29%;overflow-wrap:anywhere}
   .goal-stats-team-heading{display:inline-flex;align-items:center;justify-content:center;gap:6px;max-width:100%;vertical-align:middle;white-space:normal}
   .goal-stats-team-score{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:6px;background:linear-gradient(180deg,#FFE477,#FACC15);color:#171717;font-size:11px;font-weight:950;line-height:1;box-shadow:0 1px 5px rgba(250,204,21,.22);font-variant-numeric:tabular-nums}
+
+  .goal-stats-scoreboard{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:start;gap:8px;padding:14px 10px 12px;background:linear-gradient(155deg,#191F29,#11151C);border-bottom:1px solid rgba(214,169,0,.45)}
+  .goal-stats-live-team{display:flex;min-width:0;flex-direction:column;align-items:center;text-align:center;gap:6px;color:#F4F6FA}
+  .goal-stats-live-team img{width:48px;height:48px;object-fit:contain}
+  .goal-stats-live-team strong{font-size:12px;line-height:1.25;overflow-wrap:anywhere}
+  .goal-stats-live-score{align-self:start;margin-top:12px;padding:8px 10px;border:1px solid #66551B;border-radius:10px;background:#090C11;color:#FACC15;font-size:22px;font-weight:950;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .goal-stats-scorers{width:100%;display:flex;flex-direction:column;gap:5px;margin-top:2px}
+  .goal-stats-scorer{font-size:10px;line-height:1.35;color:#D9DEE7;overflow-wrap:anywhere}
+  .goal-stats-no-scorer{font-size:10px;color:#8E98A8}
+  @media(max-width:480px){.goal-stats-scoreboard{gap:4px;padding:12px 6px}.goal-stats-live-team img{width:39px;height:39px}.goal-stats-live-team strong{font-size:10px}.goal-stats-live-score{font-size:19px;padding:7px 8px}.goal-stats-scorer{font-size:9px}}
   .goal-match-stats-table tbody th,.goal-match-stats-table tbody td{padding:10px 9px;border-bottom:1px solid rgba(148,163,184,.14);line-height:1.25}
   .goal-match-stats-table tbody tr:nth-child(even){background:rgba(255,255,255,.035)}
   .goal-match-stats-table tbody tr:last-child th,.goal-match-stats-table tbody tr:last-child td{border-bottom:0}
@@ -6706,18 +6716,34 @@ else:
                                                                             _event_rows = _match_data.get("events") or []
                                                                             _goal_events = [ev for ev in _event_rows if str(ev.get("type") or "").casefold() == "goal" and str(ev.get("detail") or "").casefold() not in {"missed penalty", "penalty missed"}] if isinstance(_event_rows,list) else []
                                                                             _goal_events.sort(key=lambda ev: (int(((ev.get("time") or {}).get("elapsed")) or 0), int(((ev.get("time") or {}).get("extra")) or 0)))
-                                                                            _goal_minute_items = []
+                                                                            _team_names = [str(recent.get("home_name") or "Local"), str(recent.get("away_name") or "Visitante")]
+                                                                            _goal_scorers_by_team = {0: [], 1: []}
                                                                             for _ev in _goal_events:
                                                                                 _tm = _ev.get("time") or {}
                                                                                 _elapsed, _extra = _tm.get("elapsed"), _tm.get("extra")
                                                                                 _minute = f"{_elapsed}+{_extra}′" if _extra else f"{_elapsed}′" if _elapsed is not None else "N/D"
                                                                                 _player = (_ev.get("player") or {}).get("name") or "Autor N/D"
-                                                                                _side = (_ev.get("team") or {}).get("name") or "Equipo"
-                                                                                _goal_minute_items.append(f"{html.escape(str(_minute))} · {html.escape(str(_player))} ({html.escape(str(_side))})")
-                                                                            _goal_minute_text = " · ".join(_goal_minute_items) if _goal_minute_items else "N/D"
+                                                                                _side_data = _ev.get("team") or {}
+                                                                                _side = str(_side_data.get("name") or "")
+                                                                                _side_id = _side_data.get("id")
+                                                                                if _side_id is not None and str(_side_id) == str((recent.get("home_id") or "")):
+                                                                                    _goal_team_index = 0
+                                                                                elif _side_id is not None and str(_side_id) == str((recent.get("away_id") or "")):
+                                                                                    _goal_team_index = 1
+                                                                                elif _side.casefold() == _team_names[0].casefold():
+                                                                                    _goal_team_index = 0
+                                                                                elif _side.casefold() == _team_names[1].casefold():
+                                                                                    _goal_team_index = 1
+                                                                                else:
+                                                                                    _goal_team_index = None
+                                                                                if _goal_team_index is not None:
+                                                                                    _goal_scorers_by_team[_goal_team_index].append(f'<div class="goal-stats-scorer">⚽ {html.escape(str(_player))} ({html.escape(str(_minute))})</div>')
                                                                             _stat_map = {}
+                                                                            _team_logos = {}
                                                                             for _team_stats in (_match_data.get("statistics") or []):
-                                                                                _team_name = (_team_stats.get("team") or {}).get("name") or "Equipo"
+                                                                                _team_info = _team_stats.get("team") or {}
+                                                                                _team_name = _team_info.get("name") or "Equipo"
+                                                                                _team_logos[str(_team_name).casefold()] = _team_info.get("logo") or ""
                                                                                 for _stat in (_team_stats.get("statistics") or []):
                                                                                     _stat_map.setdefault(_stat.get("type"), {})[_team_name] = _stat.get("value")
                                                                             _stat_labels = [
@@ -6726,17 +6752,24 @@ else:
                                                                                 ("Tarjetas amarillas", "Yellow Cards"), ("Tarjetas rojas", "Red Cards"),
                                                                             ]
                                                                             _table_rows = []
-                                                                            _table_rows.append(f'<tr><th>Goles y minutos</th><td colspan="2">{_goal_minute_text}</td></tr>')
-                                                                            _team_names = [str(recent.get("home_name") or "Local"), str(recent.get("away_name") or "Visitante")]
                                                                             for _label, _api_key in _stat_labels:
                                                                                 _values = _stat_map.get(_api_key, {})
                                                                                 _left, _right = _values.get(_team_names[0]), _values.get(_team_names[1])
                                                                                 _table_rows.append(f'<tr><th>{_label}</th><td>{html.escape(str(_left if _left is not None else "N/D"))}</td><td>{html.escape(str(_right if _right is not None else "N/D"))}</td></tr>')
                                                                             _home_score_badge = html.escape(str(recent.get("home_goals"))) if isinstance(recent.get("home_goals"), int) else "—"
                                                                             _away_score_badge = html.escape(str(recent.get("away_goals"))) if isinstance(recent.get("away_goals"), int) else "—"
-                                                                            _home_stats_heading = '<span class="goal-stats-team-heading">' + html.escape(_team_names[0]) + '<b class="goal-stats-team-score">' + _home_score_badge + '</b></span>'
-                                                                            _away_stats_heading = '<span class="goal-stats-team-heading">' + html.escape(_team_names[1]) + '<b class="goal-stats-team-score">' + _away_score_badge + '</b></span>'
-                                                                            _stats_table = '<div class="goal-match-stats-table"><table><thead><tr><th>Estadística</th><th>' + _home_stats_heading + '</th><th>' + _away_stats_heading + '</th></tr></thead><tbody>' + "".join(_table_rows[1:]) + '</tbody></table><div class="goal-match-goals"><b>⚽ Goles y minutos:</b> ' + _goal_minute_text + '</div></div>'
+                                                                            _home_score_badge = html.escape(str(recent.get("home_goals"))) if isinstance(recent.get("home_goals"), int) else "—"
+                                                                            _away_score_badge = html.escape(str(recent.get("away_goals"))) if isinstance(recent.get("away_goals"), int) else "—"
+                                                                            _home_logo = html.escape(str(_team_logos.get(_team_names[0].casefold()) or ""), quote=True)
+                                                                            _away_logo = html.escape(str(_team_logos.get(_team_names[1].casefold()) or ""), quote=True)
+                                                                            _home_badge = f'<img src="{_home_logo}" alt="">' if _home_logo else '<span>⚽</span>'
+                                                                            _away_badge = f'<img src="{_away_logo}" alt="">' if _away_logo else '<span>⚽</span>'
+                                                                            _home_scorers = "".join(_goal_scorers_by_team[0]) or '<div class="goal-stats-no-scorer">Sin goles</div>'
+                                                                            _away_scorers = "".join(_goal_scorers_by_team[1]) or '<div class="goal-stats-no-scorer">Sin goles</div>'
+                                                                            _scoreboard_html = '<div class="goal-stats-scoreboard"><div class="goal-stats-live-team">' + _home_badge + '<strong>' + html.escape(_team_names[0]) + '</strong><div class="goal-stats-scorers">' + _home_scorers + '</div></div><div class="goal-stats-live-score">' + _home_score_badge + ' - ' + _away_score_badge + '</div><div class="goal-stats-live-team">' + _away_badge + '<strong>' + html.escape(_team_names[1]) + '</strong><div class="goal-stats-scorers">' + _away_scorers + '</div></div></div>'
+                                                                            _home_stats_heading = '<span class="goal-stats-team-heading">' + html.escape(_team_names[0]) + '</span>'
+                                                                            _away_stats_heading = '<span class="goal-stats-team-heading">' + html.escape(_team_names[1]) + '</span>'
+                                                                            _stats_table = '<div class="goal-match-stats-table">' + _scoreboard_html + '<table><thead><tr><th>Estadística</th><th>' + _home_stats_heading + '</th><th>' + _away_stats_heading + '</th></tr></thead><tbody>' + "".join(_table_rows) + '</tbody></table></div>'
                                                                             if _match_data.get("stats_error") and not _match_data.get("statistics"):
                                                                                 st.caption("No fue posible consultar las estadísticas de este partido.")
                                                                             else:
