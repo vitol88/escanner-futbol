@@ -2696,7 +2696,7 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         color:#293448 !important; font-family:inherit !important;
         font-size:clamp(1.28rem,2.35vw,1.58rem) !important;
         font-weight:800 !important; letter-spacing:.005em !important;
-        line-height:1.25 !important;
+        line-height:1.25 !important; text-transform:none !important;
       }
       html body .stApp .fl-yellow-analysis .fl-yellow-grid article {
         background:#FFFFFF !important;border-color:#DDE2E9 !important;
@@ -5716,7 +5716,7 @@ else:
                                         _card_away_count = (_card_result.get("away") or {}).get("matches", 0)
                                         _card_h2h_count = (_card_result.get("h2h") or {}).get("matches", 0)
                                         _card_html = (
-                                            '<section class="fl-yellow-analysis"><header><span>🟨</span><strong>PROYECCIÓN DE TARJETAS</strong></header>'
+                                            '<section class="fl-yellow-analysis"><header><span>🟨</span><strong>Proyección de tarjetas</strong></header>'
                                             '<div class="fl-yellow-grid">'
                                             f'<article><small>{html.escape(str(match_home_name))} · LOCAL</small><b>{_card_fmt(_card_home_avg)}</b><span>{_card_home_count} partidos analizados</span></article>'
                                             f'<article><small>{html.escape(str(match_away_name))} · VISITANTE</small><b>{_card_fmt(_card_away_avg)}</b><span>{_card_away_count} partidos analizados</span></article>'
@@ -5879,7 +5879,7 @@ else:
 
                                         _shots_html = (
                                             '<section class="fl-shots-analysis">'
-                                            '<header><span>🎯</span><strong>PROYECCIÓN DE TIROS</strong></header>'
+                                            '<header><span>🎯</span><strong>Proyección de tiros</strong></header>'
                                             '<div class="fl-shots-grid">'
                                             f'<article><small>{html.escape(str(match_home_name))} · LOCAL</small><b>{_shots_fmt(_shots_home_on)}</b><span>Tiros a puerta · {_shots_home.get("on_target_matches", 0)} partidos</span><b class="fl-shots-secondary">{_shots_fmt(_shots_home_total)}</b><span>Tiros totales · {_shots_home.get("total_matches", 0)} partidos</span></article>'
                                             f'<article><small>{html.escape(str(match_away_name))} · VISITANTE</small><b>{_shots_fmt(_shots_away_on)}</b><span>Tiros a puerta · {_shots_away.get("on_target_matches", 0)} partidos</span><b class="fl-shots-secondary">{_shots_fmt(_shots_away_total)}</b><span>Tiros totales · {_shots_away.get("total_matches", 0)} partidos</span></article>'
