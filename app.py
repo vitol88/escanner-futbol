@@ -10,7 +10,6 @@ from typing import Any
 
 import requests
 import streamlit as st
-from streamlit_autorefresh import st_autorefresh
 
 from models.live_context import qualifies_as_corner_candidate, summarize_live_context
 from models.backtest import evaluate_binary_predictions
@@ -4546,17 +4545,21 @@ if manual_scan:
     st.markdown('<div class="scan-running-status"><span class="scan-code-icon">⟳</span><div><strong>ESCANEANDO…</strong><div class="scan-running-subtitle">Analizando partidos y mercados</div></div><span class="scan-sweep"></span></div>', unsafe_allow_html=True)
 
 internal_scan_requested = False
-auto_tick = None
-if st.session_state.auto_refresh_enabled:
-    auto_tick = st_autorefresh(interval=60_000, key="live_fixture_refresh_60s")
 
-should_refresh = refresh or (
-    auto_tick is not None
-    and auto_tick > 0
-    and auto_tick != st.session_state.get("last_auto_tick_seen")
-)
-if auto_tick is not None:
-    st.session_state.last_auto_tick_seen = auto_tick
+@st.fragment(run_every="60s")
+def _native_live_refresh_timer():
+    if not st.session_state.get("auto_refresh_enabled", False):
+        return
+    _now = time.monotonic()
+    _last = st.session_state.get("last_native_auto_refresh")
+    if _last is None:
+        st.session_state.last_native_auto_refresh = _now
+    elif _now - _last >= 55:
+        st.session_state.last_native_auto_refresh = _now
+        st.rerun()
+
+_native_live_refresh_timer()
+should_refresh = refresh
 
 if should_refresh:
     try:
