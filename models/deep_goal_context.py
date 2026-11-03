@@ -169,7 +169,7 @@ def build_deep_goal_context(
             if isinstance(gf, int) and isinstance(ga, int):
                 selected.append({**old, "_gf": gf, "_ga": ga})
         selected.sort(key=lambda item: str(((item.get("fixture") or {}).get("date") or "")), reverse=True)
-        return selected[:3]
+        return selected
 
     home_recent = recent(home, "home")
     away_recent = recent(away, "away")
