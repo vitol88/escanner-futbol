@@ -5209,16 +5209,27 @@ if _analysis_page_active:
         }}
         [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button {{
           display:inline-flex !important; align-items:center !important; justify-content:center !important;
-          width:68px !important; min-width:68px !important; max-width:68px !important;
-          min-height:68px !important; height:68px !important; padding:0 !important;
+          width:58px !important; min-width:58px !important; max-width:58px !important;
+          min-height:58px !important; height:58px !important; padding:0 !important;
           border:2px solid #FACC15 !important; border-radius:50% !important;
           background:linear-gradient(145deg,#252117 0%,#111419 72%) !important;
           box-shadow:0 0 0 1px rgba(250,204,21,.12),0 5px 18px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,229,102,.12) !important;
           color:#FACC15 !important; -webkit-text-fill-color:#FACC15 !important;
-          font-size:48px !important; line-height:1 !important; font-weight:900 !important;
-          text-shadow:0 0 2px rgba(250,204,21,.95),0 0 9px rgba(250,204,21,.48) !important;
-          letter-spacing:-.06em !important; text-align:center !important; white-space:nowrap !important;
+          font-size:0 !important; line-height:1 !important; font-weight:900 !important;
+          color:transparent !important; -webkit-text-fill-color:transparent !important;
+          position:relative !important; overflow:visible !important; text-align:center !important;
           transition:color .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease,background .18s ease !important;
+        }}
+        [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button::before {{
+          content:"" !important; display:block !important; position:absolute !important;
+          width:42px !important; height:42px !important; left:50% !important; top:50% !important;
+          transform:translate(-50%,-50%) !important; pointer-events:none !important;
+          background-repeat:no-repeat !important; background-position:center !important; background-size:contain !important;
+          background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M19 5 L7 20 L19 35 M7 20 H36' fill='none' stroke='%23FACC15' stroke-width='4.8' stroke-linecap='square' stroke-linejoin='miter'/%3E%3C/svg%3E") !important;
+          filter:drop-shadow(0 0 3px rgba(250,204,21,.55)) !important;
+        }}
+        [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button:hover::before {{
+          background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M19 5 L7 20 L19 35 M7 20 H36' fill='none' stroke='%23FFE566' stroke-width='4.8' stroke-linecap='square' stroke-linejoin='miter'/%3E%3C/svg%3E") !important;
         }}
         [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button:hover {{
           color:#FFE566 !important; -webkit-text-fill-color:#FFE566 !important;
@@ -5264,17 +5275,17 @@ if _analysis_page_active:
             padding-right:8px !important; box-sizing:border-box !important; overflow:visible !important;
           }}
           [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] {{
-            width:72px !important; max-width:72px !important; min-width:72px !important;
+            width:62px !important; max-width:62px !important; min-width:62px !important;
             margin-left:0 !important; margin-right:0 !important; box-sizing:border-box !important;
           }}
           [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] [data-testid="stButton"] {{
-            width:72px !important; max-width:72px !important; min-width:72px !important;
+            width:62px !important; max-width:62px !important; min-width:62px !important;
             box-sizing:border-box !important;
           }}
           [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button {{
-            width:68px !important; max-width:68px !important; min-width:68px !important;
-            height:68px !important; min-height:68px !important; padding:0 !important;
-            box-sizing:border-box !important; font-size:48px !important;
+            width:58px !important; max-width:58px !important; min-width:58px !important;
+            height:58px !important; min-height:58px !important; padding:0 !important;
+            box-sizing:border-box !important; font-size:0 !important;
           }}
         }}
 </style>
@@ -5285,7 +5296,7 @@ if _analysis_page_active:
         # Acceso de regreso sin abrir el panel lateral.
         _is_standings_page = _analysis_page_tool == "standings"
         _back_help = "Volver a la pantalla principal de partidos"
-        _back_clicked = st.button("⟵", key=f"topnav_back_{_analysis_page_id}", help=_back_help)
+        _back_clicked = st.button(" ", key=f"topnav_back_{_analysis_page_id}", help=_back_help)
         if _back_clicked:
             if _is_standings_page:
                 st.session_state["main_fixture_tool"] = {"fixture_id": _analysis_page_id, "tool": "stats"}
