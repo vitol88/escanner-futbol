@@ -5724,6 +5724,134 @@ else:
                                         @media(prefers-color-scheme:light){.fl-yellow-analysis{background:linear-gradient(145deg,#FFFFFF,#F3F6FA);color:#303744}.fl-yellow-grid article{background:#FFFFFF;border-color:#DDE2E9}.fl-yellow-grid small,.fl-yellow-estimate small,.fl-yellow-grid span,.fl-yellow-analysis p{color:#68717F}.fl-yellow-grid b,.fl-yellow-estimate strong,.fl-yellow-analysis header{color:#987300}.fl-yellow-estimate{background:linear-gradient(135deg,#FFF3C4,#FFF9E8);border:2px solid #D4A91F;box-shadow:0 0 0 1px rgba(212,169,31,.16),0 0 14px rgba(212,169,31,.14)}.fl-yellow-estimate small{color:#806000}.fl-yellow-estimate b{color:#303744}}
                                         </style>
                                         """, unsafe_allow_html=True)
+
+                                        # PROYECCIÓN DE TIROS: misma competición y condición local/visitante.
+                                        _shots_league_id = _card_league_id
+                                        _shots_season = _card_season
+                                        _shots_home_id, _shots_away_id = _card_home_id, _card_away_id
+                                        _shots_cache = st.session_state.setdefault("shots_analysis_cache", {})
+                                        _shots_cache_key = f"{_shots_league_id}:{_shots_season}:{_shots_home_id}:{_shots_away_id}"
+                                        if _shots_cache_key not in _shots_cache:
+                                            _shots_result = {"home": {}, "away": {}}
+
+                                            def _shots_number(_value):
+                                                if _value is None:
+                                                    return None
+                                                try:
+                                                    return float(str(_value).replace(",", ".").strip())
+                                                except (TypeError, ValueError):
+                                                    return None
+
+                                            def _shots_team_average(_team_id, _venue):
+                                                _team_result = {"total": None, "on_target": None, "total_matches": 0, "on_target_matches": 0}
+                                                if not _team_id or not _shots_league_id or not _shots_season:
+                                                    return _team_result
+                                                _team_fixtures_payload = api_get("fixtures", {
+                                                    "team": _team_id, "league": _shots_league_id,
+                                                    "season": _shots_season, "last": 20
+                                                })
+                                                _team_fixtures = _team_fixtures_payload.get("response") or []
+                                                _eligible = []
+                                                for _past_fixture in _team_fixtures:
+                                                    _past_teams = _past_fixture.get("teams") or {}
+                                                    _past_home_id = (_past_teams.get("home") or {}).get("id")
+                                                    _past_away_id = (_past_teams.get("away") or {}).get("id")
+                                                    _past_status = (((_past_fixture.get("fixture") or {}).get("status") or {}).get("short") or "")
+                                                    _same_venue = (_past_home_id == _team_id) if _venue == "home" else (_past_away_id == _team_id)
+                                                    if _same_venue and _past_status in {"FT", "AET", "PEN"}:
+                                                        _eligible.append(_past_fixture)
+                                                _total_values, _on_target_values = [], []
+                                                for _past_fixture in _eligible[:10]:
+                                                    _past_id = ((_past_fixture.get("fixture") or {}).get("id"))
+                                                    if not _past_id:
+                                                        continue
+                                                    _past_stats_payload = api_get("fixtures/statistics", {"fixture": _past_id})
+                                                    _past_stats = _past_stats_payload.get("response") or []
+                                                    _team_row = next(
+                                                        (row for row in _past_stats if str((row.get("team") or {}).get("id")) == str(_team_id)),
+                                                        None
+                                                    )
+                                                    if not _team_row:
+                                                        continue
+                                                    _team_stat_values = {
+                                                        item.get("type"): item.get("value")
+                                                        for item in (_team_row.get("statistics") or [])
+                                                    }
+                                                    _total_value = _shots_number(_team_stat_values.get("Total Shots"))
+                                                    _on_target_value = _shots_number(_team_stat_values.get("Shots on Goal"))
+                                                    if _total_value is not None:
+                                                        _total_values.append(_total_value)
+                                                    if _on_target_value is not None:
+                                                        _on_target_values.append(_on_target_value)
+                                                _team_result["total"] = (sum(_total_values) / len(_total_values)) if _total_values else None
+                                                _team_result["on_target"] = (sum(_on_target_values) / len(_on_target_values)) if _on_target_values else None
+                                                _team_result["total_matches"] = len(_total_values)
+                                                _team_result["on_target_matches"] = len(_on_target_values)
+                                                return _team_result
+
+                                            try:
+                                                _shots_result["home"] = _shots_team_average(_shots_home_id, "home")
+                                                _shots_result["away"] = _shots_team_average(_shots_away_id, "away")
+                                            except Exception as _shots_exc:
+                                                _shots_result["error"] = str(_shots_exc)
+                                            _shots_cache[_shots_cache_key] = _shots_result
+
+                                        _shots_result = _shots_cache[_shots_cache_key]
+                                        _shots_home = _shots_result.get("home") or {}
+                                        _shots_away = _shots_result.get("away") or {}
+                                        _shots_home_total = _shots_home.get("total")
+                                        _shots_away_total = _shots_away.get("total")
+                                        _shots_home_on = _shots_home.get("on_target")
+                                        _shots_away_on = _shots_away.get("on_target")
+                                        _shots_total_today = max(0, _shots_home_total + _shots_away_total - 2.0) if _shots_home_total is not None and _shots_away_total is not None else None
+                                        _shots_on_today = max(0, _shots_home_on + _shots_away_on - 1.0) if _shots_home_on is not None and _shots_away_on is not None else None
+
+                                        def _shots_fmt(_value):
+                                            return f"{_value:.1f}" if _value is not None else "N/D"
+
+                                        _shots_html = (
+                                            '<section class="fl-shots-analysis">'
+                                            '<header><span>🎯</span><strong>PROYECCIÓN DE TIROS</strong></header>'
+                                            '<div class="fl-shots-grid">'
+                                            f'<article><small>{html.escape(str(match_home_name))} · LOCAL</small><b>{_shots_fmt(_shots_home_on)}</b><span>Tiros a puerta · {_shots_home.get("on_target_matches", 0)} partidos</span><b class="fl-shots-secondary">{_shots_fmt(_shots_home_total)}</b><span>Tiros totales · {_shots_home.get("total_matches", 0)} partidos</span></article>'
+                                            f'<article><small>{html.escape(str(match_away_name))} · VISITANTE</small><b>{_shots_fmt(_shots_away_on)}</b><span>Tiros a puerta · {_shots_away.get("on_target_matches", 0)} partidos</span><b class="fl-shots-secondary">{_shots_fmt(_shots_away_total)}</b><span>Tiros totales · {_shots_away.get("total_matches", 0)} partidos</span></article>'
+                                            '</div>'
+                                            '<div class="fl-shots-estimates">'
+                                            f'<article><small>TIROS A PUERTA HOY</small><strong>{_shots_fmt(_shots_on_today)}</strong><span>Margen aplicado: −1.0</span></article>'
+                                            f'<article><small>TIROS TOTALES HOY</small><strong>{_shots_fmt(_shots_total_today)}</strong><span>Margen aplicado: −2.0</span></article>'
+                                            '</div>'
+                                            '<p>Promedios de los últimos 10 partidos finalizados de esta competición, filtrados por localía: local en casa y visitante fuera. Los datos faltantes no se cuentan como cero.</p>'
+                                            '</section>'
+                                        )
+                                        if _shots_result.get("error"):
+                                            _shots_html += '<p class="fl-shots-note">No fue posible completar todas las consultas históricas. Se muestran únicamente los datos disponibles.</p>'
+                                        st.markdown(_shots_html + """
+                                        <style>
+                                        .fl-shots-analysis{margin:16px 0;padding:15px;border:1px solid #A88632;border-radius:16px;background:linear-gradient(145deg,#171A20,#0D1015);color:#F8FAFC}
+                                        .fl-shots-analysis header{display:flex;align-items:center;gap:9px;margin-bottom:12px;color:#F2C94C;font-size:13px;font-weight:900;letter-spacing:.04em}
+                                        .fl-shots-grid,.fl-shots-estimates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+                                        .fl-shots-grid article{display:flex;flex-direction:column;gap:4px;min-width:0;padding:11px;border:1px solid #343944;border-radius:11px;background:#20242B}
+                                        .fl-shots-grid small,.fl-shots-estimates small{font-size:9px;color:#AEB5C0;font-weight:800}
+                                        .fl-shots-grid b{font-size:23px;line-height:1.1;color:#F2C94C}
+                                        .fl-shots-grid .fl-shots-secondary{margin-top:5px;font-size:18px;color:#F8D96A}
+                                        .fl-shots-grid span,.fl-shots-estimates span{font-size:10px;color:#AEB5C0}
+                                        .fl-shots-estimates{margin-top:10px}
+                                        .fl-shots-estimates article{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-width:0;padding:13px 8px;border:1.5px solid #FACC15;border-radius:12px;background:linear-gradient(135deg,rgba(250,204,21,.16),#191C22 60%,#101216);box-shadow:0 0 12px rgba(250,204,21,.10)}
+                                        .fl-shots-estimates small{color:#FFE566;text-align:center;font-size:10px;font-weight:950;letter-spacing:.025em}
+                                        .fl-shots-estimates strong{font-size:29px;line-height:1;color:#F2C94C;font-weight:950;font-variant-numeric:tabular-nums}
+                                        .fl-shots-estimates span{text-align:center}
+                                        .fl-shots-analysis p,.fl-shots-note{margin:10px 0 0;color:#AEB5C0;font-size:10px;line-height:1.45}
+                                        @media(max-width:380px){.fl-shots-analysis{padding:11px}.fl-shots-grid,.fl-shots-estimates{gap:6px}.fl-shots-grid article{padding:8px}.fl-shots-grid b{font-size:20px}.fl-shots-estimates strong{font-size:25px}}
+                                        @media(prefers-color-scheme:light){
+                                          .fl-shots-analysis{background:linear-gradient(145deg,#FFFFFF,#F3F6FA);color:#303744;border-color:#D6B64C}
+                                          .fl-shots-grid article{background:#FFFFFF;border-color:#DDE2E9}
+                                          .fl-shots-grid small,.fl-shots-grid span,.fl-shots-estimates span,.fl-shots-analysis p,.fl-shots-note{color:#68717F}
+                                          .fl-shots-grid b,.fl-shots-grid .fl-shots-secondary,.fl-shots-analysis header{color:#987300}
+                                          .fl-shots-estimates article{background:linear-gradient(135deg,#FFF3C4,#FFF9E8);border-color:#D4A91F;box-shadow:0 0 12px rgba(212,169,31,.12)}
+                                          .fl-shots-estimates small{color:#806000}.fl-shots-estimates strong{color:#987300}
+                                        }
+                                        </style>
+                                        """, unsafe_allow_html=True)
                                         st.markdown("""
                                         <style>
                                         [class*="st-key-league_standings_cta"] {
