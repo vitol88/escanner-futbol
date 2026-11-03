@@ -988,15 +988,17 @@ st.markdown("""
   @media (prefers-reduced-motion: reduce) { .goal-form-card, .goal-form-back { animation:none; } }
   .goal-form-back-title { color:#FACC15; font-size:.72rem; font-weight:900; margin-bottom:8px; line-height:1.35; }
   .goal-form-back { animation:goal-card-flip-in .62s cubic-bezier(.2,.75,.25,1) both; transform-origin:center; }
-  .goal-form-match { display:block; padding:9px 0 3px; border-top:1px solid #34302A; color:#E4E4E7; font-size:.7rem; line-height:1.35; }
-  .goal-form-match-meta { color:#FACC15; font-size:.63rem; font-weight:800; letter-spacing:.25px; margin-bottom:5px; white-space:nowrap; }
-  .goal-form-match-opponent { width:100%; min-width:0; overflow:hidden; }
-  .goal-form-match-teams { width:100%; color:#E4E4E7; font-weight:700; font-size:.78rem; line-height:1.35; white-space:nowrap; overflow:hidden; text-overflow:clip; }
-  .goal-form-match-outcome { display:flex; align-items:center; justify-content:flex-start; gap:6px; white-space:nowrap; min-height:29px; }
+  .goal-form-match-meta { color:#FACC15; font-size:.68rem; font-weight:800; letter-spacing:.25px; margin:9px 0 5px; white-space:nowrap; }
+  .goal-form-team-lines,.goal-form-score-lines {display:flex;flex-direction:column;justify-content:center;gap:5px;min-height:48px}
+  .goal-form-team-lines>div {color:#E4E4E7;font-size:.76rem;font-weight:700;line-height:1.3;white-space:normal;overflow-wrap:anywhere}
+  .goal-form-score-lines>div {color:#F4F4F5;font-size:.82rem;font-weight:950;line-height:1.3;text-align:center}
+  .goal-form-actions {display:flex;justify-content:flex-end;align-items:center;margin-bottom:3px}
   [class*="st-key-goal_timeline_btn_"] {display:flex;justify-content:flex-end;width:100%}
   [class*="st-key-goal_timeline_btn_"] button {margin-left:auto!important}
-  .goal-form-match-score { color:#F4F4F5; font-size:.8rem; font-weight:950; white-space:nowrap; }
-  .goal-form-match .goal-form-result { min-width:20px; }
+  .goal-form-result {display:inline-flex;justify-content:center;align-items:center;min-width:22px;padding:3px 6px;border-radius:5px;font-size:.65rem;font-weight:900}
+  .goal-form-result-v {color:#FFFFFF;background:#16A34A}
+  .goal-form-result-e {color:#FFFFFF;background:#6B7280}
+  .goal-form-result-d {color:#FFFFFF;background:#DC2626}
    [class*="st-key-goal_form_back_"]{box-sizing:border-box;border:1px solid #FACC15;border-radius:11px;padding:11px;margin-top:5px;background:linear-gradient(145deg,#20232B,#12151A);min-height:170px;animation:goal-card-flip-in .62s cubic-bezier(.2,.75,.25,1) both;transform-origin:center;transform-style:preserve-3d;backface-visibility:visible}[class*="st-key-goal_timeline_btn_"] button{width:25px!important;min-width:25px!important;height:25px!important;min-height:25px!important;padding:0!important;border-radius:50%!important;border:1px solid #FACC15!important;background:radial-gradient(circle at 35% 25%,#FFF1A6 0%,#FACC15 55%,#9A7000 100%)!important;color:#171717!important;font-size:12px!important;box-shadow:0 0 7px #FACC1545!important}[class*="st-key-goal_timeline_btn_"] button:hover{transform:rotate(-10deg) scale(1.08)!important;box-shadow:0 0 0 3px #FACC1535,0 0 17px #FACC1580!important}.goal-event-timeline{margin:5px 0 12px;padding:8px 10px;border:1px solid rgba(250,204,21,.28);border-radius:11px;background:rgba(17,20,25,.72)}.goal-event-row{display:grid;grid-template-columns:42px 20px minmax(0,1fr) auto;align-items:center;gap:7px;padding:8px 2px;border-bottom:1px solid rgba(255,255,255,.08)}.goal-event-row:last-child{border-bottom:0}.goal-event-minute{color:#FACC15;font-size:.72rem;white-space:nowrap}.goal-event-ball{font-size:14px}.goal-event-info{display:flex;flex-direction:column;min-width:0;gap:2px}.goal-event-info strong{color:#F4F4F5;font-size:.72rem;overflow-wrap:anywhere}.goal-event-info span,.goal-event-info small{color:#A1A1AA;font-size:.62rem;overflow-wrap:anywhere}.goal-event-score{color:#FACC15;font-size:.78rem;white-space:nowrap}
   @media (max-width: 700px) {
     /* En móvil, apilar los dos historiales para darles ancho completo. */
@@ -1008,12 +1010,11 @@ st.markdown("""
     .goal-form-header{gap:11px;margin:3px 0 8px}
     .goal-form-logo{width:42px;height:42px;flex-basis:42px}
     .goal-form-team{font-size:.88rem;line-height:1.25;overflow-wrap:normal;word-break:normal}
-    .goal-form-match{padding:10px 0 4px}
-    .goal-form-match-opponent{width:100%;min-width:0;overflow:visible}
-    .goal-form-match-teams{font-size:.82rem;line-height:1.4;white-space:normal;overflow-wrap:anywhere}
-    .goal-form-match-meta{font-size:.67rem;margin-bottom:5px}
-    .goal-form-match-outcome{gap:6px;min-height:29px}
-    .goal-form-match-score{font-size:.82rem}
+    .goal-form-match-meta{font-size:.7rem;margin:10px 0 6px}
+    .goal-form-team-lines,.goal-form-score-lines{gap:7px;min-height:52px}
+    .goal-form-team-lines>div{font-size:.8rem;line-height:1.35;overflow-wrap:anywhere}
+    .goal-form-score-lines>div{font-size:.86rem}
+    .goal-form-actions{justify-content:flex-end}
     [class*="st-key-goal_timeline_btn_"]{display:flex;justify-content:flex-end;width:100%}
     [class*="st-key-goal_timeline_btn_"] button{margin-left:auto!important}
   }
@@ -6659,11 +6660,16 @@ else:
                                                                         recent_id = recent.get("fixture_id")
                                                                         match_row_key = f"{match_id}_{recent_id or date_label}_{team.get('id') or label}"
                                                                         is_timeline_open = st.session_state.get(active_goal_match_key) == str(recent_id) if recent_id else False
-                                                                        st.markdown(f'<div class="goal-form-match"><div class="goal-form-match-meta">{date_label}</div><div class="goal-form-match-opponent"><div class="goal-form-match-teams">{home_label} <span style="color:#FACC15">·</span> {away_label}</div></div></div>', unsafe_allow_html=True)
-                                                                        match_action_cols = st.columns([0.82, 0.18], gap="small", vertical_alignment="center")
+                                                                        _hg_label = html.escape(str(hg)) if isinstance(hg, int) else "—"
+                                                                        _ag_label = html.escape(str(ag)) if isinstance(ag, int) else "—"
+                                                                        st.markdown(f'<div class="goal-form-match-meta">{date_label}</div>', unsafe_allow_html=True)
+                                                                        match_action_cols = st.columns([0.68, 0.14, 0.18], gap="small", vertical_alignment="center")
                                                                         with match_action_cols[0]:
-                                                                            st.markdown(f'<div class="goal-form-match-outcome"><span class="goal-form-match-score">{html.escape(score_label)}</span><span class="goal-form-result goal-form-result-{result_class}">{html.escape(result_code)}</span></div>', unsafe_allow_html=True)
+                                                                            st.markdown(f'<div class="goal-form-team-lines"><div>{home_label}</div><div>{away_label}</div></div>', unsafe_allow_html=True)
                                                                         with match_action_cols[1]:
+                                                                            st.markdown(f'<div class="goal-form-score-lines"><div>{_hg_label}</div><div>{_ag_label}</div></div>', unsafe_allow_html=True)
+                                                                        with match_action_cols[2]:
+                                                                            st.markdown(f'<div class="goal-form-actions"><span class="goal-form-result goal-form-result-{result_class}">{html.escape(result_code)}</span></div>', unsafe_allow_html=True)
                                                                             if recent_id:
                                                                                 if st.button("📊", key=f"goal_timeline_btn_{match_row_key}", help="Ver estadísticas completas de este partido"):
                                                                                     st.session_state[active_goal_match_key] = None if is_timeline_open else str(recent_id)
