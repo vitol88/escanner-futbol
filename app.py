@@ -990,6 +990,8 @@ st.markdown("""
   .goal-match-goals{margin:0 10px 10px;padding:10px 11px;border:1px solid rgba(250,204,21,.2);border-radius:9px;background:rgba(250,204,21,.055);color:#D5DCE6;font-size:11px;line-height:1.6;overflow-wrap:anywhere}
   .goal-match-goals b{color:#F4C928;font-weight:900}
   @media(max-width:480px){.goal-match-stats-table table{font-size:11px}.goal-match-stats-table thead th{padding:10px 6px;font-size:9px}.goal-match-stats-table tbody th,.goal-match-stats-table tbody td{padding:9px 6px}.goal-match-stats-table tbody th{font-size:10px}.goal-match-stats-table tbody td{font-size:11px}}
+  [class*="st-key-goal_form_front_"]{box-sizing:border-box;width:100%;padding:8px 0 14px;margin:7px 0 13px;border-bottom:1px solid rgba(250,204,21,.22)}
+  [class*="st-key-goal_form_front_"]:last-of-type{margin-bottom:4px;border-bottom:0;padding-bottom:4px}
   .goal-form-card { box-sizing:border-box; border:1px solid #393326; border-radius:11px; padding:12px; margin-top:5px; background:linear-gradient(145deg,#191D24,#101216); min-height:170px; height:100%; }
   .goal-form-back { box-sizing:border-box; border:1px solid #FACC15; border-radius:11px; padding:11px; margin-top:5px; background:linear-gradient(145deg,#20232B,#12151A); min-height:170px; height:100%; }
   @keyframes goal-card-flip-in { 0% { opacity:.15; transform:perspective(900px) rotateY(-180deg) scale(.94); } 70% { opacity:1; transform:perspective(900px) rotateY(12deg) scale(1.01); } 100% { opacity:1; transform:perspective(900px) rotateY(0deg) scale(1); } }
@@ -1035,11 +1037,11 @@ st.markdown("""
   .goal-form-result-v { color:#FFFFFF; background:#16A34A; }
   .goal-form-result-e { color:#FFFFFF; background:#6B7280; }
   .goal-form-result-d { color:#FFFFFF; background:#DC2626; }
-  .goal-form-header { display:flex; align-items:center; gap:10px; margin:2px 0 9px; min-width:0; width:100%; box-sizing:border-box; }
+  .goal-form-header { display:flex; align-items:center; gap:10px; margin:2px 0 7px; min-width:0; width:100%; box-sizing:border-box; }
   .goal-form-logo { width:38px; height:38px; object-fit:contain; flex:0 0 38px; }
   .goal-form-team { display:block; flex:1 1 0%; min-width:0; max-width:100%; color:#E4E4E7; font-size:.78rem; font-weight:800; line-height:1.3; white-space:normal; overflow-wrap:break-word; word-break:normal; hyphens:none; }
   .goal-form-record { color:#FACC15; font-size:1.15rem; font-weight:900; margin:4px 0; }
-  .goal-form-line { color:#BFC2CA; font-size:.68rem; line-height:1.45; }
+  .goal-form-line { color:#BFC2CA; font-size:.62rem; line-height:1.35; }
   .goal-h2h-summary { margin:.5rem 0; border:1px solid #393326; border-radius:10px; padding:9px 11px; color:#D4D4D8; background:#15191F; font-size:.78rem; line-height:1.5; }
   .goal-last-goal { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin:1.65rem 0 1rem; padding:12px 14px; border:2px solid #FACC15; border-radius:12px; background:linear-gradient(135deg,rgba(250,204,21,.16),#191C22 52%,#101216); box-shadow:0 0 0 1px rgba(250,204,21,.22),0 0 16px rgba(250,204,21,.16); color:#F4F4F5; font-size:.84rem; line-height:1.5; }
   .goal-last-goal b { color:#FFE566; font-weight:950; letter-spacing:.35px; }
@@ -3286,6 +3288,7 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         color:#263142 !important;
         -webkit-text-fill-color:#263142 !important;
       }
+      [class*="st-key-goal_form_front_"]{border-bottom-color:rgba(181,138,0,.22)!important}
       .goal-form-team {
         color:#263142 !important;
         -webkit-text-fill-color:#263142 !important;
@@ -6645,7 +6648,7 @@ else:
                                                         logo_html = f'<img class="goal-form-logo" src="{team_logo}" alt="">' if team_logo else ""
                                                         flip_key = f"goal_form_flipped_{match_id}_{team.get('id') or label}"
                                                         is_flipped = bool(st.session_state.get(flip_key, False))
-                                                        with col.container():
+                                                        with col.container(key=f"goal_form_front_{match_id}_{team.get('id') or label}"):
                                                             st.markdown(
                                                                 f'<div class="goal-form-header">{logo_html}<div class="goal-form-team">{("ÚLTIMOS PARTIDOS · " if is_flipped else "")}{html.escape(label)}</div></div>',
                                                                 unsafe_allow_html=True,
