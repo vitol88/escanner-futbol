@@ -990,7 +990,7 @@ st.markdown("""
   .goal-form-back-title { color:#FACC15; font-size:.72rem; font-weight:900; margin-bottom:8px; line-height:1.35; }
   .goal-form-back { animation:goal-card-flip-in .62s cubic-bezier(.2,.75,.25,1) both; transform-origin:center; }
   .goal-form-match { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:5px 9px; align-items:center; padding:9px 0; border-top:1px solid #34302A; color:#E4E4E7; font-size:.7rem; line-height:1.35; }
-  .goal-form-match-meta { color:#FACC15; font-size:.63rem; font-weight:800; letter-spacing:.25px; margin-bottom:3px; }
+  .goal-form-match-meta { grid-column:1/-1; color:#FACC15; font-size:.63rem; font-weight:800; letter-spacing:.25px; margin-bottom:0; }
   .goal-form-match-opponent { min-width:0; overflow-wrap:normal; word-break:normal; }
   .goal-form-match-teams { color:#E4E4E7; font-weight:650; overflow-wrap:normal; word-break:normal; }
   .goal-form-match-outcome { display:flex; align-items:center; justify-content:flex-end; gap:6px; white-space:nowrap; }
@@ -6650,7 +6650,7 @@ else:
                                                                         is_timeline_open = st.session_state.get(active_goal_match_key) == str(recent_id) if recent_id else False
                                                                         match_cols = st.columns([0.88, 0.12], gap="small", vertical_alignment="center")
                                                                         with match_cols[0]:
-                                                                            st.markdown(f'<div class="goal-form-match"><div class="goal-form-match-opponent"><div class="goal-form-match-meta">{date_label}</div><div class="goal-form-match-teams">{home_label} <span style="color:#FACC15">·</span> {away_label}</div></div><div class="goal-form-match-outcome"><span class="goal-form-match-score">{html.escape(score_label)}</span><span class="goal-form-result goal-form-result-{result_class}">{html.escape(result_code)}</span></div></div>', unsafe_allow_html=True)
+                                                                            st.markdown(f'<div class="goal-form-match"><div class="goal-form-match-meta">{date_label}</div><div class="goal-form-match-opponent"><div class="goal-form-match-teams">{home_label} <span style="color:#FACC15">·</span> {away_label}</div></div><div class="goal-form-match-outcome"><span class="goal-form-match-score">{html.escape(score_label)}</span><span class="goal-form-result goal-form-result-{result_class}">{html.escape(result_code)}</span></div></div>', unsafe_allow_html=True)
                                                                         with match_cols[1]:
                                                                             if recent_id:
                                                                                 if st.button("📊", key=f"goal_timeline_btn_{match_row_key}", help="Ver estadísticas completas de este partido"):
