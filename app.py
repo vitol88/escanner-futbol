@@ -5208,23 +5208,27 @@ if _analysis_page_active:
           width:auto !important; max-width:100% !important; margin:0 !important;
         }}
         [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button {{
-          display:inline-flex !important; align-items:center !important; justify-content:flex-start !important;
-          width:auto !important; min-width:0 !important; min-height:36px !important; height:36px !important;
-          padding:4px 2px !important; border:0 !important; border-radius:0 !important;
-          background:transparent !important; box-shadow:none !important;
-          color:#E8CC70 !important; -webkit-text-fill-color:#E8CC70 !important;
-          font-size:.82rem !important; font-weight:650 !important; letter-spacing:.015em !important;
-          text-align:left !important; white-space:nowrap !important;
-          transition:color .18s ease,transform .18s ease !important;
+          display:inline-flex !important; align-items:center !important; justify-content:center !important;
+          width:68px !important; min-width:68px !important; max-width:68px !important;
+          min-height:68px !important; height:68px !important; padding:0 !important;
+          border:2px solid #FACC15 !important; border-radius:50% !important;
+          background:linear-gradient(145deg,#252117 0%,#111419 72%) !important;
+          box-shadow:0 0 0 1px rgba(250,204,21,.12),0 5px 18px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,229,102,.12) !important;
+          color:#FACC15 !important; -webkit-text-fill-color:#FACC15 !important;
+          font-size:38px !important; line-height:1 !important; font-weight:900 !important;
+          letter-spacing:0 !important; text-align:center !important; white-space:nowrap !important;
+          transition:color .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease,background .18s ease !important;
         }}
         [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button:hover {{
-          color:#F5E3A4 !important; -webkit-text-fill-color:#F5E3A4 !important;
-          background:transparent !important; box-shadow:none !important; transform:translateX(-2px) !important;
+          color:#FFE566 !important; -webkit-text-fill-color:#FFE566 !important;
+          border-color:#FFE566 !important; background:linear-gradient(145deg,#332B17 0%,#151820 72%) !important;
+          box-shadow:0 0 0 2px rgba(250,204,21,.12),0 0 22px rgba(250,204,21,.22),0 6px 20px rgba(0,0,0,.34) !important;
+          transform:translateX(-2px) scale(1.03) !important;
         }}
         [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button:focus,
         [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button:focus-visible {{
-          outline:1px solid rgba(232,204,112,.45) !important; outline-offset:3px !important;
-          box-shadow:none !important;
+          outline:2px solid rgba(250,204,21,.45) !important; outline-offset:4px !important;
+          box-shadow:0 0 0 2px rgba(250,204,21,.12),0 5px 18px rgba(0,0,0,.32) !important;
         }}
         @media(max-width:640px) {{
           /* H2H: mantener todo el contenido dentro del ancho real del móvil. */
@@ -5259,17 +5263,17 @@ if _analysis_page_active:
             padding-right:8px !important; box-sizing:border-box !important; overflow:visible !important;
           }}
           [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] {{
-            width:48px !important; max-width:48px !important; min-width:48px !important;
+            width:72px !important; max-width:72px !important; min-width:72px !important;
             margin-left:0 !important; margin-right:0 !important; box-sizing:border-box !important;
           }}
           [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] [data-testid="stButton"] {{
-            width:48px !important; max-width:48px !important; min-width:48px !important;
+            width:72px !important; max-width:72px !important; min-width:72px !important;
             box-sizing:border-box !important;
           }}
           [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button {{
-            width:44px !important; max-width:44px !important; min-width:44px !important;
-            height:44px !important; min-height:44px !important; padding:0 !important;
-            box-sizing:border-box !important; font-size:25px !important;
+            width:68px !important; max-width:68px !important; min-width:68px !important;
+            height:68px !important; min-height:68px !important; padding:0 !important;
+            box-sizing:border-box !important; font-size:38px !important;
           }}
         }}
 </style>
