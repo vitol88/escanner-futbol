@@ -5728,7 +5728,7 @@ else:
                                         st.markdown(_card_html + """
                                         <style>
                                         .fl-yellow-analysis{margin:16px 0;padding:15px;border:1px solid #A88632;border-radius:16px;background:linear-gradient(145deg,#171A20,#0D1015);color:#F8FAFC}
-                                        .fl-yellow-analysis header{display:flex;gap:9px;align-items:center;color:#F2C94C;font-size:13px;letter-spacing:.04em;margin-bottom:12px}
+                                        .fl-yellow-analysis header{display:flex;gap:9px;align-items:center;color:#F1F3F6;font-size:clamp(1.28rem,2.35vw,1.58rem);font-weight:800;letter-spacing:.005em;line-height:1.25;text-transform:none;margin-bottom:12px}.fl-yellow-analysis header strong{color:#F1F3F6;font:inherit;text-transform:none}
                                         .fl-yellow-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
                                         .fl-yellow-grid article{display:flex;flex-direction:column;gap:4px;padding:10px;border:1px solid #343944;border-radius:10px;background:#20242B;min-width:0}
                                         .fl-yellow-grid article:nth-child(3){grid-column:1/-1}
@@ -5896,7 +5896,7 @@ else:
                                         st.markdown(_shots_html + """
                                         <style>
                                         .fl-shots-analysis{margin:16px 0;padding:15px;border:1px solid #A88632;border-radius:16px;background:linear-gradient(145deg,#171A20,#0D1015);color:#F8FAFC}
-                                        .fl-shots-analysis header{display:flex;align-items:center;gap:9px;margin-bottom:12px;color:#F2C94C;font-size:13px;font-weight:900;letter-spacing:.04em}
+                                        .fl-shots-analysis header{display:flex;align-items:center;gap:9px;margin-bottom:12px;color:#F1F3F6;font-size:clamp(1.28rem,2.35vw,1.58rem);font-weight:800;letter-spacing:.005em;line-height:1.25;text-transform:none}.fl-shots-analysis header strong{color:#F1F3F6;font:inherit;text-transform:none}
                                         .fl-shots-grid,.fl-shots-estimates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
                                         .fl-shots-grid article{display:flex;flex-direction:column;gap:4px;min-width:0;padding:11px;border:1px solid #343944;border-radius:11px;background:#20242B}
                                         .fl-shots-grid small,.fl-shots-estimates small{font-size:9px;color:#AEB5C0;font-weight:800}
