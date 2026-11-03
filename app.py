@@ -5743,7 +5743,7 @@ else:
                                         _shots_cache = st.session_state.setdefault("shots_analysis_cache", {})
                                         _shots_cache_key = f"{_shots_league_id}:{_shots_season}:{_shots_home_id}:{_shots_away_id}"
                                         if _shots_cache_key not in _shots_cache:
-                                            _shots_result = {"home": {}, "away": {}}
+                                            _shots_result = {"home": {}, "away": {}, "h2h": {"total": None, "on_target": None, "matches": 0}}
 
                                             def _shots_number(_value):
                                                 if _value is None:
@@ -5803,6 +5803,46 @@ else:
                                             try:
                                                 _shots_result["home"] = _shots_team_average(_shots_home_id, "home")
                                                 _shots_result["away"] = _shots_team_average(_shots_away_id, "away")
+
+                                                # H2H: promedio del total combinado de tiros de ambos equipos
+                                                # en sus últimos enfrentamientos directos con estadísticas disponibles.
+                                                _h2h_total_values, _h2h_on_values = [], []
+                                                _h2h_payload = api_get("fixtures/headtohead", {
+                                                    "h2h": f"{_shots_home_id}-{_shots_away_id}", "last": 10
+                                                })
+                                                _h2h_fixtures = _h2h_payload.get("response") or []
+                                                for _h2h_fixture in _h2h_fixtures:
+                                                    _h2h_status = (((_h2h_fixture.get("fixture") or {}).get("status") or {}).get("short") or "")
+                                                    _h2h_fixture_id = (_h2h_fixture.get("fixture") or {}).get("id")
+                                                    if not _h2h_fixture_id or _h2h_status not in {"FT", "AET", "PEN"}:
+                                                        continue
+                                                    _h2h_stats_payload = api_get("fixtures/statistics", {"fixture": _h2h_fixture_id})
+                                                    _h2h_rows = _h2h_stats_payload.get("response") or []
+                                                    _match_total_shots, _match_on_shots = 0.0, 0.0
+                                                    _has_total, _has_on = False, False
+                                                    for _h2h_row in _h2h_rows:
+                                                        _h2h_values = {
+                                                            item.get("type"): item.get("value")
+                                                            for item in (_h2h_row.get("statistics") or [])
+                                                        }
+                                                        _total = _shots_number(_h2h_values.get("Total Shots"))
+                                                        _on = _shots_number(_h2h_values.get("Shots on Goal"))
+                                                        if _total is not None:
+                                                            _match_total_shots += _total
+                                                            _has_total = True
+                                                        if _on is not None:
+                                                            _match_on_shots += _on
+                                                            _has_on = True
+                                                    if _has_total:
+                                                        _h2h_total_values.append(_match_total_shots)
+                                                    if _has_on:
+                                                        _h2h_on_values.append(_match_on_shots)
+
+                                                _shots_result["h2h"] = {
+                                                    "total": (sum(_h2h_total_values) / len(_h2h_total_values)) if len(_h2h_total_values) >= 3 else None,
+                                                    "on_target": (sum(_h2h_on_values) / len(_h2h_on_values)) if len(_h2h_on_values) >= 3 else None,
+                                                    "matches": min(len(_h2h_total_values), len(_h2h_on_values))
+                                                }
                                             except Exception as _shots_exc:
                                                 _shots_result["error"] = str(_shots_exc)
                                             _shots_cache[_shots_cache_key] = _shots_result
@@ -5814,8 +5854,13 @@ else:
                                         _shots_away_total = _shots_away.get("total")
                                         _shots_home_on = _shots_home.get("on_target")
                                         _shots_away_on = _shots_away.get("on_target")
-                                        _shots_total_today = max(0, _shots_home_total + _shots_away_total - 5.0) if _shots_home_total is not None and _shots_away_total is not None else None
-                                        _shots_on_today = max(0, _shots_home_on + _shots_away_on - 3.0) if _shots_home_on is not None and _shots_away_on is not None else None
+                                        _shots_h2h = _shots_result.get("h2h") or {}
+                                        _shots_base_total = (_shots_home_total + _shots_away_total) if _shots_home_total is not None and _shots_away_total is not None else None
+                                        _shots_base_on = (_shots_home_on + _shots_away_on) if _shots_home_on is not None and _shots_away_on is not None else None
+                                        _shots_total_blended = (0.80 * _shots_base_total + 0.20 * _shots_h2h["total"]) if _shots_base_total is not None and _shots_h2h.get("total") is not None else _shots_base_total
+                                        _shots_on_blended = (0.80 * _shots_base_on + 0.20 * _shots_h2h["on_target"]) if _shots_base_on is not None and _shots_h2h.get("on_target") is not None else _shots_base_on
+                                        _shots_total_today = max(0, _shots_total_blended - 5.0) if _shots_total_blended is not None else None
+                                        _shots_on_today = max(0, _shots_on_blended - 3.0) if _shots_on_blended is not None else None
 
                                         def _shots_fmt(_value):
                                             return f"{_value:.1f}" if _value is not None else "N/D"
