@@ -966,6 +966,13 @@ st.markdown("""
   .goal-live-summary-title { color:#FACC15; font-weight:900; font-size:.78rem; letter-spacing:1.2px; margin-bottom:6px; }
   .goal-live-summary p { color:#D4D4D8; font-size:.88rem; line-height:1.45; margin:0; }
   .goal-deep-heading { display:block; clear:both; position:relative; z-index:1; color:#FACC15; font-size:.78rem; letter-spacing:1.1px; font-weight:900; margin:1.9rem 0 1.1rem; padding:0 0 .2rem; line-height:1.6; }
+  .goal-match-stats-table{margin:8px 0 12px;padding:9px;border:1px solid #49402A;border-radius:10px;background:linear-gradient(145deg,#1B2028,#111419);overflow-x:auto}
+  .goal-match-stats-table table{width:100%;border-collapse:collapse;font-size:11px;color:#E5E7EB}
+  .goal-match-stats-table th,.goal-match-stats-table td{padding:7px 6px;border-bottom:1px solid #343944;text-align:center;white-space:normal}
+  .goal-match-stats-table thead th{color:#FACC15;font-weight:800}
+  .goal-match-stats-table tbody th{text-align:left;color:#C7CDD6;font-weight:650}
+  .goal-match-goals{padding:8px 4px 2px;color:#E5E7EB;font-size:11px;line-height:1.5}
+  .goal-match-goals b{color:#FACC15}
   .goal-form-card { box-sizing:border-box; border:1px solid #393326; border-radius:11px; padding:12px; margin-top:5px; background:linear-gradient(145deg,#191D24,#101216); min-height:170px; height:100%; }
   .goal-form-back { box-sizing:border-box; border:1px solid #FACC15; border-radius:11px; padding:11px; margin-top:5px; background:linear-gradient(145deg,#20232B,#12151A); min-height:170px; height:100%; }
   @keyframes goal-card-flip-in { 0% { opacity:.15; transform:perspective(900px) rotateY(-180deg) scale(.94); } 70% { opacity:1; transform:perspective(900px) rotateY(12deg) scale(1.01); } 100% { opacity:1; transform:perspective(900px) rotateY(0deg) scale(1); } }
@@ -3351,6 +3358,11 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         border-bottom:1px solid #B8CDE3 !important;
       }
 
+      html body .stApp .goal-match-stats-table{background:linear-gradient(145deg,#FFFFFF,#F3F6FA)!important;border-color:#DDE2E9!important}
+      html body .stApp .goal-match-stats-table table{color:#303744!important}
+      html body .stApp .goal-match-stats-table th,html body .stApp .goal-match-stats-table td{border-bottom-color:#DDE2E9!important}
+      html body .stApp .goal-match-stats-table thead th,html body .stApp .goal-match-goals b{color:#806000!important}
+      html body .stApp .goal-match-stats-table tbody th,html body .stApp .goal-match-goals{color:#394354!important}
       .goals-section-title {
         color:#263449 !important;
         -webkit-text-fill-color:#263449 !important;
@@ -6620,7 +6632,7 @@ else:
                                                                             st.markdown(f'<div class="goal-form-match"><div class="goal-form-match-opponent"><div class="goal-form-match-meta">{date_label}</div><div class="goal-form-match-teams">{home_label} <span style="color:#FACC15">·</span> {away_label}</div></div><div class="goal-form-match-outcome"><span class="goal-form-match-score">{html.escape(score_label)}</span><span class="goal-form-result goal-form-result-{result_class}">{html.escape(result_code)}</span></div></div>', unsafe_allow_html=True)
                                                                         with match_cols[1]:
                                                                             if recent_id:
-                                                                                if st.button("⚽", key=f"goal_timeline_btn_{match_row_key}", help="Ver goles y minutos de este partido"):
+                                                                                if st.button("📊", key=f"goal_timeline_btn_{match_row_key}", help="Ver estadísticas completas de este partido"):
                                                                                     st.session_state[active_goal_match_key] = None if is_timeline_open else str(recent_id)
                                                                                     st.rerun()
                                                                             else:
