@@ -6577,7 +6577,7 @@ else:
                                                         pass
 
                                                 if deep_context.get("available"):
-                                                    st.markdown('<div class="goal-deep-heading">⌁ ÚLTIMOS 3 PARTIDOS POR CONDICIÓN</div>', unsafe_allow_html=True)
+                                                    st.markdown('<div class="goal-deep-heading">⌁ ÚLTIMOS PARTIDOS POR CONDICIÓN</div>', unsafe_allow_html=True)
                                                     form_cols = st.columns(2, gap="small")
                                                     for col, team, label, form_data in (
                                                         (form_cols[0], match_home, home_name, deep_context.get("home_form") or {}),
@@ -6597,12 +6597,12 @@ else:
                                                                 st.session_state[flip_key] = not is_flipped
                                                                 st.rerun()
                                                             if is_flipped:
-                                                                recent_matches = (form_data.get("recent_matches") or [])[:3]
+                                                                recent_matches = form_data.get("recent_matches") or []
                                                                 with st.container(key=f"goal_form_back_{match_id}_{team.get('id') or label}"):
                                                                     if not recent_matches:
                                                                         st.caption("No hay partidos recientes disponibles para esta condición.")
                                                                     else:
-                                                                        st.caption("⚽ Toca el mini balón de un partido para ver sus goles.")
+                                                                        st.caption("📊 Abre las estadísticas de cualquier partido para consultar sus datos y los minutos de los goles.")
                                                                     active_goal_match_key = f"goal_timeline_open_{match_id}"
                                                                     for recent in recent_matches:
                                                                         result_code = str(recent.get("result") or "?").upper()
@@ -6626,49 +6626,55 @@ else:
                                                                             else:
                                                                                 st.caption("—")
                                                                         if is_timeline_open and recent_id:
-                                                                            _goal_events_cache = st.session_state.setdefault("goal_recent_events_cache", {})
-                                                                            _goal_events_key = str(recent_id)
-                                                                            if _goal_events_key not in _goal_events_cache:
+                                                                            _goal_stats_cache = st.session_state.setdefault("goal_recent_stats_cache", {})
+                                                                            _goal_stats_key = str(recent_id)
+                                                                            if _goal_stats_key not in _goal_stats_cache:
+                                                                                _goal_stats_cache[_goal_stats_key] = {}
                                                                                 try:
-                                                                                    _goal_events_payload = api_get("fixtures/events", {"fixture": recent_id})
-                                                                                    _goal_events_cache[_goal_events_key] = _goal_events_payload.get("response") or []
-                                                                                except Exception as _goal_events_exc:
-                                                                                    _goal_events_cache[_goal_events_key] = {"error": str(_goal_events_exc)}
-                                                                            _goal_match_events = _goal_events_cache.get(_goal_events_key) or []
-                                                                            if isinstance(_goal_match_events, dict):
-                                                                                st.caption("No fue posible consultar los eventos de este partido. Inténtalo más tarde.")
+                                                                                    _events_payload = api_get("fixtures/events", {"fixture": recent_id})
+                                                                                    _goal_stats_cache[_goal_stats_key]["events"] = _events_payload.get("response") or []
+                                                                                except Exception as _events_exc:
+                                                                                    _goal_stats_cache[_goal_stats_key]["events_error"] = str(_events_exc)
+                                                                                try:
+                                                                                    _stats_payload = api_get("fixtures/statistics", {"fixture": recent_id})
+                                                                                    _goal_stats_cache[_goal_stats_key]["statistics"] = _stats_payload.get("response") or []
+                                                                                except Exception as _stats_exc:
+                                                                                    _goal_stats_cache[_goal_stats_key]["stats_error"] = str(_stats_exc)
+                                                                            _match_data = _goal_stats_cache[_goal_stats_key]
+                                                                            _event_rows = _match_data.get("events") or []
+                                                                            _goal_events = [ev for ev in _event_rows if str(ev.get("type") or "").casefold() == "goal" and str(ev.get("detail") or "").casefold() not in {"missed penalty", "penalty missed"}] if isinstance(_event_rows,list) else []
+                                                                            _goal_events.sort(key=lambda ev: (int(((ev.get("time") or {}).get("elapsed")) or 0), int(((ev.get("time") or {}).get("extra")) or 0)))
+                                                                            _goal_minute_items = []
+                                                                            for _ev in _goal_events:
+                                                                                _tm = _ev.get("time") or {}
+                                                                                _elapsed, _extra = _tm.get("elapsed"), _tm.get("extra")
+                                                                                _minute = f"{_elapsed}+{_extra}′" if _extra else f"{_elapsed}′" if _elapsed is not None else "N/D"
+                                                                                _player = (_ev.get("player") or {}).get("name") or "Autor N/D"
+                                                                                _side = (_ev.get("team") or {}).get("name") or "Equipo"
+                                                                                _goal_minute_items.append(f"{html.escape(str(_minute))} · {html.escape(str(_player))} ({html.escape(str(_side))})")
+                                                                            _goal_minute_text = " · ".join(_goal_minute_items) if _goal_minute_items else "N/D"
+                                                                            _stat_map = {}
+                                                                            for _team_stats in (_match_data.get("statistics") or []):
+                                                                                _team_name = (_team_stats.get("team") or {}).get("name") or "Equipo"
+                                                                                for _stat in (_team_stats.get("statistics") or []):
+                                                                                    _stat_map.setdefault(_stat.get("type"), {})[_team_name] = _stat.get("value")
+                                                                            _stat_labels = [
+                                                                                ("Tiros totales", "Total Shots"), ("Tiros a puerta", "Shots on Goal"),
+                                                                                ("Posesión", "Ball Possession"), ("Córners", "Corner Kicks"),
+                                                                                ("Tarjetas amarillas", "Yellow Cards"), ("Tarjetas rojas", "Red Cards"),
+                                                                            ]
+                                                                            _table_rows = []
+                                                                            _table_rows.append(f'<tr><th>Goles y minutos</th><td colspan="2">{_goal_minute_text}</td></tr>')
+                                                                            _team_names = [str(recent.get("home_name") or "Local"), str(recent.get("away_name") or "Visitante")]
+                                                                            for _label, _api_key in _stat_labels:
+                                                                                _values = _stat_map.get(_api_key, {})
+                                                                                _left, _right = _values.get(_team_names[0]), _values.get(_team_names[1])
+                                                                                _table_rows.append(f'<tr><th>{_label}</th><td>{html.escape(str(_left if _left is not None else "N/D"))}</td><td>{html.escape(str(_right if _right is not None else "N/D"))}</td></tr>')
+                                                                            _stats_table = '<div class="goal-match-stats-table"><table><thead><tr><th>Estadística</th><th>' + html.escape(_team_names[0]) + '</th><th>' + html.escape(_team_names[1]) + '</th></tr></thead><tbody>' + "".join(_table_rows[1:]) + '</tbody></table><div class="goal-match-goals"><b>⚽ Goles y minutos:</b> ' + _goal_minute_text + '</div></div>'
+                                                                            if _match_data.get("stats_error") and not _match_data.get("statistics"):
+                                                                                st.caption("No fue posible consultar las estadísticas de este partido.")
                                                                             else:
-                                                                                _goal_timeline = [ev for ev in _goal_match_events if str(ev.get("type") or "").casefold() == "goal" and str(ev.get("detail") or "").casefold() not in {"missed penalty", "penalty missed"}]
-                                                                                _goal_timeline.sort(key=lambda ev: (int(((ev.get("time") or {}).get("elapsed")) or 0), int(((ev.get("time") or {}).get("extra")) or 0)))
-                                                                                if not _goal_timeline:
-                                                                                    st.caption("Eventos de gol no disponibles para este encuentro.")
-                                                                                else:
-                                                                                    _timeline_home_id, _timeline_away_id = recent.get("home_id"), recent.get("away_id")
-                                                                                    _timeline_home_score, _timeline_away_score = 0, 0
-                                                                                    _timeline_html = ['<div class="goal-event-timeline">']
-                                                                                    for _goal_event in _goal_timeline:
-                                                                                        _event_team = _goal_event.get("team") or {}
-                                                                                        _event_team_id = _event_team.get("id")
-                                                                                        if _event_team_id == _timeline_home_id:
-                                                                                            _timeline_home_score += 1
-                                                                                            _timeline_side = "home"
-                                                                                        elif _event_team_id == _timeline_away_id:
-                                                                                            _timeline_away_score += 1
-                                                                                            _timeline_side = "away"
-                                                                                        else:
-                                                                                            _timeline_side = "other"
-                                                                                        _event_time = _goal_event.get("time") or {}
-                                                                                        _event_elapsed, _event_extra = _event_time.get("elapsed"), _event_time.get("extra")
-                                                                                        _event_minute = f"{_event_elapsed}+{_event_extra}′" if _event_extra else f"{_event_elapsed}′" if _event_elapsed is not None else "—"
-                                                                                        _event_player = html.escape(str((_goal_event.get("player") or {}).get("name") or "Autor no disponible"))
-                                                                                        _event_team_name = html.escape(str(_event_team.get("name") or "Equipo"))
-                                                                                        _event_detail = str(_goal_event.get("detail") or "")
-                                                                                        _event_assist = (_goal_event.get("assist") or {}).get("name")
-                                                                                        _event_note = " · " + html.escape(_event_detail) if _event_detail and _event_detail.casefold() not in {"normal goal", "goal"} else ""
-                                                                                        _event_assist_html = f'<small>Asistencia: {html.escape(str(_event_assist))}</small>' if _event_assist else ""
-                                                                                        _timeline_html.append(f'<div class="goal-event-row {_timeline_side}"><b class="goal-event-minute">{html.escape(str(_event_minute))}</b><span class="goal-event-ball">⚽</span><div class="goal-event-info"><strong>{_event_player}</strong><span>{_event_team_name}{_event_note}</span>{_event_assist_html}</div><b class="goal-event-score">{_timeline_home_score}–{_timeline_away_score}</b></div>')
-                                                                                    _timeline_html.append("</div>")
-                                                                                    st.markdown("".join(_timeline_html), unsafe_allow_html=True)
+                                                                                st.markdown(_stats_table, unsafe_allow_html=True)
                                                             else:
                                                                 st.markdown(
                                                                     f'<div class="goal-form-record">{html.escape(str(form_data.get("record", "N/D")))}</div>'
