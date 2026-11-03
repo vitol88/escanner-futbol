@@ -3400,6 +3400,16 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         background:#FFF7DC !important; color:#705400 !important; border:1px solid #E5D18A !important;
       }
       html body .stApp .fl-tracker-status-dot { box-shadow:0 0 8px #D6A91A !important; }
+      /* Proyección de tarjetas: paleta clara ligada al selector de apariencia de Football Lab. */
+      html body .stApp .fl-yellow-analysis { background:linear-gradient(145deg,#FFFFFF,#F3F6FA) !important; color:#303744 !important; border-color:#D6B64C !important; }
+      html body .stApp .fl-yellow-grid article { background:#FFFFFF !important; border-color:#DDE2E9 !important; }
+      html body .stApp .fl-yellow-grid small, html body .stApp .fl-yellow-grid span,
+      html body .stApp .fl-yellow-analysis p { color:#68717F !important; }
+      html body .stApp .fl-yellow-grid b, html body .stApp .fl-yellow-estimate strong,
+      html body .stApp .fl-yellow-analysis header, html body .stApp .fl-yellow-analysis header strong { color:#293448 !important; }
+      html body .stApp .fl-yellow-estimate { background:linear-gradient(135deg,#FFF3C4,#FFF9E8) !important; border:2px solid #D4A91F !important; box-shadow:0 0 0 1px rgba(212,169,31,.16),0 0 14px rgba(212,169,31,.14) !important; }
+      html body .stApp .fl-yellow-estimate small { color:#806000 !important; }
+      html body .stApp .fl-yellow-estimate b { color:#303744 !important; }
       /* Proyección de tiros: paleta clara ligada al selector de apariencia de Football Lab. */
       html body .stApp .fl-shots-analysis { background:linear-gradient(145deg,#FFFFFF,#F3F6FA) !important; color:#303744 !important; border-color:#D6B64C !important; }
       html body .stApp .fl-shots-grid article { background:#FFFFFF !important; border-color:#DDE2E9 !important; }
@@ -5744,7 +5754,6 @@ else:
                                         @keyframes fl-yellow-card-pulse{0%,100%{transform:scale(1);filter:drop-shadow(0 0 4px rgba(250,204,21,.35));opacity:.88}50%{transform:scale(1.13);filter:drop-shadow(0 0 12px rgba(250,204,21,.9));opacity:1}}
                                         .fl-yellow-analysis p{font-size:10px;color:#AEB5C0;margin:10px 0 0}
                                         @media(prefers-reduced-motion:reduce){.fl-yellow-card-icon{animation:none}}
-                                        @media(prefers-color-scheme:light){.fl-yellow-analysis{background:linear-gradient(145deg,#FFFFFF,#F3F6FA);color:#303744}.fl-yellow-grid article{background:#FFFFFF;border-color:#DDE2E9}.fl-yellow-grid small,.fl-yellow-estimate small,.fl-yellow-grid span,.fl-yellow-analysis p{color:#68717F}.fl-yellow-grid b,.fl-yellow-estimate strong,.fl-yellow-analysis header{color:#987300}.fl-yellow-estimate{background:linear-gradient(135deg,#FFF3C4,#FFF9E8);border:2px solid #D4A91F;box-shadow:0 0 0 1px rgba(212,169,31,.16),0 0 14px rgba(212,169,31,.14)}.fl-yellow-estimate small{color:#806000}.fl-yellow-estimate b{color:#303744}}
                                         </style>
                                         """, unsafe_allow_html=True)
 
