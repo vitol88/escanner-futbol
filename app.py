@@ -6456,54 +6456,82 @@ else:
                                                         unsafe_allow_html=True,
                                                     )
                                                     if _h2h_fixture_id:
-                                                        if st.button("⚽", key=f"h2h_goal_timeline_btn_{h2h_key}_{_h2h_fixture_id}", help="Voltear este partido para ver los goleadores y minutos"):
+                                                        if st.button("⚽", key=f"h2h_goal_timeline_btn_{h2h_key}_{_h2h_fixture_id}", help="Ver estadísticas, marcador y goleadores de este partido"):
                                                             st.session_state[_h2h_timeline_key] = None if _h2h_is_open else str(_h2h_fixture_id)
                                                             st.rerun()
                                                     if _h2h_is_open and _h2h_fixture_id:
-                                                        _h2h_events_cache = st.session_state.setdefault("h2h_goal_events_cache", {})
-                                                        _h2h_events_cache_key = str(_h2h_fixture_id)
-                                                        if _h2h_events_cache_key not in _h2h_events_cache:
+                                                        _h2h_stats_cache = st.session_state.setdefault("h2h_match_stats_cache", {})
+                                                        _h2h_stats_cache_key = str(_h2h_fixture_id)
+                                                        if _h2h_stats_cache_key not in _h2h_stats_cache:
+                                                            _h2h_stats_cache[_h2h_stats_cache_key] = {}
                                                             try:
                                                                 _h2h_events_payload = api_get("fixtures/events", {"fixture": _h2h_fixture_id})
-                                                                _h2h_events_cache[_h2h_events_cache_key] = _h2h_events_payload.get("response") or []
+                                                                _h2h_stats_cache[_h2h_stats_cache_key]["events"] = _h2h_events_payload.get("response") or []
                                                             except Exception as _h2h_events_exc:
-                                                                _h2h_events_cache[_h2h_events_cache_key] = {"error": str(_h2h_events_exc)}
-                                                        _h2h_events = _h2h_events_cache.get(_h2h_events_cache_key) or []
-                                                        if isinstance(_h2h_events, dict):
-                                                            st.caption("No fue posible consultar los eventos de este partido. Inténtalo más tarde.")
+                                                                _h2h_stats_cache[_h2h_stats_cache_key]["events_error"] = str(_h2h_events_exc)
+                                                            try:
+                                                                _h2h_stats_payload = api_get("fixtures/statistics", {"fixture": _h2h_fixture_id})
+                                                                _h2h_stats_cache[_h2h_stats_cache_key]["statistics"] = _h2h_stats_payload.get("response") or []
+                                                            except Exception as _h2h_stats_exc:
+                                                                _h2h_stats_cache[_h2h_stats_cache_key]["stats_error"] = str(_h2h_stats_exc)
+                                                        _h2h_match_data = _h2h_stats_cache[_h2h_stats_cache_key]
+                                                        _h2h_home_name = html.unescape(str(_h2h_row.get("home_html") or "Local"))
+                                                        _h2h_away_name = html.unescape(str(_h2h_row.get("away_html") or "Visitante"))
+                                                        _h2h_team_names = [_h2h_home_name, _h2h_away_name]
+                                                        _h2h_scorers = {0: [], 1: []}
+                                                        _h2h_events = _h2h_match_data.get("events") or []
+                                                        _h2h_goal_events = [
+                                                            ev for ev in _h2h_events
+                                                            if str(ev.get("type") or "").casefold() == "goal"
+                                                            and str(ev.get("detail") or "").casefold() not in {"missed penalty", "penalty missed"}
+                                                        ] if isinstance(_h2h_events, list) else []
+                                                        _h2h_goal_events.sort(key=lambda ev: (int(((ev.get("time") or {}).get("elapsed")) or 0), int(((ev.get("time") or {}).get("extra")) or 0)))
+                                                        for _h2h_ev in _h2h_goal_events:
+                                                            _h2h_tm = _h2h_ev.get("time") or {}
+                                                            _h2h_elapsed, _h2h_extra = _h2h_tm.get("elapsed"), _h2h_tm.get("extra")
+                                                            _h2h_minute = f"{_h2h_elapsed}+{_h2h_extra}′" if _h2h_extra else f"{_h2h_elapsed}′" if _h2h_elapsed is not None else "N/D"
+                                                            _h2h_player = (_h2h_ev.get("player") or {}).get("name") or "Autor N/D"
+                                                            _h2h_side = _h2h_ev.get("team") or {}
+                                                            _h2h_side_id = _h2h_side.get("id")
+                                                            if str(_h2h_side_id) == str(_h2h_row.get("home_id")):
+                                                                _h2h_scorers[0].append(f'<div class="goal-stats-scorer">⚽ {html.escape(str(_h2h_player))} ({html.escape(str(_h2h_minute))})</div>')
+                                                            elif str(_h2h_side_id) == str(_h2h_row.get("away_id")):
+                                                                _h2h_scorers[1].append(f'<div class="goal-stats-scorer">⚽ {html.escape(str(_h2h_player))} ({html.escape(str(_h2h_minute))})</div>')
+                                                        _h2h_stat_map = {}
+                                                        _h2h_stat_team_names = {}
+                                                        for _h2h_team_stats in (_h2h_match_data.get("statistics") or []):
+                                                            _h2h_team_info = _h2h_team_stats.get("team") or {}
+                                                            _h2h_stat_team_name = str(_h2h_team_info.get("name") or "Equipo")
+                                                            _h2h_stat_team_names[str(_h2h_team_info.get("id"))] = _h2h_stat_team_name
+                                                            for _h2h_stat in (_h2h_team_stats.get("statistics") or []):
+                                                                _h2h_stat_map.setdefault(_h2h_stat.get("type"), {})[_h2h_stat_team_name] = _h2h_stat.get("value")
+                                                        _h2h_stat_labels = [
+                                                            ("Tiros totales", "Total Shots"), ("Tiros a puerta", "Shots on Goal"),
+                                                            ("Posesión", "Ball Possession"), ("Córners", "Corner Kicks"),
+                                                            ("Tarjetas amarillas", "Yellow Cards"), ("Tarjetas rojas", "Red Cards"),
+                                                        ]
+                                                        _h2h_table_rows = []
+                                                        for _h2h_label, _h2h_api_key in _h2h_stat_labels:
+                                                            _h2h_values = _h2h_stat_map.get(_h2h_api_key, {})
+                                                            _h2h_left = _h2h_values.get(_h2h_stat_team_names.get(str(_h2h_row.get("home_id")), _h2h_home_name))
+                                                            _h2h_right = _h2h_values.get(_h2h_stat_team_names.get(str(_h2h_row.get("away_id")), _h2h_away_name))
+                                                            _h2h_table_rows.append(f'<tr><th>{_h2h_label}</th><td>{html.escape(str(_h2h_left if _h2h_left is not None else "N/D"))}</td><td>{html.escape(str(_h2h_right if _h2h_right is not None else "N/D"))}</td></tr>')
+                                                        _h2h_home_logo = html.escape(str(_h2h_row.get("home_logo") or ""), quote=True)
+                                                        _h2h_away_logo = html.escape(str(_h2h_row.get("away_logo") or ""), quote=True)
+                                                        _h2h_home_badge = f'<img src="{_h2h_home_logo}" alt="">' if _h2h_home_logo else '<span>⚽</span>'
+                                                        _h2h_away_badge = f'<img src="{_h2h_away_logo}" alt="">' if _h2h_away_logo else '<span>⚽</span>'
+                                                        _h2h_home_scorers = "".join(_h2h_scorers[0]) or '<div class="goal-stats-no-scorer">Sin goles</div>'
+                                                        _h2h_away_scorers = "".join(_h2h_scorers[1]) or '<div class="goal-stats-no-scorer">Sin goles</div>'
+                                                        _h2h_home_score = html.escape(str(_h2h_row.get("home_goals"))) if _h2h_row.get("home_goals") is not None else "—"
+                                                        _h2h_away_score = html.escape(str(_h2h_row.get("away_goals"))) if _h2h_row.get("away_goals") is not None else "—"
+                                                        _h2h_scoreboard_html = '<div class="goal-stats-scoreboard"><div class="goal-stats-live-team">' + _h2h_home_badge + '<strong>' + html.escape(_h2h_home_name) + '</strong><div class="goal-stats-scorers">' + _h2h_home_scorers + '</div></div><div class="goal-stats-live-score">' + _h2h_home_score + ' - ' + _h2h_away_score + '</div><div class="goal-stats-live-team">' + _h2h_away_badge + '<strong>' + html.escape(_h2h_away_name) + '</strong><div class="goal-stats-scorers">' + _h2h_away_scorers + '</div></div></div>'
+                                                        _h2h_home_heading = '<span class="goal-stats-team-heading">' + html.escape(_h2h_home_name) + '</span>'
+                                                        _h2h_away_heading = '<span class="goal-stats-team-heading">' + html.escape(_h2h_away_name) + '</span>'
+                                                        _h2h_stats_html = '<div class="goal-match-stats-table">' + _h2h_scoreboard_html + '<table><thead><tr><th>Estadística</th><th>' + _h2h_home_heading + '</th><th>' + _h2h_away_heading + '</th></tr></thead><tbody>' + "".join(_h2h_table_rows) + '</tbody></table></div>'
+                                                        if _h2h_match_data.get("stats_error") and not _h2h_match_data.get("statistics"):
+                                                            st.caption("No fue posible consultar las estadísticas de este partido histórico.")
                                                         else:
-                                                            _h2h_goal_events = [ev for ev in _h2h_events if str(ev.get("type") or "").casefold() == "goal" and str(ev.get("detail") or "").casefold() not in {"missed penalty", "penalty missed"}]
-                                                            _h2h_goal_events.sort(key=lambda ev: (int(((ev.get("time") or {}).get("elapsed")) or 0), int(((ev.get("time") or {}).get("extra")) or 0)))
-                                                            if not _h2h_goal_events:
-                                                                st.caption("Eventos de gol no disponibles para este encuentro.")
-                                                            else:
-                                                                _h2h_home_id = _h2h_row.get("home_id")
-                                                                _h2h_away_id = _h2h_row.get("away_id")
-                                                                _h2h_home_score, _h2h_away_score = 0, 0
-                                                                _h2h_timeline_html = ['<div class="h2h-goal-timeline">']
-                                                                for _h2h_event in _h2h_goal_events:
-                                                                    _h2h_event_team = _h2h_event.get("team") or {}
-                                                                    _h2h_event_team_id = _h2h_event_team.get("id")
-                                                                    if _h2h_event_team_id == _h2h_home_id:
-                                                                        _h2h_home_score += 1
-                                                                        _h2h_event_side = "home"
-                                                                    elif _h2h_event_team_id == _h2h_away_id:
-                                                                        _h2h_away_score += 1
-                                                                        _h2h_event_side = "away"
-                                                                    else:
-                                                                        _h2h_event_side = "other"
-                                                                    _h2h_event_time = _h2h_event.get("time") or {}
-                                                                    _h2h_elapsed, _h2h_extra = _h2h_event_time.get("elapsed"), _h2h_event_time.get("extra")
-                                                                    _h2h_minute = f"{_h2h_elapsed}+{_h2h_extra}′" if _h2h_extra else f"{_h2h_elapsed}′" if _h2h_elapsed is not None else "—"
-                                                                    _h2h_player = html.escape(str((_h2h_event.get("player") or {}).get("name") or "Autor no disponible"))
-                                                                    _h2h_team_name = html.escape(str(_h2h_event_team.get("name") or "Equipo"))
-                                                                    _h2h_detail = str(_h2h_event.get("detail") or "")
-                                                                    _h2h_assist = (_h2h_event.get("assist") or {}).get("name")
-                                                                    _h2h_note = " · " + html.escape(_h2h_detail) if _h2h_detail and _h2h_detail.casefold() not in {"normal goal", "goal"} else ""
-                                                                    _h2h_assist_html = f'<small>Asistencia: {html.escape(str(_h2h_assist))}</small>' if _h2h_assist else ""
-                                                                    _h2h_timeline_html.append(f'<div class="h2h-goal-event-row {_h2h_event_side}"><b class="h2h-goal-minute">{html.escape(str(_h2h_minute))}</b><span>⚽</span><div><strong>{_h2h_player}</strong><small>{_h2h_team_name}{_h2h_note}</small>{_h2h_assist_html}</div><b class="h2h-goal-score">{_h2h_home_score}–{_h2h_away_score}</b></div>')
-                                                                _h2h_timeline_html.append("</div>")
-                                                                st.markdown("".join(_h2h_timeline_html), unsafe_allow_html=True)
+                                                            st.markdown(_h2h_stats_html, unsafe_allow_html=True)
                                             st.markdown('</div>', unsafe_allow_html=True)
                                         elif isinstance(h2h_data, list) and h2h_data:
                                             # Compatibilidad con entradas de caché creadas antes de h2h-v2.
