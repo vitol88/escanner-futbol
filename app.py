@@ -2276,6 +2276,20 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
     <style>
       /* PALETA CLARA FOOTBALL LAB — solo se activa al elegir ☀️ Claro. */
       :root { color-scheme:light; --fl-bg:#F4F6F9; --fl-surface:#FFFFFF; --fl-text:#20242C; --fl-muted:#68717F; --fl-gold:#B58A00; --fl-border:#DDE2E9; }
+      /* Flecha de regreso: adaptar solo el botón al modo claro. */
+      html body .stApp [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button {
+        background:linear-gradient(145deg,#FFFFFF 0%,#FFFDF6 68%,#FFF4D4 100%) !important;
+        border:2px solid #E5B800 !important;
+        box-shadow:0 3px 12px rgba(181,138,0,.22),0 0 0 1px rgba(229,184,0,.10),inset 0 1px 0 rgba(255,255,255,.98) !important;
+      }
+      html body .stApp [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button::before {
+        filter:drop-shadow(0 0 2px rgba(229,184,0,.28)) !important;
+      }
+      html body .stApp [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button:hover {
+        background:linear-gradient(145deg,#FFFDF5 0%,#FFF3C4 100%) !important;
+        border-color:#D6A600 !important;
+        box-shadow:0 4px 15px rgba(181,138,0,.28),inset 0 1px 0 rgba(255,255,255,.98) !important;
+      }
       /* Buscador fijo: paleta clara y unión real entre campo y lupa. */
       html body .stApp div[class*="st-key-home_search_bar"] { background:rgba(244,246,249,.98) !important; box-shadow:none !important; }
       html body .stApp div[class*="st-key-home_search_bar"] [data-testid="stHorizontalBlock"] { gap:0 !important; column-gap:0 !important; }
