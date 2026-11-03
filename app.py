@@ -2691,7 +2691,7 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         background:linear-gradient(145deg,#FFFFFF,#F3F6FA) !important;
         color:#303744 !important;border-color:#D6B84C !important;
       }
-      html body .stApp .fl-yellow-analysis header { color:#806000 !important; }
+      html body .stApp .fl-yellow-analysis header { color:#293448 !important; }
       html body .stApp .fl-yellow-analysis .fl-yellow-grid article {
         background:#FFFFFF !important;border-color:#DDE2E9 !important;
       }
@@ -3401,7 +3401,7 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       html body .stApp .fl-shots-estimates span, html body .stApp .fl-shots-analysis p,
       html body .stApp .fl-shots-note { color:#68717F !important; }
       html body .stApp .fl-shots-grid b, html body .stApp .fl-shots-grid .fl-shots-secondary,
-      html body .stApp .fl-shots-analysis header { color:#987300 !important; }
+      html body .stApp .fl-shots-analysis header { color:#293448 !important; }
       html body .stApp .fl-shots-estimates article { background:linear-gradient(135deg,#FFF3C4,#FFF9E8) !important; border-color:#D4A91F !important; box-shadow:0 0 12px rgba(212,169,31,.12) !important; }
       html body .stApp .fl-shots-estimates small { color:#806000 !important; }
       html body .stApp .fl-shots-estimates strong { color:#987300 !important; }
