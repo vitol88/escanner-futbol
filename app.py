@@ -6358,7 +6358,7 @@ else:
                                                 ph, pa = pt.get("home") or {}, pt.get("away") or {}
                                                 raw_date = (pf.get("date") or "")[:10]
                                                 try:
-                                                    date_label = datetime.strptime(raw_date, "%Y-%m-%d").strftime("%d %b %Y").lower()
+                                                    date_label = datetime.strptime(raw_date, "%Y-%m-%d").strftime("%d-%m-%y")
                                                 except ValueError:
                                                     date_label = raw_date
                                                 date_label = html.escape(date_label)
@@ -6386,6 +6386,12 @@ else:
                                                     if home_goals > 0 and away_goals > 0:
                                                         both_score_count += 1
                                                 h2h_fixture_id = pf.get("id")
+                                                _h2h_result_code = "E"
+                                                if isinstance(home_goals, (int, float)) and isinstance(away_goals, (int, float)):
+                                                    if home_goals > away_goals:
+                                                        _h2h_result_code = "V"
+                                                    elif home_goals < away_goals:
+                                                        _h2h_result_code = "D"
                                                 h2h_rows.append({
                                                     "fixture_id": h2h_fixture_id,
                                                     "date_html": date_label,
@@ -6397,6 +6403,7 @@ else:
                                                     "away_id": pa.get("id"),
                                                     "home_goals": home_goals,
                                                     "away_goals": away_goals,
+                                                    "result_code": _h2h_result_code,
                                                 })
                                             if valid_goal_totals:
                                                 average_goals = sum(valid_goal_totals) / len(valid_goal_totals)
@@ -6451,14 +6458,27 @@ else:
                                                 _h2h_timeline_key = f"h2h_goal_timeline_open_{h2h_key}"
                                                 _h2h_is_open = st.session_state.get(_h2h_timeline_key) == str(_h2h_fixture_id) if _h2h_fixture_id else False
                                                 with st.container(key=f"h2h_history_row_{h2h_key}_{_h2h_fixture_id or _h2h_row['date_html']}"):
-                                                    st.markdown(
-                                                        f'<div class="h2h-match-row h2h-match-row-full {"h2h-stripe-even" if _h2h_index % 2 == 0 else "h2h-stripe-odd"}{" h2h-row-front-open" if _h2h_is_open else ""}"><span class="h2h-date">{_h2h_row["date_html"]}</span><span class="h2h-team"><img src="{_h2h_row["home_logo"]}" alt="" onerror="this.style.display=\'none\'"><span class="h2h-team-name">{_h2h_row["home_html"]}</span></span><span class="h2h-score">{_h2h_row["home_goals"] if _h2h_row["home_goals"] is not None else "—"} – {_h2h_row["away_goals"] if _h2h_row["away_goals"] is not None else "—"}</span><span class="h2h-team"><img src="{_h2h_row["away_logo"]}" alt="" onerror="this.style.display=\'none\'"><span class="h2h-team-name">{_h2h_row["away_html"]}</span></span></div>',
-                                                        unsafe_allow_html=True,
-                                                    )
-                                                    if _h2h_fixture_id:
-                                                        if st.button("⚽", key=f"h2h_goal_timeline_btn_{h2h_key}_{_h2h_fixture_id}", help="Ver estadísticas, marcador y goleadores de este partido"):
-                                                            st.session_state[_h2h_timeline_key] = None if _h2h_is_open else str(_h2h_fixture_id)
-                                                            st.rerun()
+                                                    _h2h_result_code = str(_h2h_row.get("result_code") or "E")
+                                                    _h2h_result_class = {"V": "v", "E": "e", "D": "d"}.get(_h2h_result_code, "e")
+                                                    _h2h_home_score = html.escape(str(_h2h_row.get("home_goals"))) if isinstance(_h2h_row.get("home_goals"), (int, float)) else "—"
+                                                    _h2h_away_score = html.escape(str(_h2h_row.get("away_goals"))) if isinstance(_h2h_row.get("away_goals"), (int, float)) else "—"
+                                                    st.markdown(f'<div class="goal-form-match-meta">{_h2h_row["date_html"]}</div>', unsafe_allow_html=True)
+                                                    _h2h_match_cols = st.columns([0.76, 0.10, 0.14], gap="small", vertical_alignment="center")
+                                                    with _h2h_match_cols[0]:
+                                                        st.markdown(f'<div class="goal-form-team-lines"><div>{_h2h_row["home_html"]}</div><div>{_h2h_row["away_html"]}</div></div>', unsafe_allow_html=True)
+                                                    with _h2h_match_cols[1]:
+                                                        st.markdown(f'<div class="goal-form-score-lines"><div>{_h2h_home_score}</div><div>{_h2h_away_score}</div></div>', unsafe_allow_html=True)
+                                                    with _h2h_match_cols[2]:
+                                                        _h2h_action_cols = st.columns([0.46, 0.54], gap="small", vertical_alignment="center")
+                                                        with _h2h_action_cols[0]:
+                                                            st.markdown(f'<div class="goal-form-actions"><span class="goal-form-result goal-form-result-{_h2h_result_class}">{html.escape(_h2h_result_code)}</span></div>', unsafe_allow_html=True)
+                                                        with _h2h_action_cols[1]:
+                                                            if _h2h_fixture_id:
+                                                                if st.button("📊", key=f"goal_timeline_btn_h2h_{h2h_key}_{_h2h_fixture_id}", help="Ver estadísticas completas de este partido histórico"):
+                                                                    st.session_state[_h2h_timeline_key] = None if _h2h_is_open else str(_h2h_fixture_id)
+                                                                    st.rerun()
+                                                            else:
+                                                                st.caption("—")
                                                     if _h2h_is_open and _h2h_fixture_id:
                                                         _h2h_stats_cache = st.session_state.setdefault("h2h_match_stats_cache", {})
                                                         _h2h_stats_cache_key = str(_h2h_fixture_id)
