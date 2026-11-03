@@ -5814,8 +5814,8 @@ else:
                                         _shots_away_total = _shots_away.get("total")
                                         _shots_home_on = _shots_home.get("on_target")
                                         _shots_away_on = _shots_away.get("on_target")
-                                        _shots_total_today = max(0, _shots_home_total + _shots_away_total - 2.0) if _shots_home_total is not None and _shots_away_total is not None else None
-                                        _shots_on_today = max(0, _shots_home_on + _shots_away_on - 1.0) if _shots_home_on is not None and _shots_away_on is not None else None
+                                        _shots_total_today = max(0, _shots_home_total + _shots_away_total - 5.0) if _shots_home_total is not None and _shots_away_total is not None else None
+                                        _shots_on_today = max(0, _shots_home_on + _shots_away_on - 3.0) if _shots_home_on is not None and _shots_away_on is not None else None
 
                                         def _shots_fmt(_value):
                                             return f"{_value:.1f}" if _value is not None else "N/D"
@@ -5828,8 +5828,8 @@ else:
                                             f'<article><small>{html.escape(str(match_away_name))} · VISITANTE</small><b>{_shots_fmt(_shots_away_on)}</b><span>Tiros a puerta · {_shots_away.get("on_target_matches", 0)} partidos</span><b class="fl-shots-secondary">{_shots_fmt(_shots_away_total)}</b><span>Tiros totales · {_shots_away.get("total_matches", 0)} partidos</span></article>'
                                             '</div>'
                                             '<div class="fl-shots-estimates">'
-                                            f'<article><small>TIROS A PUERTA HOY</small><strong>{_shots_fmt(_shots_on_today)}</strong><span>Margen aplicado: −1.0</span></article>'
-                                            f'<article><small>TIROS TOTALES HOY</small><strong>{_shots_fmt(_shots_total_today)}</strong><span>Margen aplicado: −2.0</span></article>'
+                                            f'<article><small>TIROS A PUERTA HOY</small><strong>{_shots_fmt(_shots_on_today)}</strong></article>'
+                                            f'<article><small>TIROS TOTALES HOY</small><strong>{_shots_fmt(_shots_total_today)}</strong></article>'
                                             '</div>'
                                             '<p>Promedios de los últimos 10 partidos finalizados de esta competición, filtrados por localía: local en casa y visitante fuera. Los datos faltantes no se cuentan como cero.</p>'
                                             '</section>'
