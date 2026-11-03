@@ -6624,7 +6624,7 @@ else:
 
                                                 if deep_context.get("available"):
                                                     st.markdown('<div class="goal-deep-heading">⌁ ÚLTIMOS PARTIDOS POR CONDICIÓN</div>', unsafe_allow_html=True)
-                                                    form_cols = st.columns(2, gap="small")
+                                                    form_cols = st.columns(1, gap="small")
                                                     for col, team, label, form_data in (
                                                         (form_cols[0], match_home, home_name, deep_context.get("home_form") or {}),
                                                         (form_cols[1], match_away, away_name, deep_context.get("away_form") or {}),
@@ -6669,7 +6669,7 @@ else:
                                                                         _hg_label = html.escape(str(hg)) if isinstance(hg, int) else "—"
                                                                         _ag_label = html.escape(str(ag)) if isinstance(ag, int) else "—"
                                                                         st.markdown(f'<div class="goal-form-match-meta">{date_label}</div>', unsafe_allow_html=True)
-                                                                        match_action_cols = st.columns([0.68, 0.14, 0.18], gap="small", vertical_alignment="center")
+                                                                        match_action_cols = st.columns([0.76, 0.10, 0.14], gap="small", vertical_alignment="center")
                                                                         with match_action_cols[0]:
                                                                             st.markdown(f'<div class="goal-form-team-lines"><div>{home_label}</div><div>{away_label}</div></div>', unsafe_allow_html=True)
                                                                         with match_action_cols[1]:
