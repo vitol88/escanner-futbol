@@ -5559,8 +5559,8 @@ else:
                                         _card_html = (
                                             '<section class="fl-yellow-analysis"><header><span>🟨</span><strong>PROYECCIÓN DE TARJETAS</strong></header>'
                                             '<div class="fl-yellow-grid">'
-                                            f'<article><small>{home_name} · LOCAL</small><b>{_card_fmt(_card_home_avg)}</b><span>{_card_home_count} partidos analizados</span></article>'
-                                            f'<article><small>{away_name} · VISITANTE</small><b>{_card_fmt(_card_away_avg)}</b><span>{_card_away_count} partidos analizados</span></article>'
+                                            f'<article><small>{html.escape(str(match_home_name))} · LOCAL</small><b>{_card_fmt(_card_home_avg)}</b><span>{_card_home_count} partidos analizados</span></article>'
+                                            f'<article><small>{html.escape(str(match_away_name))} · VISITANTE</small><b>{_card_fmt(_card_away_avg)}</b><span>{_card_away_count} partidos analizados</span></article>'
                                             f'<article><small>HISTORIAL DIRECTO · MISMA LOCALÍA · TOTAL</small><b>{_card_fmt(_card_h2h_avg)}</b><span>{_card_h2h_count} enfrentamientos con datos</span></article>'
                                             '</div>'
                                             f'<div class="fl-yellow-estimate"><small>TOTAL TARJETAS PARA HOY</small><div class="fl-yellow-total"><strong>{_card_fmt(_card_total_today)}</strong><span class="fl-yellow-card-icon">🟨</span></div></div>'
