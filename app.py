@@ -4876,8 +4876,27 @@ if _analysis_page_active:
           border:2px solid #FACC15 !important; color:#FFD52A !important;
           box-shadow:0 0 14px rgba(250,204,21,.13) !important;
         }}
-        [class*="st-key-topnav_back_"] {{ margin-top:2px !important; }}
-        [class*="st-key-topnav_back_"] button {{ min-height:36px !important; padding:5px 10px !important; font-size:.76rem !important; }}
+        /* Botón de regreso compacto, circular y premium para la vista individual. */
+        [class*="st-key-topnav_back_"] {{ margin:2px 0 10px 0 !important; width:48px !important; max-width:48px !important; }}
+        [class*="st-key-topnav_back_"] [data-testid="stButton"] {{ width:48px !important; max-width:48px !important; }}
+        [class*="st-key-topnav_back_"] button {{
+          display:flex !important;align-items:center !important;justify-content:center !important;
+          width:44px !important;min-width:44px !important;max-width:44px !important;
+          height:44px !important;min-height:44px !important;max-height:44px !important;
+          padding:0 !important;border:1.5px solid #C9A227 !important;border-radius:50% !important;
+          background:linear-gradient(145deg,#FFF9E8,#F4E5B5) !important;
+          color:#6F5410 !important;-webkit-text-fill-color:#6F5410 !important;
+          font-size:25px !important;font-weight:700 !important;line-height:1 !important;
+          box-shadow:0 2px 8px rgba(176,137,24,.18),inset 0 1px 0 rgba(255,255,255,.9) !important;
+          transition:transform .16s ease,box-shadow .16s ease,background .16s ease !important;
+        }}
+        [class*="st-key-topnav_back_"] button:hover {{
+          transform:translateX(-2px) !important;background:linear-gradient(145deg,#FFEFAE,#EFD77B) !important;
+          border-color:#A98213 !important;box-shadow:0 3px 12px rgba(176,137,24,.28) !important;
+        }}
+        [class*="st-key-topnav_back_"] button:focus-visible {{
+          outline:3px solid rgba(201,162,39,.28) !important;outline-offset:3px !important;
+        }}
         @media(max-width:640px) {{
           [class*="st-key-analysis_page_nav"] [data-testid="stHorizontalBlock"] {{ gap:5px !important; }}
           [class*="st-key-topnav_stats_"] button, [class*="st-key-topnav_goals_"] button,
@@ -5240,18 +5259,17 @@ if _analysis_page_active:
             padding-right:8px !important; box-sizing:border-box !important; overflow:visible !important;
           }}
           [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] {{
-            width:100% !important; max-width:100% !important; min-width:0 !important;
+            width:48px !important; max-width:48px !important; min-width:48px !important;
             margin-left:0 !important; margin-right:0 !important; box-sizing:border-box !important;
           }}
           [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] [data-testid="stButton"] {{
-            width:100% !important; max-width:100% !important; min-width:0 !important;
+            width:48px !important; max-width:48px !important; min-width:48px !important;
             box-sizing:border-box !important;
           }}
           [class*="st-key-analysis_page_nav"] [class*="st-key-topnav_back_"] button {{
-            width:auto !important; max-width:100% !important; min-width:0 !important;
-            height:auto !important; min-height:38px !important; padding:6px 4px !important;
-            white-space:normal !important; overflow-wrap:anywhere !important;
-            box-sizing:border-box !important; font-size:.78rem !important;
+            width:44px !important; max-width:44px !important; min-width:44px !important;
+            height:44px !important; min-height:44px !important; padding:0 !important;
+            box-sizing:border-box !important; font-size:25px !important;
           }}
         }}
 </style>
@@ -5261,25 +5279,29 @@ if _analysis_page_active:
     with st.container(key="analysis_page_nav"):
         # Acceso de regreso sin abrir el panel lateral.
         _is_standings_page = _analysis_page_tool == "standings"
-        _back_label = "← Volver a estadísticas" if _is_standings_page else "← Volver a partidos en vivo"
-        _back_help = "Regresar a las estadísticas del mismo partido" if _is_standings_page else "Regresar a la lista de partidos"
-        _back_clicked = st.button(_back_label, key=f"topnav_back_{_analysis_page_id}", help=_back_help)
+        _back_help = "Volver a la pantalla principal de partidos"
+        _back_clicked = st.button("←", key=f"topnav_back_{_analysis_page_id}", help=_back_help)
         if _back_clicked:
             if _is_standings_page:
                 st.session_state["main_fixture_tool"] = {"fixture_id": _analysis_page_id, "tool": "stats"}
             else:
-                st.session_state[f"live_match_{_analysis_page_id}"] = True
-                for _match in st.session_state.get("live_fixtures", []):
-                    _fixture = _match.get("fixture") or {}
-                    if str(_fixture.get("id")) == _analysis_page_id:
-                        _league = _match.get("league") or {}
-                        _country = _league.get("country") or "Otros países"
-                        _league_name = _league.get("name") or "Liga sin nombre"
-                        st.session_state[f"live_league_{_country}_{_league_name}"] = True
-                        break
-                st.session_state["live_now_expander"] = True
+                _came_from_upcoming = st.session_state.get("fixture_mode", "live") == "upcoming"
                 st.session_state["main_fixture_tool"] = {}
-                st.session_state["return_to_fixture_id"] = _analysis_page_id
+                if not _came_from_upcoming:
+                    st.session_state[f"live_match_{_analysis_page_id}"] = True
+                    for _match in st.session_state.get("live_fixtures", []):
+                        _fixture = _match.get("fixture") or {}
+                        if str(_fixture.get("id")) == _analysis_page_id:
+                            _league = _match.get("league") or {}
+                            _country = _league.get("country") or "Otros países"
+                            _league_name = _league.get("name") or "Liga sin nombre"
+                            st.session_state[f"live_league_{_country}_{_league_name}"] = True
+                            break
+                    st.session_state["live_now_expander"] = True
+                    st.session_state["return_to_fixture_id"] = _analysis_page_id
+                else:
+                    # Conservar HOY/MAÑANA al volver desde un encuentro programado.
+                    st.session_state["upcoming_day"] = st.session_state.get("upcoming_day", "HOY")
             st.rerun()
     st.markdown(
         '<div class="match-analysis-panel"><div class="match-analysis-kicker">FOOTBALL LAB · ANÁLISIS INDIVIDUAL</div><div class="match-analysis-title">Vista ampliada del partido</div><div class="signal-meta">Consulta el análisis seleccionado y vuelve a los partidos cuando termines.</div></div>',
