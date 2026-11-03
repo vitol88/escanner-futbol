@@ -2694,7 +2694,7 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       html body .stApp .fl-yellow-analysis header,
       html body .stApp .fl-yellow-analysis header strong {
         color:#293448 !important; font-family:inherit !important;
-        font-size:clamp(1.28rem,2.35vw,1.58rem) !important;
+        font-size:clamp(1.15rem,2.1vw,1.45rem) !important;
         font-weight:800 !important; letter-spacing:.005em !important;
         line-height:1.25 !important; text-transform:none !important;
       }
@@ -3410,7 +3410,7 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
       html body .stApp .fl-shots-analysis header,
       html body .stApp .fl-shots-analysis header strong {
         color:#293448 !important; font-family:inherit !important;
-        font-size:clamp(1.28rem,2.35vw,1.58rem) !important;
+        font-size:clamp(1.15rem,2.1vw,1.45rem) !important;
         font-weight:800 !important; letter-spacing:.005em !important;
         line-height:1.25 !important;
       }
