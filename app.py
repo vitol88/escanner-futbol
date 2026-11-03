@@ -4,7 +4,7 @@ import io
 import json
 import os
 from pathlib import Path
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import time
 from typing import Any
 
@@ -4340,6 +4340,72 @@ with st.container(key="scan_actions_row"):
             type="secondary",
             key="scan_all_live",
         )
+# Navegación entre partidos en vivo y programación previa.
+with st.container(key="fixture_mode_switch"):
+    _mode_cols = st.columns(2, gap="small")
+    with _mode_cols[0]:
+        _live_mode_clicked = st.button("EN VIVO", key="fixture_mode_live", use_container_width=True, type="primary" if st.session_state.get("fixture_mode", "live") == "live" else "secondary")
+    with _mode_cols[1]:
+        _upcoming_mode_clicked = st.button("PRÓXIMOS PARTIDOS", key="fixture_mode_upcoming", use_container_width=True, type="primary" if st.session_state.get("fixture_mode", "live") == "upcoming" else "secondary")
+    if _live_mode_clicked:
+        st.session_state["fixture_mode"] = "live"
+        st.session_state.pop("live_search_query", None)
+        st.rerun()
+    if _upcoming_mode_clicked:
+        st.session_state["fixture_mode"] = "upcoming"
+        st.session_state.pop("live_search_query", None)
+        st.rerun()
+
+# Cargar partidos programados de hoy/mañana en hora local colombiana.
+if "upcoming_fixtures_by_date" not in st.session_state:
+    st.session_state["upcoming_fixtures_by_date"] = {}
+if "upcoming_fixtures_cache_epoch" not in st.session_state:
+    st.session_state["upcoming_fixtures_cache_epoch"] = {}
+_colombia_tz = timezone(timedelta(hours=-5))
+_colombia_now = datetime.now(timezone.utc).astimezone(_colombia_tz)
+_upcoming_dates = {
+    "HOY": _colombia_now.strftime("%Y-%m-%d"),
+    "MAÑANA": (_colombia_now + timedelta(days=1)).strftime("%Y-%m-%d"),
+}
+if st.session_state.get("fixture_mode", "live") == "upcoming":
+    _upcoming_date_cols = st.columns(2, gap="small")
+    with _upcoming_date_cols[0]:
+        _today_clicked = st.button("HOY", key="upcoming_day_today", use_container_width=True, type="primary" if st.session_state.get("upcoming_day", "HOY") == "HOY" else "secondary")
+    with _upcoming_date_cols[1]:
+        _tomorrow_clicked = st.button("MAÑANA", key="upcoming_day_tomorrow", use_container_width=True, type="primary" if st.session_state.get("upcoming_day", "HOY") == "MAÑANA" else "secondary")
+    if _today_clicked:
+        st.session_state["upcoming_day"] = "HOY"
+        st.rerun()
+    if _tomorrow_clicked:
+        st.session_state["upcoming_day"] = "MAÑANA"
+        st.rerun()
+    _upcoming_day = st.session_state.get("upcoming_day", "HOY")
+    _upcoming_date = _upcoming_dates[_upcoming_day]
+    _upcoming_cache_epoch = float(st.session_state["upcoming_fixtures_cache_epoch"].get(_upcoming_date, 0) or 0)
+    if time.time() - _upcoming_cache_epoch > 600:
+        try:
+            _upcoming_payload = api_get("fixtures", {"date": _upcoming_date, "timezone": "America/Bogota"})
+            _upcoming_rows = _upcoming_payload.get("response") or []
+            st.session_state["upcoming_fixtures_by_date"][_upcoming_date] = _upcoming_rows
+            st.session_state["upcoming_fixtures_cache_epoch"][_upcoming_date] = time.time()
+            st.session_state["upcoming_fixtures_error"] = ""
+        except Exception as _upcoming_exc:
+            st.session_state["upcoming_fixtures_error"] = str(_upcoming_exc)
+    _scheduled_rows = st.session_state["upcoming_fixtures_by_date"].get(_upcoming_date, [])
+    _scheduled_rows = [
+        _row for _row in _scheduled_rows
+        if str(((_row.get("fixture") or {}).get("status") or {}).get("short") or "").upper() in {"NS", "TBD"}
+    ]
+    if _upcoming_day == "HOY":
+        _scheduled_rows = [
+            _row for _row in _scheduled_rows
+            if str((_row.get("fixture") or {}).get("date") or "") >= _colombia_now.isoformat()
+        ]
+    _scheduled_rows.sort(key=lambda _row: str((_row.get("fixture") or {}).get("date") or ""))
+    st.session_state["upcoming_fixtures"] = _scheduled_rows
+else:
+    st.session_state["upcoming_fixtures"] = []
+
 # El balón ejecuta ahora la actualización general y el análisis completo en una sola secuencia.
 # Se conserva el flujo existente de actualización; el botón secundario deja de ser necesario.
 refresh = manual_scan
@@ -5223,7 +5289,11 @@ if _analysis_page_active:
 # El formulario envía la búsqueda solo al pulsar Enter o la lupa.
 st.session_state.pop("live_search_submit_requested", None)
 
-fixtures = st.session_state.live_fixtures
+fixtures = (
+    st.session_state.get("upcoming_fixtures", [])
+    if st.session_state.get("fixture_mode", "live") == "upcoming"
+    else st.session_state.live_fixtures
+)
 
 # Buscar partidos o ligas desde la barra lateral y navegar directamente al resultado.
 if search_clicked:
@@ -5285,7 +5355,13 @@ if not str(st.session_state.get("search_goal_matches", "") or "").strip():
 
 if not fixtures:
     st.markdown("### Tu centro de análisis")
-    st.info("Pulsa «Actualizar partidos» para cargar los encuentros en vivo. Después podrás escanear goles, córners, empate y ambos equipos marcan.")
+    if st.session_state.get("fixture_mode", "live") == "upcoming":
+        if st.session_state.get("upcoming_fixtures_error"):
+            st.warning("No se pudieron cargar los próximos partidos. Intenta nuevamente en unos minutos.")
+        else:
+            st.info(f"No hay partidos programados disponibles para {_upcoming_day.lower()} en este momento.")
+    else:
+        st.info("Pulsa «Actualizar partidos» para cargar los encuentros en vivo. Después podrás escanear goles, córners, empate y ambos equipos marcan.")
     st.markdown("""
     <div class="brand-header">
       <div>
@@ -5315,7 +5391,7 @@ else:
                 _league_filtered.append(_item)
         filtered = _team_filtered[:1] if _team_filtered else _league_filtered
     with st.container(key="live_now_section"):
-        with st.expander(f"En vivo ahora ({len(filtered)})", expanded=st.session_state.get("live_now_expander", False) or bool(_submitted_query), key="live_now_expander", on_change="rerun"):
+        with st.expander((f"Próximos partidos · {_upcoming_day} ({len(filtered)})" if st.session_state.get("fixture_mode", "live") == "upcoming" else f"En vivo ahora ({len(filtered)})"), expanded=st.session_state.get("live_now_expander", False) or bool(_submitted_query) or st.session_state.get("fixture_mode", "live") == "upcoming", key="live_now_expander", on_change="rerun"):
             if not filtered and _submitted_query:
                 st.markdown(
                     '<div style="display:flex;align-items:center;justify-content:center;gap:10px;'
@@ -5376,13 +5452,13 @@ else:
                             # La única flecha para contraer/expandir es la de la liga.
                             with st.container(key=f"live_match_{match_id}"):
                                 # Marcador detallado primero: reloj a la izquierda y una fila por equipo.
-                                _clock_text = f"{match_minute}:00" if match_minute is not None else str(((match_fixture.get("status") or {}).get("short") or "EN VIVO"))
+                                _clock_text = (datetime.fromisoformat(str(match_fixture.get("date")).replace("Z", "+00:00")).astimezone(_colombia_tz).strftime("%H:%M") if st.session_state.get("fixture_mode", "live") == "upcoming" and match_fixture.get("date") else (f"{match_minute}:00" if match_minute is not None else str(((match_fixture.get("status") or {}).get("short") or "EN VIVO"))))
                                 _clock_data_attr = f' data-base-minute="{int(match_minute)}"' if match_minute is not None else ""
-                                _home_score = match_goals.get("home") if match_goals.get("home") is not None else "—"
-                                _away_score = match_goals.get("away") if match_goals.get("away") is not None else "—"
+                                _home_score = "—" if st.session_state.get("fixture_mode", "live") == "upcoming" else (match_goals.get("home") if match_goals.get("home") is not None else "—")
+                                _away_score = "—" if st.session_state.get("fixture_mode", "live") == "upcoming" else (match_goals.get("away") if match_goals.get("away") is not None else "—")
                                 _home_crest = f'<img class="fl-match-crest" src="{html.escape(match_home_logo, quote=True)}" alt="">' if match_home_logo else '<span class="fl-match-crest-empty">⚽</span>'
                                 _away_crest = f'<img class="fl-match-crest" src="{html.escape(match_away_logo, quote=True)}" alt="">' if match_away_logo else '<span class="fl-match-crest-empty">⚽</span>'
-                                _home_red_cards, _away_red_cards = fixture_red_card_counts(match_id, match_home_id, match_away_id)
+                                _home_red_cards, _away_red_cards = (0, 0) if st.session_state.get("fixture_mode", "live") == "upcoming" else fixture_red_card_counts(match_id, match_home_id, match_away_id)
                                 _home_red_badge = f'<span class="fl-red-card-badge" title="Tarjeta roja">🟥{(" ×" + str(_home_red_cards)) if _home_red_cards > 1 else ""}</span>' if _home_red_cards else ""
                                 _away_red_badge = f'<span class="fl-red-card-badge" title="Tarjeta roja">🟥{(" ×" + str(_away_red_cards)) if _away_red_cards > 1 else ""}</span>' if _away_red_cards else ""
                                 _status_short = str((match_fixture.get("status") or {}).get("short") or "")
