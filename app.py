@@ -3394,6 +3394,17 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         background:#FFF7DC !important; color:#705400 !important; border:1px solid #E5D18A !important;
       }
       html body .stApp .fl-tracker-status-dot { box-shadow:0 0 8px #D6A91A !important; }
+      /* Proyección de tiros: paleta clara ligada al selector de apariencia de Football Lab. */
+      html body .stApp .fl-shots-analysis { background:linear-gradient(145deg,#FFFFFF,#F3F6FA) !important; color:#303744 !important; border-color:#D6B64C !important; }
+      html body .stApp .fl-shots-grid article { background:#FFFFFF !important; border-color:#DDE2E9 !important; }
+      html body .stApp .fl-shots-grid small, html body .stApp .fl-shots-grid span,
+      html body .stApp .fl-shots-estimates span, html body .stApp .fl-shots-analysis p,
+      html body .stApp .fl-shots-note { color:#68717F !important; }
+      html body .stApp .fl-shots-grid b, html body .stApp .fl-shots-grid .fl-shots-secondary,
+      html body .stApp .fl-shots-analysis header { color:#987300 !important; }
+      html body .stApp .fl-shots-estimates article { background:linear-gradient(135deg,#FFF3C4,#FFF9E8) !important; border-color:#D4A91F !important; box-shadow:0 0 12px rgba(212,169,31,.12) !important; }
+      html body .stApp .fl-shots-estimates small { color:#806000 !important; }
+      html body .stApp .fl-shots-estimates strong { color:#987300 !important; }
 </style>
     """, unsafe_allow_html=True)
 if st.session_state.get("appearance_mode") not in {"☀️", "☀️ Claro"}:
@@ -5842,14 +5853,7 @@ else:
                                         .fl-shots-estimates span{text-align:center}
                                         .fl-shots-analysis p,.fl-shots-note{margin:10px 0 0;color:#AEB5C0;font-size:10px;line-height:1.45}
                                         @media(max-width:380px){.fl-shots-analysis{padding:11px}.fl-shots-grid,.fl-shots-estimates{gap:6px}.fl-shots-grid article{padding:8px}.fl-shots-grid b{font-size:20px}.fl-shots-estimates strong{font-size:25px}}
-                                        @media(prefers-color-scheme:light){
-                                          .fl-shots-analysis{background:linear-gradient(145deg,#FFFFFF,#F3F6FA);color:#303744;border-color:#D6B64C}
-                                          .fl-shots-grid article{background:#FFFFFF;border-color:#DDE2E9}
-                                          .fl-shots-grid small,.fl-shots-grid span,.fl-shots-estimates span,.fl-shots-analysis p,.fl-shots-note{color:#68717F}
-                                          .fl-shots-grid b,.fl-shots-grid .fl-shots-secondary,.fl-shots-analysis header{color:#987300}
-                                          .fl-shots-estimates article{background:linear-gradient(135deg,#FFF3C4,#FFF9E8);border-color:#D4A91F;box-shadow:0 0 12px rgba(212,169,31,.12)}
-                                          .fl-shots-estimates small{color:#806000}.fl-shots-estimates strong{color:#987300}
-                                        }
+
                                         </style>
                                         """, unsafe_allow_html=True)
                                         st.markdown("""
