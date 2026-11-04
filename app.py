@@ -3728,6 +3728,8 @@ def _api_cache_ttl(endpoint: str, params: dict[str, Any] | None = None) -> int:
         return 45 if fixture_id in live_ids else 21600
     if endpoint == "fixtures/events":
         return 30
+    if endpoint == "fixtures/lineups":
+        return 1800
     if endpoint in {"fixtures/headtohead", "standings"}:
         return 21600
     return 600
@@ -3754,6 +3756,8 @@ def api_get(endpoint: str, params: dict[str, Any] | None = None) -> dict[str, An
         cached_response = cached_payload.get("response") or []
         if endpoint == "fixtures/statistics" and not cached_response:
             ttl = min(ttl, 300 if (normalized_params or {}).get("half") == "true" else 900)
+        if endpoint == "fixtures/lineups" and not cached_response:
+            ttl = min(ttl, 180)
         if now_epoch - float(cached.get("fetched_at", 0)) < ttl:
             return cached["payload"]
 
@@ -6080,6 +6084,83 @@ else:
                                             if st.button("Ver clasificación", key=f"open_standings_{match_id}", icon=":material/emoji_events:", use_container_width=True, type="secondary"):
                                                 st.session_state["main_fixture_tool"] = {"fixture_id": str(match_id), "tool": "standings"}
                                                 st.rerun()
+                                                                            # FORMACIONES: consulta bajo demanda para no consumir cuota en cada partido.
+                                        _lineups_toggle_key = f"show_lineups_{match_id}"
+                                        _lineups_open = bool(st.session_state.get(_lineups_toggle_key, False))
+                                        if st.button(
+                                            "Ocultar formaciones" if _lineups_open else "Ver formaciones",
+                                            key=f"toggle_lineups_{match_id}",
+                                            icon=":material/groups:",
+                                            type="secondary",
+                                            use_container_width=True,
+                                        ):
+                                            st.session_state[_lineups_toggle_key] = not _lineups_open
+                                            st.rerun()
+
+                                        if st.session_state.get(_lineups_toggle_key, False):
+                                            try:
+                                                _lineups_payload = api_get("fixtures/lineups", {"fixture": match_id})
+                                                _lineups_response = _lineups_payload.get("response") or []
+                                                if not _lineups_response:
+                                                    st.info(
+                                                        "Las alineaciones todavía no están disponibles. "
+                                                        "La API las mostrará cuando la competición las publique; "
+                                                        "vuelve a consultar más cerca del inicio del partido."
+                                                    )
+                                                else:
+                                                    _lineups_by_team = {
+                                                        str((item.get("team") or {}).get("id")): item
+                                                        for item in _lineups_response
+                                                    }
+                                                    _lineup_cols = st.columns(2)
+                                                    for _lineup_col, _team in zip(
+                                                        _lineup_cols,
+                                                        (match_home, match_away),
+                                                    ):
+                                                        with _lineup_col:
+                                                            _team_id_key = str(_team.get("id"))
+                                                            _team_lineup = _lineups_by_team.get(_team_id_key) or {}
+                                                            _team_name_lineup = str(_team.get("name") or "Equipo")
+                                                            st.markdown(f"**{_team_name_lineup}**")
+                                                            if _team_lineup:
+                                                                _formation = str(_team_lineup.get("formation") or "N/D")
+                                                                st.caption(f"Formación · {_formation}")
+                                                                _coach = _team_lineup.get("coach") or {}
+                                                                if _coach.get("name"):
+                                                                    st.caption(f"Entrenador · {_coach.get('name')}")
+
+                                                                st.markdown("**Titulares**")
+                                                                _starting_xi = _team_lineup.get("startXI") or []
+                                                                if _starting_xi:
+                                                                    for _entry in _starting_xi:
+                                                                        _player = _entry.get("player") or {}
+                                                                        _player_name = str(_player.get("name") or "Jugador")
+                                                                        _player_number = _player.get("number")
+                                                                        _player_position = str(_player.get("pos") or "")
+                                                                        _shirt = f"#{_player_number} · " if _player_number is not None else ""
+                                                                        _position_suffix = f" · {_player_position}" if _player_position else ""
+                                                                        st.write(f"{_shirt}{_player_name}{_position_suffix}")
+                                                                else:
+                                                                    st.caption("Titulares no disponibles.")
+
+                                                                st.markdown("**Suplentes**")
+                                                                _substitutes = _team_lineup.get("substitutes") or []
+                                                                if _substitutes:
+                                                                    for _entry in _substitutes:
+                                                                        _player = _entry.get("player") or {}
+                                                                        _player_name = str(_player.get("name") or "Jugador")
+                                                                        _player_number = _player.get("number")
+                                                                        _player_position = str(_player.get("pos") or "")
+                                                                        _shirt = f"#{_player_number} · " if _player_number is not None else ""
+                                                                        _position_suffix = f" · {_player_position}" if _player_position else ""
+                                                                        st.write(f"{_shirt}{_player_name}{_position_suffix}")
+                                                                else:
+                                                                    st.caption("Suplentes no disponibles.")
+                                                            else:
+                                                                st.caption("La API todavía no ha publicado la alineación de este equipo.")
+                                            except Exception as _lineups_exc:
+                                                st.warning(f"No se pudieron consultar las formaciones: {_lineups_exc}")
+
                                     elif tool_name == "standings":
                                         _standings_league = match.get("league") or {}
                                         _standings_league_id = _standings_league.get("id")
