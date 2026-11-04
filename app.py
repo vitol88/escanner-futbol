@@ -6084,7 +6084,7 @@ else:
                                             if st.button("Ver clasificación", key=f"open_standings_{match_id}", icon=":material/emoji_events:", use_container_width=True, type="secondary"):
                                                 st.session_state["main_fixture_tool"] = {"fixture_id": str(match_id), "tool": "standings"}
                                                 st.rerun()
-                                                                            # FORMACIONES: consulta bajo demanda para no consumir cuota en cada partido.
+                                        # FORMACIONES: consulta bajo demanda para no consumir cuota en cada partido.
                                         _lineups_toggle_key = f"show_lineups_{match_id}"
                                         _lineups_open = bool(st.session_state.get(_lineups_toggle_key, False))
                                         if st.button(
@@ -6112,52 +6112,121 @@ else:
                                                         str((item.get("team") or {}).get("id")): item
                                                         for item in _lineups_response
                                                     }
-                                                    _lineup_cols = st.columns(2)
-                                                    for _lineup_col, _team in zip(
-                                                        _lineup_cols,
-                                                        (match_home, match_away),
-                                                    ):
-                                                        with _lineup_col:
+                                                    _lineup_tabs = st.tabs([
+                                                        str(match_home.get("name") or "LOCAL").upper(),
+                                                        str(match_away.get("name") or "VISITANTE").upper(),
+                                                    ])
+                                                    for _lineup_tab, _team in zip(_lineup_tabs, (match_home, match_away)):
+                                                        with _lineup_tab:
                                                             _team_id_key = str(_team.get("id"))
                                                             _team_lineup = _lineups_by_team.get(_team_id_key) or {}
                                                             _team_name_lineup = str(_team.get("name") or "Equipo")
-                                                            st.markdown(f"**{_team_name_lineup}**")
-                                                            if _team_lineup:
-                                                                _formation = str(_team_lineup.get("formation") or "N/D")
-                                                                st.caption(f"Formación · {_formation}")
-                                                                _coach = _team_lineup.get("coach") or {}
-                                                                if _coach.get("name"):
-                                                                    st.caption(f"Entrenador · {_coach.get('name')}")
-
-                                                                st.markdown("**Titulares**")
-                                                                _starting_xi = _team_lineup.get("startXI") or []
-                                                                if _starting_xi:
-                                                                    for _entry in _starting_xi:
-                                                                        _player = _entry.get("player") or {}
-                                                                        _player_name = str(_player.get("name") or "Jugador")
-                                                                        _player_number = _player.get("number")
-                                                                        _player_position = str(_player.get("pos") or "")
-                                                                        _shirt = f"#{_player_number} · " if _player_number is not None else ""
-                                                                        _position_suffix = f" · {_player_position}" if _player_position else ""
-                                                                        st.write(f"{_shirt}{_player_name}{_position_suffix}")
-                                                                else:
-                                                                    st.caption("Titulares no disponibles.")
-
-                                                                st.markdown("**Suplentes**")
-                                                                _substitutes = _team_lineup.get("substitutes") or []
-                                                                if _substitutes:
-                                                                    for _entry in _substitutes:
-                                                                        _player = _entry.get("player") or {}
-                                                                        _player_name = str(_player.get("name") or "Jugador")
-                                                                        _player_number = _player.get("number")
-                                                                        _player_position = str(_player.get("pos") or "")
-                                                                        _shirt = f"#{_player_number} · " if _player_number is not None else ""
-                                                                        _position_suffix = f" · {_player_position}" if _player_position else ""
-                                                                        st.write(f"{_shirt}{_player_name}{_position_suffix}")
-                                                                else:
-                                                                    st.caption("Suplentes no disponibles.")
+                                                            _team_logo_lineup = str(_team.get("logo") or "")
+                                                            _formation = str(_team_lineup.get("formation") or "N/D")
+                                                            _coach = _team_lineup.get("coach") or {}
+                                                            _coach_name = str(_coach.get("name") or "Por confirmar")
+                                                            _starting_xi = _team_lineup.get("startXI") or []
+                                                            _substitutes = _team_lineup.get("substitutes") or []
+                                                            st.markdown(
+                                                                f'<div class="fl-lineup-head">'
+                                                                f'<div class="fl-lineup-team">'
+                                                                f'<img src="{html.escape(_team_logo_lineup, quote=True)}" alt="" />'
+                                                                f'<div><div class="fl-lineup-team-name">{html.escape(_team_name_lineup)}</div>'
+                                                                f'<div class="fl-lineup-meta">SISTEMA TÁCTICO · {html.escape(_formation)}</div></div>'
+                                                                f'</div><div class="fl-lineup-coach">ENTRENADOR<br><b>{html.escape(_coach_name)}</b></div></div>',
+                                                                unsafe_allow_html=True,
+                                                            )
+                                                            if _starting_xi:
+                                                                _players = []
+                                                                for _entry in _starting_xi:
+                                                                    _player = _entry.get("player") or {}
+                                                                    _grid = str(_player.get("grid") or "").strip()
+                                                                    _row = _col = None
+                                                                    if ":" in _grid:
+                                                                        try:
+                                                                            _row, _col = [int(_part) for _part in _grid.split(":", 1)]
+                                                                        except (TypeError, ValueError):
+                                                                            _row = _col = None
+                                                                    _players.append({
+                                                                        "name": str(_player.get("name") or "Jugador"),
+                                                                        "number": _player.get("number"),
+                                                                        "pos": str(_player.get("pos") or ""),
+                                                                        "row": _row,
+                                                                        "col": _col,
+                                                                    })
+                                                                _grid_rows = [p["row"] for p in _players if p["row"] is not None]
+                                                                _grid_cols = [p["col"] for p in _players if p["col"] is not None]
+                                                                _max_row = max(_grid_rows) if _grid_rows else 4
+                                                                _max_col = max(_grid_cols) if _grid_cols else 5
+                                                                _fallback_groups = {"G": [], "D": [], "M": [], "F": []}
+                                                                for _p in _players:
+                                                                    if _p["row"] is None or _p["col"] is None:
+                                                                        _fallback_groups.get(_p["pos"].upper()[:1], _fallback_groups["M"]).append(_p)
+                                                                for _p in _players:
+                                                                    if _p["row"] is None or _p["col"] is None:
+                                                                        _group = _p["pos"].upper()[:1]
+                                                                        _row_map = {"G": 1, "D": 2, "M": 3, "F": 4}
+                                                                        _p["row"] = _row_map.get(_group, 3)
+                                                                        _same_row = [q for q in _players if q["row"] == _p["row"]]
+                                                                        _p["col"] = _same_row.index(_p) + 1
+                                                                _max_row = max([p["row"] for p in _players] or [4])
+                                                                _max_col = max([p["col"] for p in _players] or [5])
+                                                                _markers = []
+                                                                for _p in _players:
+                                                                    _left = max(8, min(92, ((_p["col"] - 0.5) / max(1, _max_col)) * 100))
+                                                                    _top = max(8, min(92, ((_max_row - _p["row"] + 0.5) / max(1, _max_row)) * 100))
+                                                                    _number = "—" if _p["number"] is None else str(_p["number"])
+                                                                    _markers.append(
+                                                                        f'<div class="fl-player" style="left:{_left:.1f}%;top:{_top:.1f}%">'
+                                                                        f'<span class="fl-player-shirt">{html.escape(_number)}</span>'
+                                                                        f'<span class="fl-player-name">{html.escape(_p["name"])}</span></div>'
+                                                                    )
+                                                                st.markdown(
+                                                                    '<style>'
+                                                                    '.fl-lineup-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:8px 0 14px;padding:12px 14px;border:1px solid rgba(226,190,75,.45);border-radius:14px;background:linear-gradient(120deg,rgba(232,197,83,.13),rgba(20,25,37,.08));}'
+                                                                    '.fl-lineup-team{display:flex;align-items:center;gap:11px;min-width:0;}'
+                                                                    '.fl-lineup-team img{width:42px;height:42px;object-fit:contain;}'
+                                                                    '.fl-lineup-team-name{font-weight:900;font-size:1rem;color:var(--text-color);}'
+                                                                    '.fl-lineup-meta{font-size:.7rem;letter-spacing:.1em;font-weight:800;color:#B18A22;margin-top:3px;}'
+                                                                    '.fl-lineup-coach{text-align:right;font-size:.65rem;letter-spacing:.08em;color:var(--text-color);opacity:.72;}'
+                                                                    '.fl-lineup-coach b{font-size:.82rem;letter-spacing:0;color:var(--text-color);opacity:1;}'
+                                                                    '.fl-lineup-pitch{position:relative;width:100%;max-width:510px;height:570px;margin:0 auto 16px;overflow:hidden;border:2px solid #D9C16B;border-radius:15px;background:repeating-linear-gradient(0deg,#176B38 0px,#176B38 72px,#1B773E 72px,#1B773E 144px);box-shadow:0 8px 22px rgba(0,0,0,.18);}'
+                                                                    '.fl-lineup-pitch:before{content:"";position:absolute;inset:10px;border:1.5px solid rgba(255,255,255,.72);border-radius:5px;}'
+                                                                    '.fl-lineup-pitch:after{content:"";position:absolute;left:10px;right:10px;top:50%;border-top:1.5px solid rgba(255,255,255,.65);}'
+                                                                    '.fl-pitch-center{position:absolute;left:50%;top:50%;width:112px;height:112px;transform:translate(-50%,-50%);border:1.5px solid rgba(255,255,255,.7);border-radius:50%;}'
+                                                                    '.fl-pitch-box-top,.fl-pitch-box-bottom{position:absolute;left:25%;width:50%;height:14%;border:1.5px solid rgba(255,255,255,.7);}'
+                                                                    '.fl-pitch-box-top{top:10px;border-top:0;}.fl-pitch-box-bottom{bottom:10px;border-bottom:0;}'
+                                                                    '.fl-player{position:absolute;z-index:2;display:flex;flex-direction:column;align-items:center;gap:3px;width:76px;transform:translate(-50%,-50%);text-align:center;}'
+                                                                    '.fl-player-shirt{display:flex;align-items:center;justify-content:center;width:31px;height:31px;border:2px solid #F6D76A;border-radius:50%;background:linear-gradient(145deg,#242A36,#090D15);color:#FFE27A;font-size:.76rem;font-weight:950;box-shadow:0 2px 9px rgba(0,0,0,.4);}'
+                                                                    '.fl-player-name{display:block;max-width:76px;padding:2px 4px;border-radius:5px;background:rgba(7,12,18,.78);color:#fff;font-size:.62rem;font-weight:750;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 2px #000;}'
+                                                                    '.fl-bench-title{margin:14px 0 8px;color:#B18A22;font-weight:950;letter-spacing:.09em;font-size:.82rem;}'
+                                                                    '.fl-bench-list{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px;}'
+                                                                    '.fl-bench-player{display:flex;align-items:center;gap:6px;padding:6px 9px;border:1px solid rgba(190,158,65,.35);border-radius:9px;background:rgba(180,145,45,.08);color:var(--text-color);font-size:.76rem;font-weight:650;}'
+                                                                    '.fl-bench-number{color:#B18A22;font-weight:950;}'
+                                                                    '@media(max-width:640px){.fl-lineup-pitch{height:500px;max-width:100%;}.fl-player{width:64px;}.fl-player-name{max-width:64px;font-size:.56rem;}.fl-player-shirt{width:28px;height:28px;font-size:.7rem;}.fl-pitch-center{width:86px;height:86px;}}'
+                                                                    '</style>'
+                                                                    + '<div class="fl-lineup-pitch"><div class="fl-pitch-center"></div>'
+                                                                    + '<div class="fl-pitch-box-top"></div><div class="fl-pitch-box-bottom"></div>'
+                                                                    + ''.join(_markers) + '</div>',
+                                                                    unsafe_allow_html=True,
+                                                                )
                                                             else:
-                                                                st.caption("La API todavía no ha publicado la alineación de este equipo.")
+                                                                st.info("La API todavía no ha publicado los titulares de este equipo.")
+                                                            _bench_html = []
+                                                            for _entry in _substitutes:
+                                                                _player = _entry.get("player") or {}
+                                                                _number = "—" if _player.get("number") is None else str(_player.get("number"))
+                                                                _name = str(_player.get("name") or "Jugador")
+                                                                _bench_html.append(
+                                                                    f'<span class="fl-bench-player"><b class="fl-bench-number">{html.escape(_number)}</b>'
+                                                                    f'{html.escape(_name)}</span>'
+                                                                )
+                                                            st.markdown(
+                                                                '<div class="fl-bench-title">SUPLENTES</div><div class="fl-bench-list">'
+                                                                + (''.join(_bench_html) if _bench_html else '<span class="fl-bench-player">Suplentes por confirmar</span>')
+                                                                + '</div>',
+                                                                unsafe_allow_html=True,
+                                                            )
                                             except Exception as _lineups_exc:
                                                 st.warning(f"No se pudieron consultar las formaciones: {_lineups_exc}")
 
