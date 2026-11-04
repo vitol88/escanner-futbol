@@ -2040,6 +2040,16 @@ st.markdown("""
   /* H2H oscuro: quitar el marco del contenedor padre que envuelve el análisis.
      Las tarjetas de muestra, distribución y resultados mantienen sus bordes. */
   @media (prefers-color-scheme: dark) {
+    /* El marco visible que queda rodeando la lista es el propio .h2h-history-list. */
+    html body .stApp section.main .h2h-history-list,
+    html body .stApp section.main .h2h-history-list::before,
+    html body .stApp section.main .h2h-history-list::after {
+      border:0 !important;
+      outline:0 !important;
+      box-shadow:none !important;
+      background-image:none !important;
+      content:none !important;
+    }
     html body .stApp section.main:has(.h2h-page-kicker) div[data-testid="stVerticalBlock"]:has(.h2h-page-kicker),
     html body .stApp section.main:has(.h2h-page-kicker) div[data-testid="stVerticalBlockBorderWrapper"],
     html body .stApp section.main:has(.h2h-page-kicker) [data-testid="column"]:has(.h2h-page-kicker),
