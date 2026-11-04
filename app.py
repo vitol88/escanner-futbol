@@ -2044,10 +2044,8 @@ st.markdown("""
     html body .stApp section.main:has(.h2h-page-kicker) div[data-testid="stVerticalBlockBorderWrapper"],
     html body .stApp section.main:has(.h2h-page-kicker) [data-testid="column"]:has(.h2h-page-kicker),
     html body .stApp section.main:has(.h2h-page-kicker) .stColumn:has(.h2h-page-kicker) {
-      border-left:0 !important;
-      border-right:0 !important;
-      outline-left:0 !important;
-      outline-right:0 !important;
+      border:0 !important;
+      outline:0 !important;
       box-shadow:none !important;
       background-image:none !important;
     }
