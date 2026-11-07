@@ -3,6 +3,7 @@ import io
 import json
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 from ai_engine.live_corner_report import build_live_corner_report, main
@@ -38,6 +39,29 @@ class LiveCornerReportTests(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertIn("INFORME DE CÓRNERS EN VIVO", output.getvalue())
             self.assertIn("Solicitudes API: 0", output.getvalue())
+
+
+    def test_cli_passes_configured_corner_lines_to_backtest(self):
+        with tempfile.TemporaryDirectory() as folder:
+            with patch(
+                "ai_engine.live_corner_report.run_live_corner_baseline_backtest",
+                return_value={"available": False, "reason": "database_not_found"},
+            ) as backtest:
+                with contextlib.redirect_stdout(io.StringIO()):
+                    exit_code = main([
+                        "--db", str(Path(folder) / "missing.sqlite3"),
+                        "--corner-lines", "4.5,5.5,6.5",
+                    ])
+            self.assertEqual(exit_code, 0)
+            backtest.assert_called_once_with(
+                Path(folder) / "missing.sqlite3",
+                over_under_lines=(4.5, 5.5, 6.5),
+            )
+
+    def test_cli_rejects_non_numeric_corner_lines(self):
+        with self.assertRaises(SystemExit) as raised:
+            main(["--corner-lines", "4.5,invalid"])
+        self.assertEqual(raised.exception.code, 2)
 
 
 if __name__ == "__main__":
