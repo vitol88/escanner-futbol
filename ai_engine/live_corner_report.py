@@ -57,6 +57,12 @@ def _human_summary(report: dict) -> str:
             f"- Partidos entrenamiento / prueba: {split['train_fixtures']} / {split['test_fixtures']}",
             f"- MAE de córners restantes: {metrics['mae_remaining_corners']:.3f}",
             f"- Sesgo medio: {metrics['mean_signed_error']:.3f}",
+            f"- MAE referencia media global: {backtest['benchmark']['mae_remaining_corners']:.3f}",
+            (
+                f"- Mejora de MAE vs referencia global: {backtest['mae_improvement_vs_global_mean']:.1%}"
+                if backtest.get("mae_improvement_vs_global_mean") is not None
+                else "- Mejora vs referencia global: no calculable (MAE de referencia = 0)"
+            ),
             f"- Desgloses por liga/minuto: {len(backtest.get('by_league_minute_bucket', []))}",
             "- Interpretación: baseline experimental; no demuestra rentabilidad.",
         ])
