@@ -12,6 +12,7 @@ import requests
 import streamlit as st
 
 from ai_engine.data_engine import FootballDataEngine
+from ai_engine.live_corner_capture import capture_live_corner_snapshot
 from models.live_context import qualifies_as_corner_candidate, summarize_live_context
 from ai_engine.evaluation import evaluate_binary_forecasts, evaluate_forecasts_by_group, evaluate_chronological_holdout
 from ai_engine.dataset_audit import audit_forecast_dataset
@@ -35,6 +36,10 @@ from models.live_odds import (
 
 API_BASE = "https://v3.football.api-sports.io"
 TIMEOUT_SECONDS = 15
+LIVE_CORNER_CAPTURE_DB = Path(os.environ.get(
+    "FOOTBALL_LAB_DB_PATH",
+    str(Path(__file__).resolve().parent / "data" / "football_lab.sqlite3"),
+))
 
 st.set_page_config(
     page_title="FOOTBALL LAB · Live Analytics",
@@ -4710,6 +4715,22 @@ if should_refresh:
                 try:
                     stat_payload = api_get("fixtures/statistics", {"fixture": fixture_id})
                     stat_rows = stat_payload.get("response") or []
+                    # Capturar el snapshot con estadísticas ya consultadas: cero llamadas API adicionales.
+                    # La captura es auxiliar y nunca debe interrumpir el escáner principal.
+                    try:
+                        capture_result = capture_live_corner_snapshot(
+                            LIVE_CORNER_CAPTURE_DB, match, stat_rows
+                        )
+                        if capture_result.get("stored"):
+                            st.session_state["live_corner_capture_last"] = {
+                                "fixture_id": fixture_id,
+                                "minute": capture_result.get("minute"),
+                            }
+                            st.session_state["live_corner_capture_count"] = (
+                                st.session_state.get("live_corner_capture_count", 0) + 1
+                            )
+                    except Exception as capture_exc:
+                        st.session_state["live_corner_capture_error"] = str(capture_exc)
                     # Reutilizar datos recientes en el panel del partido seleccionado.
                     st.session_state.stats_cache[fixture_id] = stat_rows
                     home_c = safe_stat(stat_rows, "Corner Kicks", 0)
