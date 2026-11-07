@@ -7280,8 +7280,11 @@ else:
                                                 try:
                                                     live_corner_stats = (api_get("fixtures/statistics", {"fixture": match_id}).get("response") or [])
                                                     st.session_state.stats_cache[str(match_id)] = live_corner_stats
-                                                    selected_home_corners = safe_stat(live_corner_stats, "Corner Kicks", 0)
-                                                    selected_away_corners = safe_stat(live_corner_stats, "Corner Kicks", 1)
+                                                    selected_teams = match.get("teams") or {}
+                                                    selected_home_id = (selected_teams.get("home") or {}).get("id")
+                                                    selected_away_id = (selected_teams.get("away") or {}).get("id")
+                                                    selected_home_corners = safe_stat_for_team(live_corner_stats, "Corner Kicks", selected_home_id)
+                                                    selected_away_corners = safe_stat_for_team(live_corner_stats, "Corner Kicks", selected_away_id)
                                                     if selected_home_corners is None or selected_away_corners is None:
                                                         st.session_state.setdefault("stats_errors", {})[str(match_id)] = "La API no entregó córners para ambos equipos."
                                                     else:
