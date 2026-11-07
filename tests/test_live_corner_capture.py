@@ -37,6 +37,7 @@ class LiveCornerCaptureTests(unittest.TestCase):
             self.db, self.fixture, self.stats, captured_at=self.stamp
         )
         self.assertTrue(result["stored"])
+        self.assertTrue(result["inserted"])
         self.assertEqual(result["minute"], 67)
         self.assertEqual(result["home_corners"], 5)
         self.assertEqual(count_live_corner_snapshots(self.db), 1)
@@ -47,9 +48,10 @@ class LiveCornerCaptureTests(unittest.TestCase):
             {"statistics": [{"type": "Corner Kicks", "value": 6}]},
             {"statistics": [{"type": "Corner Kicks", "value": 4}]},
         ]
-        capture_live_corner_snapshot(
+        updated = capture_live_corner_snapshot(
             self.db, self.fixture, updated_stats, captured_at=self.stamp
         )
+        self.assertFalse(updated["inserted"])
         lower_stats = [
             {"statistics": [{"type": "Corner Kicks", "value": 4}]},
             {"statistics": [{"type": "Corner Kicks", "value": 2}]},
