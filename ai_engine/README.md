@@ -21,6 +21,7 @@ El historial de tarjetas se extrae de las mismas respuestas fixtures/statistics 
 - `evaluation.evaluate_chronological_holdout` separa por fecha de primer registro y por partido completo, para que snapshots en vivo del mismo fixture no aparezcan simultáneamente en desarrollo y prueba. Solo puntúa resultados verificados del bloque posterior y exige al menos 5 partidos por bloque por defecto.
 - La validación cronológica evalúa pronósticos ya registrados; no entrena modelos ni demuestra rentabilidad. Sus desgloses por mercado y liga se calculan únicamente sobre el bloque de prueba posterior, no sobre los datos de desarrollo; cada desglose debe leerse junto con el tamaño de muestra.
 - Solo incluye pronósticos con resultado marcado explícitamente como verificado; excluye registros incompletos o inválidos.
+- El holdout cronológico exige timestamps con zona horaria explícita. Los timestamps legacy sin zona se excluyen en vez de asumir UTC y alterar el orden temporal.
 - Informa si alcanza el mínimo de muestra configurado (30 por defecto), sin presentar ese umbral como garantía de validez.
 - La evaluación debe ejecutarse cronológicamente y separarse por liga, mercado y línea. No calcula ROI ni recomienda apuestas.
 
