@@ -136,6 +136,23 @@ def run_live_corner_baseline_backtest(
     train = [row for row in rows if str(row["fixture_id"]) in train_ids]
     test = [row for row in rows if str(row["fixture_id"]) in test_ids]
     overall = _metrics(test, train)
+    # Independent naive benchmark: one global mean from training, applied to
+    # every held-out observation. This reveals whether segmented averages add
+    # value beyond a constant prediction without using any test outcomes.
+    global_training_mean = sum(float(row["corners_for_after"]) for row in train) / len(train)
+    global_errors = [
+        global_training_mean - float(row["corners_for_after"]) for row in test
+    ]
+    global_mean_baseline = {
+        "observations": len(test),
+        "mae_remaining_corners": sum(abs(error) for error in global_errors) / len(global_errors),
+        "mean_signed_error": sum(global_errors) / len(global_errors),
+    }
+    mae_improvement = (
+        (global_mean_baseline["mae_remaining_corners"] - overall["mae_remaining_corners"])
+        / global_mean_baseline["mae_remaining_corners"]
+        if global_mean_baseline["mae_remaining_corners"] > 0 else None
+    )
 
     league_ids = sorted({str(row["league"] or "Unknown") for row in test})
     by_league = []
@@ -210,6 +227,11 @@ def run_live_corner_baseline_backtest(
             "test_kickoff_timestamp_groups": len(test_timestamps),
         },
         "metrics": overall,
+        "benchmark": {
+            "name": "global_training_mean",
+            **global_mean_baseline,
+        },
+        "mae_improvement_vs_global_mean": mae_improvement,
         "by_league": by_league,
         "by_league_minute_bucket": by_league_minute_bucket,
     }
