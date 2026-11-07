@@ -65,7 +65,9 @@ def _human_summary(report: dict) -> str:
             ),
             (
                 f"- Evaluación rolling-origin: {backtest['rolling_origin']['fold_count']} bloques, "
-                f"MAE ponderado {backtest['rolling_origin']['weighted_mae_remaining_corners']:.3f}"
+                f"MAE ponderado {backtest['rolling_origin']['weighted_mae_remaining_corners']:.3f}, "
+                f"estabilidad {backtest['rolling_origin']['stability']}, "
+                f"rango MAE {backtest['rolling_origin']['fold_mae_range']:.3f}"
                 if backtest.get("rolling_origin", {}).get("available")
                 else f"- Evaluación rolling-origin no disponible: {backtest.get('rolling_origin', {}).get('reason', 'unknown')}"
             ),
