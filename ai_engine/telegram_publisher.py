@@ -10,7 +10,7 @@ TELEGRAM_API_BASE = "https://api.telegram.org"
 
 
 def format_signal_message(row: dict[str, Any]) -> str:
-    """Create a concise plain-text message from one recorded live signal."""
+    """Create a clear Telegram alert with the verified odds prominently displayed."""
     home = str(row.get("home") or "Local")
     away = str(row.get("away") or "Visitante")
     market = str(row.get("market") or "Señal")
@@ -24,32 +24,30 @@ def format_signal_message(row: dict[str, Any]) -> str:
 
     score = ""
     if score_home is not None and score_away is not None:
-        score = f"Marcador: {score_home}-{score_away}\n"
-    minute_text = f"Minuto: {minute}'\n" if minute is not None else ""
-    probability_text = ""
+        score = f"Marcador: {score_home}-{score_away}\\n"
+    minute_text = f"Minuto: {minute}'\\n" if minute is not None else ""
+
+    odds_text = f"CUOTA: {float(live_odd):.2f} · Casa: {bookmaker}\\n"
+    risk_mode = "MODO SEGURO" if 1.35 <= float(live_odd) <= 1.60 else "MODO ARRIESGADO"
+
+    analysis_parts = []
     try:
-        probability_text = f"Probabilidad exploratoria: {float(probability) * 100:.1f}%\n"
+        analysis_parts.append(f"Probabilidad estimada: {float(probability) * 100:.1f}%")
     except (TypeError, ValueError):
         pass
-
-    odds_text = (
-        f"Cuota real: {float(live_odd):.2f} · Casa: {bookmaker}\n"
-        if isinstance(live_odd, (int, float)) and bookmaker else ""
-    )
-    edge_text = (
-        f"Ventaja estimada frente a la cuota: {float(edge) * 100:.1f}%\n"
-        if isinstance(edge, (int, float)) else ""
-    )
+    if isinstance(edge, (int, float)):
+        analysis_parts.append(f"Ventaja estimada: {float(edge) * 100:.1f}%")
+    analysis_text = "\\n".join(analysis_parts)
 
     return (
-        "⚽ FOOTBALL LAB · SEÑAL EN VIVO\n\n"
-        f"{home} vs {away}\n"
+        "⚽ FOOTBALL LAB · SEÑAL EN VIVO\\n\\n"
+        f"{home} vs {away}\\n"
         f"{score}{minute_text}"
-        f"Mercado: {market}\n"
-        f"{probability_text}"
-        f"{odds_text}"
-        f"{edge_text}\n"
-        "Análisis informativo; verifica que la cuota siga vigente antes de decidir."
+        f"Mercado: {market}\\n"
+        f"{risk_mode}\\n"
+        f"{odds_text}\\n"
+        f"ANÁLISIS\\n{analysis_text}\\n\\n"
+        "Verifica que la cuota siga vigente antes de decidir."
     )
 
 
