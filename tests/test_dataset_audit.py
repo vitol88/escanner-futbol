@@ -59,6 +59,14 @@ class ForecastDatasetAuditTests(unittest.TestCase):
         self.assertEqual(result["league_count"], 2)
         self.assertEqual(result["leagues"], ["Liga A", "Liga B"])
 
+    def test_canonical_probability_field_is_supported(self):
+        row = self.row()
+        row.pop("estimated_probability_exploratory")
+        row["probability"] = 0.72
+        result = audit_forecast_dataset([row])
+        self.assertEqual(result["structurally_valid_rows"], 1)
+        self.assertEqual(result["invalid_probability_rows"], 0)
+
     def test_non_list_input_is_safe(self):
         result = audit_forecast_dataset(None)
         self.assertEqual(result["row_count"], 0)
