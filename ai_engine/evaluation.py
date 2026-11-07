@@ -171,8 +171,13 @@ def evaluate_binary_forecasts(
             excluded += 1
             continue
         outcome = _outcome(row.get(outcome_key))
+        raw_probability = row.get(probability_key)
+        if raw_probability in (None, "") and probability_key != "probability":
+            # Canonical versioned records use "probability"; legacy CSVs retain
+            # "estimated_probability_exploratory".
+            raw_probability = row.get("probability")
         try:
-            probability = float(row.get(probability_key))
+            probability = float(raw_probability)
         except (TypeError, ValueError, OverflowError):
             probability = math.nan
         if outcome is None or not math.isfinite(probability) or not 0 <= probability <= 1:
