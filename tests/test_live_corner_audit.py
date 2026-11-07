@@ -82,6 +82,33 @@ class LiveCornerAuditTests(unittest.TestCase):
         self.assertEqual(result["quality"]["orphan_observation_minutes"], 0)
         self.assertTrue(any("snapshots" in warning for warning in result["warnings"]))
 
+    def test_audit_detects_impossible_remaining_corner_timeline(self):
+        capture_live_corner_snapshot(self.db, self.fixture, self.live_stats)
+        later_fixture = {
+            **self.fixture,
+            "fixture": {"id": 501, "status": {"short": "2H", "elapsed": 75}},
+        }
+        capture_live_corner_snapshot(self.db, later_fixture, self.live_stats)
+        finalize_live_corner_fixture(self.db, self.final_fixture, self.final_stats)
+
+        connection = __import__("sqlite3").connect(self.db)
+        connection.execute(
+            """
+            UPDATE live_corner_observations
+            SET corners_for_after = 5
+            WHERE fixture_id = ? AND venue = 'home' AND minute = 75
+            """,
+            ("501",),
+        )
+        connection.commit()
+        connection.close()
+
+        result = audit_live_corner_database(self.db)
+        self.assertEqual(result["quality"]["inconsistent_remaining_progression"], 1)
+        self.assertEqual(result["quality"]["inconsistent_final_totals"], 1)
+        self.assertTrue(any("restantes aumentan" in warning for warning in result["warnings"]))
+        self.assertTrue(any("total final implícito" in warning for warning in result["warnings"]))
+
     def test_audit_is_read_only(self):
         capture_live_corner_snapshot(self.db, self.fixture, self.live_stats)
         before = self.db.stat().st_mtime_ns
