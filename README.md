@@ -85,3 +85,8 @@ La vista **En vivo** agrupa los partidos en listas desplegables por país y comp
 - **Córners:** muestra córners actuales por equipo, promedios históricos por sede, ritmo en vivo y una proyección orientativa cuando los datos estén disponibles.
 
 El botón seleccionado queda resaltado en amarillo y el panel de análisis aparece con una transición visual. Los botones consultan el partido seleccionado; los datos faltantes se muestran como no disponibles y no se sustituyen por valores inventados. Estas consultas bajo demanda pueden consumir solicitudes del plan gratuito de API-Football.
+
+
+### Auditoría de calidad del CSV
+
+El módulo puro `ai_engine.dataset_audit.audit_forecast_dataset` permite revisar un CSV exportado sin modificarlo: identifica registros con metadatos o probabilidades inválidas, duplicados por partido/mercado/minuto/marcador y resultados explícitamente verificados. Esta auditoría mide calidad estructural; no sustituye el evaluador de calibración, no completa resultados faltantes y no calcula rentabilidad.
