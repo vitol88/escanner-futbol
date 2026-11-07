@@ -67,3 +67,10 @@ El pipeline no consulta APIs, no escribe archivos, no toca Streamlit y no modifi
 - `normalize_prediction_records` informa filas válidas, inválidas y duplicadas sin modificar el CSV original.
 
 Este contrato es una capa de compatibilidad y validación; todavía no cambia el logger activo ni crea pronósticos adicionales. La integración del registro por mercado se hará cuando cada mercado produzca probabilidades con línea y contexto definidos.
+
+
+### Integración del registro en vivo
+
+El escáner global de goles ahora añade al CSV el contrato versionado al registrar cada señal en vivo: fase `live`, ID de liga, tipo de mercado, probabilidad normalizada, identificador del modelo, fuente, snapshot y un `prediction_id` determinista. La fecha nueva se escribe en UTC con sufijo `Z`. Se mantienen los campos históricos `estimated_probability_exploratory` y el resto del contexto para que el panel de evaluación existente siga leyendo los CSV anteriores.
+
+La escritura del CSV construye la unión de columnas presentes en todas las filas, de modo que un archivo con filas antiguas y nuevas no falle al guardarse. La deduplicación activa del scanner (fixture/mercado/minuto/marcador) se conserva sin cambios; el snapshot identifica ese estado, pero todavía no se crean nuevas señales por cada variación de estadísticas dentro del mismo minuto. Las líneas y selecciones no se separan si el productor no las entrega explícitamente. Córners, tarjetas y mercados prepartido aún no se añaden a este logger.
