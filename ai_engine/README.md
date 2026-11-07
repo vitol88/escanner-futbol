@@ -130,3 +130,16 @@ La integración con `build_automatic_history` reutiliza las respuestas de estad�
 - Si la base no existe, devuelve un informe vacío y no crea archivos ni tablas.
 
 La auditoría describe volumen y consistencia estructural; no mide precisión predictiva, calibración ni rentabilidad. No modifica datos, no consulta APIs y no se conecta a la interfaz.
+
+
+## Backtest de referencia para córners restantes
+
+`live_corner_backtest.run_live_corner_baseline_backtest(database_path)` evalúa una referencia estadística sencilla sobre observaciones verificadas:
+
+- Divide por ID de partido mediante hash estable; todas las capturas y perspectivas del mismo partido permanecen juntas, evitando fuga entre entrenamiento y prueba.
+- Predice córners restantes con la media de entrenamiento del bloque de 15 minutos; si un bloque no tiene muestra de entrenamiento, utiliza la media global de entrenamiento.
+- Reporta MAE y sesgo (predicción menos resultado real), además de métricas por bloque de minuto.
+- Devuelve "muestra insuficiente" en vez de puntuar cuando no hay suficientes partidos para ambos lados del holdout.
+- Abre SQLite en modo solo lectura y no consulta APIs ni modifica la base.
+
+Este es un baseline de evaluación, no un modelo entrenado ni una recomendación de apuesta. La partición por hash es reproducible pero no cronológica: la tabla actual no conserva fecha/hora del partido, por lo que un backtest temporal estricto requiere incorporar timestamps verificados a los registros futuros. Las métricas de esta primera versión sirven para comprobar el pipeline y comparar futuras mejoras con una referencia, no para afirmar rentabilidad.
