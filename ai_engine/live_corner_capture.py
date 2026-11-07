@@ -1,9 +1,4 @@
-"""Capture raw live-corner snapshots without making API requests.
-
-The Streamlit scanner passes fixture and statistics payloads it has already fetched.
-Snapshots remain provisional until a completed fixture's final corner totals are
-verified; this module deliberately does not turn live snapshots into outcomes.
-"""
+"""Capture raw live-corner snapshots without making API requests."""
 from __future__ import annotations
 
 import sqlite3
@@ -12,11 +7,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS live_corner_capture_snapshots (
     fixture_id TEXT NOT NULL,
     fixture_date TEXT,
+    fixture_timestamp INTEGER,
     league_id TEXT,
     league_name TEXT NOT NULL,
     home_team_id TEXT,
@@ -60,6 +55,14 @@ def _connect(database_path: str | Path) -> sqlite3.Connection:
     connection = sqlite3.connect(str(path), timeout=15)
     connection.execute("PRAGMA busy_timeout = 15000")
     connection.execute(_SCHEMA)
+    # Safe additive migration for databases created by earlier app versions.
+    columns = {row[1] for row in connection.execute(
+        "PRAGMA table_info(live_corner_capture_snapshots)"
+    )}
+    if "fixture_timestamp" not in columns:
+        connection.execute(
+            "ALTER TABLE live_corner_capture_snapshots ADD COLUMN fixture_timestamp INTEGER"
+        )
     return connection
 
 
@@ -84,6 +87,7 @@ def capture_live_corner_snapshot(
     away_name = str(away.get("name") or "").strip()
     home_corners = _corner_value(statistics, 0)
     away_corners = _corner_value(statistics, 1)
+    timestamp = _nonnegative_int(fixture_data.get("timestamp"))
 
     if status_short in {"", "NS", "HT", "FT", "AET", "PEN", "PST", "CANC", "ABD", "AWD", "WO"}:
         return {"stored": False, "reason": "fixture_not_in_live_play"}
@@ -109,39 +113,28 @@ def capture_live_corner_snapshot(
             connection.execute(
                 """
                 INSERT INTO live_corner_capture_snapshots (
-                    fixture_id, fixture_date, league_id, league_name,
+                    fixture_id, fixture_date, fixture_timestamp, league_id, league_name,
                     home_team_id, away_team_id, home_team, away_team, minute,
                     home_corners, away_corners, first_seen_at_utc, last_seen_at_utc
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(fixture_id, minute) DO UPDATE SET
                     home_corners = MAX(home_corners, excluded.home_corners),
                     away_corners = MAX(away_corners, excluded.away_corners),
+                    fixture_timestamp = COALESCE(fixture_timestamp, excluded.fixture_timestamp),
                     last_seen_at_utc = excluded.last_seen_at_utc
                 """,
                 (
-                    fixture_id,
-                    str(fixture_data.get("date") or ""),
-                    str(league.get("id") or ""),
-                    str(league.get("name") or "Unknown league"),
-                    str(home.get("id") or ""),
-                    str(away.get("id") or ""),
-                    home_name,
-                    away_name,
-                    minute,
-                    home_corners,
-                    away_corners,
-                    stamp_text,
-                    stamp_text,
+                    fixture_id, str(fixture_data.get("date") or ""), timestamp,
+                    str(league.get("id") or ""), str(league.get("name") or "Unknown league"),
+                    str(home.get("id") or ""), str(away.get("id") or ""),
+                    home_name, away_name, minute, home_corners, away_corners,
+                    stamp_text, stamp_text,
                 ),
             )
 
     return {
-        "stored": True,
-        "inserted": inserted,
-        "fixture_id": fixture_id,
-        "minute": minute,
-        "home_corners": home_corners,
-        "away_corners": away_corners,
+        "stored": True, "inserted": inserted, "fixture_id": fixture_id,
+        "minute": minute, "home_corners": home_corners, "away_corners": away_corners,
     }
 
 
