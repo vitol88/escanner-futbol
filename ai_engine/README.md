@@ -25,3 +25,8 @@ El historial de tarjetas se extrae de las mismas respuestas fixtures/statistics 
 - La evaluación debe ejecutarse cronológicamente y separarse por liga, mercado y línea. No calcula ROI ni recomienda apuestas.
 
 Todos los modelos son experimentales y no calibrados. Antes de mostrar señales requieren backtesting cronológico, calibración, evaluación de sobredispersión y cuotas verificables. No generan valor esperado ni recomendaciones sin esos insumos.
+
+
+## Cobertura del histórico de tarjetas
+
+`feature_builder` expone el número de partidos históricos válidos de tarjetas amarillas para la liga del encuentro y el número de esos partidos dirigidos por el árbitro actual. Estos contadores informan disponibilidad, no suficiencia estadística: `card_model` aplica por separado sus mínimos de muestra por equipo y árbitro. No se deriva un promedio arbitral/de liga representativo usando únicamente los dos equipos del encuentro; si falta ese promedio, el ajuste del árbitro permanece neutral.
