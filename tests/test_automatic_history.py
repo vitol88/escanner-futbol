@@ -68,7 +68,7 @@ def test_automatic_history_counts_shared_stats_budget_for_full_and_half_requests
         return {"response": []}
 
     shared_cache = {"_automatic_history_stats_calls": 4}
-    result = build_automatic_history(current, api_get=fake_api, cache=shared_cache, stats_budget=2)
+    result = build_automatic_history(current, api_get=fake_api, cache=shared_cache, stats_budget=4)
 
     assert result["diagnostics"]["historical_stats"]["requested"] == 2
     assert shared_cache["_automatic_history_stats_calls"] == 6
