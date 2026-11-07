@@ -38,6 +38,15 @@ class BinaryForecastEvaluationTests(unittest.TestCase):
         self.assertEqual(len(result["reliability"]), 2)
         self.assertEqual(result["reliability"][-1]["upper_bound"], 1.0)
 
+    def test_canonical_probability_field_is_supported(self):
+        rows = [
+            {"probability": 0.8, "outcome": 1, "outcome_verified": True},
+            {"probability": 0.2, "outcome": 0, "outcome_verified": True},
+        ]
+        result = evaluate_binary_forecasts(rows, minimum_sample=2)
+        self.assertEqual(result["sample_size"], 2)
+        self.assertEqual(result["brier_score"], 0.04)
+
     def test_empty_data_returns_null_metrics(self):
         result = evaluate_binary_forecasts([{"outcome": 1, "outcome_verified": False}])
         self.assertEqual(result["sample_size"], 0)
