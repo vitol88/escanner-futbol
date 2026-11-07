@@ -24,13 +24,13 @@ def test_automatic_history_calculates_home_away_goals_and_corners():
             return {"response": [past_away]}
         if endpoint == "fixtures/statistics" and params["fixture"] == 101:
             return {"response": [
-                {"statistics": [{"type": "Corner Kicks", "value": 6}]},
-                {"statistics": [{"type": "Corner Kicks", "value": 2}]},
+                {"statistics": [{"type": "Corner Kicks", "value": 6}, {"type": "Yellow Cards", "value": 3}]},
+                {"statistics": [{"type": "Corner Kicks", "value": 2}, {"type": "Yellow Cards", "value": 1}]},
             ]}
         if endpoint == "fixtures/statistics" and params["fixture"] == 102:
             return {"response": [
-                {"statistics": [{"type": "Corner Kicks", "value": 4}]},
-                {"statistics": [{"type": "Corner Kicks", "value": 5}]},
+                {"statistics": [{"type": "Corner Kicks", "value": 4}, {"type": "Yellow Cards", "value": 2}]},
+                {"statistics": [{"type": "Corner Kicks", "value": 5}, {"type": "Yellow Cards", "value": 4}]},
             ]}
         return {"response": []}
 
@@ -40,3 +40,6 @@ def test_automatic_history_calculates_home_away_goals_and_corners():
     assert result["away_goals_for"] == 1.0
     assert result["home_corners_for"] == 6.0
     assert result["away_corners_for"] == 5.0
+    assert len(result["card_history_rows"]) == 2
+    assert result["card_history_rows"][0]["home_yellow_cards"] == 3.0
+    assert result["card_history_rows"][1]["away_yellow_cards"] == 4.0
