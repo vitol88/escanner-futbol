@@ -137,9 +137,9 @@ La auditoría describe volumen y consistencia estructural; no mide precisión pr
 `live_corner_backtest.run_live_corner_baseline_backtest(database_path)` evalúa un baseline sencillo sobre observaciones verificadas:
 
 - Captura y conserva el timestamp Unix del inicio del partido en snapshots y observaciones finales. Las bases existentes se actualizan mediante migraciones aditivas; no se borran filas.
-- Ordena partidos por timestamp y reserva el bloque más reciente para prueba. Todas las capturas y perspectivas de un mismo partido permanecen juntas.
-- Entrena únicamente con partidos anteriores a la prueba. La predicción utiliza la media de la liga y bloque de 15 minutos; si no existe esa muestra, recurre a la media de liga y después a la media global de entrenamiento.
-- Reporta MAE y sesgo (predicción menos resultado real) globales y por liga, además de cantidades de partidos/observaciones y límites temporales del split.
+- Ordena partidos por timestamp y reserva el bloque más reciente para prueba. Todas las capturas y perspectivas de un mismo partido permanecen juntas; partidos con el mismo timestamp de inicio también se mantienen en el mismo bloque para impedir solapamiento temporal.
+- Entrena únicamente con partidos anteriores a la prueba. La predicción utiliza la media de la liga y bloque de 15 minutos; si no existe esa muestra, recurre a la media de liga y después a la media global de entrenamiento. El resultado identifica qué nivel de histórico se utilizó.
+- Reporta MAE y sesgo (predicción menos resultado real) globales y por liga, además de métricas por liga y bloque de 15 minutos. Cada desglose informa cuántos partidos lo respaldan y se abstiene cuando no alcanza el mínimo configurado.
 - Se abstiene si faltan timestamps o no hay suficientes partidos para entrenamiento y prueba; no vuelve silenciosamente al split aleatorio/hash.
 - Abre SQLite en modo solo lectura y no consulta APIs ni modifica la base.
 
