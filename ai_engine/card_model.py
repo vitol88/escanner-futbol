@@ -3,6 +3,8 @@ from __future__ import annotations
 import math
 from typing import Any
 
+MODEL_VERSION = "0.1.0"
+
 def _number(value: Any) -> float | None:
     if isinstance(value, bool) or value is None:
         return None
@@ -41,9 +43,9 @@ def estimate_prematch_yellow_cards(features: dict[str, Any], history_rows: list[
     home_name, away_name = teams.get("home"), teams.get("away")
     referee = features.get("referee")
     if league_id is None or not (home_id is not None or home_name) or not (away_id is not None or away_name):
-        return {"available": False, "reason": "Faltan liga o identificación de los equipos."}
+        return {"available": False, "model_version": MODEL_VERSION, "reason": "Faltan liga o identificación de los equipos."}
     if isinstance(minimum_team_matches, bool) or minimum_team_matches < 1:
-        return {"available": False, "reason": "minimum_team_matches debe ser mayor que cero."}
+        return {"available": False, "model_version": MODEL_VERSION, "reason": "minimum_team_matches debe ser mayor que cero."}
 
     league_rows = []
     for row in rows:
@@ -67,7 +69,7 @@ def estimate_prematch_yellow_cards(features: dict[str, Any], history_rows: list[
             referee_totals.append(hc + ac)
 
     if len(home_for) < minimum_team_matches or len(away_for) < minimum_team_matches:
-        return {"available": False,
+        return {"available": False, "model_version": MODEL_VERSION,
                 "reason": "Muestra insuficiente de tarjetas por localía para uno o ambos equipos.",
                 "sample": {"home_team": len(home_for), "away_team": len(away_for)},
                 "minimum_team_matches": minimum_team_matches}
@@ -88,7 +90,7 @@ def estimate_prematch_yellow_cards(features: dict[str, Any], history_rows: list[
     expected_home, expected_away = home_base * factor, away_base * factor
     expected_total = expected_home + expected_away
     if not math.isfinite(expected_total):
-        return {"available": False, "reason": "No fue posible calcular una proyección válida."}
+        return {"available": False, "model_version": MODEL_VERSION, "reason": "No fue posible calcular una proyección válida."}
     lines = {line: round(_poisson_over(expected_total, line), 6) for line in (2.5, 3.5, 4.5, 5.5, 6.5)}
     warnings = [
         "Modelo experimental Poisson, no calibrado; las tarjetas pueden presentar sobredispersión.",
@@ -98,7 +100,7 @@ def estimate_prematch_yellow_cards(features: dict[str, Any], history_rows: list[
     if not referee_used:
         warnings.append("Sin muestra suficiente del árbitro o promedio de liga representativo: se conserva el factor neutral.")
     return {
-        "available": True, "model": "experimental_poisson_yellow_cards", "calibrated": False,
+        "available": True, "model": "experimental_poisson_yellow_cards", "model_version": MODEL_VERSION, "calibrated": False,
         "expected_yellow_cards": {"home": round(expected_home, 3), "away": round(expected_away, 3), "total": round(expected_total, 3)},
         "probability_over": lines,
         "referee": {"name": referee, "matches": len(referee_totals),
