@@ -92,6 +92,17 @@ class DataEngineTests(unittest.TestCase):
         self.assertIs(first, second)
         self.assertEqual(len(calls), 1)
 
+    def test_data_engine_reuses_existing_streamlit_stats_cache(self):
+        existing = [{"team": {"id": 10}, "statistics": []}]
+        cache = {"12345": existing}
+        calls = []
+        engine = FootballDataEngine(
+            lambda endpoint, params: calls.append((endpoint, params)) or {"response": []},
+            cache,
+        )
+        self.assertIs(engine.get_fixture_statistics(12345), existing)
+        self.assertEqual(calls, [])
+
     def test_data_engine_rejects_empty_fixture_id(self):
         engine = FootballDataEngine(lambda endpoint, params: {"response": []})
         with self.assertRaises(ValueError):
