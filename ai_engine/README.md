@@ -16,4 +16,10 @@ La capa de datos se integra progresivamente sin modificar el flujo ni la interfa
 
 El historial de tarjetas se extrae de las mismas respuestas fixtures/statistics que ya consulta el historial automático, sin añadir endpoints ni solicitudes. Se conserva el partido, liga, temporada, equipos, tarjetas y árbitro; se filtran partidos posteriores al encuentro objetivo cuando existen timestamps. La comparación arbitral exige además un promedio de liga representativo explícito; el subconjunto de dos equipos no se usa como sustituto de ese promedio. Si falta ese dato o la muestra del árbitro, el factor es neutral. El motor todavía no está conectado a la interfaz ni genera señales.
 
+## Evaluación y calibración
+- `evaluation.evaluate_binary_forecasts` calcula Brier score, log loss y tabla de confiabilidad por intervalos.
+- Solo incluye pronósticos con resultado marcado explícitamente como verificado; excluye registros incompletos o inválidos.
+- Informa si alcanza el mínimo de muestra configurado (30 por defecto), sin presentar ese umbral como garantía de validez.
+- La evaluación debe ejecutarse cronológicamente y separarse por liga, mercado y línea. No calcula ROI ni recomienda apuestas.
+
 Todos los modelos son experimentales y no calibrados. Antes de mostrar señales requieren backtesting cronológico, calibración, evaluación de sobredispersión y cuotas verificables. No generan valor esperado ni recomendaciones sin esos insumos.
