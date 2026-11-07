@@ -55,6 +55,27 @@ class LiveCornerBacktestTests(unittest.TestCase):
             {"Premier League", "La Liga"},
         )
 
+    def test_fixtures_with_same_kickoff_timestamp_are_not_split(self):
+        connection = sqlite3.connect(self.db)
+        connection.execute(
+            "UPDATE live_corner_observations SET fixture_timestamp = ? WHERE fixture_id IN (?, ?, ?, ?)",
+            (1_800_000_000 + 9 * 86400, "fixture-6", "fixture-7", "fixture-8", "fixture-9"),
+        )
+        connection.commit()
+        connection.close()
+        result = run_live_corner_baseline_backtest(
+            self.db, test_fraction=0.25, min_train_fixtures=5,
+            min_test_fixtures=2, min_league_test_fixtures=1,
+        )
+        self.assertTrue(result["available"])
+        self.assertEqual(result["split"]["test_fixtures"], 4)
+        self.assertEqual(result["split"]["train_fixtures"], 6)
+        self.assertLess(
+            result["split"]["train_latest_timestamp"],
+            result["split"]["test_earliest_timestamp"],
+        )
+        self.assertEqual(result["split"]["fixture_overlap"], 0)
+
     def test_missing_database_is_reported(self):
         result = run_live_corner_baseline_backtest(self.db.parent / "missing.sqlite3")
         self.assertFalse(result["available"])
