@@ -66,8 +66,11 @@ def audit_forecast_dataset(rows: list[dict[str, Any]]) -> dict[str, Any]:
         if not metadata_ok:
             invalid_metadata += 1
 
+        raw_probability = row.get("estimated_probability_exploratory")
+        if raw_probability in (None, ""):
+            raw_probability = row.get("probability")
         try:
-            probability = float(row.get("estimated_probability_exploratory"))
+            probability = float(raw_probability)
         except (TypeError, ValueError, OverflowError):
             probability = math.nan
         probability_ok = math.isfinite(probability) and 0 <= probability <= 1
