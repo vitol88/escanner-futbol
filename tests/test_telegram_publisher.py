@@ -24,7 +24,8 @@ def test_format_signal_message_includes_match_market_and_probability():
     assert "Minuto: 67'" in message
     assert "Más de 1.5 goles" in message
     assert "82.0%" in message
-    assert "Cuota real: 1.55" in message
+    assert "CUOTA: 1.55" in message
+    assert "MODO SEGURO" in message
     assert "Casa A" in message
     assert "Ventaja estimada" in message
 
@@ -72,3 +73,15 @@ def test_send_telegram_signal_rejects_missing_or_out_of_band_odds():
     assert ok is False
     assert "cuota real" in detail
     assert calls == []
+
+
+
+def test_format_signal_message_labels_high_risk_odds():
+    message = format_signal_message({
+        "home": "Local", "away": "Visitante", "market": "Ambos marcan",
+        "verified_live_odd": 1.75, "verified_bookmaker": "Casa B",
+        "verified_odds_market": "Ambos equipos marcan: Sí", "estimated_edge": 0.03,
+    })
+    assert "MODO ARRIESGADO" in message
+    assert "CUOTA: 1.75" in message
+    assert "Casa B" in message
