@@ -108,6 +108,48 @@ class LiveCornerBacktestTests(unittest.TestCase):
         )
         self.assertEqual(result["split"]["fixture_overlap"], 0)
 
+
+    def test_rolling_origin_uses_expanding_chronological_folds_without_leakage(self):
+        connection = sqlite3.connect(self.db)
+        for number in range(10, 30):
+            for minute in (30, 65):
+                for venue, team in (("home", "Home"), ("away", "Away")):
+                    connection.execute(
+                        "INSERT INTO live_corner_observations VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                        (f"fixture-{number}", "Premier League", team, venue, minute,
+                         5, 3, 1_800_000_000 + number * 86400),
+                    )
+        connection.commit()
+        connection.close()
+        result = run_live_corner_baseline_backtest(
+            self.db, test_fraction=0.25, min_train_fixtures=5,
+            min_test_fixtures=2, min_league_test_fixtures=1,
+        )
+        rolling = result["rolling_origin"]
+        self.assertTrue(rolling["available"])
+        self.assertEqual(rolling["fold_count"], 3)
+        previous_test_start = 0
+        for fold in rolling["folds"]:
+            self.assertEqual(fold["fixture_overlap"], 0)
+            self.assertLess(fold["train_latest_timestamp"], fold["test_earliest_timestamp"])
+            self.assertGreater(fold["test_earliest_timestamp"], previous_test_start)
+            previous_test_start = fold["test_earliest_timestamp"]
+        self.assertIsNotNone(rolling["weighted_mae_remaining_corners"])
+        self.assertEqual(
+            rolling["method"], "expanding_window_chronological_folds"
+        )
+
+    def test_rolling_origin_reports_insufficient_history(self):
+        result = run_live_corner_baseline_backtest(
+            self.db, test_fraction=0.25, min_train_fixtures=5,
+            min_test_fixtures=2, min_league_test_fixtures=1,
+        )
+        self.assertFalse(result["rolling_origin"]["available"])
+        self.assertEqual(
+            result["rolling_origin"]["reason"],
+            "insufficient_fixtures_in_rolling_fold",
+        )
+
     def test_missing_database_is_reported(self):
         result = run_live_corner_baseline_backtest(self.db.parent / "missing.sqlite3")
         self.assertFalse(result["available"])
