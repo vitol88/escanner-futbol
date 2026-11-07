@@ -37,5 +37,8 @@ raw_stats = engine.get_fixture_statistics(fixture_id)
 snapshot = engine.snapshot(fixture, statistics=raw_stats)
 ```
 
-La aplicación todavía no importa este módulo. Su adopción en el escáner se hará en
-una etapa posterior, después de validar el contrato y sus pruebas.
+La sección de estadísticas del partido seleccionado ya utiliza este adaptador y guarda
+un snapshot versionado en `st.session_state.ai_match_snapshots`, con un máximo de 100
+partidos por sesión. La integración reutiliza `api_get` y `stats_cache`; no agrega
+consultas, controles visuales ni cambios de navegación. Los próximos motores podrán
+consumir esos snapshots sin volver a consultar el proveedor.
