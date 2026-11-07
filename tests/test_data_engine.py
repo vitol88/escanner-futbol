@@ -15,6 +15,7 @@ FIXTURE = {
         "date": "2026-11-06T20:00:00+00:00",
         "timestamp": 1793995200,
         "status": {"short": "2H", "long": "Second Half", "elapsed": 63},
+        "referee": "Referee Test",
     },
     "league": {"id": 239, "name": "Liga BetPlay", "country": "Colombia", "season": 2026},
     "teams": {
@@ -31,6 +32,7 @@ class DataEngineTests(unittest.TestCase):
         normalized = normalize_fixture(FIXTURE)
         self.assertEqual(normalized["fixture_id"], 12345)
         self.assertEqual(normalized["teams"]["home"]["name"], "América")
+        self.assertEqual(normalized["league"]["referee"], "Referee Test")
         self.assertEqual(normalized["goals"], {"home": 1, "away": 0})
         self.assertEqual(normalized["halftime_score"]["away"], 0)
 
