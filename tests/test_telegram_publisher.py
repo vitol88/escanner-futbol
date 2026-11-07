@@ -26,6 +26,7 @@ def test_format_signal_message_includes_match_market_and_probability():
     assert "82.0%" in message
     assert "CUOTA: 1.55" in message
     assert "MODO SEGURO" in message
+    assert "\\n" not in message
     assert "Casa A" in message
     assert "Ventaja estimada" in message
 
