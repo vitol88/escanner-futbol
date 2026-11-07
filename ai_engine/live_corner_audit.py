@@ -62,6 +62,9 @@ def audit_live_corner_database(database_path: str | Path) -> dict[str, Any]:
         captured_fixtures = {str(row["fixture_id"]) for row in captures}
         verified_fixtures = {str(row["fixture_id"]) for row in observations}
         pending_fixtures = captured_fixtures - verified_fixtures
+        captured_minutes = {
+            (str(row["fixture_id"]), int(row["minute"])) for row in captures
+        }
 
         grouped: dict[tuple[str, int], dict[str, sqlite3.Row]] = {}
         incomplete_pairs = 0
@@ -131,6 +134,10 @@ def audit_live_corner_database(database_path: str | Path) -> dict[str, Any]:
                 "verified_fixtures": hist["fixtures"],
             })
 
+        verified_minutes = set(grouped)
+        pending_snapshots = captured_minutes - verified_minutes
+        orphan_observation_minutes = verified_minutes - captured_minutes
+
         warnings = []
         if not has_captures:
             warnings.append("No existe la tabla de capturas provisionales.")
@@ -138,6 +145,10 @@ def audit_live_corner_database(database_path: str | Path) -> dict[str, Any]:
             warnings.append("No existe la tabla de observaciones verificadas.")
         if pending_fixtures:
             warnings.append("Hay partidos capturados que todavía no tienen cierre verificado.")
+        if pending_snapshots:
+            warnings.append("Hay snapshots capturados sin pareja de observaciones verificadas local/visitante.")
+        if orphan_observation_minutes:
+            warnings.append("Hay observaciones verificadas sin snapshot de captura correspondiente.")
         if incomplete_pairs:
             warnings.append("Hay observaciones sin su pareja local/visitante.")
         if mismatched_pairs:
@@ -164,6 +175,8 @@ def audit_live_corner_database(database_path: str | Path) -> dict[str, Any]:
             "quality": {
                 "incomplete_pairs": incomplete_pairs,
                 "mismatched_pairs": mismatched_pairs,
+                "pending_snapshots": len(pending_snapshots),
+                "orphan_observation_minutes": len(orphan_observation_minutes),
             },
             "by_league": league_report,
             "by_minute_bucket": [
