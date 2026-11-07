@@ -88,6 +88,10 @@ def test_automatic_history_does_not_count_cached_statistics_as_new_requests():
             {"statistics": [{"type": "Corner Kicks", "value": 5}, {"type": "Yellow Cards", "value": 2}]},
             {"statistics": [{"type": "Corner Kicks", "value": 3}, {"type": "Yellow Cards", "value": 1}]},
         ],
+        "historical-stats-halves-v5:202": [
+            {"statistics": [{"type": "Corner Kicks", "value": 2}]},
+            {"statistics": [{"type": "Corner Kicks", "value": 1}]},
+        ],
         "_automatic_history_stats_calls": 7,
     }
     calls = []
