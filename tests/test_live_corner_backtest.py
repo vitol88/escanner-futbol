@@ -183,6 +183,26 @@ class LiveCornerBacktestTests(unittest.TestCase):
             "insufficient_fixtures_in_rolling_fold",
         )
 
+    def test_configurable_over_under_lines_report_confusion_without_signals(self):
+        result = run_live_corner_baseline_backtest(
+            self.db, test_fraction=0.25, min_train_fixtures=5,
+            min_test_fixtures=2, min_league_test_fixtures=1,
+            over_under_lines=(4.5, 6.5),
+        )
+        evaluations = result["over_under_line_evaluation"]
+        self.assertEqual([item["line"] for item in evaluations], [4.5, 6.5])
+        self.assertEqual(evaluations[0]["observations"], result["metrics"]["observations"])
+        self.assertEqual(evaluations[0]["confusion_matrix"]["true_over"], 0)
+        self.assertEqual(evaluations[0]["confusion_matrix"]["missed_over"], 12)
+        self.assertIsNotNone(evaluations[0]["balanced_accuracy"])
+        self.assertIn("no probability", evaluations[0]["warning"])
+
+    def test_over_under_lines_require_unique_nonnegative_half_points(self):
+        for lines in ((4.0,), (-0.5,), (4.5, 4.5)):
+            with self.subTest(lines=lines):
+                with self.assertRaises(ValueError):
+                    run_live_corner_baseline_backtest(self.db, over_under_lines=lines)
+
     def test_missing_database_is_reported(self):
         result = run_live_corner_baseline_backtest(self.db.parent / "missing.sqlite3")
         self.assertFalse(result["available"])
