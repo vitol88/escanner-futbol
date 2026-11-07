@@ -4747,8 +4747,9 @@ if should_refresh:
                         st.session_state["live_corner_capture_error"] = str(capture_exc)
                     # Reutilizar datos recientes en el panel del partido seleccionado.
                     st.session_state.stats_cache[fixture_id] = stat_rows
-                    home_c = safe_stat(stat_rows, "Corner Kicks", 0)
-                    away_c = safe_stat(stat_rows, "Corner Kicks", 1)
+                    match_teams = match.get("teams") or {}
+                    home_c = safe_stat_for_team(stat_rows, "Corner Kicks", (match_teams.get("home") or {}).get("id"))
+                    away_c = safe_stat_for_team(stat_rows, "Corner Kicks", (match_teams.get("away") or {}).get("id"))
                     if home_c is None or away_c is None:
                         continue
                     now_total = home_c + away_c
@@ -7645,7 +7646,13 @@ else:
                                                     else:
                                                         st.markdown('<div class="tip-card risk-tip-card tip-card-empty"><div class="tip-card-title">Sin oportunidad confirmada por ahora</div><div class="tip-card-meta">Se requiere respaldo estadístico suficiente.</div></div>', unsafe_allow_html=True)
                                                     goals = match.get("goals") or {}
-                                                    patterns = numerology_context(goals.get("home"), goals.get("away"), home_c, away_c, safe_stat(st.session_state.stats_cache.get(str(match_id), []), "Yellow Cards", 0), safe_stat(st.session_state.stats_cache.get(str(match_id), []), "Yellow Cards", 1))
+                                                    pattern_stats = st.session_state.stats_cache.get(str(match_id), [])
+                                            pattern_teams = match.get("teams") or {}
+                                            patterns = numerology_context(
+                                                goals.get("home"), goals.get("away"), home_c, away_c,
+                                                safe_stat_for_team(pattern_stats, "Yellow Cards", (pattern_teams.get("home") or {}).get("id")),
+                                                safe_stat_for_team(pattern_stats, "Yellow Cards", (pattern_teams.get("away") or {}).get("id")),
+                                            )
                                             elif corner_item:
                                                 st.warning(f"No se pudo cargar el análisis de córners: {corner_item.get('error')}")
                                             else:
