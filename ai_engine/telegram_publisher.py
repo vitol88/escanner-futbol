@@ -18,6 +18,9 @@ def format_signal_message(row: dict[str, Any]) -> str:
     score_home = row.get("score_home")
     score_away = row.get("score_away")
     probability = row.get("probability")
+    live_odd = row.get("verified_live_odd")
+    bookmaker = str(row.get("verified_bookmaker") or "")
+    edge = row.get("estimated_edge")
 
     score = ""
     if score_home is not None and score_away is not None:
@@ -54,6 +57,12 @@ def send_telegram_signal(
         return False, "Falta configurar TELEGRAM_BOT_TOKEN."
     if not destination:
         return False, "Falta configurar TELEGRAM_CHAT_ID."
+    odd = row.get("verified_live_odd")
+    edge = row.get("estimated_edge")
+    if (not isinstance(odd, (int, float)) or not row.get("verified_bookmaker")
+        or not row.get("verified_odds_market") or not isinstance(edge, (int, float))
+        or edge < 0.02 or not (1.35 <= float(odd) <= 1.60 or float(odd) >= 1.70)):
+        return False, "Señal retenida: falta una cuota real coincidente dentro de los rangos permitidos."
 
     sender = post or requests.post
     url = f"{TELEGRAM_API_BASE}/bot{token}/sendMessage"
