@@ -32,13 +32,24 @@ def format_signal_message(row: dict[str, Any]) -> str:
     except (TypeError, ValueError):
         pass
 
+    odds_text = (
+        f"Cuota real: {float(live_odd):.2f} · Casa: {bookmaker}\n"
+        if isinstance(live_odd, (int, float)) and bookmaker else ""
+    )
+    edge_text = (
+        f"Ventaja estimada frente a la cuota: {float(edge) * 100:.1f}%\n"
+        if isinstance(edge, (int, float)) else ""
+    )
+
     return (
         "⚽ FOOTBALL LAB · SEÑAL EN VIVO\n\n"
         f"{home} vs {away}\n"
         f"{score}{minute_text}"
         f"Mercado: {market}\n"
-        f"{probability_text}\n"
-        "Análisis informativo; verifica las cuotas y el contexto antes de decidir."
+        f"{probability_text}"
+        f"{odds_text}"
+        f"{edge_text}\n"
+        "Análisis informativo; verifica que la cuota siga vigente antes de decidir."
     )
 
 
