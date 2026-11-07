@@ -52,23 +52,23 @@ def sync_live_corner_history_to_sqlite(
     with closing(_connect(database_path)) as connection:
         with connection:
             for row in rows:
-            team = str(row["team"]).strip()
-            cursor = connection.execute(
-                """
-                INSERT OR IGNORE INTO live_corner_observations (
-                    fixture_id, league, team, team_key, venue, minute,
-                    corners_for, corners_against,
-                    corners_for_after, corners_against_after
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    str(row["fixture_id"]), str(row["league"]), team,
-                    " ".join(team.casefold().split()), row["venue"], int(row["minute"]),
-                    int(row["corners_for"]), int(row["corners_against"]),
-                    int(row["corners_for_after"]), int(row["corners_against_after"]),
-                ),
-            )
-            inserted += max(0, cursor.rowcount)
+                team = str(row["team"]).strip()
+                cursor = connection.execute(
+                    """
+                    INSERT OR IGNORE INTO live_corner_observations (
+                        fixture_id, league, team, team_key, venue, minute,
+                        corners_for, corners_against,
+                        corners_for_after, corners_against_after
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        str(row["fixture_id"]), str(row["league"]), team,
+                        " ".join(team.casefold().split()), row["venue"], int(row["minute"]),
+                        int(row["corners_for"]), int(row["corners_against"]),
+                        int(row["corners_for_after"]), int(row["corners_against_after"]),
+                    ),
+                )
+                inserted += max(0, cursor.rowcount)
 
     result = dict(report)
     result["persisted"] = inserted
