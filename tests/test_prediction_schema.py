@@ -103,6 +103,39 @@ class PredictionSchemaTests(unittest.TestCase):
         self.assertNotEqual(first["prediction_id"], other_line["prediction_id"])
         self.assertNotEqual(first["prediction_id"], later_snapshot["prediction_id"])
 
+    def test_live_scanner_record_carries_common_contract_metadata(self):
+        row = {
+            "recorded_at": "2026-11-07T00:14:00Z",
+            "fixture_id": 123,
+            "league_id": 39,
+            "league": "Premier League",
+            "home": "Home",
+            "away": "Away",
+            "phase": "live",
+            "minute": 67,
+            "score_home": 1,
+            "score_away": 0,
+            "market": "Empate final",
+            "market_type": "goals",
+            "probability": 0.64,
+            "estimated_probability_exploratory": 0.64,
+            "model_id": "estimate_live_goal_markets",
+            "source": "football_lab_live_scanner",
+            "snapshot_id": "123:67:1:0",
+            "outcome": "",
+            "outcome_verified": "",
+        }
+        result = normalize_prediction_record(row)
+        self.assertTrue(result["valid"])
+        self.assertEqual(result["phase"], "live")
+        self.assertEqual(result["league_id"], "39")
+        self.assertEqual(result["market_type"], "goals")
+        self.assertEqual(result["probability"], 0.64)
+        self.assertEqual(result["model_id"], "estimate_live_goal_markets")
+        self.assertEqual(result["source"], "football_lab_live_scanner")
+        self.assertEqual(result["snapshot_id"], "123:67:1:0")
+        self.assertIsNone(result["outcome"])
+
     def test_dataset_counts_duplicates_and_invalid_records(self):
         base = {
             "recorded_at": "2026-11-06T19:14:00Z",
