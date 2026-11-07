@@ -123,7 +123,7 @@ class LiveCornerFinalizeTests(unittest.TestCase):
         }
         result = finalize_live_corner_fixture(self.db, mismatch, self.final_stats)
         self.assertFalse(result["finalized"])
-        self.assertEqual(result["reason"], "missing_fixture_identity")
+        self.assertEqual(result["reason"], "fixture_identity_mismatch")
         self.assertEqual(load_live_corner_history_from_sqlite(self.db), [])
 
 
