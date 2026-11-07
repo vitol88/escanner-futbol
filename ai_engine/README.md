@@ -40,3 +40,10 @@ Todos los modelos son experimentales y no calibrados. Antes de mostrar señales 
 - El ajuste arbitral permanece no disponible hasta contar con un promedio representativo e independiente de toda la liga. El historial de los dos equipos no se usa como promedio de liga.
 - Córners en vivo usa una fuente histórica distinta y compara liga, equipo, sede y minuto exacto. Si no se proporciona ese histórico minuto-a-minuto, el diagnóstico lo marca como ausente; no lo sustituye por los promedios prepartido.
 - “Suficiente” solo significa que se cumple el mínimo técnico del baseline experimental; no significa que el modelo esté calibrado ni que deba recomendar una apuesta.
+
+
+## Puertas de ejecución y abstención
+
+`eligibility.build_model_eligibility` aplica una puerta independiente para cada baseline experimental. Solo permite calcular cuando la cobertura correspondiente y las variables requeridas están presentes. Córners en vivo exige además la fuente histórica minuto-a-minuto separada y el estado actual del partido. La falta de datos produce `status="abstain"` con una razón legible; no se sustituye por ceros ni por promedios de otro mercado.
+
+La elegibilidad autoriza únicamente un cálculo experimental, nunca una recomendación: todas las puertas mantienen `may_emit_betting_signal=false`. La política global de señales permanece desactivada hasta completar validación cronológica y calibración. El módulo es puro y todavía no se conecta a la interfaz ni al scanner.
