@@ -4,7 +4,7 @@ from ai_engine.card_model import estimate_prematch_yellow_cards
 class PrematchYellowCardModelTests(unittest.TestCase):
     def setUp(self):
         self.features = {"league_id": 140, "home_team_id": 1, "away_team_id": 2,
-                          "teams": {"home": "Home FC", "away": "Away FC"}, "referee": "Referee A"}
+                          "teams": {"home": "Home FC", "away": "Away FC"}, "referee": "Referee A", "league_average_total_cards": 3.5}
         self.rows = []
         for i in range(5):
             self.rows.append({"league_id": 140, "home_team_id": 1, "away_team_id": 10+i,
