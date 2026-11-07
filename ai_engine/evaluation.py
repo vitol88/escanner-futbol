@@ -23,6 +23,45 @@ def _outcome(value: Any) -> int | None:
     return None
 
 
+
+def evaluate_forecasts_by_group(
+    rows: list[dict[str, Any]],
+    *,
+    group_key: str,
+    probability_key: str = "estimated_probability_exploratory",
+    outcome_key: str = "outcome",
+    verified_key: str = "outcome_verified",
+    minimum_sample: int = 30,
+) -> list[dict[str, Any]]:
+    """Evaluate verified forecasts separately by a non-empty category.
+
+    Rows without a usable group label are omitted from this breakdown. Each
+    group uses the same strict verification and probability validation rules
+    as the overall evaluator.
+    """
+    if not isinstance(group_key, str) or not group_key.strip():
+        raise ValueError("group_key debe ser un texto no vacío")
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for row in rows if isinstance(rows, list) else []:
+        if not isinstance(row, dict):
+            continue
+        label = str(row.get(group_key, "") or "").strip()
+        if not label:
+            continue
+        grouped.setdefault(label, []).append(row)
+
+    results = []
+    for label in sorted(grouped, key=str.casefold):
+        metrics = evaluate_binary_forecasts(
+            grouped[label],
+            probability_key=probability_key,
+            outcome_key=outcome_key,
+            verified_key=verified_key,
+            minimum_sample=minimum_sample,
+        )
+        results.append({"group": label, **metrics})
+    return results
+
 def evaluate_binary_forecasts(
     rows: list[dict[str, Any]],
     *,
