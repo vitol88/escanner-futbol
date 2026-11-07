@@ -43,7 +43,7 @@ jobs:
               print("Ask the project maintainer to inspect the webhook configuration; no changes were made.")
               raise SystemExit(1)
 
-          updates = call("getUpdates", {"offset": -20, "limit": 20, "timeout": 0})
+          updates = call("getUpdates", {"offset": -20, "limit": 20, "timeout": 0, "allowed_updates": json.dumps(["channel_post", "edited_channel_post"])})
           matches = []
           for update in updates:
               post = update.get("channel_post") or update.get("edited_channel_post")
