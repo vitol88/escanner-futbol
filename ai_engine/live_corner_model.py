@@ -81,7 +81,9 @@ def estimate_live_remaining_corners(
         return unavailable
 
     minimum = max(1, _nonnegative_int(minimum_matches) or 8)
-    common = {"league": str(league_id), "minute": match_minute, "minimum_matches": minimum}
+    # The persisted minute-level history uses the competition name when available.
+    league_key = features.get("league_name") or str(league_id)
+    common = {"league": str(league_key), "minute": match_minute, "minimum_matches": minimum}
     home_result = estimator(
         history_rows, team=home_team, venue="home",
         corners_for=home_corners, corners_against=away_corners, **common,
