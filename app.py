@@ -13,7 +13,7 @@ import streamlit as st
 
 from ai_engine.data_engine import FootballDataEngine
 from models.live_context import qualifies_as_corner_candidate, summarize_live_context
-from ai_engine.evaluation import evaluate_binary_forecasts, evaluate_forecasts_by_group
+from ai_engine.evaluation import evaluate_binary_forecasts, evaluate_forecasts_by_group, evaluate_chronological_holdout
 from models.automatic_history import build_automatic_history
 from models.deep_goal_context import build_deep_goal_context
 from models.probabilities import (
@@ -8600,6 +8600,22 @@ else:
                         st.info("Todavía no hay filas con probabilidad válida y resultado binario marcado como verificado.")
 
                     if metrics["sample_size"]:
+                        st.markdown("#### Validación cronológica por partido")
+                        temporal = evaluate_chronological_holdout(uploaded_rows)
+                        if temporal["available"]:
+                            temporal_metrics = temporal["test_metrics"]
+                            st.caption(
+                                f"Separación temporal: {temporal['train_fixture_count']} partidos anteriores "
+                                f"para desarrollo y {temporal['test_fixture_count']} partidos posteriores para prueba. "
+                                "Los registros del mismo partido permanecen juntos."
+                            )
+                            temporal_cols = st.columns(3)
+                            temporal_cols[0].metric("Muestra futura verificada", temporal_metrics["sample_size"])
+                            temporal_cols[1].metric("Brier de prueba", f"{temporal_metrics['brier_score']:.3f}" if temporal_metrics["brier_score"] is not None else "N/D")
+                            temporal_cols[2].metric("Log loss de prueba", f"{temporal_metrics['log_loss']:.3f}" if temporal_metrics["log_loss"] is not None else "N/D")
+                        else:
+                            st.info("Aún no hay suficientes partidos con fecha válida para la prueba cronológica. Se requieren al menos 5 partidos anteriores y 5 posteriores.")
+
                         st.markdown("#### Rendimiento por mercado")
                         market_groups = evaluate_forecasts_by_group(uploaded_rows, group_key="market")
                         if market_groups:
