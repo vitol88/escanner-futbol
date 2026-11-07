@@ -14,7 +14,7 @@ class LiveCornerFinalizeTests(unittest.TestCase):
         self.addCleanup(self.folder.cleanup)
         self.db = Path(self.folder.name) / "football_lab.sqlite3"
         self.fixture = {
-            "fixture": {"id": 501, "status": {"short": "2H", "elapsed": 67}},
+            "fixture": {"id": 501, "timestamp": 1794078000, "status": {"short": "2H", "elapsed": 67}},
             "league": {"id": 39, "name": "Premier League"},
             "teams": {
                 "home": {"id": 1, "name": "Arsenal"},
@@ -27,7 +27,7 @@ class LiveCornerFinalizeTests(unittest.TestCase):
         ]
         self.final_fixture = {
             **self.fixture,
-            "fixture": {"id": 501, "status": {"short": "FT", "elapsed": 90}},
+            "fixture": {"id": 501, "timestamp": 1794078000, "status": {"short": "FT", "elapsed": 90}},
         }
         self.final_stats = [
             {"team": {"id": 2}, "statistics": [{"type": "Corner Kicks", "value": 7}]},
