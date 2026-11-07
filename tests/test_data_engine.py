@@ -32,7 +32,7 @@ class DataEngineTests(unittest.TestCase):
         self.assertEqual(normalized["fixture_id"], 12345)
         self.assertEqual(normalized["teams"]["home"]["name"], "América")
         self.assertEqual(normalized["goals"], {"home": 1, "away": 0})
-        self.assertIsNone(normalized["halftime_score"]["away"])
+        self.assertEqual(normalized["halftime_score"]["away"], 0)
 
     def test_statistics_are_matched_by_team_id_not_provider_order(self):
         response = [
