@@ -42,3 +42,14 @@ un snapshot versionado en `st.session_state.ai_match_snapshots`, con un máximo 
 partidos por sesión. La integración reutiliza `api_get` y `stats_cache`; no agrega
 consultas, controles visuales ni cambios de navegación. Los próximos motores podrán
 consumir esos snapshots sin volver a consultar el proveedor.
+
+
+## Primer modelo prepartido de goles
+
+`goal_model.estimate_prematch_goals(features)` añade un baseline independiente
+de Poisson para goles esperados local/visitante, 1X2, ambos marcan y líneas
+totales. Solo calcula cuando ambos equipos tienen al menos cinco partidos de
+muestra y están disponibles los cuatro promedios por localía. El mínimo es
+configurable. El resultado queda marcado como experimental/no calibrado; no
+genera picks, cuotas objetivo ni valor esperado. Antes de usarlo en la aplicación
+debe pasar backtesting cronológico y análisis de calibración.
