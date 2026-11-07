@@ -1,6 +1,7 @@
 """Chronological, fixture-leakage-safe baseline backtest for live corners."""
 from __future__ import annotations
 
+import math
 import sqlite3
 from pathlib import Path
 from typing import Any
@@ -105,7 +106,7 @@ def run_live_corner_baseline_backtest(
         timestamps[fixture_id] = timestamp
 
     ordered_fixtures = sorted(timestamps, key=lambda fixture_id: (timestamps[fixture_id], fixture_id))
-    test_count = max(min_test_fixtures, int(round(len(ordered_fixtures) * test_fraction)))
+    test_count = max(min_test_fixtures, int(math.ceil(len(ordered_fixtures) * test_fraction)))
     test_count = min(test_count, len(ordered_fixtures) - min_train_fixtures)
     if test_count < min_test_fixtures or len(ordered_fixtures) - test_count < min_train_fixtures:
         return {
