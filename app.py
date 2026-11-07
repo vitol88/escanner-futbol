@@ -30,6 +30,7 @@ from models.probabilities import (
     poisson_pmf,
 )
 from models.live_odds import (
+    best_live_odds_by_market,
     classify_market,
     extract_live_odds,
     numerology_context,
@@ -7186,7 +7187,7 @@ else:
                                                     return float(base_probability) + adjustment
 
                                                 # Show main and risk tips in this match panel too, not only in the global tab.
-                                                live_odds_rows = st.session_state.get("live_odds_by_fixture", {}).get(str(match_id), [])
+                                                live_odds_rows = best_live_odds_by_market(st.session_state.get("live_odds_by_fixture", {}).get(str(match_id), []))
                                                 match_main_options, match_risk_options = [], []
                                                 current_estimate = next((row[1] for row in st.session_state.get("goal_scan_results", []) if str(((row[0].get("fixture") or {}).get("id"))) == str(match_id)), None)
                                                 current_estimate = current_estimate if isinstance(current_estimate, dict) else {}
@@ -8267,7 +8268,7 @@ else:
                             st.caption("Contexto observado: " + "; ".join(rationale) + ".")
                     st.caption(f"Referencia usada por el modelo: {estimate.get('baseline_league', 'genérica')} · muestra de liga: {estimate.get('baseline_matches', 0)} partidos · contexto: {context.get('context_status', 'no disponible')}.")
                     odds_by_fixture = st.session_state.get("live_odds_by_fixture", {})
-                    match_odds = odds_by_fixture.get(str(fixture_id), [])
+                    match_odds = best_live_odds_by_market(odds_by_fixture.get(str(fixture_id), []))
                     main_options = []
                     risk_options = []
                     draw_prob = estimate.get("draw_final") if isinstance(estimate, dict) else None
@@ -8621,7 +8622,7 @@ else:
                             # Match live corner markets to real odds from API-Football.
                             # A price alone is never enough: require a provisional model edge.
                             fixture_id = ((item.get("fixture") or {}).get("fixture") or {}).get("id")
-                            live_rows = st.session_state.get("live_odds_by_fixture", {}).get(str(fixture_id), [])
+                            live_rows = best_live_odds_by_market(st.session_state.get("live_odds_by_fixture", {}).get(str(fixture_id), []))
                             corner_options = []
                             remaining_mean = max(0.05, remaining_expected * 0.70)
                             for odds_row in live_rows:
