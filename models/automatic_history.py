@@ -70,6 +70,7 @@ def build_automatic_history(
         "available": False, "home_team": home.get("name"), "away_team": away.get("name"),
         "home_matches": 0, "away_matches": 0, "h2h_matches": 0,
         "home_corners_for": None, "home_corners_against": None,
+        "card_history_rows": [],
         "away_corners_for": None, "away_corners_against": None,
         "home_goals_for": None, "home_goals_against": None,
         "away_goals_for": None, "away_goals_against": None,
@@ -132,6 +133,8 @@ def build_automatic_history(
     total_budget = max(0, int(stats_budget))
     home_budget = [(total_budget + 1) // 2]
     away_budget = [total_budget // 2]
+
+    card_history_rows: dict[str, dict[str, Any]] = {}
 
     def averages(matches: list[dict[str, Any]], team_id: int, venue: str, request_budget: list[int]) -> dict[str, Any]:
         gf: list[float] = []
@@ -218,6 +221,42 @@ def build_automatic_history(
                  if (row.get("team") or {}).get("id") == opponent_id),
                 1 - own_stats_index,
             )
+            old_home_id = (old_teams.get("home") or {}).get("id")
+            old_away_id = (old_teams.get("away") or {}).get("id")
+            home_stats_index = next(
+                (idx for idx, row in enumerate(stats or [])
+                 if (row.get("team") or {}).get("id") == old_home_id),
+                0,
+            )
+            away_stats_index = next(
+                (idx for idx, row in enumerate(stats or [])
+                 if (row.get("team") or {}).get("id") == old_away_id),
+                1,
+            )
+            home_yellow = _stat(stats, home_stats_index, "Yellow Cards")
+            away_yellow = _stat(stats, away_stats_index, "Yellow Cards")
+            old_fixture_info = old.get("fixture") or {}
+            old_timestamp = old_fixture_info.get("timestamp")
+            target_timestamp = (fixture.get("fixture") or {}).get("timestamp")
+            before_target = not (
+                isinstance(old_timestamp, (int, float))
+                and isinstance(target_timestamp, (int, float))
+                and old_timestamp >= target_timestamp
+            )
+            if old_id and before_target and home_yellow is not None and away_yellow is not None:
+                card_history_rows[str(old_id)] = {
+                    "fixture_id": old_id,
+                    "fixture_timestamp": old_timestamp,
+                    "league_id": (old.get("league") or {}).get("id"),
+                    "season": (old.get("league") or {}).get("season"),
+                    "home_team_id": old_home_id,
+                    "away_team_id": old_away_id,
+                    "home_team": (old_teams.get("home") or {}).get("name"),
+                    "away_team": (old_teams.get("away") or {}).get("name"),
+                    "home_yellow_cards": home_yellow,
+                    "away_yellow_cards": away_yellow,
+                    "referee": old_fixture_info.get("referee"),
+                }
             own_c, _, _ = _corner_parts(stats, own_stats_index)
             opp_c, _, _ = _corner_parts(stats, opponent_stats_index)
             _, own_first, own_second = _corner_parts(half_stats, own_stats_index)
@@ -251,6 +290,7 @@ def build_automatic_history(
         "home_corner_sample": h["corner_sample"], "away_corner_sample": a["corner_sample"],
         "home_corner_period_sample": h["corner_period_sample"], "away_corner_period_sample": a["corner_period_sample"],
         "home_goal_sample": h["goal_sample"], "away_goal_sample": a["goal_sample"],
+        "card_history_rows": sorted(card_history_rows.values(), key=lambda row: row.get("fixture_timestamp") or 0),
         "diagnostics": {**diagnostics, "home_venue_matches_checked": h["matches"], "away_venue_matches_checked": a["matches"], "home_stats_attempted": h["stats_attempted"], "away_stats_attempted": a["stats_attempted"], "home_stats_nonempty": h["stats_nonempty"], "away_stats_nonempty": a["stats_nonempty"], "home_stats_with_corners": h["stats_with_corners"], "away_stats_with_corners": a["stats_with_corners"], "stats_budget_remaining": away_budget[0]},
         "note": "Promedios calculados con partidos finalizados de la misma competición y temporada. La muestra cuenta únicamente partidos con estadísticas de córners disponibles.",
     })
