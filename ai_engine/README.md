@@ -77,3 +77,16 @@ El escáner global de goles ahora añade al CSV el contrato versionado al regist
 La escritura del CSV construye la unión de columnas presentes en todas las filas, de modo que un archivo con filas antiguas y nuevas no falle al guardarse. La deduplicación activa del scanner (fixture/mercado/minuto/marcador) se conserva sin cambios; el snapshot identifica ese estado, pero todavía no se crean nuevas señales por cada variación de estadísticas dentro del mismo minuto. Las líneas y selecciones no se separan si el productor no las entrega explícitamente. Córners, tarjetas y mercados prepartido aún no se añaden a este logger.
 
 Los evaluadores y la auditoría aceptan tanto el campo histórico `estimated_probability_exploratory` como el campo canónico `probability`. Así, los CSV anteriores siguen funcionando y las exportaciones normalizadas pueden evaluarse sin renombrar columnas manualmente.
+
+
+## Persistencia del histórico minuto a minuto de córners
+
+`live_corner_store.sync_live_corner_history_to_sqlite(database_path, csv_path)` valida el CSV mediante `live_corner_history` y guarda únicamente observaciones válidas en la tabla `live_corner_observations` de SQLite. La clave primaria compuesta por partido, equipo normalizado, sede y minuto hace que la sincronización sea idempotente.
+
+- `load_live_corner_history_from_sqlite(database_path)` recupera las observaciones en el contrato que consume el modelo live.
+- `analyze_with_persisted_live_corner_history(database_path, csv_path, features, history, **options)` sincroniza el archivo, carga el histórico acumulado y ejecuta `pipeline.analyze_experimental_models`.
+- Si el CSV no existe o no aporta filas válidas, las observaciones previamente almacenadas siguen disponibles.
+- La tabla es independiente del ledger de pronósticos: no mezcla observaciones históricas con probabilidades ni resultados de apuestas.
+- Esta integración es una capa de servicio probada; todavía no activa captura automática desde API-Football ni modifica la interfaz de Streamlit.
+
+Las salidas siguen siendo experimentales. La política de recomendaciones y señales permanece desactivada.
