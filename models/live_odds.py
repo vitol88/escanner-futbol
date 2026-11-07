@@ -62,13 +62,15 @@ def classify_market(row: dict[str, Any]) -> str | None:
         if any(token in value for token in ("over", "under", "mas de", "menos de")):
             handicap = row.get("handicap")
             side = "Más de" if any(token in value for token in ("over", "mas de")) else "Menos de"
-            line_match = re.search(r"(\d+(?:[.,]\d+)?)", value)\n            line = str(handicap).strip() if handicap not in (None, "") else (line_match.group(1) if line_match else value)
+            line_match = re.search(r"(\d+(?:[.,]\d+)?)", value)
+            line = str(handicap).strip() if handicap not in (None, "") else (line_match.group(1) if line_match else value)
             return f"{side} {line} córners"
     if "over/under" in market or "total goals" in market or "total de goles" in market:
         if any(token in value for token in ("over", "under", "mas de", "menos de")):
             handicap = row.get("handicap")
             side = "Más de" if any(token in value for token in ("over", "mas de")) else "Menos de"
-            line_match = re.search(r"(\d+(?:[.,]\d+)?)", value)\n            line = str(handicap).strip() if handicap not in (None, "") else (line_match.group(1) if line_match else value)
+            line_match = re.search(r"(\d+(?:[.,]\d+)?)", value)
+            line = str(handicap).strip() if handicap not in (None, "") else (line_match.group(1) if line_match else value)
             return f"{side} {line} goles"
     return None
 
