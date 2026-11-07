@@ -50,6 +50,8 @@ class LiveCornerBacktestTests(unittest.TestCase):
         self.assertEqual(result["split"]["train_fixtures"], 7)
         self.assertEqual(result["split"]["test_fixtures"], 3)
         self.assertIsNotNone(result["metrics"]["mae_remaining_corners"])
+        self.assertTrue(result["by_league_minute_bucket"])
+        self.assertTrue(all("test_fixtures" in item for item in result["by_league_minute_bucket"]))
         self.assertEqual(
             {item["league"] for item in result["by_league"]},
             {"Premier League", "La Liga"},
