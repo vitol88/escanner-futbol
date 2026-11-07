@@ -139,7 +139,7 @@ def test_automatic_history_excludes_card_rows_without_proven_pre_kickoff_timesta
 
 def test_failed_historical_statistics_request_still_consumes_budget():
     current = {
-        "fixture": {"timestamp": 3000},
+        "fixture": {"timestamp": 5000},
         "teams": {"home": {"id": 1, "name": "Home FC"}, "away": {"id": 2, "name": "Away FC"}},
         "league": {"id": 10, "season": 2026},
     }
