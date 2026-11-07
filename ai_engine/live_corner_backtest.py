@@ -43,6 +43,68 @@ def _metrics(rows: list[sqlite3.Row], train: list[sqlite3.Row]) -> dict[str, Any
 
 
 
+
+def _predict_remaining(row: sqlite3.Row, train: list[sqlite3.Row]) -> float:
+    """Predict from training rows only, with league/minute fallback."""
+    global_values = [float(item["corners_for_after"]) for item in train]
+    league = str(row["league"] or "Unknown")
+    league_values = [
+        float(item["corners_for_after"]) for item in train
+        if str(item["league"] or "Unknown") == league
+    ]
+    bucket_values = [
+        float(item["corners_for_after"]) for item in train
+        if str(item["league"] or "Unknown") == league
+        and _minute_bucket(item["minute"]) == _minute_bucket(row["minute"])
+    ]
+    values = bucket_values or league_values or global_values
+    return sum(values) / len(values)
+
+
+def _line_metrics(
+    rows: list[sqlite3.Row], train: list[sqlite3.Row], lines: tuple[float, ...]
+) -> list[dict[str, Any]]:
+    """Classify over/under half-point lines; this is not a probability or signal."""
+    results = []
+    for line in lines:
+        tp = tn = fp = fn = 0
+        for row in rows:
+            actual_over = float(row["corners_for_after"]) > line
+            predicted_over = _predict_remaining(row, train) > line
+            if predicted_over and actual_over:
+                tp += 1
+            elif predicted_over and not actual_over:
+                fp += 1
+            elif not predicted_over and actual_over:
+                fn += 1
+            else:
+                tn += 1
+        total = tp + tn + fp + fn
+        over_actual = tp + fn
+        under_actual = tn + fp
+        sensitivity = tp / over_actual if over_actual else None
+        specificity = tn / under_actual if under_actual else None
+        balanced = (
+            (sensitivity + specificity) / 2
+            if sensitivity is not None and specificity is not None else None
+        )
+        results.append({
+            "line": line, "observations": total,
+            "actual_over_rate": over_actual / total if total else None,
+            "predicted_over_rate": (tp + fp) / total if total else None,
+            "accuracy": (tp + tn) / total if total else None,
+            "sensitivity_over": sensitivity,
+            "specificity_under": specificity,
+            "balanced_accuracy": balanced,
+            "confusion_matrix": {
+                "true_over": tp, "false_over": fp,
+                "missed_over": fn, "true_under": tn,
+            },
+            "decision_rule": "predicted_mean_and_actual_remaining_corners_greater_than_line",
+            "warning": "Descriptive threshold classification only; no probability, odds, ROI, or betting signal.",
+        })
+    return results
+
 def _rolling_origin_metrics(rows, timestamps, ordered_timestamps, *, folds, min_train_fixtures, min_test_fixtures):
     """Evaluate future blocks with expanding, strictly earlier training."""
     if folds < 2:
