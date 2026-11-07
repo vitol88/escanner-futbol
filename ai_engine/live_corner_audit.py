@@ -125,8 +125,10 @@ def audit_live_corner_database(database_path: str | Path) -> dict[str, Any]:
             hist = history_leagues.get(label, {"observations": 0, "fixtures": 0})
             league_report.append({
                 "league": label,
-                **cap,
-                **hist,
+                "capture_snapshots": cap["snapshots"],
+                "capture_fixtures": cap["fixtures"],
+                "verified_observations": hist["observations"],
+                "verified_fixtures": hist["fixtures"],
             })
 
         warnings = []
