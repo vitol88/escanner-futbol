@@ -166,3 +166,51 @@ def test_failed_historical_statistics_request_still_consumes_budget():
     assert result["diagnostics"]["historical_stats"]["requested"] == 1
     assert result["diagnostics"]["stats_budget_remaining"] == 0
 
+
+
+def test_automatic_history_reuses_cached_completed_stats_for_corner_finalization():
+    current = {
+        "fixture": {"timestamp": 5000},
+        "teams": {
+            "home": {"id": 1, "name": "Home FC"},
+            "away": {"id": 2, "name": "Away FC"},
+        },
+        "league": {"id": 10, "season": 2026},
+    }
+    past = _fixture(601, 1, 3, 2, 0)
+    cached_stats = [
+        {"team": {"id": 1}, "statistics": [{"type": "Corner Kicks", "value": 8}]},
+        {"team": {"id": 3}, "statistics": [{"type": "Corner Kicks", "value": 4}]},
+    ]
+    cache = {
+        "team-fixtures-v5:1:10:2026": [past],
+        "team-fixtures-v5:2:10:2026": [],
+        "historical-stats-full-v1:601": cached_stats,
+        "historical-stats-halves-v5:601": [],
+    }
+    finalized = []
+
+    def finalizer(completed_fixture, final_statistics):
+        finalized.append((completed_fixture, final_statistics))
+        return {"finalized": True, "observations_inserted": 2}
+
+    calls = []
+
+    def fake_api(endpoint, params):
+        calls.append((endpoint, params))
+        return {"response": []}
+
+    result = build_automatic_history(
+        current,
+        api_get=fake_api,
+        cache=cache,
+        stats_budget=0,
+        live_corner_finalizer=finalizer,
+    )
+
+    assert len(finalized) == 1
+    assert finalized[0][0]["fixture"]["id"] == 601
+    assert finalized[0][1] == cached_stats
+    assert calls == []
+    assert result["diagnostics"]["live_corner_finalization"]["finalized"] == 1
+    assert result["diagnostics"]["live_corner_finalization"]["observations_inserted"] == 2
