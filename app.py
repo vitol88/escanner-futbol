@@ -13,7 +13,7 @@ import streamlit as st
 
 from ai_engine.data_engine import FootballDataEngine
 from models.live_context import qualifies_as_corner_candidate, summarize_live_context
-from models.backtest import evaluate_binary_predictions
+from ai_engine.evaluation import evaluate_binary_forecasts
 from models.automatic_history import build_automatic_history
 from models.deep_goal_context import build_deep_goal_context
 from models.probabilities import (
@@ -8578,18 +8578,24 @@ else:
             if backtest_file is not None:
                 try:
                     uploaded_rows = list(csv.DictReader(io.StringIO(backtest_file.getvalue().decode("utf-8-sig"))))
-                    metrics = evaluate_binary_predictions(uploaded_rows)
-                    metric_cols = st.columns(4)
+                    metrics = evaluate_binary_forecasts(uploaded_rows)
+                    metric_cols = st.columns(5)
                     metric_cols[0].metric("Muestra verificada", metrics["sample_size"])
-                    metric_cols[1].metric("Tasa de acierto", f"{metrics['hit_rate']:.1%}" if metrics["hit_rate"] is not None else "N/D")
-                    metric_cols[2].metric("Brier score", f"{metrics['brier_score']:.3f}" if metrics["brier_score"] is not None else "N/D")
-                    metric_cols[3].metric("Filas excluidas", metrics["excluded"])
+                    metric_cols[1].metric("Brier score", f"{metrics['brier_score']:.3f}" if metrics["brier_score"] is not None else "N/D")
+                    metric_cols[2].metric("Log loss", f"{metrics['log_loss']:.3f}" if metrics["log_loss"] is not None else "N/D")
+                    metric_cols[3].metric("Brecha calibración", f"{metrics['calibration_gap']:.1%}" if metrics["calibration_gap"] is not None else "N/D")
+                    metric_cols[4].metric("Filas excluidas", metrics["excluded"])
                     if metrics["sample_size"]:
                         st.caption(
                             f"Probabilidad media pronosticada: {metrics['mean_probability']:.1%} frente a "
-                            f"frecuencia real de acierto: {metrics['observed_rate']:.1%}. "
-                            "Una diferencia grande puede indicar mala calibración; evalúa cada mercado por separado y con una muestra suficiente. Brier score: cuanto más bajo, mejor (0 es perfecto)."
+                            f"frecuencia real: {metrics['observed_rate']:.1%}. "
+                            "Brier y Log loss: cuanto más bajos, mejor. La brecha de calibración pondera la diferencia entre probabilidad y frecuencia observada por intervalos."
                         )
+                        if not metrics["minimum_sample_reached"]:
+                            st.warning(
+                                f"Muestra todavía pequeña: {metrics['sample_size']} registros válidos; "
+                                f"se recomienda reunir al menos {metrics['minimum_sample']} antes de interpretar la calibración."
+                            )
                     else:
                         st.info("Todavía no hay filas con probabilidad válida y resultado binario marcado como verificado.")
                 except (UnicodeDecodeError, csv.Error, ValueError) as exc:
