@@ -42,6 +42,64 @@ def _metrics(rows: list[sqlite3.Row], train: list[sqlite3.Row]) -> dict[str, Any
     }
 
 
+
+def _rolling_origin_metrics(rows, timestamps, ordered_timestamps, *, folds, min_train_fixtures, min_test_fixtures):
+    """Evaluate future blocks with expanding, strictly earlier training."""
+    if folds < 2:
+        raise ValueError("rolling_folds must be at least 2")
+    if len(ordered_timestamps) < folds + 1:
+        return {"available": False, "reason": "insufficient_kickoff_groups_for_rolling_folds"}
+    by_time = {}
+    for fixture_id, timestamp in timestamps.items():
+        by_time.setdefault(timestamp, set()).add(fixture_id)
+    initial_groups = max(1, len(ordered_timestamps) // (folds + 1))
+    remaining = ordered_timestamps[initial_groups:]
+    if len(remaining) < folds:
+        return {"available": False, "reason": "insufficient_kickoff_groups_for_rolling_folds"}
+    results = []
+    for index in range(folds):
+        start = len(remaining) * index // folds
+        end = len(remaining) * (index + 1) // folds
+        test_times = remaining[start:end]
+        train_ids = {fid for fid, ts in timestamps.items() if ts < test_times[0]}
+        test_ids = set().union(*(by_time[ts] for ts in test_times))
+        if len(train_ids) < min_train_fixtures or len(test_ids) < min_test_fixtures:
+            return {"available": False, "reason": "insufficient_fixtures_in_rolling_fold",
+                    "fold": index + 1, "train_fixtures": len(train_ids),
+                    "test_fixtures": len(test_ids)}
+        train = [r for r in rows if str(r["fixture_id"]) in train_ids]
+        test = [r for r in rows if str(r["fixture_id"]) in test_ids]
+        metrics = _metrics(test, train)
+        mean = sum(float(r["corners_for_after"]) for r in train) / len(train)
+        errors = [mean - float(r["corners_for_after"]) for r in test]
+        benchmark = sum(abs(e) for e in errors) / len(errors)
+        improvement = ((benchmark - metrics["mae_remaining_corners"]) / benchmark
+                       if benchmark > 0 else None)
+        results.append({
+            "fold": index + 1, "train_fixtures": len(train_ids),
+            "test_fixtures": len(test_ids),
+            "train_latest_timestamp": max(timestamps[x] for x in train_ids),
+            "test_earliest_timestamp": min(timestamps[x] for x in test_ids),
+            "fixture_overlap": len(train_ids & test_ids),
+            "metrics": metrics, "global_mean_benchmark_mae": benchmark,
+            "mae_improvement_vs_global_mean": improvement,
+        })
+    total = sum(x["metrics"]["observations"] for x in results)
+    mae = sum(x["metrics"]["mae_remaining_corners"] * x["metrics"]["observations"]
+              for x in results) / total
+    benchmark = sum(x["global_mean_benchmark_mae"] * x["metrics"]["observations"]
+                    for x in results) / total
+    return {
+        "available": True, "method": "expanding_window_chronological_folds",
+        "fold_count": len(results), "total_test_observations": total,
+        "weighted_mae_remaining_corners": mae,
+        "weighted_global_mean_benchmark_mae": benchmark,
+        "weighted_mae_improvement_vs_global_mean":
+            (benchmark - mae) / benchmark if benchmark > 0 else None,
+        "folds": results,
+        "warning": "Experimental baseline only; not evidence of betting profitability.",
+    }
+
 def run_live_corner_baseline_backtest(
     database_path: str | Path,
     *,
@@ -50,6 +108,7 @@ def run_live_corner_baseline_backtest(
     min_test_fixtures: int = 2,
     min_league_test_fixtures: int = 2,
     min_bucket_test_fixtures: int = 2,
+    rolling_folds: int = 3,
 ) -> dict[str, Any]:
     """Train on earlier kickoff times and evaluate on the latest chronological block.
 
@@ -57,6 +116,8 @@ def run_live_corner_baseline_backtest(
     Fixtures sharing the same kickoff timestamp also stay on the same side of the
     split. Prediction fallback is league+minute bucket, league-wide, then global.
     """
+    if rolling_folds < 2:
+        raise ValueError("rolling_folds must be at least 2")
     if not 0.05 <= test_fraction <= 0.5:
         raise ValueError("test_fraction must be between 0.05 and 0.5")
     if min(
@@ -154,6 +215,11 @@ def run_live_corner_baseline_backtest(
         if global_mean_baseline["mae_remaining_corners"] > 0 else None
     )
 
+    rolling = _rolling_origin_metrics(
+        rows, timestamps, ordered_timestamps, folds=rolling_folds,
+        min_train_fixtures=min_train_fixtures, min_test_fixtures=min_test_fixtures,
+    )
+
     league_ids = sorted({str(row["league"] or "Unknown") for row in test})
     by_league = []
     by_league_minute_bucket = []
@@ -232,6 +298,7 @@ def run_live_corner_baseline_backtest(
             **global_mean_baseline,
         },
         "mae_improvement_vs_global_mean": mae_improvement,
+        "rolling_origin": rolling,
         "by_league": by_league,
         "by_league_minute_bucket": by_league_minute_bucket,
     }
