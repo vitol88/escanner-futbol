@@ -37,13 +37,21 @@ jobs:
                   raise RuntimeError(f"Telegram {method} failed: {payload.get('description', 'unknown error')}")
               return payload["result"]
 
+          identity = call("getMe")
+          print(f"Token belongs to bot: @{identity.get('username', 'unknown')}")
+          print(f"Bot ID: {identity.get('id', 'unknown')}")
+
           webhook = call("getWebhookInfo")
+          print(f"Webhook configured: {'yes' if webhook.get('url') else 'no'}")
+          print(f"Pending updates reported by Telegram: {webhook.get('pending_update_count', 0)}")
           if webhook.get("url"):
-              print("A webhook is configured for this bot. getUpdates cannot be used until that webhook is removed.")
-              print("Ask the project maintainer to inspect the webhook configuration; no changes were made.")
+              print("A webhook is configured; getUpdates cannot be used until it is removed.")
               raise SystemExit(1)
 
-          updates = call("getUpdates", {"offset": -20, "limit": 20, "timeout": 0, "allowed_updates": json.dumps(["channel_post", "edited_channel_post"])})
+          updates = call("getUpdates", {"offset": -20, "limit": 20, "timeout": 0, "allowed_updates": json.dumps(["channel_post", "edited_channel_post", "message"])})
+          print(f"Updates returned by Telegram: {len(updates)}")
+          for item in updates:
+              print(f"Update {item.get('update_id')} contains: {', '.join(k for k in item.keys() if k != 'update_id')}")
           matches = []
           for update in updates:
               post = update.get("channel_post") or update.get("edited_channel_post")
