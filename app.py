@@ -6799,8 +6799,8 @@ else:
                                                 away_score = current_goals.get("away")
                                                 home_name = str(match_home.get("name") or "Local")
                                                 away_name = str(match_away.get("name") or "Visitante")
-                                                home_on = safe_stat(live_stats, "Shots on Goal", 0)
-                                                away_on = safe_stat(live_stats, "Shots on Goal", 1)
+                                                home_on = safe_stat_for_team(live_stats, "Shots on Goal", match_home.get("id"))
+                                                away_on = safe_stat_for_team(live_stats, "Shots on Goal", match_away.get("id"))
                                                 goal_history_rows = [
                                                     (f"{home_name} · goles a favor en casa", history.get("home_goals_for"), history.get("home_goal_sample", 0)),
                                                     (f"{home_name} · goles recibidos en casa", history.get("home_goals_against"), history.get("home_goal_sample", 0)),
@@ -7248,10 +7248,10 @@ else:
                                                 match_stats_for_patterns = st.session_state.stats_cache.get(str(match_id), [])
                                                 numerology_patterns = numerology_context(
                                                     home_score, away_score,
-                                                    safe_stat(match_stats_for_patterns, "Corner Kicks", 0),
-                                                    safe_stat(match_stats_for_patterns, "Corner Kicks", 1),
-                                                    safe_stat(match_stats_for_patterns, "Yellow Cards", 0),
-                                                    safe_stat(match_stats_for_patterns, "Yellow Cards", 1),
+                                                    safe_stat_for_team(match_stats_for_patterns, "Corner Kicks", match_home.get("id")),
+                                                    safe_stat_for_team(match_stats_for_patterns, "Corner Kicks", match_away.get("id")),
+                                                    safe_stat_for_team(match_stats_for_patterns, "Yellow Cards", match_home.get("id")),
+                                                    safe_stat_for_team(match_stats_for_patterns, "Yellow Cards", match_away.get("id")),
                                                 )
                                             else:
                                                 st.info("Primero pulsa «Escanear todos los partidos en vivo». Después, vuelve a abrir Goles y señales para ver promedios por localía, lectura en vivo y tip principal.")
@@ -7311,8 +7311,8 @@ else:
                                                 if history.get("pending") and st.button("📚 Consultar historial de este partido", key=f"load_history_selected_{match_id}"):
                                                     try:
                                                         history_cache = st.session_state.setdefault("automatic_history_cache", {})
-                                                        history_cache.setdefault("_automatic_history_stats_calls", 0)
-                                                        history_cache.setdefault("_automatic_history_team_fixture_calls", 0)
+                                                        history_cache["_automatic_history_stats_calls"] = 0
+                                                        history_cache["_automatic_history_team_fixture_calls"] = 0
                                                         corner_item["automatic_history"] = build_automatic_history(
                                                             corner_item["fixture"],
                                                             api_get=api_get,
@@ -8130,14 +8130,17 @@ else:
                     # Choose one main tip: favor a team-goal signal when live pressure supports it.
                     candidates = list(tips or [])
                     live_stats = st.session_state.stats_cache.get(str(fixture_id), [])
-                    home_shots = safe_stat(live_stats, "Total Shots", 0)
-                    away_shots = safe_stat(live_stats, "Total Shots", 1)
-                    home_on = safe_stat(live_stats, "Shots on Goal", 0)
-                    away_on = safe_stat(live_stats, "Shots on Goal", 1)
-                    home_poss = safe_stat(live_stats, "Ball Possession", 0)
-                    away_poss = safe_stat(live_stats, "Ball Possession", 1)
-                    home_corners = safe_stat(live_stats, "Corner Kicks", 0)
-                    away_corners = safe_stat(live_stats, "Corner Kicks", 1)
+                    fixture_teams = fixture.get("teams") or {}
+                    live_home_id = (fixture_teams.get("home") or {}).get("id")
+                    live_away_id = (fixture_teams.get("away") or {}).get("id")
+                    home_shots = safe_stat_for_team(live_stats, "Total Shots", live_home_id)
+                    away_shots = safe_stat_for_team(live_stats, "Total Shots", live_away_id)
+                    home_on = safe_stat_for_team(live_stats, "Shots on Goal", live_home_id)
+                    away_on = safe_stat_for_team(live_stats, "Shots on Goal", live_away_id)
+                    home_poss = safe_stat_for_team(live_stats, "Ball Possession", live_home_id)
+                    away_poss = safe_stat_for_team(live_stats, "Ball Possession", live_away_id)
+                    home_corners = safe_stat_for_team(live_stats, "Corner Kicks", live_home_id)
+                    away_corners = safe_stat_for_team(live_stats, "Corner Kicks", live_away_id)
                     if isinstance(home_poss, str):
                         try: home_poss = float(home_poss.replace("%", "").strip())
                         except ValueError: home_poss = None
@@ -8261,8 +8264,9 @@ else:
                                 is_corner_market = "córner" in market_label.casefold()
                                 if is_corner_market:
                                     corner_stats = st.session_state.stats_cache.get(str(fixture_id), [])
-                                    current_home_corners = safe_stat(corner_stats, "Corner Kicks", 0)
-                                    current_away_corners = safe_stat(corner_stats, "Corner Kicks", 1)
+                                    fixture_teams = fixture.get("teams") or {}
+                                    current_home_corners = safe_stat_for_team(corner_stats, "Corner Kicks", (fixture_teams.get("home") or {}).get("id"))
+                                    current_away_corners = safe_stat_for_team(corner_stats, "Corner Kicks", (fixture_teams.get("away") or {}).get("id"))
                                     corner_minute = (match_fixture.get("status") or {}).get("elapsed")
                                     if (isinstance(current_home_corners, (int, float))
                                         and isinstance(current_away_corners, (int, float))
@@ -8339,10 +8343,13 @@ else:
                                 unsafe_allow_html=True,
                             )
                         risk_stats = st.session_state.stats_cache.get(str(fixture_id), [])
-                        risk_home_corners = safe_stat(risk_stats, "Corner Kicks", 0)
-                        risk_away_corners = safe_stat(risk_stats, "Corner Kicks", 1)
-                        risk_home_yellow = safe_stat(risk_stats, "Yellow Cards", 0)
-                        risk_away_yellow = safe_stat(risk_stats, "Yellow Cards", 1)
+                        fixture_teams = fixture.get("teams") or {}
+                        risk_home_id = (fixture_teams.get("home") or {}).get("id")
+                        risk_away_id = (fixture_teams.get("away") or {}).get("id")
+                        risk_home_corners = safe_stat_for_team(risk_stats, "Corner Kicks", risk_home_id)
+                        risk_away_corners = safe_stat_for_team(risk_stats, "Corner Kicks", risk_away_id)
+                        risk_home_yellow = safe_stat_for_team(risk_stats, "Yellow Cards", risk_home_id)
+                        risk_away_yellow = safe_stat_for_team(risk_stats, "Yellow Cards", risk_away_id)
                         risk_context_bits = [score_pattern_context(home_score, away_score)]
                         if isinstance(risk_home_corners, (int, float)) and isinstance(risk_away_corners, (int, float)):
                             if abs(risk_home_corners - risk_away_corners) >= 3:
@@ -8518,8 +8525,8 @@ else:
                         if history.get("pending") and st.button("📚 Consultar historial de este partido", key=f"load_history_global_{((item.get('fixture') or {}).get('fixture') or {}).get('id')}"):
                             try:
                                 history_cache = st.session_state.setdefault("automatic_history_cache", {})
-                                history_cache.setdefault("_automatic_history_stats_calls", 0)
-                                history_cache.setdefault("_automatic_history_team_fixture_calls", 0)
+                                history_cache["_automatic_history_stats_calls"] = 0
+                                history_cache["_automatic_history_team_fixture_calls"] = 0
                                 item["automatic_history"] = build_automatic_history(
                                     item["fixture"],
                                     api_get=api_get,
