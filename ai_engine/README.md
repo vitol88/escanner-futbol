@@ -90,3 +90,17 @@ Los evaluadores y la auditoría aceptan tanto el campo histórico `estimated_pro
 - Esta integración es una capa de servicio probada; todavía no activa captura automática desde API-Football ni modifica la interfaz de Streamlit.
 
 Las salidas siguen siendo experimentales. La política de recomendaciones y señales permanece desactivada.
+
+
+## Captura automática de córners en vivo
+
+El escáner integra `ai_engine.live_corner_capture.capture_live_corner_snapshot` dentro del ciclo estadístico existente. Usa exclusivamente la respuesta de `fixtures/statistics` que el escáner ya consultó para cada partido de su lote rotativo (máximo cinco partidos por ciclo); no crea solicitudes adicionales a API-Football.
+
+- Guarda una instantánea por partido y minuto con liga, equipos y córners de ambos equipos.
+- Si el mismo minuto se consulta más de una vez, conserva el mayor conteo observado y actualiza la hora de última observación; no duplica la clave partido/minuto.
+- Rechaza partidos no activos, minutos fuera de rango y estadísticas incompletas.
+- La captura es auxiliar: si SQLite falla, el escáner y sus notificaciones siguen funcionando.
+- Base de datos predeterminada: `data/football_lab.sqlite3` junto a `app.py`. Se puede cambiar con la variable de entorno `FOOTBALL_LAB_DB_PATH`.
+- La base de datos está excluida de Git. En despliegues con sistema de archivos efímero, configura `FOOTBALL_LAB_DB_PATH` hacia un volumen persistente antes de confiar en la acumulación entre reinicios.
+
+**Importante:** estas filas son instantáneas provisionales. No se consideran todavía observaciones históricas de resultado ni alimentan los modelos. Para eso falta verificar el total final de córners de cada partido y calcular los córners posteriores a cada minuto capturado. Esa etapa debe usar estadísticas finales ya disponibles o una consulta de cierre presupuestada, sin convertir conteos parciales en resultados.
