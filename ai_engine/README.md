@@ -54,3 +54,16 @@ La elegibilidad autoriza únicamente un cálculo experimental, nunca una recomen
 `pipeline.analyze_experimental_models(features, history, live_corner_history_rows=...)` coordina cobertura, elegibilidad y ejecución de los baselines disponibles. Cada mercado se ejecuta solo si su puerta lo autoriza; si el cálculo devuelve un resultado inválido, el propio mercado vuelve a abstenerse. El resultado conserva cobertura, elegibilidad, proyección y razones de abstención por separado.
 
 El pipeline no consulta APIs, no escribe archivos, no toca Streamlit y no modifica la interfaz. Todas las salidas se marcan como experimentales y la política de recomendaciones/señales permanece desactivada. El histórico minuto-a-minuto live se consulta con el nombre de competición almacenado en esas filas (con ID como fallback), igual que el diagnóstico de cobertura.
+
+
+## Contrato versionado de pronósticos
+
+`prediction_schema.normalize_prediction_record` adapta una fila nueva o del CSV histórico a un contrato común para cualquier mercado: goles, córners, tarjetas, resultado, empate o ambos marcan. Incluye partido, liga, fase prepartido/en vivo, minuto/marcador, mercado, selección/línea, probabilidad, versión de modelo, fuente, snapshot y estado de verificación. Los metadatos opcionales ausentes se mantienen como desconocidos; no se inventan líneas ni versiones.
+
+- Acepta el campo histórico `estimated_probability_exploratory` y también el campo normalizado `probability`.
+- Convierte timestamps con zona explícita a UTC. Los timestamps antiguos sin zona se conservan y marcan como `naive_legacy`; no se adivina su zona horaria.
+- Un resultado binario solo se conserva cuando `outcome_verified` es explícito y el resultado es 0 o 1.
+- Genera un identificador determinista por partido/fase/mercado/línea/estado/modelo. Para guardar dos snapshots realmente distintos en el mismo minuto y marcador, el productor debe proporcionar `snapshot_id`.
+- `normalize_prediction_records` informa filas válidas, inválidas y duplicadas sin modificar el CSV original.
+
+Este contrato es una capa de compatibilidad y validación; todavía no cambia el logger activo ni crea pronósticos adicionales. La integración del registro por mercado se hará cuando cada mercado produzca probabilidades con línea y contexto definidos.
