@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - desarrollo-escanner
+      - integration/football-lab-main-plus-ai
   pull_request:
     branches:
       - main
