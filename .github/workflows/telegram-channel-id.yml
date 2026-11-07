@@ -1,6 +1,9 @@
 name: Get Telegram channel ID
 
 on:
+  push:
+    branches:
+      - integration/football-lab-main-plus-ai
   workflow_dispatch:
 
 permissions:
