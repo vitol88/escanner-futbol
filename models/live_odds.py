@@ -127,3 +127,54 @@ def best_live_odds_by_market(rows: list[dict[str, Any]]) -> list[dict[str, Any]]
         if current is None or float(odd) > float(current.get("odd", 0)):
             best[label] = {**row, "market_label": label}
     return list(best.values())
+
+
+def match_goal_tip_to_live_odds(
+    tip_label: str,
+    probability: float,
+    rows: list[dict[str, Any]],
+    *,
+    minimum_edge: float = 0.02,
+) -> dict[str, Any] | None:
+    """Match supported goal-model tips to a real quote and enforce alert rules.
+
+    Only exact supported markets are matched. Unknown/team-specific propositions
+    are deliberately withheld rather than paired with a merely similar price.
+    """
+    tip = _norm(tip_label)
+    expected_market: str | None = None
+    if tip == "empate final":
+        expected_market = "Empate final"
+    elif tip.startswith("ambos equipos marcan"):
+        expected_market = "Ambos equipos marcan: Sí"
+    else:
+        over_match = re.search(r"total final:\\s*(\\d+)\\s*goles o mas", tip)
+        under_match = re.search(r"menos de\\s*(\\d+(?:[.,]\\d+)?)\\s*goles totales", tip)
+        if over_match:
+            # N goals or more corresponds to the Asian half-goal line N-0.5.
+            expected_market = f"Más de {int(over_match.group(1)) - 0.5:g} goles"
+        elif under_match:
+            expected_market = f"Menos de {float(under_match.group(1).replace(',', '.')):g} goles"
+    if not expected_market or not isinstance(probability, (int, float)):
+        return None
+
+    best = None
+    for row in best_live_odds_by_market(rows):
+        if row.get("market_label") != expected_market:
+            continue
+        odd = row.get("odd")
+        if not isinstance(odd, (int, float)) or not (1.35 <= float(odd) <= 1.60 or float(odd) >= 1.70):
+            continue
+        implied = 1.0 / float(odd)
+        edge = float(probability) - implied
+        if edge < minimum_edge:
+            continue
+        candidate = {
+            **row,
+            "model_probability": float(probability),
+            "implied_probability": implied,
+            "estimated_edge": edge,
+        }
+        if best is None or float(candidate["odd"]) > float(best["odd"]):
+            best = candidate
+    return best
