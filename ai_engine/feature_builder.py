@@ -67,7 +67,7 @@ def build_model_features(snapshot: dict[str, Any], history: dict[str, Any] | Non
         "season": (match.get("league") or {}).get("season"),
         "home_team_id": home.get("id"), "away_team_id": away.get("id"),
         "teams": {"home": home.get("name"), "away": away.get("name")},
-        "referee": match.get("referee"),
+        "referee": (match.get("league") or {}).get("referee"),
         "goals": goal_features, "corners": corner_features,
         "cards": {"current_home_yellow_cards": home_yellow, "current_away_yellow_cards": away_yellow,
                   "current_total_yellow_cards": home_yellow + away_yellow if home_yellow is not None and away_yellow is not None else None},
