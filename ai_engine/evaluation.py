@@ -62,9 +62,12 @@ def evaluate_chronological_holdout(
             continue
         try:
             parsed = datetime.fromisoformat(raw_timestamp.replace("Z", "+00:00"))
+            # A naive legacy timestamp has no defensible absolute ordering.
+            # Exclude it rather than silently assuming UTC in chronological tests.
             if parsed.tzinfo is None:
-                parsed = parsed.replace(tzinfo=timezone.utc)
-            epoch = parsed.timestamp()
+                excluded_temporal += 1
+                continue
+            epoch = parsed.astimezone(timezone.utc).timestamp()
         except (TypeError, ValueError, OverflowError, OSError):
             excluded_temporal += 1
             continue
@@ -103,6 +106,7 @@ def evaluate_chronological_holdout(
         "warnings": [
             "Partición por partido completo: no mezcla snapshots del mismo fixture.",
             "Solo se puntúan resultados verificados del bloque cronológico posterior.",
+            "Los timestamps sin zona horaria se excluyen del holdout; no se asume UTC para datos legacy.",
             "Los desgloses por mercado y liga usan exclusivamente el bloque de prueba posterior.",
             "No entrena modelos ni demuestra rentabilidad futura.",
         ],
