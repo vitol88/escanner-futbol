@@ -13,7 +13,7 @@ import streamlit as st
 
 from ai_engine.data_engine import FootballDataEngine
 from models.live_context import qualifies_as_corner_candidate, summarize_live_context
-from ai_engine.evaluation import evaluate_binary_forecasts
+from ai_engine.evaluation import evaluate_binary_forecasts, evaluate_forecasts_by_group
 from models.automatic_history import build_automatic_history
 from models.deep_goal_context import build_deep_goal_context
 from models.probabilities import (
@@ -8598,6 +8598,43 @@ else:
                             )
                     else:
                         st.info("Todavía no hay filas con probabilidad válida y resultado binario marcado como verificado.")
+
+                    if metrics["sample_size"]:
+                        st.markdown("#### Rendimiento por mercado")
+                        market_groups = evaluate_forecasts_by_group(uploaded_rows, group_key="market")
+                        if market_groups:
+                            st.dataframe(
+                                [{
+                                    "Mercado": item["group"],
+                                    "Muestra": item["sample_size"],
+                                    "Brier": item["brier_score"],
+                                    "Log loss": item["log_loss"],
+                                    "Brecha calibración": item["calibration_gap"],
+                                    "Estado": "Muestra suficiente" if item["minimum_sample_reached"] else "Muestra pequeña",
+                                } for item in market_groups],
+                                hide_index=True,
+                                use_container_width=True,
+                            )
+                        else:
+                            st.caption("El CSV no contiene etiquetas de mercado utilizables.")
+
+                        st.markdown("#### Rendimiento por liga")
+                        league_groups = evaluate_forecasts_by_group(uploaded_rows, group_key="league")
+                        if league_groups:
+                            st.dataframe(
+                                [{
+                                    "Liga": item["group"],
+                                    "Muestra": item["sample_size"],
+                                    "Brier": item["brier_score"],
+                                    "Log loss": item["log_loss"],
+                                    "Brecha calibración": item["calibration_gap"],
+                                    "Estado": "Muestra suficiente" if item["minimum_sample_reached"] else "Muestra pequeña",
+                                } for item in league_groups],
+                                hide_index=True,
+                                use_container_width=True,
+                            )
+                        else:
+                            st.caption("El CSV no contiene etiquetas de liga utilizables.")
                 except (UnicodeDecodeError, csv.Error, ValueError) as exc:
                     st.error(f"No se pudo leer el CSV para la evaluación: {exc}")
 
