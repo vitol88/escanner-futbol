@@ -15,7 +15,9 @@ from ai_engine.live_corner_audit import audit_live_corner_database
 from ai_engine.live_corner_backtest import run_live_corner_baseline_backtest
 
 
-def build_live_corner_report(\n    database_path: str | Path, *, over_under_lines: tuple[float, ...] = ()\n) -> dict:
+def build_live_corner_report(
+    database_path: str | Path, *, over_under_lines: tuple[float, ...] = ()
+) -> dict:
     """Combine structural coverage audit and chronological baseline evaluation."""
     path = Path(database_path)
     return {
@@ -100,9 +102,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     default_path = os.environ.get("FOOTBALL_LAB_DB_PATH", "data/football_lab.sqlite3")
     parser.add_argument("--db", default=default_path, help="Ruta de la base SQLite.")
-    parser.add_argument(\n        "--corner-lines", default="",\n        help="Líneas O/U de córners restantes separadas por coma (solo líneas x.5).",\n    )\n    parser.add_argument("--json", action="store_true", help="Imprime el informe completo en JSON.")
+    parser.add_argument(
+        "--corner-lines", default="",
+        help="Líneas O/U de córners restantes separadas por coma (solo líneas x.5).",
+    )
+    parser.add_argument("--json", action="store_true", help="Imprime el informe completo en JSON.")
     args = parser.parse_args(argv)
-    try:\n        lines = tuple(float(value.strip()) for value in args.corner_lines.split(",") if value.strip())\n    except ValueError as exc:\n        parser.error(f"Líneas de córners no válidas: {exc}")\n    report = build_live_corner_report(args.db, over_under_lines=lines)
+    try:
+        lines = tuple(float(value.strip()) for value in args.corner_lines.split(",") if value.strip())
+    except ValueError as exc:
+        parser.error(f"Líneas de córners no válidas: {exc}")
+    report = build_live_corner_report(args.db, over_under_lines=lines)
     print(json.dumps(report, ensure_ascii=False, indent=2) if args.json else _human_summary(report))
     return 0
 
