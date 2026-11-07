@@ -166,3 +166,5 @@ La evaluación también compara el baseline segmentado por liga/minuto con una r
 ### Evaluación rolling-origin de córners en vivo
 
 El backtest también ejecuta tres bloques cronológicos de evaluación *expanding-window*: cada bloque se predice usando únicamente partidos anteriores y el conjunto de entrenamiento crece en los bloques siguientes. Los partidos con el mismo kickoff permanecen juntos y se informa el MAE ponderado frente al promedio global de entrenamiento. Si el histórico no alcanza para formar bloques con suficientes partidos, el resultado se marca como no disponible; no se relajan los mínimos para fabricar métricas. Esta evaluación es experimental y no activa señales ni demuestra rentabilidad.
+
+La salida rolling-origin incluye además el número de bloques que mejoran o empeoran frente al promedio global, el rango entre el MAE más bajo y más alto y una etiqueta descriptiva de estabilidad (improves_in_every_fold, worse_in_every_fold, mixed_results, etc.). Es un resumen diagnóstico, no una aprobación automática del predictor: una mejora ponderada puede coexistir con bloques individuales peores.
