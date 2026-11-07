@@ -13,6 +13,7 @@ import streamlit as st
 
 from ai_engine.data_engine import FootballDataEngine
 from ai_engine.live_corner_capture import capture_live_corner_snapshot
+from ai_engine.live_corner_finalize import finalize_live_corner_fixture
 from models.live_context import qualifies_as_corner_candidate, summarize_live_context
 from ai_engine.evaluation import evaluate_binary_forecasts, evaluate_forecasts_by_group, evaluate_chronological_holdout
 from ai_engine.dataset_audit import audit_forecast_dataset
@@ -7920,6 +7921,11 @@ else:
                     api_get=api_get,
                     cache=history_cache,
                     stats_budget=max(0, history_budget - used_history_stats),
+                    live_corner_finalizer=lambda completed_fixture, final_stats: (
+                        finalize_live_corner_fixture(
+                            LIVE_CORNER_CAPTURE_DB, completed_fixture, final_stats
+                        )
+                    ),
                 )
             except Exception as history_exc:
                 corner_item["automatic_history"] = {
