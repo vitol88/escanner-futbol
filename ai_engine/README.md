@@ -12,8 +12,8 @@ La capa de datos se integra progresivamente sin modificar el flujo ni la interfa
 - goal_model: baseline Poisson prepartido de goles, 1X2 y ambos marcan.
 - corner_model: baseline Poisson prepartido de córners.
 - live_corner_model: frecuencias empíricas de córners restantes por minuto, equipo, sede y estado.
-- card_model: baseline Poisson prepartido de tarjetas amarillas, con tasas por localía y ajuste arbitral reducido hacia la media de liga cuando hay muestra suficiente.
+- card_model: baseline Poisson prepartido de tarjetas amarillas, con tasas por localía y ajuste arbitral reducido hacia un promedio de liga representativo cuando se proporciona.
 
-El modelo de tarjetas requiere history_rows con partidos terminados antes del inicio del encuentro objetivo, de la misma competición, IDs de equipos y tarjetas amarillas de ambos equipos. El árbitro es opcional; sin muestra suficiente se conserva un factor neutral. La aplicación todavía no recolecta ni conecta automáticamente ese histórico con este modelo: no se agregan consultas API ni se activa en la interfaz en esta etapa.
+El historial de tarjetas se extrae de las mismas respuestas fixtures/statistics que ya consulta el historial automático, sin añadir endpoints ni solicitudes. Se conserva el partido, liga, temporada, equipos, tarjetas y árbitro; se filtran partidos posteriores al encuentro objetivo cuando existen timestamps. La comparación arbitral exige además un promedio de liga representativo explícito; el subconjunto de dos equipos no se usa como sustituto de ese promedio. Si falta ese dato o la muestra del árbitro, el factor es neutral. El motor todavía no está conectado a la interfaz ni genera señales.
 
 Todos los modelos son experimentales y no calibrados. Antes de mostrar señales requieren backtesting cronológico, calibración, evaluación de sobredispersión y cuotas verificables. No generan valor esperado ni recomendaciones sin esos insumos.
