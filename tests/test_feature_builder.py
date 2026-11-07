@@ -8,7 +8,7 @@ class FeatureBuilderTests(unittest.TestCase):
         return {
             "match": {
                 "fixture_id": 123,
-                "league": {"id": 39, "season": 2026},
+                "league": {"id": 39, "season": 2026, "referee": "Referee Test"},
                 "teams": {
                     "home": {"name": "Arsenal"},
                     "away": {"name": "Chelsea"},
@@ -54,6 +54,7 @@ class FeatureBuilderTests(unittest.TestCase):
         }
         result = build_model_features(self._snapshot(), history)
         self.assertEqual(result["fixture_id"], 123)
+        self.assertEqual(result["referee"], "Referee Test")
         self.assertEqual(result["goals"]["home_goals_for_avg"], 1.8)
         self.assertEqual(result["corners"]["away_corners_for_avg"], 4.4)
         self.assertEqual(result["live"]["minute"], 67)
