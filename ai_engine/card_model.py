@@ -75,7 +75,7 @@ def estimate_prematch_yellow_cards(features: dict[str, Any], history_rows: list[
     home_base = (sum(home_for) / len(home_for) + sum(away_against) / len(away_against)) / 2
     away_base = (sum(away_for) / len(away_for) + sum(home_against) / len(home_against)) / 2
     league_totals = [hc + ac for _, hc, ac in league_rows]
-    league_average = sum(league_totals) / len(league_totals) if league_totals else None
+    league_average = _number(features.get("league_average_total_cards"))
     referee_average = sum(referee_totals) / len(referee_totals) if referee_totals else None
     factor, referee_used = 1.0, False
     if league_average and referee_average is not None and len(referee_totals) >= minimum_referee_matches:
@@ -92,11 +92,11 @@ def estimate_prematch_yellow_cards(features: dict[str, Any], history_rows: list[
     lines = {line: round(_poisson_over(expected_total, line), 6) for line in (2.5, 3.5, 4.5, 5.5, 6.5)}
     warnings = [
         "Modelo experimental Poisson, no calibrado; las tarjetas pueden presentar sobredispersión.",
-        "El ajuste arbitral se reduce hacia el promedio de liga y exige una muestra mínima.",
+        "El ajuste arbitral se reduce hacia el promedio de liga y exige una muestra mínima y un promedio de liga representativo.",
         "No incorpora cuotas, valor esperado ni recomendaciones de apuesta.",
     ]
     if not referee_used:
-        warnings.append("Sin muestra suficiente del árbitro: se conserva el factor neutral.")
+        warnings.append("Sin muestra suficiente del árbitro o promedio de liga representativo: se conserva el factor neutral.")
     return {
         "available": True, "model": "experimental_poisson_yellow_cards", "calibrated": False,
         "expected_yellow_cards": {"home": round(expected_home, 3), "away": round(expected_away, 3), "total": round(expected_total, 3)},
