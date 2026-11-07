@@ -7217,9 +7217,9 @@ else:
                                                     if edge < 0.02:
                                                         continue
                                                     option = {"market": market_label, "odd": float(odd), "prob": float(model_prob), "edge": edge, "bookmaker": odds_row.get("bookmaker", "Casa no identificada")}
-                                                    if 1.25 <= odd < 1.60:
+                                                    if 1.35 <= odd <= 1.60:
                                                         match_main_options.append(option)
-                                                    elif odd >= 1.60:
+                                                    elif odd >= 1.70:
                                                         match_risk_options.append(option)
 
                                                 st.markdown('<div class="tip-section-heading"><span class="tip-heading-icon">◈</span><span>TIP PRINCIPAL</span><span class="tip-heading-status">EN VIVO</span></div>', unsafe_allow_html=True)
@@ -8339,9 +8339,9 @@ else:
                             "estimated_edge": estimated_edge,
                             "bookmaker": odds_row.get("bookmaker", "Casa no identificada"),
                         }
-                        if 1.25 <= odd < 1.60:
+                        if 1.35 <= odd <= 1.60:
                             main_options.append(option)
-                        if odd >= 1.60:
+                        if odd >= 1.70:
                             # High-risk candidates may include goals, draw, and BTTS;
                             # numeric score patterns only add context to this slot.
                             risk_options.append(option)
