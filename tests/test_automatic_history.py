@@ -134,6 +134,8 @@ def test_automatic_history_excludes_card_rows_without_proven_pre_kickoff_timesta
         return {"response": []}
 
     result = build_automatic_history(current, api_get=fake_api, cache={}, stats_budget=8)
+    assert result["home_matches"] == 1
+    assert result["home_goal_sample"] == 1
     assert [row["fixture_id"] for row in result["card_history_rows"]] == [301]
 
 
