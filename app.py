@@ -11,6 +11,7 @@ from typing import Any
 import requests
 import streamlit as st
 
+from ai_engine.data_engine import FootballDataEngine
 from models.live_context import qualifies_as_corner_candidate, summarize_live_context
 from models.backtest import evaluate_binary_predictions
 from models.automatic_history import build_automatic_history
@@ -5661,14 +5662,17 @@ else:
                                     if tool_name != "stats" and not _analysis_page_active:
                                         st.markdown('<div class="match-analysis-kicker">PARTIDO SELECCIONADO</div>', unsafe_allow_html=True)
                                     if tool_name == "stats":
+                                        # Adaptador AI: reutiliza api_get y la caché existente; no añade
+                                        # endpoints ni solicitudes de red al flujo actual.
+                                        _ai_data_engine = FootballDataEngine(api_get, st.session_state.stats_cache)
                                         if st.session_state.get("fixture_mode", "live") == "upcoming":
                                             stat_data = []
                                             stats_error = None
                                         else:
                                             if str(match_id) not in st.session_state.stats_cache or str(match_id) in st.session_state.get("stats_errors", {}):
                                                 try:
-                                                    _stats_payload = api_get("fixtures/statistics", {"fixture": match_id})
-                                                    st.session_state.stats_cache[str(match_id)] = _stats_payload.get("response") or []
+                                                    stat_data = _ai_data_engine.get_fixture_statistics(match_id)
+                                                    st.session_state.stats_cache[str(match_id)] = stat_data
                                                     st.session_state.setdefault("stats_errors", {}).pop(str(match_id), None)
                                                 except Exception as _stats_exc:
                                                     st.session_state.stats_cache[str(match_id)] = []
@@ -5676,6 +5680,17 @@ else:
                                             stat_data = st.session_state.stats_cache.get(str(match_id), [])
                                             stats_error = st.session_state.get("stats_errors", {}).get(str(match_id))
                                         stats_error = st.session_state.get("stats_errors", {}).get(str(match_id))
+
+                                        # Snapshot versionado para la futura IA prepartido/en vivo.
+                                        # Se construye únicamente con datos ya disponibles en la sesión.
+                                        _live_odds_cache = st.session_state.get("live_odds_by_fixture", {}) or {}
+                                        _match_odds = _live_odds_cache.get(str(match_id), _live_odds_cache.get(match_id, {}))
+                                        _ai_snapshots = st.session_state.setdefault("ai_match_snapshots", {})
+                                        _ai_snapshots[str(match_id)] = _ai_data_engine.snapshot(
+                                            match, statistics=stat_data, odds=_match_odds
+                                        )
+                                        while len(_ai_snapshots) > 100:
+                                            _ai_snapshots.pop(next(iter(_ai_snapshots)))
                                         if stats_error:
                                             st.warning(f"No se pudieron cargar las estadísticas: {stats_error}")
                                         elif stat_data:
