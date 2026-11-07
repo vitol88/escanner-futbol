@@ -18,6 +18,7 @@ class LiveCornerCaptureTests(unittest.TestCase):
             "fixture": {
                 "id": 501,
                 "date": "2026-11-07T19:00:00+00:00",
+                "timestamp": 1794078000,
                 "status": {"short": "2H", "elapsed": 67},
             },
             "league": {"id": 39, "name": "Premier League"},
