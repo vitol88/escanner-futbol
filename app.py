@@ -8613,6 +8613,42 @@ else:
                             temporal_cols[0].metric("Muestra futura verificada", temporal_metrics["sample_size"])
                             temporal_cols[1].metric("Brier de prueba", f"{temporal_metrics['brier_score']:.3f}" if temporal_metrics["brier_score"] is not None else "N/D")
                             temporal_cols[2].metric("Log loss de prueba", f"{temporal_metrics['log_loss']:.3f}" if temporal_metrics["log_loss"] is not None else "N/D")
+
+                            st.markdown("##### Prueba posterior por mercado")
+                            holdout_markets = temporal["test_metrics_by_market"]
+                            if holdout_markets:
+                                st.dataframe(
+                                    [{
+                                        "Mercado": item["group"],
+                                        "Muestra": item["sample_size"],
+                                        "Brier": item["brier_score"],
+                                        "Log loss": item["log_loss"],
+                                        "Brecha calibración": item["calibration_gap"],
+                                        "Estado": "Muestra suficiente" if item["minimum_sample_reached"] else "Muestra pequeña",
+                                    } for item in holdout_markets],
+                                    hide_index=True,
+                                    use_container_width=True,
+                                )
+                            else:
+                                st.caption("El bloque de prueba todavía no contiene resultados verificados agrupables por mercado.")
+
+                            st.markdown("##### Prueba posterior por liga")
+                            holdout_leagues = temporal["test_metrics_by_league"]
+                            if holdout_leagues:
+                                st.dataframe(
+                                    [{
+                                        "Liga": item["group"],
+                                        "Muestra": item["sample_size"],
+                                        "Brier": item["brier_score"],
+                                        "Log loss": item["log_loss"],
+                                        "Brecha calibración": item["calibration_gap"],
+                                        "Estado": "Muestra suficiente" if item["minimum_sample_reached"] else "Muestra pequeña",
+                                    } for item in holdout_leagues],
+                                    hide_index=True,
+                                    use_container_width=True,
+                                )
+                            else:
+                                st.caption("El bloque de prueba todavía no contiene resultados verificados agrupables por liga.")
                         else:
                             st.info("Aún no hay suficientes partidos con fecha válida para la prueba cronológica. Se requieren al menos 5 partidos anteriores y 5 posteriores.")
 
