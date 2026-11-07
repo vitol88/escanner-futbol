@@ -148,8 +148,8 @@ def match_goal_tip_to_live_odds(
     elif tip.startswith("ambos equipos marcan"):
         expected_market = "Ambos equipos marcan: Sí"
     else:
-        over_match = re.search(r"total final:\\s*(\\d+)\\s*goles o mas", tip)
-        under_match = re.search(r"menos de\\s*(\\d+(?:[.,]\\d+)?)\\s*goles totales", tip)
+        over_match = re.search(r"total final:\s*(\d+)\s*goles o mas", tip)
+        under_match = re.search(r"menos de\s*(\d+(?:[.,]\d+)?)\s*goles totales", tip)
         if over_match:
             # N goals or more corresponds to the Asian half-goal line N-0.5.
             expected_market = f"Más de {int(over_match.group(1)) - 0.5:g} goles"
