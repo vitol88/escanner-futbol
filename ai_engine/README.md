@@ -160,3 +160,5 @@ python -m ai_engine.live_corner_report --db /ruta/football_lab.sqlite3 --json
 ```
 
 El informe combina la auditoría de snapshots/cierres verificados con el backtest cronológico, incluyendo motivos de abstención y métricas disponibles. Es de solo lectura, no consulta API-Football y no activa señales. Si el histórico todavía no alcanza los mínimos o faltan timestamps, informa esa condición en vez de inventar una precisión.
+
+La evaluación también compara el baseline segmentado por liga/minuto con una referencia ingenua: la media global de córners restantes calculada solo con el bloque de entrenamiento. Informa ambos MAE y la mejora relativa del baseline segmentado. Si la referencia global tiene MAE cero, la mejora relativa queda como no calculable. Esta comparación evita declarar útil una segmentación que no supere una predicción constante; sigue siendo una evaluación experimental, no una prueba de rentabilidad.
