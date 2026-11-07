@@ -169,9 +169,12 @@ def build_automatic_history(
             full_retry_key = f"{full_stats_key}:retry_after"
             if old_id and full_stats_key not in cache and time.time() >= float(cache.get(full_retry_key, 0) or 0) and request_budget[0] > 0 and not cache.get("_automatic_history_rate_limited"):
                 try:
-                    full_response = (api_get("fixtures/statistics", {"fixture": old_id}).get("response") or [])
+                    # Count every real historical-statistics request across all fixtures
+                    # in this scan, including attempts that fail or return no data.
+                    cache["_automatic_history_stats_calls"] = int(cache.get("_automatic_history_stats_calls", 0) or 0) + 1
                     stats_attempted += 1
                     diagnostics["historical_stats"]["requested"] += 1
+                    full_response = (api_get("fixtures/statistics", {"fixture": old_id}).get("response") or [])
                     request_budget[0] -= 1
                     if full_response:
                         cache[full_stats_key] = full_response
@@ -191,9 +194,11 @@ def build_automatic_history(
             half_stats = cache.get(half_stats_key)
             if old_id and full_stats_key in cache and half_stats is None and time.time() >= float(cache.get(half_retry_key, 0) or 0) and request_budget[0] > 0 and not cache.get("_automatic_history_rate_limited"):
                 try:
-                    half_response = (api_get("fixtures/statistics", {"fixture": old_id, "half": "true"}).get("response") or [])
+                    # Half-time statistics consume the same shared API budget.
+                    cache["_automatic_history_stats_calls"] = int(cache.get("_automatic_history_stats_calls", 0) or 0) + 1
                     stats_attempted += 1
                     diagnostics["historical_stats"]["requested"] += 1
+                    half_response = (api_get("fixtures/statistics", {"fixture": old_id, "half": "true"}).get("response") or [])
                     request_budget[0] -= 1
                     if half_response:
                         cache[half_stats_key] = half_response
