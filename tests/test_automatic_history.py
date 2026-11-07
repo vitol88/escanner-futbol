@@ -49,6 +49,7 @@ def test_automatic_history_calculates_home_away_goals_and_corners():
 
 def test_automatic_history_counts_shared_stats_budget_for_full_and_half_requests():
     current = {
+        "fixture": {"timestamp": 3000},
         "teams": {"home": {"id": 1, "name": "Home FC"}, "away": {"id": 2, "name": "Away FC"}},
         "league": {"id": 10, "season": 2026},
     }
@@ -78,6 +79,7 @@ def test_automatic_history_counts_shared_stats_budget_for_full_and_half_requests
 
 def test_automatic_history_does_not_count_cached_statistics_as_new_requests():
     current = {
+        "fixture": {"timestamp": 3000},
         "teams": {"home": {"id": 1, "name": "Home FC"}, "away": {"id": 2, "name": "Away FC"}},
         "league": {"id": 10, "season": 2026},
     }
@@ -137,6 +139,7 @@ def test_automatic_history_excludes_card_rows_without_proven_pre_kickoff_timesta
 
 def test_failed_historical_statistics_request_still_consumes_budget():
     current = {
+        "fixture": {"timestamp": 3000},
         "teams": {"home": {"id": 1, "name": "Home FC"}, "away": {"id": 2, "name": "Away FC"}},
         "league": {"id": 10, "season": 2026},
     }
