@@ -45,7 +45,7 @@ class LiveOddsTests(unittest.TestCase):
 
     def test_matches_goal_tips_only_to_real_odds_in_allowed_bands_with_edge(self):
         rows = [
-            {"market": "Over/Under", "value": "Over 1.5", "handicap": "1.5", "odd": 1.55, "bookmaker": "Casa A"},
+            {"market": "Over/Under", "value": "Over 1.5", "odd": 1.55, "bookmaker": "Casa A"},
             {"market": "Over/Under", "value": "Over 1.5", "handicap": "1.5", "odd": 1.58, "bookmaker": "Casa B"},
             {"market": "Match Winner", "value": "Draw", "odd": 1.65, "bookmaker": "Casa C"},
         ]
