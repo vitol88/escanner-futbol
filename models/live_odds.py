@@ -113,3 +113,17 @@ def numerology_context(
                 f"registro {home_count:g}–{away_count:g}"
             )
     return patterns
+
+
+def best_live_odds_by_market(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Return the highest currently listed price per recognized market."""
+    best: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        label = classify_market(row)
+        odd = row.get("odd")
+        if not label or not isinstance(odd, (int, float)) or odd <= 1:
+            continue
+        current = best.get(label)
+        if current is None or float(odd) > float(current.get("odd", 0)):
+            best[label] = {**row, "market_label": label}
+    return list(best.values())
