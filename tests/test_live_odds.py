@@ -1,6 +1,6 @@
 import unittest
 
-from models.live_odds import classify_market, extract_live_odds, numerology_context, score_pattern_context
+from models.live_odds import best_live_odds_by_market, classify_market, extract_live_odds, numerology_context, score_pattern_context
 
 
 class LiveOddsTests(unittest.TestCase):
@@ -30,6 +30,18 @@ class LiveOddsTests(unittest.TestCase):
             classify_market({"market": "Both Teams Score", "value": "Yes", "odd": 1.8}),
             "Ambos equipos marcan: Sí",
         )
+
+    def test_best_live_odds_keeps_highest_price_and_bookmaker_per_market(self):
+        rows = [
+            {"market": "Match Winner", "value": "Draw", "odd": 2.80, "bookmaker": "Casa A"},
+            {"market": "Match Winner", "value": "Draw", "odd": 3.05, "bookmaker": "Casa B"},
+            {"market": "Both Teams Score", "value": "Yes", "odd": 1.72, "bookmaker": "Casa C"},
+        ]
+        best = best_live_odds_by_market(rows)
+        by_market = {row["market_label"]: row for row in best}
+        self.assertEqual(by_market["Empate final"]["odd"], 3.05)
+        self.assertEqual(by_market["Empate final"]["bookmaker"], "Casa B")
+        self.assertEqual(by_market["Ambos equipos marcan: Sí"]["bookmaker"], "Casa C")
 
     def test_numerology_matches_score_to_corners_and_cards_within_one(self):
         self.assertTrue(numerology_context(1, 0, home_yellows=1, away_yellows=1))
