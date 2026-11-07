@@ -97,8 +97,8 @@ class LiveCornerBacktestTests(unittest.TestCase):
         )
         # The segmented prediction is no longer dominated by the 20 repeated
         # observations from one match; it uses one within-fixture mean per match.
-        self.assertGreater(result["metrics"]["mae_remaining_corners"], 10.0)
-        self.assertLess(result["metrics"]["mae_remaining_corners"], 20.0)
+        self.assertGreater(result["metrics"]["mae_remaining_corners"], 8.0)
+        self.assertLess(result["metrics"]["mae_remaining_corners"], 10.0)
 
     def test_fixture_weighted_metrics_limit_dominance_from_dense_fixtures(self):
         connection = sqlite3.connect(self.db)
