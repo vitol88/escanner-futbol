@@ -74,6 +74,31 @@ class LiveCornerBacktestTests(unittest.TestCase):
         self.assertAlmostEqual(result["metrics"]["mae_remaining_corners"], 4.0)
         self.assertAlmostEqual(result["mae_improvement_vs_global_mean"], 0.0)
 
+    def test_training_prediction_gives_dense_fixtures_equal_weight(self):
+        connection = sqlite3.connect(self.db)
+        # One training fixture gets many extra rows with a very different
+        # target. Its within-fixture mean must count once in the training mean.
+        for index in range(20):
+            connection.execute(
+                "INSERT INTO live_corner_observations VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                ("fixture-0", "Premier League", f"Extra-{index}", "home",
+                 30, 100, 3, 1_800_000_000),
+            )
+        connection.commit()
+        connection.close()
+        result = run_live_corner_baseline_backtest(
+            self.db, test_fraction=0.25, min_train_fixtures=5,
+            min_test_fixtures=2, min_league_test_fixtures=1,
+        )
+        self.assertTrue(result["available"])
+        self.assertEqual(
+            result["metrics"]["training_weighting"],
+            "equal_fixture_weight_within_minute_bucket_league_and_global_fallback",
+        )
+        # The segmented prediction is no longer dominated by the 20 repeated
+        # observations from one match; it uses one within-fixture mean per match.
+        self.assertLess(result["metrics"]["mae_remaining_corners"], 4.5)
+
     def test_fixture_weighted_metrics_limit_dominance_from_dense_fixtures(self):
         connection = sqlite3.connect(self.db)
         # Add many extra observations to one held-out fixture with a different
