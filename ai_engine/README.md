@@ -30,3 +30,13 @@ Todos los modelos son experimentales y no calibrados. Antes de mostrar señales 
 ## Cobertura del histórico de tarjetas
 
 `feature_builder` expone el número de partidos históricos válidos de tarjetas amarillas para la liga del encuentro y el número de esos partidos dirigidos por el árbitro actual. Estos contadores informan disponibilidad, no suficiencia estadística: `card_model` aplica por separado sus mínimos de muestra por equipo y árbitro. No se deriva un promedio arbitral/de liga representativo usando únicamente los dos equipos del encuentro; si falta ese promedio, el ajuste del árbitro permanece neutral.
+
+## Diagnóstico de cobertura por mercado
+
+`coverage.build_data_coverage_report` resume las muestras ya disponibles para goles, córners prepartido, tarjetas amarillas y córners restantes en vivo. Distingue muestra disponible de muestra suficiente y permite configurar los mínimos. No hace llamadas de API ni modifica el estado de Streamlit.
+
+- Goles y córners prepartido usan los tamaños de muestra por localía que ya entrega `automatic_history`.
+- Tarjetas cuenta partidos válidos por liga donde el equipo local actuó como local y el visitante como visitante; también cuenta partidos del árbitro actual.
+- El ajuste arbitral permanece no disponible hasta contar con un promedio representativo e independiente de toda la liga. El historial de los dos equipos no se usa como promedio de liga.
+- Córners en vivo usa una fuente histórica distinta y compara liga, equipo, sede y minuto exacto. Si no se proporciona ese histórico minuto-a-minuto, el diagnóstico lo marca como ausente; no lo sustituye por los promedios prepartido.
+- “Suficiente” solo significa que se cumple el mínimo técnico del baseline experimental; no significa que el modelo esté calibrado ni que deba recomendar una apuesta.
