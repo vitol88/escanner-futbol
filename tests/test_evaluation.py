@@ -51,5 +51,28 @@ class BinaryForecastEvaluationTests(unittest.TestCase):
             evaluate_binary_forecasts([], minimum_sample=0)
 
 
+    def test_grouped_evaluation_separates_markets_and_ignores_unverified(self):
+        from ai_engine.evaluation import evaluate_forecasts_by_group
+
+        rows = [
+            {"market": "Corners", "estimated_probability_exploratory": 0.8, "outcome": 1, "outcome_verified": True},
+            {"market": "Corners", "estimated_probability_exploratory": 0.3, "outcome": 0, "outcome_verified": True},
+            {"market": "Goals", "estimated_probability_exploratory": 0.7, "outcome": 1, "outcome_verified": True},
+            {"market": "Goals", "estimated_probability_exploratory": 0.6, "outcome": 1, "outcome_verified": False},
+            {"market": "", "estimated_probability_exploratory": 0.5, "outcome": 1, "outcome_verified": True},
+        ]
+        result = evaluate_forecasts_by_group(rows, group_key="market", minimum_sample=2)
+        self.assertEqual([item["group"] for item in result], ["Corners", "Goals"])
+        self.assertEqual(result[0]["sample_size"], 2)
+        self.assertEqual(result[1]["sample_size"], 1)
+        self.assertFalse(result[1]["minimum_sample_reached"])
+
+    def test_grouped_evaluation_rejects_empty_group_key(self):
+        from ai_engine.evaluation import evaluate_forecasts_by_group
+
+        with self.assertRaises(ValueError):
+            evaluate_forecasts_by_group([], group_key=" ")
+
+
 if __name__ == "__main__":
     unittest.main()
