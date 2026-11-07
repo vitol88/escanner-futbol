@@ -121,7 +121,11 @@ class LiveCornerFinalizeTests(unittest.TestCase):
                 "away": {"id": 22, "name": "Different team"},
             },
         }
-        result = finalize_live_corner_fixture(self.db, mismatch, self.final_stats)
+        mismatch_stats = [
+            {"team": {"id": 1}, "statistics": [{"type": "Corner Kicks", "value": 9}]},
+            {"team": {"id": 22}, "statistics": [{"type": "Corner Kicks", "value": 7}]},
+        ]
+        result = finalize_live_corner_fixture(self.db, mismatch, mismatch_stats)
         self.assertFalse(result["finalized"])
         self.assertEqual(result["reason"], "fixture_identity_mismatch")
         self.assertEqual(load_live_corner_history_from_sqlite(self.db), [])
