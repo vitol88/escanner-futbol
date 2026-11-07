@@ -95,6 +95,28 @@ class BinaryForecastEvaluationTests(unittest.TestCase):
         self.assertEqual(result["test_metrics"]["sample_size"], 4)
         self.assertLess(result["train_last_timestamp"], result["test_first_timestamp"])
 
+    def test_chronological_holdout_breakdowns_use_only_test_fixtures(self):
+        from ai_engine.evaluation import evaluate_chronological_holdout
+        rows = []
+        for index in range(10):
+            rows.append({
+                "fixture_id": f"fx-{index}",
+                "recorded_at": f"2026-02-{index + 1:02d}T12:00:00",
+                "market": "Corners" if index < 8 else "Goals",
+                "league": "League A" if index < 8 else "League B",
+                "estimated_probability_exploratory": 0.8,
+                "outcome": 1,
+                "outcome_verified": True,
+            })
+        result = evaluate_chronological_holdout(
+            rows, minimum_train_fixtures=5, minimum_test_fixtures=2
+        )
+        self.assertEqual(result["test_fixture_count"], 2)
+        self.assertEqual(result["test_metrics_by_market"][0]["group"], "Goals")
+        self.assertEqual(result["test_metrics_by_market"][0]["sample_size"], 2)
+        self.assertEqual(result["test_metrics_by_league"][0]["group"], "League B")
+        self.assertEqual(result["test_metrics_by_league"][0]["sample_size"], 2)
+
     def test_chronological_holdout_excludes_bad_temporal_rows(self):
         from ai_engine.evaluation import evaluate_chronological_holdout
         rows = [
