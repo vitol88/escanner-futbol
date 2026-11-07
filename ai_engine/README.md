@@ -144,3 +144,19 @@ La auditoría describe volumen y consistencia estructural; no mide precisión pr
 - Abre SQLite en modo solo lectura y no consulta APIs ni modifica la base.
 
 Las observaciones históricas antiguas sin timestamp no se puntúan: deben volver a generarse mediante capturas nuevas para poder participar en una evaluación cronológica. Este baseline no es un modelo entrenado ni una recomendación de apuesta, y sus métricas no demuestran rentabilidad.
+
+## Informe local de auditoría y backtest
+
+Ejecuta desde la raíz del repositorio:
+
+```bash
+python -m ai_engine.live_corner_report
+```
+
+El comando usa por defecto `data/football_lab.sqlite3` (o la ruta definida en `FOOTBALL_LAB_DB_PATH`). También acepta una ruta explícita y salida JSON:
+
+```bash
+python -m ai_engine.live_corner_report --db /ruta/football_lab.sqlite3 --json
+```
+
+El informe combina la auditoría de snapshots/cierres verificados con el backtest cronológico, incluyendo motivos de abstención y métricas disponibles. Es de solo lectura, no consulta API-Football y no activa señales. Si el histórico todavía no alcanza los mínimos o faltan timestamps, informa esa condición en vez de inventar una precisión.
