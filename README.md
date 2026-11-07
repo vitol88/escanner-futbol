@@ -90,3 +90,17 @@ El botón seleccionado queda resaltado en amarillo y el panel de análisis apare
 ### Auditoría de calidad del CSV
 
 El módulo puro `ai_engine.dataset_audit.audit_forecast_dataset` permite revisar un CSV exportado sin modificarlo: identifica registros con metadatos o probabilidades inválidas, duplicados por partido/mercado/minuto/marcador y resultados explícitamente verificados. Esta auditoría mide calidad estructural; no sustituye el evaluador de calibración, no completa resultados faltantes y no calcula rentabilidad.
+
+
+## Registro central de pronósticos (SQLite)
+
+El escáner mantiene ahora un ledger independiente y append-only en SQLite, por defecto `registro_pronosticos_football_lab.sqlite3`. La ruta se puede configurar con `PREDICTION_LEDGER_PATH`.
+
+- Cada fila se normaliza con el esquema versionado y conserva fixture, fecha UTC cuando está disponible, fase, mercado, línea, probabilidad, modelo, versión y snapshot.
+- `prediction_id` es clave única: volver a procesar una misma señal no crea una segunda fila. Snapshots realmente distintos pueden conservarse por separado.
+- Las inserciones se realizan en transacción. Los registros inválidos se omiten y los resultados no se completan salvo que estén marcados explícitamente como verificados.
+- El ledger se alimenta actualmente de las señales de goles en vivo que ya registra el escáner. No significa todavía que todos los mercados, pronósticos pre-partido o proyecciones de córners/tarjetas estén conectados a persistencia.
+- El CSV histórico anterior se mantiene sin cambios y sigue siendo compatible. Si una escritura del ledger falla, la app vuelve a intentar sincronizar los registros canónicos guardados en el CSV durante el siguiente escaneo.
+- La base SQLite reside en el disco del host. En despliegues con almacenamiento efímero, configura un volumen persistente o una ruta persistente antes de usarla como histórico a largo plazo.
+
+El ledger no emite apuestas ni cambia umbrales, cálculos o presentación de la app. Las probabilidades registradas siguen siendo experimentales hasta completar validación cronológica con resultados verificados.
