@@ -67,8 +67,8 @@ def build_data_coverage_report(
     referee_min = max(1, _count(minimum_referee_sample))
     live_min = max(1, _count(minimum_live_corner_sample))
 
-    goal_home = _count(goals.get("home_goal_sample", quality.get("goal_sample")))
-    goal_away = _count(goals.get("away_goal_sample", quality.get("goal_sample")))
+    goal_home = _count(goals.get("home_goal_sample"))
+    goal_away = _count(goals.get("away_goal_sample"))
     corner_home = _count(corners.get("home_corner_sample"))
     corner_away = _count(corners.get("away_corner_sample"))
 
