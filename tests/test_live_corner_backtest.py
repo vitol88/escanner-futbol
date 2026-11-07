@@ -61,6 +61,32 @@ class LiveCornerBacktestTests(unittest.TestCase):
             {"Premier League", "La Liga"},
         )
 
+
+    def test_segmented_and_global_benchmark_use_training_data_only(self):
+        result = run_live_corner_baseline_backtest(
+            self.db, test_fraction=0.25, min_train_fixtures=5,
+            min_test_fixtures=2, min_league_test_fixtures=1,
+        )
+        self.assertTrue(result["available"])
+        # Seven earlier fixtures all have target=4; the three held-out
+        # fixtures have target=8. Neither predictor may learn from test rows.
+        self.assertAlmostEqual(result["benchmark"]["mae_remaining_corners"], 4.0)
+        self.assertAlmostEqual(result["metrics"]["mae_remaining_corners"], 4.0)
+        self.assertAlmostEqual(result["mae_improvement_vs_global_mean"], 0.0)
+
+    def test_zero_error_global_reference_has_no_percentage_improvement(self):
+        connection = sqlite3.connect(self.db)
+        connection.execute("UPDATE live_corner_observations SET corners_for_after = 4")
+        connection.commit()
+        connection.close()
+        result = run_live_corner_baseline_backtest(
+            self.db, test_fraction=0.25, min_train_fixtures=5,
+            min_test_fixtures=2, min_league_test_fixtures=1,
+        )
+        self.assertTrue(result["available"])
+        self.assertEqual(result["benchmark"]["mae_remaining_corners"], 0.0)
+        self.assertIsNone(result["mae_improvement_vs_global_mean"])
+
     def test_fixtures_with_same_kickoff_timestamp_are_not_split(self):
         connection = sqlite3.connect(self.db)
         connection.execute(
