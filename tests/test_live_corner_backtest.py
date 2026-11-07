@@ -139,6 +139,39 @@ class LiveCornerBacktestTests(unittest.TestCase):
             rolling["method"], "expanding_window_chronological_folds"
         )
 
+
+    def test_rolling_origin_reports_fold_stability_and_mae_dispersion(self):
+        connection = sqlite3.connect(self.db)
+        for number in range(10, 30):
+            for minute in (30, 65):
+                for venue, team in (("home", "Home"), ("away", "Away")):
+                    connection.execute(
+                        "INSERT INTO live_corner_observations VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                        (f"fixture-{number}", "Premier League", team, venue, minute,
+                         5, 3, 1_800_000_000 + number * 86400),
+                    )
+        connection.commit()
+        connection.close()
+        result = run_live_corner_baseline_backtest(
+            self.db, test_fraction=0.25, min_train_fixtures=5,
+            min_test_fixtures=2, min_league_test_fixtures=1,
+        )
+        rolling = result["rolling_origin"]
+        self.assertTrue(rolling["available"])
+        self.assertIn(rolling["stability"], {
+            "improves_in_every_fold", "worse_in_every_fold",
+            "mixed_results", "no_material_difference",
+            "not_assessable_zero_error_reference",
+        })
+        self.assertGreaterEqual(rolling["positive_improvement_folds"], 0)
+        self.assertGreaterEqual(rolling["negative_improvement_folds"], 0)
+        self.assertGreaterEqual(rolling["fold_mae_range"], 0)
+        self.assertEqual(
+            rolling["positive_improvement_folds"] + rolling["negative_improvement_folds"],
+            sum(1 for fold in rolling["folds"]
+                if fold["mae_improvement_vs_global_mean"] not in (None, 0)),
+        )
+
     def test_rolling_origin_reports_insufficient_history(self):
         result = run_live_corner_baseline_backtest(
             self.db, test_fraction=0.25, min_train_fixtures=5,
