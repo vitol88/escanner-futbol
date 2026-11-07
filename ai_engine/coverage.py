@@ -24,7 +24,10 @@ def _count(value: Any) -> int:
 
 
 def _same(value: Any, target: Any) -> bool:
-    return value is not None and target is not None and str(value).strip().casefold() == str(target).strip().casefold()
+    if value is None or target is None:
+        return False
+    normalize = lambda item: " ".join(str(item).strip().casefold().split())
+    return normalize(value) == normalize(target)
 
 
 def _market_status(sample: int, minimum: int) -> dict[str, Any]:
@@ -99,6 +102,8 @@ def build_data_coverage_report(
 
     live_rows = live_corner_history_rows if isinstance(live_corner_history_rows, list) else []
     live_samples: dict[str, dict[str, Any]] = {}
+    league_label = features.get("league_name") or league_id
+    live_minute = _number((features.get("live") or {}).get("minute"))
     for side, team_name, venue in (
         ("home", (features.get("teams") or {}).get("home"), "home"),
         ("away", (features.get("teams") or {}).get("away"), "away"),
@@ -107,12 +112,17 @@ def build_data_coverage_report(
         for row in live_rows:
             if not isinstance(row, dict):
                 continue
-            if not _same(row.get("league"), league_id):
+            if not _same(row.get("league"), league_label):
                 continue
             if not _same(row.get("team"), team_name) or not _same(row.get("venue"), venue):
                 continue
             required = ("minute", "corners_for", "corners_against", "corners_for_after", "corners_against_after")
-            if any(_number(row.get(key)) is None for key in required):
+            values = {key: _number(row.get(key)) for key in required}
+            if any(value is None for value in values.values()):
+                continue
+            # The existing estimator uses the exact minute bucket; do not inflate
+            # coverage by counting rows from other match minutes.
+            if live_minute is None or int(values["minute"]) != int(live_minute):
                 continue
             matched.append(row)
         live_samples[side] = _market_status(len(matched), live_min)
