@@ -118,7 +118,8 @@ def normalize_fixture(fixture: dict[str, Any] | None) -> dict[str, Any]:
             "name": _text(league_info.get("name")),
             "country": _text(league_info.get("country")),
             "season": league_info.get("season"),
-            "round": _text(league_info.get("round")),\n            "referee": _text(fixture_info.get("referee")),
+            "round": _text(league_info.get("round")),
+            "referee": _text(fixture_info.get("referee")),
         },
         "teams": {
             "home": {"id": home.get("id"), "name": _text(home.get("name"))},
