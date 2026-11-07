@@ -3858,6 +3858,19 @@ def safe_stat(
             return item.get("value")
     return None
 
+def safe_stat_for_team(stats: list[dict[str, Any]], stat_name: str, team_id: int | str | None):
+    """Return a statistic only from the API row whose team ID matches."""
+    if team_id is None:
+        return None
+    for row in stats or []:
+        row_team_id = (row.get("team") or {}).get("id")
+        if row_team_id is not None and str(row_team_id) == str(team_id):
+            for item in row.get("statistics") or []:
+                if item.get("type") == stat_name:
+                    return item.get("value")
+            return None
+    return None
+
 def safe_corner_parts(stats: list[dict[str, Any]], team_index: int = 0):
     """Return official full-match and half corner counts across API response variants."""
     if team_index < 0 or team_index >= len(stats or []):
@@ -7277,8 +7290,11 @@ else:
                                                     live_corner_stats = []
                                                     st.session_state.stats_cache[str(match_id)] = []
                                                     st.session_state.setdefault("stats_errors", {})[str(match_id)] = str(live_corner_exc)
-                                            selected_home_corners = safe_stat(live_corner_stats or [], "Corner Kicks", 0)
-                                            selected_away_corners = safe_stat(live_corner_stats or [], "Corner Kicks", 1)
+                                            selected_teams = match.get("teams") or {}
+                                            selected_home_id = (selected_teams.get("home") or {}).get("id")
+                                            selected_away_id = (selected_teams.get("away") or {}).get("id")
+                                            selected_home_corners = safe_stat_for_team(live_corner_stats or [], "Corner Kicks", selected_home_id)
+                                            selected_away_corners = safe_stat_for_team(live_corner_stats or [], "Corner Kicks", selected_away_id)
                                             st.markdown(fixture_hero_html(match, mode="corners", home_corners=selected_home_corners, away_corners=selected_away_corners), unsafe_allow_html=True)
 
                                             corner_item = next((item for item in st.session_state.get("corner_scan_results", []) if str(((item.get("fixture") or {}).get("fixture") or {}).get("id")) == str(match_id)), None)
@@ -7860,18 +7876,21 @@ else:
                     stats_payload = api_get("fixtures/statistics", {"fixture": fixture_id})
                     st.session_state.stats_cache[cache_key] = stats_payload.get("response", [])
                 stats = st.session_state.stats_cache[cache_key]
-                home_c = safe_stat(stats, "Corner Kicks", 0)
-                away_c = safe_stat(stats, "Corner Kicks", 1)
-                home_shots = safe_stat(stats, "Total Shots", 0)
-                away_shots = safe_stat(stats, "Total Shots", 1)
-                home_shots_on = safe_stat(stats, "Shots on Goal", 0)
-                away_shots_on = safe_stat(stats, "Shots on Goal", 1)
-                home_possession = safe_stat(stats, "Ball Possession", 0)
-                away_possession = safe_stat(stats, "Ball Possession", 1)
-                home_yellow = safe_stat(stats, "Yellow Cards", 0)
-                away_yellow = safe_stat(stats, "Yellow Cards", 1)
-                home_red = safe_stat(stats, "Red Cards", 0)
-                away_red = safe_stat(stats, "Red Cards", 1)
+                fixture_teams = fixture.get("teams") or {}
+                home_team_id = (fixture_teams.get("home") or {}).get("id")
+                away_team_id = (fixture_teams.get("away") or {}).get("id")
+                home_c = safe_stat_for_team(stats, "Corner Kicks", home_team_id)
+                away_c = safe_stat_for_team(stats, "Corner Kicks", away_team_id)
+                home_shots = safe_stat_for_team(stats, "Total Shots", home_team_id)
+                away_shots = safe_stat_for_team(stats, "Total Shots", away_team_id)
+                home_shots_on = safe_stat_for_team(stats, "Shots on Goal", home_team_id)
+                away_shots_on = safe_stat_for_team(stats, "Shots on Goal", away_team_id)
+                home_possession = safe_stat_for_team(stats, "Ball Possession", home_team_id)
+                away_possession = safe_stat_for_team(stats, "Ball Possession", away_team_id)
+                home_yellow = safe_stat_for_team(stats, "Yellow Cards", home_team_id)
+                away_yellow = safe_stat_for_team(stats, "Yellow Cards", away_team_id)
+                home_red = safe_stat_for_team(stats, "Red Cards", home_team_id)
+                away_red = safe_stat_for_team(stats, "Red Cards", away_team_id)
                 elapsed = ((fixture.get("fixture") or {}).get("status") or {}).get("elapsed")
                 pace = corner_pace_per_90(home_c + away_c, elapsed) if isinstance(home_c, (int, float)) and isinstance(away_c, (int, float)) and isinstance(elapsed, int) else None
                 corner_results.append({
