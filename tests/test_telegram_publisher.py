@@ -52,7 +52,7 @@ def test_send_telegram_signal_handles_api_rejection_without_leaking_token():
         return FakeResponse({"ok": False, "description": "Unauthorized"})
 
     ok, detail = send_telegram_signal(
-        {"home": "A", "away": "B"}, "secret-token", "-1004668474905", post=fake_post,
+        {"home": "A", "away": "B", "verified_live_odd": 1.50, "verified_bookmaker": "Casa A", "verified_odds_market": "Empate final", "estimated_edge": 0.03}, "secret-token", "-1004668474905", post=fake_post,
     )
     assert ok is False
     assert "secret-token" not in detail
