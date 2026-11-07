@@ -89,15 +89,37 @@ def _rolling_origin_metrics(rows, timestamps, ordered_timestamps, *, folds, min_
               for x in results) / total
     benchmark = sum(x["global_mean_benchmark_mae"] * x["metrics"]["observations"]
                     for x in results) / total
+    improvements = [x["mae_improvement_vs_global_mean"] for x in results
+                    if x["mae_improvement_vs_global_mean"] is not None]
+    positive_folds = sum(value > 0 for value in improvements)
+    negative_folds = sum(value < 0 for value in improvements)
+    fold_maes = [x["metrics"]["mae_remaining_corners"] for x in results]
+    weighted_improvement = (benchmark - mae) / benchmark if benchmark > 0 else None
+    # Conservative descriptive status, not a model-approval or betting gate.
+    if len(improvements) != len(results):
+        stability = "not_assessable_zero_error_reference"
+    elif positive_folds == len(results):
+        stability = "improves_in_every_fold"
+    elif negative_folds == len(results):
+        stability = "worse_in_every_fold"
+    elif positive_folds > 0 and negative_folds > 0:
+        stability = "mixed_results"
+    else:
+        stability = "no_material_difference"
     return {
         "available": True, "method": "expanding_window_chronological_folds",
         "fold_count": len(results), "total_test_observations": total,
         "weighted_mae_remaining_corners": mae,
         "weighted_global_mean_benchmark_mae": benchmark,
-        "weighted_mae_improvement_vs_global_mean":
-            (benchmark - mae) / benchmark if benchmark > 0 else None,
+        "weighted_mae_improvement_vs_global_mean": weighted_improvement,
+        "positive_improvement_folds": positive_folds,
+        "negative_improvement_folds": negative_folds,
+        "fold_mae_min": min(fold_maes),
+        "fold_mae_max": max(fold_maes),
+        "fold_mae_range": max(fold_maes) - min(fold_maes),
+        "stability": stability,
         "folds": results,
-        "warning": "Experimental baseline only; not evidence of betting profitability.",
+        "warning": "Descriptive stability only; not evidence of betting profitability or model approval.",
     }
 
 def run_live_corner_baseline_backtest(
