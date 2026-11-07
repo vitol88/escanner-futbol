@@ -51,7 +51,7 @@ def audit_live_corner_database(database_path: str | Path) -> dict[str, Any]:
         if has_history:
             observations = connection.execute(
                 """
-                SELECT fixture_id, league, team, venue, minute,
+                SELECT fixture_id, league, team, team_key, venue, minute,
                        corners_for, corners_against,
                        corners_for_after, corners_against_after
                 FROM live_corner_observations
