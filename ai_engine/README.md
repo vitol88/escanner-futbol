@@ -117,3 +117,16 @@ El escáner integra `ai_engine.live_corner_capture.capture_live_corner_snapshot`
 - Si falta el resultado final, las estadísticas están incompletas o no coinciden los equipos, no convierte el snapshot en histórico.
 
 La integración con `build_automatic_history` reutiliza las respuestas de estadísticas de partidos finalizados que ya se solicitan para el análisis de forma reciente. No crea consultas adicionales: también ejecuta el cierre cuando la respuesta ya está en la caché de sesión. Por tanto, un partido capturado se cierra cuando vuelve a aparecer en el flujo histórico de un análisis posterior dentro de la misma liga/temporada y se dispone de sus estadísticas. No es un proceso en segundo plano ni garantiza el cierre inmediato al pitazo final. El presupuesto histórico existente sigue siendo el límite de solicitudes.
+
+
+## Auditoría de cobertura del histórico SQLite
+
+`live_corner_audit.audit_live_corner_database(database_path)` genera un informe de solo lectura sobre la base de datos de córners.
+
+- Separa snapshots provisionales de observaciones verificadas y partidos pendientes de cierre.
+- Cuenta observaciones y partidos cerrados por liga.
+- Distribuye las capturas por bloques de 15 minutos y las observaciones por equipo/localía.
+- Comprueba que cada observación tenga su pareja local/visitante y que los conteos de ambas perspectivas sean recíprocos.
+- Si la base no existe, devuelve un informe vacío y no crea archivos ni tablas.
+
+La auditoría describe volumen y consistencia estructural; no mide precisión predictiva, calibración ni rentabilidad. No modifica datos, no consulta APIs y no se conecta a la interfaz.
