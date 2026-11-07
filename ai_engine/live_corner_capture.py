@@ -40,12 +40,19 @@ def _nonnegative_int(value: Any) -> int | None:
     return int(number)
 
 
-def _corner_value(stat_rows: list[dict[str, Any]], team_index: int) -> int | None:
-    if team_index >= len(stat_rows):
+def _corner_value(stat_rows: list[dict[str, Any]], team_id: Any) -> int | None:
+    """Read corners only from the statistics row matching the requested team ID."""
+    expected_id = str(team_id or "").strip()
+    if not expected_id:
         return None
-    for item in stat_rows[team_index].get("statistics") or []:
-        if item.get("type") == "Corner Kicks":
-            return _nonnegative_int(item.get("value"))
+    for row in stat_rows:
+        row_team_id = str(((row.get("team") or {}).get("id")) or "").strip()
+        if row_team_id != expected_id:
+            continue
+        for item in row.get("statistics") or []:
+            if item.get("type") == "Corner Kicks":
+                return _nonnegative_int(item.get("value"))
+        return None
     return None
 
 
@@ -85,14 +92,18 @@ def capture_live_corner_snapshot(
     fixture_id = str(fixture_data.get("id") or "").strip()
     home_name = str(home.get("name") or "").strip()
     away_name = str(away.get("name") or "").strip()
-    home_corners = _corner_value(statistics, 0)
-    away_corners = _corner_value(statistics, 1)
+    home_team_id = str(home.get("id") or "").strip()
+    away_team_id = str(away.get("id") or "").strip()
+    home_corners = _corner_value(statistics, home_team_id)
+    away_corners = _corner_value(statistics, away_team_id)
     timestamp = _nonnegative_int(fixture_data.get("timestamp"))
 
     if status_short in {"", "NS", "HT", "FT", "AET", "PEN", "PST", "CANC", "ABD", "AWD", "WO"}:
         return {"stored": False, "reason": "fixture_not_in_live_play"}
     if not fixture_id or not home_name or not away_name:
         return {"stored": False, "reason": "missing_fixture_identity"}
+    if not home_team_id or not away_team_id or home_team_id == away_team_id:
+        return {"stored": False, "reason": "missing_fixture_team_identity"}
     if minute is None or not 1 <= minute <= 120:
         return {"stored": False, "reason": "invalid_elapsed_minute"}
     if home_corners is None or away_corners is None:
