@@ -1,9 +1,9 @@
 from models.automatic_history import build_automatic_history
 
 
-def _fixture(fid, home_id, away_id, hg, ag, status="FT"):
+def _fixture(fid, home_id, away_id, hg, ag, status="FT", timestamp=None):
     return {
-        "fixture": {"id": fid, "status": {"short": status}},
+        "fixture": {"id": fid, "timestamp": timestamp if timestamp is not None else fid * 10, "status": {"short": status}},
         "teams": {"home": {"id": home_id}, "away": {"id": away_id}},
         "league": {"id": 10, "season": 2026},
         "goals": {"home": hg, "away": ag},
@@ -12,6 +12,7 @@ def _fixture(fid, home_id, away_id, hg, ag, status="FT"):
 
 def test_automatic_history_calculates_home_away_goals_and_corners():
     current = {
+        "fixture": {"timestamp": 2000},
         "teams": {"home": {"id": 1, "name": "Home FC"}, "away": {"id": 2, "name": "Away FC"}},
         "league": {"id": 10, "season": 2026},
     }
@@ -104,3 +105,59 @@ def test_automatic_history_does_not_count_cached_statistics_as_new_requests():
 
     assert shared_cache["_automatic_history_stats_calls"] == 7
     assert not [call for call in calls if call[0] == "fixtures/statistics"]
+
+def test_automatic_history_excludes_card_rows_without_proven_pre_kickoff_timestamps():
+    current = {
+        "fixture": {"timestamp": 2000},
+        "teams": {"home": {"id": 1, "name": "Home FC"}, "away": {"id": 2, "name": "Away FC"}},
+        "league": {"id": 10, "season": 2026},
+    }
+    earlier = _fixture(301, 1, 3, 1, 0, timestamp=1900)
+    same_time = _fixture(302, 1, 4, 1, 0, timestamp=2000)
+    later = _fixture(303, 1, 5, 1, 0, timestamp=2100)
+    missing_time = _fixture(304, 1, 6, 1, 0, timestamp=None)
+    missing_time["fixture"].pop("timestamp")
+    rows = [earlier, same_time, later, missing_time]
+
+    def fake_api(endpoint, params):
+        if endpoint == "fixtures" and params["team"] == 1:
+            return {"response": rows}
+        if endpoint == "fixtures" and params["team"] == 2:
+            return {"response": []}
+        if endpoint == "fixtures/statistics":
+            return {"response": [
+                {"statistics": [{"type": "Yellow Cards", "value": 2}]},
+                {"statistics": [{"type": "Yellow Cards", "value": 1}]},
+            ]}
+        return {"response": []}
+
+    result = build_automatic_history(current, api_get=fake_api, cache={}, stats_budget=8)
+    assert [row["fixture_id"] for row in result["card_history_rows"]] == [301]
+
+
+def test_failed_historical_statistics_request_still_consumes_budget():
+    current = {
+        "teams": {"home": {"id": 1, "name": "Home FC"}, "away": {"id": 2, "name": "Away FC"}},
+        "league": {"id": 10, "season": 2026},
+    }
+    past = _fixture(401, 1, 3, 1, 0)
+    calls = []
+
+    def fake_api(endpoint, params):
+        calls.append((endpoint, params))
+        if endpoint == "fixtures" and params["team"] == 1:
+            return {"response": [past]}
+        if endpoint == "fixtures" and params["team"] == 2:
+            return {"response": []}
+        if endpoint == "fixtures/statistics":
+            raise RuntimeError("temporary API failure")
+        return {"response": []}
+
+    cache = {}
+    result = build_automatic_history(current, api_get=fake_api, cache=cache, stats_budget=1)
+    stat_calls = [call for call in calls if call[0] == "fixtures/statistics"]
+    assert len(stat_calls) == 1
+    assert cache["_automatic_history_stats_calls"] == 1
+    assert result["diagnostics"]["historical_stats"]["requested"] == 1
+    assert result["diagnostics"]["stats_budget_remaining"] == 0
+
