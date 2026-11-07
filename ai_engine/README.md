@@ -47,3 +47,10 @@ Todos los modelos son experimentales y no calibrados. Antes de mostrar señales 
 `eligibility.build_model_eligibility` aplica una puerta independiente para cada baseline experimental. Solo permite calcular cuando la cobertura correspondiente y las variables requeridas están presentes. Córners en vivo exige además la fuente histórica minuto-a-minuto separada y el estado actual del partido. La falta de datos produce `status="abstain"` con una razón legible; no se sustituye por ceros ni por promedios de otro mercado.
 
 La elegibilidad autoriza únicamente un cálculo experimental, nunca una recomendación: todas las puertas mantienen `may_emit_betting_signal=false`. La política global de señales permanece desactivada hasta completar validación cronológica y calibración. El módulo es puro y todavía no se conecta a la interfaz ni al scanner.
+
+
+## Orquestador experimental
+
+`pipeline.analyze_experimental_models(features, history, live_corner_history_rows=...)` coordina cobertura, elegibilidad y ejecución de los baselines disponibles. Cada mercado se ejecuta solo si su puerta lo autoriza; si el cálculo devuelve un resultado inválido, el propio mercado vuelve a abstenerse. El resultado conserva cobertura, elegibilidad, proyección y razones de abstención por separado.
+
+El pipeline no consulta APIs, no escribe archivos, no toca Streamlit y no modifica la interfaz. Todas las salidas se marcan como experimentales y la política de recomendaciones/señales permanece desactivada. El histórico minuto-a-minuto live se consulta con el nombre de competición almacenado en esas filas (con ID como fallback), igual que el diagnóstico de cobertura.
