@@ -7,6 +7,7 @@ It does not fetch data, alter Streamlit state, or emit betting recommendations.
 from __future__ import annotations
 
 import sqlite3
+from contextlib import closing
 from pathlib import Path
 from typing import Any
 
@@ -48,8 +49,9 @@ def sync_live_corner_history_to_sqlite(
     report = load_live_corner_history_csv(csv_path)
     rows = report.get("rows", []) if isinstance(report, dict) else []
     inserted = 0
-    with _connect(database_path) as connection:
-        for row in rows:
+    with closing(_connect(database_path)) as connection:
+        with connection:
+            for row in rows:
             team = str(row["team"]).strip()
             cursor = connection.execute(
                 """
@@ -82,7 +84,7 @@ def load_live_corner_history_from_sqlite(
     path = Path(database_path)
     if not path.exists():
         return []
-    with _connect(path) as connection:
+    with closing(_connect(path)) as connection:
         connection.row_factory = sqlite3.Row
         rows = connection.execute(
             """
