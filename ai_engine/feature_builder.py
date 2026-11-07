@@ -25,6 +25,11 @@ def _history_number(history: dict[str, Any], key: str) -> float | None:
     return _number(history.get(key))
 
 
+def _count(value: Any) -> int:
+    number = _number(value)
+    return max(0, int(number)) if number is not None else 0
+
+
 def build_model_features(
     snapshot: dict[str, Any],
     history: dict[str, Any] | None = None,
@@ -58,7 +63,7 @@ def build_model_features(
         "home_goals_against_avg": _history_number(history, "home_goals_against"),
         "away_goals_for_avg": _history_number(history, "away_goals_for"),
         "away_goals_against_avg": _history_number(history, "away_goals_against"),
-        "home_goal_sample": _history.get("home_goal_sample"),
+        "home_goal_sample": history.get("home_goal_sample"),
         "away_goal_sample": history.get("away_goal_sample"),
         "current_home_goals": _number(goals.get("home")),
         "current_away_goals": _number(goals.get("away")),
@@ -105,12 +110,12 @@ def build_model_features(
             "statistics_available": bool(statistics.get("available")),
             "statistics_missing_teams": list(statistics.get("missing_teams") or []),
             "goal_sample": min(
-                int(goal_features["home_goal_sample"] or 0),
-                int(goal_features["away_goal_sample"] or 0),
+                _count(goal_features["home_goal_sample"]),
+                _count(goal_features["away_goal_sample"]),
             ),
             "corner_sample": min(
-                int(corner_features["home_corner_sample"] or 0),
-                int(corner_features["away_corner_sample"] or 0),
+                _count(corner_features["home_corner_sample"]),
+                _count(corner_features["away_corner_sample"]),
             ),
         },
     }
