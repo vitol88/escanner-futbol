@@ -16,6 +16,7 @@ from models.live_context import qualifies_as_corner_candidate, summarize_live_co
 from ai_engine.evaluation import evaluate_binary_forecasts, evaluate_forecasts_by_group, evaluate_chronological_holdout
 from ai_engine.dataset_audit import audit_forecast_dataset
 from ai_engine.prediction_schema import normalize_prediction_record
+from ai_engine.prediction_ledger import append_prediction_records
 from models.automatic_history import build_automatic_history
 from models.deep_goal_context import build_deep_goal_context
 from models.probabilities import (
@@ -4022,6 +4023,7 @@ if "last_auto_market_scan_epoch" not in st.session_state:
 # Persist the audit trail on the host filesystem where supported. The path can be
 # redirected with SIGNAL_HISTORY_PATH; some cloud hosts use ephemeral storage.
 SIGNAL_HISTORY_PATH = Path(os.getenv("SIGNAL_HISTORY_PATH", "registro_senales_escanner.csv"))
+PREDICTION_LEDGER_PATH = Path(os.getenv("PREDICTION_LEDGER_PATH", "registro_pronosticos_football_lab.sqlite3"))
 if "signal_rows" not in st.session_state:
     try:
         if SIGNAL_HISTORY_PATH.exists():
@@ -7949,6 +7951,7 @@ else:
 
         # Auditable signal log: avoid duplicate rows when Streamlit reruns the same scan.
         signal_rows = st.session_state.get("signal_rows", [])
+        new_prediction_records = []
         existing_keys = {
             (str(row.get("fixture_id")), str(row.get("market")), str(row.get("minute")),
              str(row.get("score_home")), str(row.get("score_away")))
@@ -7999,6 +8002,8 @@ else:
                            str(row["score_home"]), str(row["score_away"]))
                 if row_key not in existing_keys:
                     signal_rows.append(row)
+                    if normalized_row["valid"]:
+                        new_prediction_records.append(normalized_row)
                     existing_keys.add(row_key)
         st.session_state.signal_rows = signal_rows
         try:
@@ -8015,6 +8020,17 @@ else:
                     writer.writerows(signal_rows)
         except OSError as history_exc:
             st.session_state.signal_history_write_error = str(history_exc)
+        # Keep a canonical, append-only forecast ledger separate from the legacy CSV.
+        # SQLite uniqueness on prediction_id makes repeated Streamlit reruns idempotent.
+        if new_prediction_records:
+            try:
+                st.session_state.prediction_ledger_last_write = append_prediction_records(
+                    PREDICTION_LEDGER_PATH, new_prediction_records
+                )
+                st.session_state.prediction_ledger_write_error = ""
+            except Exception as ledger_exc:
+                # A ledger failure must not interrupt the live scanner or its legacy log.
+                st.session_state.prediction_ledger_write_error = str(ledger_exc)
         st.session_state.last_scan_api_calls = st.session_state.api_request_count - scan_api_calls_start
 
     # El panel global de escaneo no debe mezclarse con la pantalla individual seleccionada.
