@@ -1,5 +1,6 @@
 name: Get Telegram channel ID
 
+# Triggered on pushes to the integration branch; manual dispatch is also enabled.
 on:
   push:
     branches:
