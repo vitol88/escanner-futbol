@@ -99,6 +99,10 @@ def evaluate_chronological_holdout(
             test_rows, group_key="market", probability_key=probability_key,
             outcome_key=outcome_key, verified_key=verified_key,
         ) if enough else [],
+        "test_metrics_by_market_line": evaluate_forecasts_by_market_line(
+            test_rows, probability_key=probability_key,
+            outcome_key=outcome_key, verified_key=verified_key,
+        ) if enough else [],
         "test_metrics_by_league": evaluate_forecasts_by_group(
             test_rows, group_key="league", probability_key=probability_key,
             outcome_key=outcome_key, verified_key=verified_key,
@@ -147,6 +151,59 @@ def evaluate_forecasts_by_group(
             minimum_sample=minimum_sample,
         )
         results.append({"group": label, **metrics})
+    return results
+
+
+def evaluate_forecasts_by_market_line(
+    rows: list[dict[str, Any]],
+    *,
+    probability_key: str = "estimated_probability_exploratory",
+    outcome_key: str = "outcome",
+    verified_key: str = "outcome_verified",
+    minimum_sample: int = 30,
+) -> list[dict[str, Any]]:
+    """Evaluate separately by market, selection, line, phase and model version.
+
+    Keeping lines and model versions separate avoids pooling unlike binary
+    events into one calibration statistic. Rows missing market or line are
+    omitted because their event definition is incomplete.
+    """
+    grouped: dict[tuple[str, str, str, str, str, str], list[dict[str, Any]]] = {}
+    for row in rows if isinstance(rows, list) else []:
+        if not isinstance(row, dict):
+            continue
+        market = str(row.get("market") or "").strip()
+        line = str(row.get("line") or "").strip()
+        if not market or not line:
+            continue
+        key = (
+            market,
+            str(row.get("selection") or "unknown").strip() or "unknown",
+            line,
+            str(row.get("phase") or "unknown").strip() or "unknown",
+            str(row.get("model_id") or "unknown").strip() or "unknown",
+            str(row.get("model_version") or "unknown").strip() or "unknown",
+        )
+        grouped.setdefault(key, []).append(row)
+
+    results = []
+    for key in sorted(grouped, key=lambda item: tuple(part.casefold() for part in item)):
+        metrics = evaluate_binary_forecasts(
+            grouped[key],
+            probability_key=probability_key,
+            outcome_key=outcome_key,
+            verified_key=verified_key,
+            minimum_sample=minimum_sample,
+        )
+        results.append({
+            "market": key[0],
+            "selection": key[1],
+            "line": key[2],
+            "phase": key[3],
+            "model_id": key[4],
+            "model_version": key[5],
+            **metrics,
+        })
     return results
 
 def evaluate_binary_forecasts(
