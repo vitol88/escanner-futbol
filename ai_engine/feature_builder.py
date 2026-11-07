@@ -83,6 +83,7 @@ def build_model_features(snapshot: dict[str, Any], history: dict[str, Any] | Non
     return {
         "feature_schema_version": FEATURE_SCHEMA_VERSION,
         "fixture_id": match.get("fixture_id"), "league_id": (match.get("league") or {}).get("id"),
+        "league_name": (match.get("league") or {}).get("name"),
         "season": (match.get("league") or {}).get("season"),
         "home_team_id": home.get("id"), "away_team_id": away.get("id"),
         "teams": {"home": home.get("name"), "away": away.get("name")},
