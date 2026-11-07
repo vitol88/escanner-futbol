@@ -67,3 +67,10 @@ sobredispersión en la distribución histórica de córners.
 El histórico de frecuencias empíricas de córners restantes por minuto en
 `models/corner_history.py` sigue siendo un componente separado: este primer
 modelo es prepartido y no sustituye ni altera el estimador live existente.
+
+
+## Modelo live de córners restantes
+
+live_corner_model.estimate_live_remaining_corners(features, history_rows) reutiliza models.corner_history.estimate_remaining_corners para consultar frecuencias históricas en el mismo minuto, competición, equipo, sede y estado de córners. Evalúa las perspectivas del local y visitante. Si ambas están disponibles, combina las medias ponderadas por tamaño de muestra: no suma dos estimaciones del total del mismo partido. Si solo una perspectiva alcanza la muestra mínima, usa esa perspectiva y lo informa.
+
+El resultado separa córners actuales, media de córners restantes y total final proyectado. Incluye probabilidades empíricas de al menos uno/dos córners restantes y la frecuencia de que cada equipo consiga al menos uno. Tiros, tiros al arco y posesión se incluyen como contexto descriptivo; todavía no ajustan las probabilidades. No hay multiplicador heurístico de presión. Se abstiene si faltan minuto, equipos, liga, córners actuales o muestra histórica. No consulta API, no accede a Streamlit y no modifica el estimador live actual.
