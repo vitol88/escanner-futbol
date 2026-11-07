@@ -14,6 +14,7 @@ import streamlit as st
 from ai_engine.data_engine import FootballDataEngine
 from models.live_context import qualifies_as_corner_candidate, summarize_live_context
 from ai_engine.evaluation import evaluate_binary_forecasts, evaluate_forecasts_by_group, evaluate_chronological_holdout
+from ai_engine.dataset_audit import audit_forecast_dataset
 from models.automatic_history import build_automatic_history
 from models.deep_goal_context import build_deep_goal_context
 from models.probabilities import (
@@ -8578,6 +8579,22 @@ else:
             if backtest_file is not None:
                 try:
                     uploaded_rows = list(csv.DictReader(io.StringIO(backtest_file.getvalue().decode("utf-8-sig"))))
+                    audit = audit_forecast_dataset(uploaded_rows)
+                    st.markdown("#### Auditoría de calidad del CSV")
+                    audit_cols = st.columns(5)
+                    audit_cols[0].metric("Filas del CSV", audit["row_count"])
+                    audit_cols[1].metric("Pronósticos válidos", audit["distinct_valid_forecasts"])
+                    audit_cols[2].metric("Duplicados", audit["duplicate_forecasts"])
+                    audit_cols[3].metric("Metadatos inválidos", audit["invalid_metadata_rows"])
+                    audit_cols[4].metric("Resultados verificados", audit["verified_valid_outcomes"])
+                    if audit["verified_invalid_outcomes"]:
+                        st.warning(f"{audit['verified_invalid_outcomes']} filas marcadas como verificadas tienen probabilidad o resultado inválido.")
+                    st.caption(
+                        f"Mercados identificados: {audit['market_count']} · "
+                        f"Ligas identificadas: {audit['league_count']} · "
+                        f"Probabilidades inválidas: {audit['invalid_probability_rows']}. "
+                        "La auditoría no modifica el archivo ni completa resultados."
+                    )
                     metrics = evaluate_binary_forecasts(uploaded_rows)
                     metric_cols = st.columns(5)
                     metric_cols[0].metric("Muestra verificada", metrics["sample_size"])
