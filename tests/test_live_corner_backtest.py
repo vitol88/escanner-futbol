@@ -203,6 +203,28 @@ class LiveCornerBacktestTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     run_live_corner_baseline_backtest(self.db, over_under_lines=lines)
 
+    def test_backtest_is_read_only(self):
+        before_mtime = self.db.stat().st_mtime_ns
+        connection = sqlite3.connect(self.db)
+        before_count = connection.execute(
+            "SELECT COUNT(*) FROM live_corner_observations"
+        ).fetchone()[0]
+        connection.close()
+
+        result = run_live_corner_baseline_backtest(
+            self.db, test_fraction=0.25, min_train_fixtures=5,
+            min_test_fixtures=2, min_league_test_fixtures=1,
+        )
+
+        self.assertTrue(result["available"])
+        self.assertEqual(self.db.stat().st_mtime_ns, before_mtime)
+        connection = sqlite3.connect(self.db)
+        after_count = connection.execute(
+            "SELECT COUNT(*) FROM live_corner_observations"
+        ).fetchone()[0]
+        connection.close()
+        self.assertEqual(after_count, before_count)
+
     def test_missing_database_is_reported(self):
         result = run_live_corner_baseline_backtest(self.db.parent / "missing.sqlite3")
         self.assertFalse(result["available"])
