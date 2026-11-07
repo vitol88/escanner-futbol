@@ -5,6 +5,7 @@ def _fixture(fid, home_id, away_id, hg, ag, status="FT"):
     return {
         "fixture": {"id": fid, "status": {"short": status}},
         "teams": {"home": {"id": home_id}, "away": {"id": away_id}},
+        "league": {"id": 10, "season": 2026},
         "goals": {"home": hg, "away": ag},
     }
 
