@@ -59,6 +59,29 @@ class LiveCornerAuditTests(unittest.TestCase):
         self.assertEqual(result["by_league"][0]["verified_observations"], 2)
         self.assertEqual(result["by_minute_bucket"][0]["minute_bucket"], "61-75")
 
+    def test_audit_detects_missing_snapshot_pair_even_when_fixture_has_other_verified_minutes(self):
+        capture_live_corner_snapshot(self.db, self.fixture, self.live_stats)
+        later_fixture = {
+            **self.fixture,
+            "fixture": {"id": 501, "status": {"short": "2H", "elapsed": 75}},
+        }
+        capture_live_corner_snapshot(self.db, later_fixture, self.live_stats)
+        finalize_live_corner_fixture(self.db, self.final_fixture, self.final_stats)
+
+        connection = __import__("sqlite3").connect(self.db)
+        connection.execute(
+            "DELETE FROM live_corner_observations WHERE fixture_id = ? AND minute = ?",
+            ("501", 75),
+        )
+        connection.commit()
+        connection.close()
+
+        result = audit_live_corner_database(self.db)
+        self.assertEqual(result["captures"]["pending_fixtures"], 0)
+        self.assertEqual(result["quality"]["pending_snapshots"], 1)
+        self.assertEqual(result["quality"]["orphan_observation_minutes"], 0)
+        self.assertTrue(any("snapshots" in warning for warning in result["warnings"]))
+
     def test_audit_is_read_only(self):
         capture_live_corner_snapshot(self.db, self.fixture, self.live_stats)
         before = self.db.stat().st_mtime_ns
