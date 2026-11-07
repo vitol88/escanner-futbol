@@ -31,7 +31,7 @@ from ai_engine.data_engine import FootballDataEngine
 
 engine = FootballDataEngine(
     api_get=api_get,  # adaptador existente de la aplicación
-    cache=st.session_state.setdefault("ai_data_cache", {}),
+    cache=st.session_state.stats_cache,
 )
 raw_stats = engine.get_fixture_statistics(fixture_id)
 snapshot = engine.snapshot(fixture, statistics=raw_stats)
