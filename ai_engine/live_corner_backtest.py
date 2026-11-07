@@ -61,6 +61,36 @@ def _predict_remaining(row: sqlite3.Row, train: list[sqlite3.Row]) -> float:
     return sum(values) / len(values)
 
 
+def _fixture_weighted_metrics(
+    rows: list[sqlite3.Row], train: list[sqlite3.Row]
+) -> dict[str, Any]:
+    """Give each held-out fixture equal weight after averaging its row errors."""
+    if not rows or not train:
+        return {
+            "fixtures": 0, "observations": len(rows),
+            "mae_remaining_corners": None, "mean_signed_error": None,
+        }
+    errors_by_fixture: dict[str, list[float]] = {}
+    for row in rows:
+        prediction = _predict_remaining(row, train)
+        actual = float(row["corners_for_after"])
+        errors_by_fixture.setdefault(str(row["fixture_id"]), []).append(prediction - actual)
+    fixture_maes = [
+        sum(abs(error) for error in errors) / len(errors)
+        for errors in errors_by_fixture.values()
+    ]
+    fixture_biases = [
+        sum(errors) / len(errors) for errors in errors_by_fixture.values()
+    ]
+    return {
+        "fixtures": len(errors_by_fixture),
+        "observations": len(rows),
+        "mae_remaining_corners": sum(fixture_maes) / len(fixture_maes),
+        "mean_signed_error": sum(fixture_biases) / len(fixture_biases),
+        "weighting": "equal_fixture_weight_after_within_fixture_observation_average",
+    }
+
+
 def _line_metrics(
     rows: list[sqlite3.Row], train: list[sqlite3.Row], lines: tuple[float, ...]
 ) -> list[dict[str, Any]]:
@@ -383,6 +413,7 @@ def run_live_corner_baseline_backtest(
             "test_kickoff_timestamp_groups": len(test_timestamps),
         },
         "metrics": overall,
+        "fixture_weighted_metrics": _fixture_weighted_metrics(test, train),
         "benchmark": {
             "name": "global_training_mean",
             **global_mean_baseline,
