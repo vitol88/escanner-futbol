@@ -15,23 +15,9 @@ def _minute_bucket(minute: int) -> str:
 def _metrics(rows: list[sqlite3.Row], train: list[sqlite3.Row]) -> dict[str, Any]:
     if not rows or not train:
         return {"observations": len(rows), "mae_remaining_corners": None, "mean_signed_error": None}
-    global_values = [float(row["corners_for_after"]) for row in train]
-    global_mean = sum(global_values) / len(global_values)
-    league_values: dict[str, list[float]] = {}
-    bucket_values: dict[tuple[str, str], list[float]] = {}
-    for row in train:
-        league = str(row["league"] or "Unknown")
-        target = float(row["corners_for_after"])
-        league_values.setdefault(league, []).append(target)
-        bucket_values.setdefault((league, _minute_bucket(row["minute"])), []).append(target)
-
     abs_errors, signed_errors = [], []
     for row in rows:
-        league = str(row["league"] or "Unknown")
-        values = bucket_values.get((league, _minute_bucket(row["minute"])))
-        if not values:
-            values = league_values.get(league) or global_values
-        prediction = sum(values) / len(values) if values else global_mean
+        prediction = _predict_remaining(row, train)
         error = prediction - float(row["corners_for_after"])
         abs_errors.append(abs(error))
         signed_errors.append(error)
@@ -39,25 +25,40 @@ def _metrics(rows: list[sqlite3.Row], train: list[sqlite3.Row]) -> dict[str, Any
         "observations": len(rows),
         "mae_remaining_corners": sum(abs_errors) / len(abs_errors),
         "mean_signed_error": sum(signed_errors) / len(signed_errors),
+        "training_weighting": "equal_fixture_weight_within_minute_bucket_league_and_global_fallback",
     }
 
 
 
 
+def _fixture_balanced_values(rows: list[sqlite3.Row]) -> list[float]:
+    """Return one mean target per fixture so dense snapshots cannot dominate."""
+    by_fixture: dict[str, list[float]] = {}
+    for item in rows:
+        by_fixture.setdefault(str(item["fixture_id"]), []).append(
+            float(item["corners_for_after"])
+        )
+    return [
+        sum(values) / len(values)
+        for values in by_fixture.values() if values
+    ]
+
+
 def _predict_remaining(row: sqlite3.Row, train: list[sqlite3.Row]) -> float:
-    """Predict from training rows only, with league/minute fallback."""
-    global_values = [float(item["corners_for_after"]) for item in train]
+    """Predict from training data, giving each fixture equal weight per segment."""
     league = str(row["league"] or "Unknown")
-    league_values = [
-        float(item["corners_for_after"]) for item in train
-        if str(item["league"] or "Unknown") == league
+    bucket = _minute_bucket(row["minute"])
+    league_rows = [
+        item for item in train if str(item["league"] or "Unknown") == league
     ]
-    bucket_values = [
-        float(item["corners_for_after"]) for item in train
-        if str(item["league"] or "Unknown") == league
-        and _minute_bucket(item["minute"]) == _minute_bucket(row["minute"])
+    bucket_rows = [
+        item for item in league_rows if _minute_bucket(item["minute"]) == bucket
     ]
-    values = bucket_values or league_values or global_values
+    values = (
+        _fixture_balanced_values(bucket_rows)
+        or _fixture_balanced_values(league_rows)
+        or _fixture_balanced_values(train)
+    )
     return sum(values) / len(values)
 
 
@@ -162,7 +163,8 @@ def _rolling_origin_metrics(rows, timestamps, ordered_timestamps, *, folds, min_
         train = [r for r in rows if str(r["fixture_id"]) in train_ids]
         test = [r for r in rows if str(r["fixture_id"]) in test_ids]
         metrics = _metrics(test, train)
-        mean = sum(float(r["corners_for_after"]) for r in train) / len(train)
+        fixture_means = _fixture_balanced_values(train)
+        mean = sum(fixture_means) / len(fixture_means)
         errors = [mean - float(r["corners_for_after"]) for r in test]
         benchmark = sum(abs(e) for e in errors) / len(errors)
         improvement = ((benchmark - metrics["mae_remaining_corners"]) / benchmark
@@ -320,7 +322,8 @@ def run_live_corner_baseline_backtest(
     # Independent naive benchmark: one global mean from training, applied to
     # every held-out observation. This reveals whether segmented averages add
     # value beyond a constant prediction without using any test outcomes.
-    global_training_mean = sum(float(row["corners_for_after"]) for row in train) / len(train)
+    fixture_training_means = _fixture_balanced_values(train)
+    global_training_mean = sum(fixture_training_means) / len(fixture_training_means)
     global_errors = [
         global_training_mean - float(row["corners_for_after"]) for row in test
     ]
