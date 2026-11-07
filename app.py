@@ -7308,6 +7308,23 @@ else:
                                                 current_minute = (match_fixture.get("status") or {}).get("elapsed")
                                                 current_total = (home_c + away_c) if isinstance(home_c, (int, float)) and isinstance(away_c, (int, float)) else None
                                                 history = corner_item.get("automatic_history") or {}
+                                                if history.get("pending") and st.button("📚 Consultar historial de este partido", key=f"load_history_selected_{match_id}"):
+                                                    try:
+                                                        history_cache = st.session_state.setdefault("automatic_history_cache", {})
+                                                        history_cache.setdefault("_automatic_history_stats_calls", 0)
+                                                        history_cache.setdefault("_automatic_history_team_fixture_calls", 0)
+                                                        corner_item["automatic_history"] = build_automatic_history(
+                                                            corner_item["fixture"],
+                                                            api_get=api_get,
+                                                            cache=history_cache,
+                                                            stats_budget=8,
+                                                            live_corner_finalizer=lambda completed_fixture, final_stats: (
+                                                                finalize_live_corner_fixture(LIVE_CORNER_CAPTURE_DB, completed_fixture, final_stats)
+                                                            ),
+                                                        )
+                                                    except Exception as history_exc:
+                                                        corner_item["automatic_history"] = {"available": False, "pending": True, "note": f"No se pudo consultar el historial: {history_exc}"}
+                                                    history = corner_item.get("automatic_history") or {}
                                                 def corner_period_cards_html(first_value, second_value, note):
                                                     first_label = f"{first_value:.2f}" if isinstance(first_value, (int, float)) else "N/D"
                                                     second_label = f"{second_value:.2f}" if isinstance(second_value, (int, float)) else "N/D"
@@ -7917,44 +7934,15 @@ else:
                 corner_results.append({"fixture": fixture, "error": str(exc)})
                 if "HTTP 429" in str(exc):
                     break
-        # Automatic historical context, cached by team and fixture. Limit historical
-        # statistics calls per scan so this does not silently consume the whole API quota.
-        history_calls_before = st.session_state.api_request_count
-        history_cache = st.session_state.setdefault("automatic_history_cache", {})
-        history_cache["_automatic_history_stats_calls"] = 0
-        # El límite de consultas de equipos empieza desde cero en cada escaneo.
-        # No reservar consultas a ciegas para partidos que el usuario no está viendo.
-        history_cache["_automatic_history_team_fixture_calls"] = 0
-        # Priorizar el partido abierto por el usuario para que el presupuesto histórico
-        # no se consuma primero en otros partidos del escáner.
-        selected_detail_for_history = st.session_state.get("selected_match_detail") or {}
-        selected_history_fixture_id = str(selected_detail_for_history.get("fixture_id") or "")
-        corner_results.sort(
-            key=lambda item: 0 if str(((item.get("fixture") or {}).get("fixture") or {}).get("id") or "") == selected_history_fixture_id else 1
-        )
+        # Live-first scan: historical requests are deliberately deferred until
+        # the user asks for history on an individual fixture.
         for corner_item in corner_results:
-            # El historial es independiente de las estadísticas en vivo:
-            # aunque falle el dato actual, intentamos construir tablas históricas.
-            try:
-                used_history_stats = int(history_cache.get("_automatic_history_stats_calls", 0))
-                history_budget = 8 if auto_scan_due and not manual_scan else 20
-                corner_item["automatic_history"] = build_automatic_history(
-                    corner_item["fixture"],
-                    api_get=api_get,
-                    cache=history_cache,
-                    stats_budget=max(0, history_budget - used_history_stats),
-                    live_corner_finalizer=lambda completed_fixture, final_stats: (
-                        finalize_live_corner_fixture(
-                            LIVE_CORNER_CAPTURE_DB, completed_fixture, final_stats
-                        )
-                    ),
-                )
-            except Exception as history_exc:
-                corner_item["automatic_history"] = {
-                    "available": False,
-                    "note": f"Historial automático no disponible: {history_exc}",
-                }
-        st.session_state.last_scan_history_api_calls = st.session_state.api_request_count - history_calls_before
+            corner_item["automatic_history"] = {
+                "available": False,
+                "pending": True,
+                "note": "Historial pendiente. Consulta el historial de este partido cuando lo necesites.",
+            }
+        st.session_state.last_scan_history_api_calls = 0
         st.session_state.last_scan_api_calls = st.session_state.api_request_count - scan_api_calls_start
         st.session_state.corner_scan_results = corner_results
 
@@ -8527,6 +8515,23 @@ else:
                         if item.get("home_corners") is not None and item.get("away_corners") is not None:
                             st.caption(f"Córners actuales: local {item['home_corners']} · visitante {item['away_corners']} · total {item['home_corners'] + item['away_corners']}.")
                         history = item.get("automatic_history") or {}
+                        if history.get("pending") and st.button("📚 Consultar historial de este partido", key=f"load_history_global_{((item.get('fixture') or {}).get('fixture') or {}).get('id')}"):
+                            try:
+                                history_cache = st.session_state.setdefault("automatic_history_cache", {})
+                                history_cache.setdefault("_automatic_history_stats_calls", 0)
+                                history_cache.setdefault("_automatic_history_team_fixture_calls", 0)
+                                item["automatic_history"] = build_automatic_history(
+                                    item["fixture"],
+                                    api_get=api_get,
+                                    cache=history_cache,
+                                    stats_budget=8,
+                                    live_corner_finalizer=lambda completed_fixture, final_stats: (
+                                        finalize_live_corner_fixture(LIVE_CORNER_CAPTURE_DB, completed_fixture, final_stats)
+                                    ),
+                                )
+                            except Exception as history_exc:
+                                item["automatic_history"] = {"available": False, "pending": True, "note": f"No se pudo consultar el historial: {history_exc}"}
+                            history = item.get("automatic_history") or {}
                         if history.get("available"):
                             history_rows = [
                                 {"Indicador": "Córners a favor del local en casa", "Promedio": history.get("home_corners_for") if history.get("home_corners_for") is not None else "N/D", "Muestra": history.get("home_corner_sample", 0)},
