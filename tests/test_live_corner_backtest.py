@@ -42,7 +42,7 @@ class LiveCornerBacktestTests(unittest.TestCase):
         )
         self.assertTrue(result["available"])
         self.assertEqual(result["split"]["fixture_overlap"], 0)
-        self.assertEqual(result["split"]["method"], "chronological_fixture_timestamp")
+        self.assertEqual(result["split"]["method"], "chronological_fixture_timestamp_grouped")
         self.assertLess(
             result["split"]["train_latest_timestamp"],
             result["split"]["test_earliest_timestamp"],
