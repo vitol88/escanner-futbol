@@ -24,10 +24,10 @@ def format_signal_message(row: dict[str, Any]) -> str:
 
     score = ""
     if score_home is not None and score_away is not None:
-        score = f"Marcador: {score_home}-{score_away}\\n"
-    minute_text = f"Minuto: {minute}'\\n" if minute is not None else ""
+        score = f"Marcador: {score_home}-{score_away}\n"
+    minute_text = f"Minuto: {minute}'\n" if minute is not None else ""
 
-    odds_text = f"CUOTA: {float(live_odd):.2f} · Casa: {bookmaker}\\n"
+    odds_text = f"CUOTA: {float(live_odd):.2f} · Casa: {bookmaker}\n"
     risk_mode = "MODO SEGURO" if 1.35 <= float(live_odd) <= 1.60 else "MODO ARRIESGADO"
 
     analysis_parts = []
@@ -37,16 +37,16 @@ def format_signal_message(row: dict[str, Any]) -> str:
         pass
     if isinstance(edge, (int, float)):
         analysis_parts.append(f"Ventaja estimada: {float(edge) * 100:.1f}%")
-    analysis_text = "\\n".join(analysis_parts)
+    analysis_text = "\n".join(analysis_parts)
 
     return (
-        "⚽ FOOTBALL LAB · SEÑAL EN VIVO\\n\\n"
-        f"{home} vs {away}\\n"
+        "⚽ FOOTBALL LAB · SEÑAL EN VIVO\n\n"
+        f"{home} vs {away}\n"
         f"{score}{minute_text}"
-        f"Mercado: {market}\\n"
-        f"{risk_mode}\\n"
-        f"{odds_text}\\n"
-        f"ANÁLISIS\\n{analysis_text}\\n\\n"
+        f"Mercado: {market}\n"
+        f"{risk_mode}\n"
+        f"{odds_text}\n"
+        f"ANÁLISIS\n{analysis_text}\n\n"
         "Verifica que la cuota siga vigente antes de decidir."
     )
 
