@@ -98,9 +98,15 @@ def capture_live_corner_snapshot(
     if stamp.tzinfo is None:
         stamp = stamp.replace(tzinfo=timezone.utc)
     stamp_text = stamp.astimezone(timezone.utc).isoformat()
+    inserted = False
     with closing(_connect(database_path)) as connection:
         with connection:
-            cursor = connection.execute(
+            existing = connection.execute(
+                "SELECT 1 FROM live_corner_capture_snapshots WHERE fixture_id = ? AND minute = ?",
+                (fixture_id, minute),
+            ).fetchone()
+            inserted = existing is None
+            connection.execute(
                 """
                 INSERT INTO live_corner_capture_snapshots (
                     fixture_id, fixture_date, league_id, league_name,
@@ -128,7 +134,6 @@ def capture_live_corner_snapshot(
                     stamp_text,
                 ),
             )
-            inserted = cursor.rowcount == 1
 
     return {
         "stored": True,
