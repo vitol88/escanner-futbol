@@ -129,7 +129,7 @@ La integración con `build_automatic_history` reutiliza las respuestas de estad�
 - Comprueba que cada observación tenga su pareja local/visitante y que los conteos de ambas perspectivas sean recíprocos.
 - Si la base no existe, devuelve un informe vacío y no crea archivos ni tablas.
 
-La auditoría describe volumen y consistencia estructural; no mide precisión predictiva, calibración ni rentabilidad. No modifica datos, no consulta APIs y no se conecta a la interfaz.
+La auditoría describe volumen y consistencia estructural; no mide precisión predictiva, calibración ni rentabilidad. No modifica datos, no consulta APIs y no se conecta a la interfaz. También comprueba la coherencia cronológica de cada equipo y sede: los córners restantes no deben aumentar conforme avanza el minuto y la suma de córners acumulados más restantes debe conservar el mismo total final implícito. Agrupa por `team_key` normalizada para no fragmentar una trayectoria si cambia el nombre visible del equipo.
 
 
 ## Backtest cronológico de referencia para córners restantes
