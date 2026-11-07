@@ -7648,12 +7648,12 @@ else:
                                                         st.markdown('<div class="tip-card risk-tip-card tip-card-empty"><div class="tip-card-title">Sin oportunidad confirmada por ahora</div><div class="tip-card-meta">Se requiere respaldo estadístico suficiente.</div></div>', unsafe_allow_html=True)
                                                     goals = match.get("goals") or {}
                                                     pattern_stats = st.session_state.stats_cache.get(str(match_id), [])
-                                            pattern_teams = match.get("teams") or {}
-                                            patterns = numerology_context(
-                                                goals.get("home"), goals.get("away"), home_c, away_c,
-                                                safe_stat_for_team(pattern_stats, "Yellow Cards", (pattern_teams.get("home") or {}).get("id")),
-                                                safe_stat_for_team(pattern_stats, "Yellow Cards", (pattern_teams.get("away") or {}).get("id")),
-                                            )
+                                                    pattern_teams = match.get("teams") or {}
+                                                    patterns = numerology_context(
+                                                        goals.get("home"), goals.get("away"), home_c, away_c,
+                                                        safe_stat_for_team(pattern_stats, "Yellow Cards", (pattern_teams.get("home") or {}).get("id")),
+                                                        safe_stat_for_team(pattern_stats, "Yellow Cards", (pattern_teams.get("away") or {}).get("id")),
+                                                    )
                                             elif corner_item:
                                                 st.warning(f"No se pudo cargar el análisis de córners: {corner_item.get('error')}")
                                             else:
