@@ -54,6 +54,7 @@ def build_automatic_history(
     api_get: Callable[..., dict[str, Any]],
     cache: dict[str, Any],
     stats_budget: int = 8,
+    live_corner_finalizer: Callable[[dict[str, Any], list[dict[str, Any]]], Any] | None = None,
 ) -> dict[str, Any]:
     """Build local/home and visitor/away recent averages without any CSV upload.
 
@@ -81,7 +82,7 @@ def build_automatic_history(
         result["note"] = "Faltan IDs de equipos, liga o temporada para consultar el historial."
         return result
 
-    diagnostics: dict[str, Any] = {"league_id": league_id, "season": season, "teams": {}, "historical_stats": {"requested": 0, "nonempty_responses": 0, "responses_with_corners": 0, "empty_responses": 0, "errors": []}}
+    diagnostics: dict[str, Any] = {"league_id": league_id, "season": season, "teams": {}, "historical_stats": {"requested": 0, "nonempty_responses": 0, "responses_with_corners": 0, "empty_responses": 0, "errors": []}, "live_corner_finalization": {"attempted": 0, "finalized": 0, "observations_inserted": 0, "errors": []}}
 
     def team_fixtures(team_id: int) -> list[dict[str, Any]]:
         key = f"team-fixtures-v5:{team_id}:{league_id}:{season}"
@@ -199,6 +200,23 @@ def build_automatic_history(
                     if "HTTP 429" in str(exc):
                         cache["_automatic_history_rate_limited"] = True
             stats = cache.get(full_stats_key, [])
+
+            # Reuse the same completed-fixture statistics already fetched for
+            # recent-form history. No extra endpoint or request is introduced.
+            if live_corner_finalizer is not None and stats:
+                try:
+                    diagnostics["live_corner_finalization"]["attempted"] += 1
+                    finalized = live_corner_finalizer(old, stats)
+                    if isinstance(finalized, dict) and finalized.get("finalized"):
+                        diagnostics["live_corner_finalization"]["finalized"] += 1
+                        diagnostics["live_corner_finalization"]["observations_inserted"] += int(
+                            finalized.get("observations_inserted", 0) or 0
+                        )
+                except Exception as finalize_exc:
+                    diagnostics["live_corner_finalization"]["errors"].append({
+                        "fixture_id": old_id,
+                        "error": str(finalize_exc),
+                    })
 
             half_stats = cache.get(half_stats_key)
             if old_id and full_stats_key in cache and half_stats is None and time.time() >= float(cache.get(half_retry_key, 0) or 0) and request_budget[0] > 0 and not cache.get("_automatic_history_rate_limited"):
