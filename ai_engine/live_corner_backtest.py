@@ -193,6 +193,7 @@ def run_live_corner_baseline_backtest(
     min_league_test_fixtures: int = 2,
     min_bucket_test_fixtures: int = 2,
     rolling_folds: int = 3,
+    over_under_lines: tuple[float, ...] = (),
 ) -> dict[str, Any]:
     """Train on earlier kickoff times and evaluate on the latest chronological block.
 
@@ -202,6 +203,11 @@ def run_live_corner_baseline_backtest(
     """
     if rolling_folds < 2:
         raise ValueError("rolling_folds must be at least 2")
+    normalized_lines = tuple(float(line) for line in over_under_lines)
+    if any(not math.isfinite(line) or line < 0 or not math.isclose(line % 1, 0.5, abs_tol=1e-9) for line in normalized_lines):
+        raise ValueError("over_under_lines must contain nonnegative half-point lines")
+    if len(set(normalized_lines)) != len(normalized_lines):
+        raise ValueError("over_under_lines must be unique")
     if not 0.05 <= test_fraction <= 0.5:
         raise ValueError("test_fraction must be between 0.05 and 0.5")
     if min(
@@ -383,6 +389,7 @@ def run_live_corner_baseline_backtest(
         },
         "mae_improvement_vs_global_mean": mae_improvement,
         "rolling_origin": rolling,
+        "over_under_line_evaluation": _line_metrics(test, train, normalized_lines),
         "by_league": by_league,
         "by_league_minute_bucket": by_league_minute_bucket,
     }
