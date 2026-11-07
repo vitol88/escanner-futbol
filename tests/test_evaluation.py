@@ -143,5 +143,46 @@ class BinaryForecastEvaluationTests(unittest.TestCase):
             evaluate_chronological_holdout([], train_fraction=1.0)
         with self.assertRaises(ValueError):
             evaluate_chronological_holdout([], minimum_test_fixtures=0)
+    def test_market_line_evaluation_keeps_lines_and_models_separate(self):
+        from ai_engine.evaluation import evaluate_forecasts_by_market_line
+        rows = [
+            {"market": "total_goals", "selection": "over", "line": "2.5",
+             "phase": "pre_match", "model_id": "goal", "model_version": "0.1",
+             "probability": 0.8, "outcome": 1, "outcome_verified": True},
+            {"market": "total_goals", "selection": "over", "line": "3.5",
+             "phase": "pre_match", "model_id": "goal", "model_version": "0.1",
+             "probability": 0.4, "outcome": 0, "outcome_verified": True},
+            {"market": "total_goals", "selection": "over", "line": "2.5",
+             "phase": "pre_match", "model_id": "goal", "model_version": "0.2",
+             "probability": 0.7, "outcome": 1, "outcome_verified": True},
+            {"market": "total_goals", "selection": "over", "line": "",
+             "probability": 0.9, "outcome": 1, "outcome_verified": True},
+        ]
+        result = evaluate_forecasts_by_market_line(rows, minimum_sample=1)
+        self.assertEqual(len(result), 3)
+        self.assertEqual({(r["line"], r["model_version"]) for r in result},
+                         {("2.5", "0.1"), ("3.5", "0.1"), ("2.5", "0.2")})
+        self.assertTrue(all(r["sample_size"] == 1 for r in result))
+
+    def test_chronological_holdout_adds_market_line_breakdown_from_test_only(self):
+        from ai_engine.evaluation import evaluate_chronological_holdout
+        rows = []
+        for index in range(10):
+            rows.append({
+                "fixture_id": f"line-fx-{index}",
+                "recorded_at": f"2026-03-{index + 1:02d}T12:00:00Z",
+                "market": "total_goals", "selection": "over",
+                "line": "2.5" if index < 8 else "3.5",
+                "phase": "pre_match", "model_id": "goal", "model_version": "0.1",
+                "probability": 0.8, "outcome": 1, "outcome_verified": True,
+            })
+        result = evaluate_chronological_holdout(
+            rows, minimum_train_fixtures=5, minimum_test_fixtures=2
+        )
+        breakdown = result["test_metrics_by_market_line"]
+        self.assertEqual(len(breakdown), 1)
+        self.assertEqual(breakdown[0]["line"], "3.5")
+        self.assertEqual(breakdown[0]["sample_size"], 2)
+
 if __name__ == "__main__":
     unittest.main()
