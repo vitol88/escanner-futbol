@@ -13,7 +13,7 @@ class DataCoverageTests(unittest.TestCase):
             "away_team_id": 2,
             "teams": {"home": "Arsenal", "away": "Chelsea"},
             "referee": "Ref A",
-            "goals": {"home_goal_sample": 7, "away_goal_sample": 4},
+            "goals": {"home_goal_sample": 7, "away_goal_sample": 1},
             "corners": {"home_corner_sample": 8, "away_corner_sample": 6},
             "cards": {},
             "live": {"minute": 67},
@@ -72,7 +72,9 @@ class DataCoverageTests(unittest.TestCase):
         self.assertTrue(report["ready"]["live_remaining_corners"])
 
     def test_missing_history_is_missing_not_zero_confidence(self):
-        report = build_data_coverage_report(self._features(), {})
+        features = self._features()
+        features["corners"] = {"home_corner_sample": 0, "away_corner_sample": 0}
+        report = build_data_coverage_report(features, {})
         self.assertEqual(report["markets"]["prematch_yellow_cards"]["home_team_at_home"]["status"], "missing")
         self.assertEqual(report["markets"]["live_remaining_corners"]["home"]["status"], "missing")
         self.assertFalse(report["ready"]["prematch_goals"])
