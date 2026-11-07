@@ -32,6 +32,7 @@ from models.probabilities import (
 from models.live_odds import (
     best_live_odds_by_market,
     classify_market,
+    match_goal_tip_to_live_odds,
     extract_live_odds,
     numerology_context,
     score_pattern_context,
@@ -8048,12 +8049,35 @@ else:
                            str(row["score_home"]), str(row["score_away"]))
                 if row_key not in existing_keys:
                     signal_rows.append(row)
-                    new_signal_rows.append(row)
+                    odds_rows_for_fixture = st.session_state.get("live_odds_by_fixture", {}).get(str(fixture_data.get("id")), [])
+                    verified_odds = match_goal_tip_to_live_odds(
+                        str(market), float(probability), odds_rows_for_fixture
+                    )
+                    if verified_odds:
+                        row.update({
+                            "verified_live_odd": float(verified_odds["odd"]),
+                            "verified_bookmaker": str(verified_odds.get("bookmaker") or "Casa no identificada"),
+                            "verified_odds_market": str(verified_odds.get("market_label") or ""),
+                            "implied_probability": round(float(verified_odds["implied_probability"]), 4),
+                            "estimated_edge": round(float(verified_odds["estimated_edge"]), 4),
+                        })
+                        new_signal_rows.append(row)
                     existing_keys.add(row_key)
         st.session_state.signal_rows = signal_rows
-        # Queue only genuinely new signals. Failed Telegram sends remain pending for a later scan.
+        # Telegram recibe solo señales nuevas respaldadas por cuota real, mercado coincidente y ventaja mínima.
         telegram_pending = st.session_state.setdefault("telegram_pending_rows", [])
         telegram_pending.extend(new_signal_rows)
+        telegram_pending = [
+            row for row in telegram_pending
+            if isinstance(row, dict)
+            and isinstance(row.get("verified_live_odd"), (int, float))
+            and row.get("verified_bookmaker")
+            and row.get("verified_odds_market")
+            and isinstance(row.get("estimated_edge"), (int, float))
+            and float(row["estimated_edge"]) >= 0.02
+            and (1.35 <= float(row["verified_live_odd"]) <= 1.60 or float(row["verified_live_odd"]) >= 1.70)
+        ]
+        st.session_state.telegram_pending_rows = telegram_pending
         try:
             telegram_token = str(st.secrets.get("TELEGRAM_BOT_TOKEN", "") or os.getenv("TELEGRAM_BOT_TOKEN", "")).strip()
             telegram_chat_id = str(st.secrets.get("TELEGRAM_CHAT_ID", "") or os.getenv("TELEGRAM_CHAT_ID", "-1004668474905")).strip()
