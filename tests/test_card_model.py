@@ -22,6 +22,7 @@ class PrematchYellowCardModelTests(unittest.TestCase):
         self.assertAlmostEqual(result["expected_yellow_cards"]["total"], 3.5)
         self.assertIn(4.5, result["probability_over"])
         self.assertFalse(result["calibrated"])
+        self.assertEqual(result["model_version"], "0.1.0")
 
     def test_referee_needs_minimum_sample(self):
         result = estimate_prematch_yellow_cards(self.features, self.rows, minimum_referee_matches=9)
