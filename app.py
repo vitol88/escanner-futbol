@@ -8022,10 +8022,18 @@ else:
             st.session_state.signal_history_write_error = str(history_exc)
         # Keep a canonical, append-only forecast ledger separate from the legacy CSV.
         # SQLite uniqueness on prediction_id makes repeated Streamlit reruns idempotent.
-        if new_prediction_records:
+        ledger_records_to_sync = [
+            normalize_prediction_record(saved_row)
+            for saved_row in signal_rows
+            if saved_row.get("schema_version") == "1.0"
+        ]
+        ledger_records_to_sync = [record for record in ledger_records_to_sync if record["valid"]]
+        if ledger_records_to_sync:
             try:
+                # Re-submit canonical CSV rows on each scan: SQLite ignores rows
+                # already committed and retries any records missed by a prior failure.
                 st.session_state.prediction_ledger_last_write = append_prediction_records(
-                    PREDICTION_LEDGER_PATH, new_prediction_records
+                    PREDICTION_LEDGER_PATH, ledger_records_to_sync
                 )
                 st.session_state.prediction_ledger_write_error = ""
             except Exception as ledger_exc:
