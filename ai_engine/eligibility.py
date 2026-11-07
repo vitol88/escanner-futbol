@@ -59,9 +59,9 @@ def build_model_eligibility(
 
     goal_ok = bool(ready.get("prematch_goals")) and all(_valid_nonnegative(v) for v in goal_rates)
     corner_ok = bool(ready.get("prematch_corners")) and all(_valid_nonnegative(v) for v in corner_rates)
-    card_ok = bool(ready.get("prematch_yellow_cards")) and bool(
+    card_ok = bool(ready.get("prematch_yellow_cards")) and (
         isinstance(coverage_report.get("markets"), dict)
-        and coverage_report["markets"].get("prematch_yellow_cards")
+        and isinstance(coverage_report["markets"].get("prematch_yellow_cards"), dict)
     )
     live_rows_present = isinstance(live_corner_history_rows, list) and bool(live_corner_history_rows)
     live_ok = (
