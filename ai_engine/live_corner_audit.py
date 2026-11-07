@@ -69,9 +69,12 @@ def audit_live_corner_database(database_path: str | Path) -> dict[str, Any]:
         grouped: dict[tuple[str, int], dict[str, sqlite3.Row]] = {}
         incomplete_pairs = 0
         mismatched_pairs = 0
+        team_timelines: dict[tuple[str, str, str], list[sqlite3.Row]] = {}
         for row in observations:
             key = (str(row["fixture_id"]), int(row["minute"]))
             grouped.setdefault(key, {})[str(row["venue"])] = row
+            timeline_key = (str(row["fixture_id"]), str(row["team_key"] if "team_key" in row.keys() else row["team"]), str(row["venue"]))
+            team_timelines.setdefault(timeline_key, []).append(row)
 
         for pair in grouped.values():
             home = pair.get("home")
@@ -87,6 +90,23 @@ def audit_live_corner_database(database_path: str | Path) -> dict[str, Any]:
             )
             if not mirrored:
                 mismatched_pairs += 1
+
+        inconsistent_remaining_progression = 0
+        inconsistent_final_totals = 0
+        for timeline in team_timelines.values():
+            ordered = sorted(timeline, key=lambda item: int(item["minute"]))
+            previous_remaining = None
+            expected_final_total = None
+            for item in ordered:
+                remaining = int(item["corners_for_after"])
+                final_total = int(item["corners_for"]) + remaining
+                if previous_remaining is not None and remaining > previous_remaining:
+                    inconsistent_remaining_progression += 1
+                if expected_final_total is None:
+                    expected_final_total = final_total
+                elif final_total != expected_final_total:
+                    inconsistent_final_totals += 1
+                previous_remaining = remaining
 
         league_counts: dict[str, dict[str, int]] = {}
         for row in captures:
@@ -153,6 +173,10 @@ def audit_live_corner_database(database_path: str | Path) -> dict[str, Any]:
             warnings.append("Hay observaciones sin su pareja local/visitante.")
         if mismatched_pairs:
             warnings.append("Hay parejas local/visitante cuyos conteos no coinciden.")
+        if inconsistent_remaining_progression:
+            warnings.append("Hay secuencias donde los córners restantes aumentan con el avance del partido.")
+        if inconsistent_final_totals:
+            warnings.append("Hay secuencias cuyo total final implícito cambia entre snapshots.")
         if not observations:
             warnings.append("No hay observaciones verificadas para evaluar el modelo live.")
 
@@ -177,6 +201,8 @@ def audit_live_corner_database(database_path: str | Path) -> dict[str, Any]:
                 "mismatched_pairs": mismatched_pairs,
                 "pending_snapshots": len(pending_snapshots),
                 "orphan_observation_minutes": len(orphan_observation_minutes),
+                "inconsistent_remaining_progression": inconsistent_remaining_progression,
+                "inconsistent_final_totals": inconsistent_final_totals,
             },
             "by_league": league_report,
             "by_minute_bucket": [
