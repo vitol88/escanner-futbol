@@ -174,8 +174,9 @@ def build_automatic_history(
                     cache["_automatic_history_stats_calls"] = int(cache.get("_automatic_history_stats_calls", 0) or 0) + 1
                     stats_attempted += 1
                     diagnostics["historical_stats"]["requested"] += 1
-                    full_response = (api_get("fixtures/statistics", {"fixture": old_id}).get("response") or [])
+                    # Consume budget before the call: failed/429 attempts are real requests too.
                     request_budget[0] -= 1
+                    full_response = (api_get("fixtures/statistics", {"fixture": old_id}).get("response") or [])
                     if full_response:
                         cache[full_stats_key] = full_response
                         stats_nonempty += 1
@@ -198,8 +199,9 @@ def build_automatic_history(
                     cache["_automatic_history_stats_calls"] = int(cache.get("_automatic_history_stats_calls", 0) or 0) + 1
                     stats_attempted += 1
                     diagnostics["historical_stats"]["requested"] += 1
-                    half_response = (api_get("fixtures/statistics", {"fixture": old_id, "half": "true"}).get("response") or [])
+                    # Consume budget before the call: failed/429 attempts are real requests too.
                     request_budget[0] -= 1
+                    half_response = (api_get("fixtures/statistics", {"fixture": old_id, "half": "true"}).get("response") or [])
                     if half_response:
                         cache[half_stats_key] = half_response
                         half_stats = half_response
@@ -243,10 +245,14 @@ def build_automatic_history(
             old_fixture_info = old.get("fixture") or {}
             old_timestamp = old_fixture_info.get("timestamp")
             target_timestamp = (fixture.get("fixture") or {}).get("timestamp")
-            before_target = not (
+            # Strict temporal guard: card-model rows require both timestamps and
+            # the historical fixture must be strictly earlier than the target kickoff.
+            before_target = (
                 isinstance(old_timestamp, (int, float))
+                and not isinstance(old_timestamp, bool)
                 and isinstance(target_timestamp, (int, float))
-                and old_timestamp >= target_timestamp
+                and not isinstance(target_timestamp, bool)
+                and old_timestamp < target_timestamp
             )
             if old_id and before_target and home_yellow is not None and away_yellow is not None:
                 card_history_rows[str(old_id)] = {
