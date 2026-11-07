@@ -24,7 +24,7 @@ class PrematchYellowCardModelTests(unittest.TestCase):
         self.assertFalse(result["calibrated"])
 
     def test_referee_needs_minimum_sample(self):
-        result = estimate_prematch_yellow_cards(self.features, self.rows)
+        result = estimate_prematch_yellow_cards(self.features, self.rows, minimum_referee_matches=9)
         self.assertFalse(result["referee"]["used"])
         self.assertEqual(result["referee"]["factor"], 1.0)
 
