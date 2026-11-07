@@ -74,6 +74,32 @@ class LiveCornerBacktestTests(unittest.TestCase):
         self.assertAlmostEqual(result["metrics"]["mae_remaining_corners"], 4.0)
         self.assertAlmostEqual(result["mae_improvement_vs_global_mean"], 0.0)
 
+    def test_fixture_weighted_metrics_limit_dominance_from_dense_fixtures(self):
+        connection = sqlite3.connect(self.db)
+        # Add many extra observations to one held-out fixture with a different
+        # target, so row-weighted and equal-fixture-weighted metrics diverge.
+        for index in range(20):
+            connection.execute(
+                "INSERT INTO live_corner_observations VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                ("fixture-7", "Premier League", f"Extra-{index}", "home",
+                 80, 20, 3, 1_800_000_000 + 7 * 86400),
+            )
+        connection.commit()
+        connection.close()
+        result = run_live_corner_baseline_backtest(
+            self.db, test_fraction=0.25, min_train_fixtures=5,
+            min_test_fixtures=2, min_league_test_fixtures=1,
+        )
+        fixture_metrics = result["fixture_weighted_metrics"]
+        self.assertEqual(fixture_metrics["fixtures"], 3)
+        self.assertEqual(fixture_metrics["observations"], result["metrics"]["observations"])
+        self.assertAlmostEqual(fixture_metrics["mae_remaining_corners"], 7.3333333333)
+        self.assertNotAlmostEqual(
+            fixture_metrics["mae_remaining_corners"],
+            result["metrics"]["mae_remaining_corners"],
+        )
+        self.assertIn("equal_fixture_weight", fixture_metrics["weighting"])
+
     def test_zero_error_global_reference_has_no_percentage_improvement(self):
         connection = sqlite3.connect(self.db)
         connection.execute("UPDATE live_corner_observations SET corners_for_after = 4")
