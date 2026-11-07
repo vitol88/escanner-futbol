@@ -103,6 +103,30 @@ class DataEngineTests(unittest.TestCase):
         self.assertIs(engine.get_fixture_statistics(12345), existing)
         self.assertEqual(calls, [])
 
+
+    def test_engine_snapshot_uses_existing_statistics_without_extra_api_calls(self):
+        existing = [
+            {
+                "team": {"id": 10, "name": "América"},
+                "statistics": [{"type": "Corner Kicks", "value": 4}],
+            },
+            {
+                "team": {"id": 20, "name": "Deportivo Cali"},
+                "statistics": [{"type": "Corner Kicks", "value": 7}],
+            },
+        ]
+        calls = []
+        engine = FootballDataEngine(
+            lambda endpoint, params: calls.append((endpoint, params)) or {"response": []},
+            {"12345": existing},
+        )
+        stats = engine.get_fixture_statistics(12345)
+        snapshot = engine.snapshot(FIXTURE, statistics=stats)
+        self.assertEqual(snapshot["match"]["fixture_id"], 12345)
+        self.assertEqual(snapshot["statistics"]["home"]["values"]["corners"]["value"], 4)
+        self.assertEqual(snapshot["statistics"]["away"]["values"]["corners"]["value"], 7)
+        self.assertEqual(calls, [])
+
     def test_data_engine_rejects_empty_fixture_id(self):
         engine = FootballDataEngine(lambda endpoint, params: {"response": []})
         with self.assertRaises(ValueError):
