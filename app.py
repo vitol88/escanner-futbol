@@ -11,8 +11,14 @@ from typing import Any
 import requests
 import streamlit as st
 
+from ai_engine.data_engine import FootballDataEngine
+from ai_engine.live_corner_capture import capture_live_corner_snapshot
+from ai_engine.live_corner_finalize import finalize_live_corner_fixture
 from models.live_context import qualifies_as_corner_candidate, summarize_live_context
-from models.backtest import evaluate_binary_predictions
+from ai_engine.evaluation import evaluate_binary_forecasts, evaluate_forecasts_by_group, evaluate_chronological_holdout
+from ai_engine.dataset_audit import audit_forecast_dataset
+from ai_engine.prediction_schema import normalize_prediction_record
+from ai_engine.prediction_ledger import append_prediction_records
 from models.automatic_history import build_automatic_history
 from models.deep_goal_context import build_deep_goal_context
 from models.probabilities import (
@@ -31,6 +37,10 @@ from models.live_odds import (
 
 API_BASE = "https://v3.football.api-sports.io"
 TIMEOUT_SECONDS = 15
+LIVE_CORNER_CAPTURE_DB = Path(os.environ.get(
+    "FOOTBALL_LAB_DB_PATH",
+    str(Path(__file__).resolve().parent / "data" / "football_lab.sqlite3"),
+))
 
 st.set_page_config(
     page_title="FOOTBALL LAB · Live Analytics",
@@ -4019,6 +4029,7 @@ if "last_auto_market_scan_epoch" not in st.session_state:
 # Persist the audit trail on the host filesystem where supported. The path can be
 # redirected with SIGNAL_HISTORY_PATH; some cloud hosts use ephemeral storage.
 SIGNAL_HISTORY_PATH = Path(os.getenv("SIGNAL_HISTORY_PATH", "registro_senales_escanner.csv"))
+PREDICTION_LEDGER_PATH = Path(os.getenv("PREDICTION_LEDGER_PATH", "registro_pronosticos_football_lab.sqlite3"))
 if "signal_rows" not in st.session_state:
     try:
         if SIGNAL_HISTORY_PATH.exists():
@@ -4705,6 +4716,22 @@ if should_refresh:
                 try:
                     stat_payload = api_get("fixtures/statistics", {"fixture": fixture_id})
                     stat_rows = stat_payload.get("response") or []
+                    # Capturar el snapshot con estadísticas ya consultadas: cero llamadas API adicionales.
+                    # La captura es auxiliar y nunca debe interrumpir el escáner principal.
+                    try:
+                        capture_result = capture_live_corner_snapshot(
+                            LIVE_CORNER_CAPTURE_DB, match, stat_rows
+                        )
+                        if capture_result.get("stored"):
+                            st.session_state["live_corner_capture_last"] = {
+                                "fixture_id": fixture_id,
+                                "minute": capture_result.get("minute"),
+                            }
+                            st.session_state["live_corner_capture_count"] = (
+                                st.session_state.get("live_corner_capture_count", 0) + 1
+                            )
+                    except Exception as capture_exc:
+                        st.session_state["live_corner_capture_error"] = str(capture_exc)
                     # Reutilizar datos recientes en el panel del partido seleccionado.
                     st.session_state.stats_cache[fixture_id] = stat_rows
                     home_c = safe_stat(stat_rows, "Corner Kicks", 0)
@@ -5661,14 +5688,17 @@ else:
                                     if tool_name != "stats" and not _analysis_page_active:
                                         st.markdown('<div class="match-analysis-kicker">PARTIDO SELECCIONADO</div>', unsafe_allow_html=True)
                                     if tool_name == "stats":
+                                        # Adaptador AI: reutiliza api_get y la caché existente; no añade
+                                        # endpoints ni solicitudes de red al flujo actual.
+                                        _ai_data_engine = FootballDataEngine(api_get, st.session_state.stats_cache)
                                         if st.session_state.get("fixture_mode", "live") == "upcoming":
                                             stat_data = []
                                             stats_error = None
                                         else:
                                             if str(match_id) not in st.session_state.stats_cache or str(match_id) in st.session_state.get("stats_errors", {}):
                                                 try:
-                                                    _stats_payload = api_get("fixtures/statistics", {"fixture": match_id})
-                                                    st.session_state.stats_cache[str(match_id)] = _stats_payload.get("response") or []
+                                                    stat_data = _ai_data_engine.get_fixture_statistics(match_id)
+                                                    st.session_state.stats_cache[str(match_id)] = stat_data
                                                     st.session_state.setdefault("stats_errors", {}).pop(str(match_id), None)
                                                 except Exception as _stats_exc:
                                                     st.session_state.stats_cache[str(match_id)] = []
@@ -5676,6 +5706,17 @@ else:
                                             stat_data = st.session_state.stats_cache.get(str(match_id), [])
                                             stats_error = st.session_state.get("stats_errors", {}).get(str(match_id))
                                         stats_error = st.session_state.get("stats_errors", {}).get(str(match_id))
+
+                                        # Snapshot versionado para la futura IA prepartido/en vivo.
+                                        # Se construye únicamente con datos ya disponibles en la sesión.
+                                        _live_odds_cache = st.session_state.get("live_odds_by_fixture", {}) or {}
+                                        _match_odds = _live_odds_cache.get(str(match_id), _live_odds_cache.get(match_id, {}))
+                                        _ai_snapshots = st.session_state.setdefault("ai_match_snapshots", {})
+                                        _ai_snapshots[str(match_id)] = _ai_data_engine.snapshot(
+                                            match, statistics=stat_data, odds=_match_odds
+                                        )
+                                        while len(_ai_snapshots) > 100:
+                                            _ai_snapshots.pop(next(iter(_ai_snapshots)))
                                         if stats_error:
                                             st.warning(f"No se pudieron cargar las estadísticas: {stats_error}")
                                         elif stat_data:
@@ -7880,6 +7921,11 @@ else:
                     api_get=api_get,
                     cache=history_cache,
                     stats_budget=max(0, history_budget - used_history_stats),
+                    live_corner_finalizer=lambda completed_fixture, final_stats: (
+                        finalize_live_corner_fixture(
+                            LIVE_CORNER_CAPTURE_DB, completed_fixture, final_stats
+                        )
+                    ),
                 )
             except Exception as history_exc:
                 corner_item["automatic_history"] = {
@@ -7941,17 +7987,28 @@ else:
             for market, probability in tips:
                 fixture_data = fixture.get("fixture") or {}
                 goals_data = fixture.get("goals") or {}
+                recorded_at = datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
                 row = {
-                    "recorded_at": datetime.now().isoformat(timespec="seconds"),
+                    "recorded_at": recorded_at,
                     "fixture_id": fixture_data.get("id"),
+                    "league_id": (fixture.get("league") or {}).get("id"),
                     "league": (fixture.get("league") or {}).get("name"),
                     "home": ((fixture.get("teams") or {}).get("home") or {}).get("name"),
                     "away": ((fixture.get("teams") or {}).get("away") or {}).get("name"),
+                    "phase": "live",
                     "minute": context.get("elapsed"),
                     "score_home": goals_data.get("home"),
                     "score_away": goals_data.get("away"),
                     "market": market,
+                    "market_type": "goals",
+                    "probability": round(float(probability), 4),
                     "estimated_probability_exploratory": round(float(probability), 4),
+                    "model_id": "estimate_live_goal_markets",
+                    "source": "football_lab_live_scanner",
+                    "snapshot_id": ":".join(str(value) for value in (
+                        fixture_data.get("id"), context.get("elapsed"),
+                        goals_data.get("home"), goals_data.get("away"),
+                    )),
                     "context_status": context.get("context_status"),
                     "corners_total": context.get("corners_total"),
                     "shots_total": context.get("shots_total"),
@@ -7961,6 +8018,12 @@ else:
                     "outcome": "",
                     "outcome_verified": "",
                 }
+                normalized_row = normalize_prediction_record(row)
+                row.update({
+                    "schema_version": normalized_row["schema_version"],
+                    "prediction_id": normalized_row["prediction_id"],
+                    "timestamp_status": normalized_row["timestamp_status"],
+                })
                 row_key = (str(row["fixture_id"]), str(row["market"]), str(row["minute"]),
                            str(row["score_home"]), str(row["score_away"]))
                 if row_key not in existing_keys:
@@ -7971,11 +8034,35 @@ else:
             if signal_rows:
                 SIGNAL_HISTORY_PATH.parent.mkdir(parents=True, exist_ok=True)
                 with SIGNAL_HISTORY_PATH.open("w", encoding="utf-8-sig", newline="") as history_file:
-                    writer = csv.DictWriter(history_file, fieldnames=list(signal_rows[0].keys()))
+                    # Registros antiguos y nuevos pueden tener columnas distintas.
+                    # Unimos las claves para conservar las filas legacy sin perder metadatos nuevos.
+                    fieldnames = list(dict.fromkeys(
+                        key for saved_row in signal_rows for key in saved_row.keys()
+                    ))
+                    writer = csv.DictWriter(history_file, fieldnames=fieldnames, extrasaction="ignore")
                     writer.writeheader()
                     writer.writerows(signal_rows)
         except OSError as history_exc:
             st.session_state.signal_history_write_error = str(history_exc)
+        # Keep a canonical, append-only forecast ledger separate from the legacy CSV.
+        # SQLite uniqueness on prediction_id makes repeated Streamlit reruns idempotent.
+        ledger_records_to_sync = [
+            normalize_prediction_record(saved_row)
+            for saved_row in signal_rows
+            if saved_row.get("schema_version") == "1.0"
+        ]
+        ledger_records_to_sync = [record for record in ledger_records_to_sync if record["valid"]]
+        if ledger_records_to_sync:
+            try:
+                # Re-submit canonical CSV rows on each scan: SQLite ignores rows
+                # already committed and retries any records missed by a prior failure.
+                st.session_state.prediction_ledger_last_write = append_prediction_records(
+                    PREDICTION_LEDGER_PATH, ledger_records_to_sync
+                )
+                st.session_state.prediction_ledger_write_error = ""
+            except Exception as ledger_exc:
+                # A ledger failure must not interrupt the live scanner or its legacy log.
+                st.session_state.prediction_ledger_write_error = str(ledger_exc)
         st.session_state.last_scan_api_calls = st.session_state.api_request_count - scan_api_calls_start
 
     # El panel global de escaneo no debe mezclarse con la pantalla individual seleccionada.
@@ -8563,20 +8650,131 @@ else:
             if backtest_file is not None:
                 try:
                     uploaded_rows = list(csv.DictReader(io.StringIO(backtest_file.getvalue().decode("utf-8-sig"))))
-                    metrics = evaluate_binary_predictions(uploaded_rows)
-                    metric_cols = st.columns(4)
+                    audit = audit_forecast_dataset(uploaded_rows)
+                    st.markdown("#### Auditoría de calidad del CSV")
+                    audit_cols = st.columns(5)
+                    audit_cols[0].metric("Filas del CSV", audit["row_count"])
+                    audit_cols[1].metric("Pronósticos válidos", audit["distinct_valid_forecasts"])
+                    audit_cols[2].metric("Duplicados", audit["duplicate_forecasts"])
+                    audit_cols[3].metric("Metadatos inválidos", audit["invalid_metadata_rows"])
+                    audit_cols[4].metric("Resultados verificados", audit["verified_valid_outcomes"])
+                    if audit["verified_invalid_outcomes"]:
+                        st.warning(f"{audit['verified_invalid_outcomes']} filas marcadas como verificadas tienen probabilidad o resultado inválido.")
+                    st.caption(
+                        f"Mercados identificados: {audit['market_count']} · "
+                        f"Ligas identificadas: {audit['league_count']} · "
+                        f"Probabilidades inválidas: {audit['invalid_probability_rows']}. "
+                        "La auditoría no modifica el archivo ni completa resultados."
+                    )
+                    metrics = evaluate_binary_forecasts(uploaded_rows)
+                    metric_cols = st.columns(5)
                     metric_cols[0].metric("Muestra verificada", metrics["sample_size"])
-                    metric_cols[1].metric("Tasa de acierto", f"{metrics['hit_rate']:.1%}" if metrics["hit_rate"] is not None else "N/D")
-                    metric_cols[2].metric("Brier score", f"{metrics['brier_score']:.3f}" if metrics["brier_score"] is not None else "N/D")
-                    metric_cols[3].metric("Filas excluidas", metrics["excluded"])
+                    metric_cols[1].metric("Brier score", f"{metrics['brier_score']:.3f}" if metrics["brier_score"] is not None else "N/D")
+                    metric_cols[2].metric("Log loss", f"{metrics['log_loss']:.3f}" if metrics["log_loss"] is not None else "N/D")
+                    metric_cols[3].metric("Brecha calibración", f"{metrics['calibration_gap']:.1%}" if metrics["calibration_gap"] is not None else "N/D")
+                    metric_cols[4].metric("Filas excluidas", metrics["excluded"])
                     if metrics["sample_size"]:
                         st.caption(
                             f"Probabilidad media pronosticada: {metrics['mean_probability']:.1%} frente a "
-                            f"frecuencia real de acierto: {metrics['observed_rate']:.1%}. "
-                            "Una diferencia grande puede indicar mala calibración; evalúa cada mercado por separado y con una muestra suficiente. Brier score: cuanto más bajo, mejor (0 es perfecto)."
+                            f"frecuencia real: {metrics['observed_rate']:.1%}. "
+                            "Brier y Log loss: cuanto más bajos, mejor. La brecha de calibración pondera la diferencia entre probabilidad y frecuencia observada por intervalos."
                         )
+                        if not metrics["minimum_sample_reached"]:
+                            st.warning(
+                                f"Muestra todavía pequeña: {metrics['sample_size']} registros válidos; "
+                                f"se recomienda reunir al menos {metrics['minimum_sample']} antes de interpretar la calibración."
+                            )
                     else:
                         st.info("Todavía no hay filas con probabilidad válida y resultado binario marcado como verificado.")
+
+                    if metrics["sample_size"]:
+                        st.markdown("#### Validación cronológica por partido")
+                        temporal = evaluate_chronological_holdout(uploaded_rows)
+                        if temporal["available"]:
+                            temporal_metrics = temporal["test_metrics"]
+                            st.caption(
+                                f"Separación temporal: {temporal['train_fixture_count']} partidos anteriores "
+                                f"para desarrollo y {temporal['test_fixture_count']} partidos posteriores para prueba. "
+                                "Los registros del mismo partido permanecen juntos."
+                            )
+                            temporal_cols = st.columns(3)
+                            temporal_cols[0].metric("Muestra futura verificada", temporal_metrics["sample_size"])
+                            temporal_cols[1].metric("Brier de prueba", f"{temporal_metrics['brier_score']:.3f}" if temporal_metrics["brier_score"] is not None else "N/D")
+                            temporal_cols[2].metric("Log loss de prueba", f"{temporal_metrics['log_loss']:.3f}" if temporal_metrics["log_loss"] is not None else "N/D")
+
+                            st.markdown("##### Prueba posterior por mercado")
+                            holdout_markets = temporal["test_metrics_by_market"]
+                            if holdout_markets:
+                                st.dataframe(
+                                    [{
+                                        "Mercado": item["group"],
+                                        "Muestra": item["sample_size"],
+                                        "Brier": item["brier_score"],
+                                        "Log loss": item["log_loss"],
+                                        "Brecha calibración": item["calibration_gap"],
+                                        "Estado": "Muestra suficiente" if item["minimum_sample_reached"] else "Muestra pequeña",
+                                    } for item in holdout_markets],
+                                    hide_index=True,
+                                    use_container_width=True,
+                                )
+                            else:
+                                st.caption("El bloque de prueba todavía no contiene resultados verificados agrupables por mercado.")
+
+                            st.markdown("##### Prueba posterior por liga")
+                            holdout_leagues = temporal["test_metrics_by_league"]
+                            if holdout_leagues:
+                                st.dataframe(
+                                    [{
+                                        "Liga": item["group"],
+                                        "Muestra": item["sample_size"],
+                                        "Brier": item["brier_score"],
+                                        "Log loss": item["log_loss"],
+                                        "Brecha calibración": item["calibration_gap"],
+                                        "Estado": "Muestra suficiente" if item["minimum_sample_reached"] else "Muestra pequeña",
+                                    } for item in holdout_leagues],
+                                    hide_index=True,
+                                    use_container_width=True,
+                                )
+                            else:
+                                st.caption("El bloque de prueba todavía no contiene resultados verificados agrupables por liga.")
+                        else:
+                            st.info("Aún no hay suficientes partidos con fecha válida para la prueba cronológica. Se requieren al menos 5 partidos anteriores y 5 posteriores.")
+
+                        st.markdown("#### Rendimiento por mercado")
+                        market_groups = evaluate_forecasts_by_group(uploaded_rows, group_key="market")
+                        if market_groups:
+                            st.dataframe(
+                                [{
+                                    "Mercado": item["group"],
+                                    "Muestra": item["sample_size"],
+                                    "Brier": item["brier_score"],
+                                    "Log loss": item["log_loss"],
+                                    "Brecha calibración": item["calibration_gap"],
+                                    "Estado": "Muestra suficiente" if item["minimum_sample_reached"] else "Muestra pequeña",
+                                } for item in market_groups],
+                                hide_index=True,
+                                use_container_width=True,
+                            )
+                        else:
+                            st.caption("El CSV no contiene etiquetas de mercado utilizables.")
+
+                        st.markdown("#### Rendimiento por liga")
+                        league_groups = evaluate_forecasts_by_group(uploaded_rows, group_key="league")
+                        if league_groups:
+                            st.dataframe(
+                                [{
+                                    "Liga": item["group"],
+                                    "Muestra": item["sample_size"],
+                                    "Brier": item["brier_score"],
+                                    "Log loss": item["log_loss"],
+                                    "Brecha calibración": item["calibration_gap"],
+                                    "Estado": "Muestra suficiente" if item["minimum_sample_reached"] else "Muestra pequeña",
+                                } for item in league_groups],
+                                hide_index=True,
+                                use_container_width=True,
+                            )
+                        else:
+                            st.caption("El CSV no contiene etiquetas de liga utilizables.")
                 except (UnicodeDecodeError, csv.Error, ValueError) as exc:
                     st.error(f"No se pudo leer el CSV para la evaluación: {exc}")
 

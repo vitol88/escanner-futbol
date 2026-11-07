@@ -2,3 +2,7 @@
 __pycache__/
 *.pyc
 .venv/
+
+# Runtime SQLite databases (never commit live capture data)
+data/*.sqlite3
+data/*.db

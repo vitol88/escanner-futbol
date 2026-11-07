@@ -54,6 +54,7 @@ def build_automatic_history(
     api_get: Callable[..., dict[str, Any]],
     cache: dict[str, Any],
     stats_budget: int = 8,
+    live_corner_finalizer: Callable[[dict[str, Any], list[dict[str, Any]]], Any] | None = None,
 ) -> dict[str, Any]:
     """Build local/home and visitor/away recent averages without any CSV upload.
 
@@ -70,6 +71,7 @@ def build_automatic_history(
         "available": False, "home_team": home.get("name"), "away_team": away.get("name"),
         "home_matches": 0, "away_matches": 0, "h2h_matches": 0,
         "home_corners_for": None, "home_corners_against": None,
+        "card_history_rows": [],
         "away_corners_for": None, "away_corners_against": None,
         "home_goals_for": None, "home_goals_against": None,
         "away_goals_for": None, "away_goals_against": None,
@@ -80,7 +82,7 @@ def build_automatic_history(
         result["note"] = "Faltan IDs de equipos, liga o temporada para consultar el historial."
         return result
 
-    diagnostics: dict[str, Any] = {"league_id": league_id, "season": season, "teams": {}, "historical_stats": {"requested": 0, "nonempty_responses": 0, "responses_with_corners": 0, "empty_responses": 0, "errors": []}}
+    diagnostics: dict[str, Any] = {"league_id": league_id, "season": season, "teams": {}, "historical_stats": {"requested": 0, "nonempty_responses": 0, "responses_with_corners": 0, "empty_responses": 0, "errors": []}, "live_corner_finalization": {"attempted": 0, "finalized": 0, "observations_inserted": 0, "errors": []}}
 
     def team_fixtures(team_id: int) -> list[dict[str, Any]]:
         key = f"team-fixtures-v5:{team_id}:{league_id}:{season}"
@@ -111,12 +113,20 @@ def build_automatic_history(
 
     # Solo partidos finalizados de la misma competición y temporada del partido en vivo.
     finished = {"FT", "AET", "PEN"}
+    target_timestamp = (fixture.get("fixture") or {}).get("timestamp")
     def same_competition_finished(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        # Only use completed fixtures with a known kickoff strictly before the
+        # target fixture. This protects every historical feature from temporal leakage.
         return [
             item for item in items
             if (item.get("fixture") or {}).get("status", {}).get("short") in finished
             and (item.get("league") or {}).get("id") == league_id
             and str((item.get("league") or {}).get("season")) == str(season)
+            and isinstance((item.get("fixture") or {}).get("timestamp"), (int, float))
+            and not isinstance((item.get("fixture") or {}).get("timestamp"), bool)
+            and isinstance(target_timestamp, (int, float))
+            and not isinstance(target_timestamp, bool)
+            and (item.get("fixture") or {}).get("timestamp") < target_timestamp
         ]
     home_raw = team_fixtures(home["id"])
     away_raw = team_fixtures(away["id"])
@@ -132,6 +142,8 @@ def build_automatic_history(
     total_budget = max(0, int(stats_budget))
     home_budget = [(total_budget + 1) // 2]
     away_budget = [total_budget // 2]
+
+    card_history_rows: dict[str, dict[str, Any]] = {}
 
     def averages(matches: list[dict[str, Any]], team_id: int, venue: str, request_budget: list[int]) -> dict[str, Any]:
         gf: list[float] = []
@@ -166,10 +178,14 @@ def build_automatic_history(
             full_retry_key = f"{full_stats_key}:retry_after"
             if old_id and full_stats_key not in cache and time.time() >= float(cache.get(full_retry_key, 0) or 0) and request_budget[0] > 0 and not cache.get("_automatic_history_rate_limited"):
                 try:
-                    full_response = (api_get("fixtures/statistics", {"fixture": old_id}).get("response") or [])
+                    # Count every real historical-statistics request across all fixtures
+                    # in this scan, including attempts that fail or return no data.
+                    cache["_automatic_history_stats_calls"] = int(cache.get("_automatic_history_stats_calls", 0) or 0) + 1
                     stats_attempted += 1
                     diagnostics["historical_stats"]["requested"] += 1
+                    # Consume budget before the call: failed/429 attempts are real requests too.
                     request_budget[0] -= 1
+                    full_response = (api_get("fixtures/statistics", {"fixture": old_id}).get("response") or [])
                     if full_response:
                         cache[full_stats_key] = full_response
                         stats_nonempty += 1
@@ -185,13 +201,33 @@ def build_automatic_history(
                         cache["_automatic_history_rate_limited"] = True
             stats = cache.get(full_stats_key, [])
 
+            # Reuse the same completed-fixture statistics already fetched for
+            # recent-form history. No extra endpoint or request is introduced.
+            if live_corner_finalizer is not None and stats:
+                try:
+                    diagnostics["live_corner_finalization"]["attempted"] += 1
+                    finalized = live_corner_finalizer(old, stats)
+                    if isinstance(finalized, dict) and finalized.get("finalized"):
+                        diagnostics["live_corner_finalization"]["finalized"] += 1
+                        diagnostics["live_corner_finalization"]["observations_inserted"] += int(
+                            finalized.get("observations_inserted", 0) or 0
+                        )
+                except Exception as finalize_exc:
+                    diagnostics["live_corner_finalization"]["errors"].append({
+                        "fixture_id": old_id,
+                        "error": str(finalize_exc),
+                    })
+
             half_stats = cache.get(half_stats_key)
             if old_id and full_stats_key in cache and half_stats is None and time.time() >= float(cache.get(half_retry_key, 0) or 0) and request_budget[0] > 0 and not cache.get("_automatic_history_rate_limited"):
                 try:
-                    half_response = (api_get("fixtures/statistics", {"fixture": old_id, "half": "true"}).get("response") or [])
+                    # Half-time statistics consume the same shared API budget.
+                    cache["_automatic_history_stats_calls"] = int(cache.get("_automatic_history_stats_calls", 0) or 0) + 1
                     stats_attempted += 1
                     diagnostics["historical_stats"]["requested"] += 1
+                    # Consume budget before the call: failed/429 attempts are real requests too.
                     request_budget[0] -= 1
+                    half_response = (api_get("fixtures/statistics", {"fixture": old_id, "half": "true"}).get("response") or [])
                     if half_response:
                         cache[half_stats_key] = half_response
                         half_stats = half_response
@@ -218,6 +254,46 @@ def build_automatic_history(
                  if (row.get("team") or {}).get("id") == opponent_id),
                 1 - own_stats_index,
             )
+            old_home_id = (old_teams.get("home") or {}).get("id")
+            old_away_id = (old_teams.get("away") or {}).get("id")
+            home_stats_index = next(
+                (idx for idx, row in enumerate(stats or [])
+                 if (row.get("team") or {}).get("id") == old_home_id),
+                0,
+            )
+            away_stats_index = next(
+                (idx for idx, row in enumerate(stats or [])
+                 if (row.get("team") or {}).get("id") == old_away_id),
+                1,
+            )
+            home_yellow = _stat(stats, home_stats_index, "Yellow Cards")
+            away_yellow = _stat(stats, away_stats_index, "Yellow Cards")
+            old_fixture_info = old.get("fixture") or {}
+            old_timestamp = old_fixture_info.get("timestamp")
+            target_timestamp = (fixture.get("fixture") or {}).get("timestamp")
+            # Strict temporal guard: card-model rows require both timestamps and
+            # the historical fixture must be strictly earlier than the target kickoff.
+            before_target = (
+                isinstance(old_timestamp, (int, float))
+                and not isinstance(old_timestamp, bool)
+                and isinstance(target_timestamp, (int, float))
+                and not isinstance(target_timestamp, bool)
+                and old_timestamp < target_timestamp
+            )
+            if old_id and before_target and home_yellow is not None and away_yellow is not None:
+                card_history_rows[str(old_id)] = {
+                    "fixture_id": old_id,
+                    "fixture_timestamp": old_timestamp,
+                    "league_id": (old.get("league") or {}).get("id"),
+                    "season": (old.get("league") or {}).get("season"),
+                    "home_team_id": old_home_id,
+                    "away_team_id": old_away_id,
+                    "home_team": (old_teams.get("home") or {}).get("name"),
+                    "away_team": (old_teams.get("away") or {}).get("name"),
+                    "home_yellow_cards": home_yellow,
+                    "away_yellow_cards": away_yellow,
+                    "referee": old_fixture_info.get("referee"),
+                }
             own_c, _, _ = _corner_parts(stats, own_stats_index)
             opp_c, _, _ = _corner_parts(stats, opponent_stats_index)
             _, own_first, own_second = _corner_parts(half_stats, own_stats_index)
@@ -251,6 +327,7 @@ def build_automatic_history(
         "home_corner_sample": h["corner_sample"], "away_corner_sample": a["corner_sample"],
         "home_corner_period_sample": h["corner_period_sample"], "away_corner_period_sample": a["corner_period_sample"],
         "home_goal_sample": h["goal_sample"], "away_goal_sample": a["goal_sample"],
+        "card_history_rows": sorted(card_history_rows.values(), key=lambda row: row.get("fixture_timestamp") or 0),
         "diagnostics": {**diagnostics, "home_venue_matches_checked": h["matches"], "away_venue_matches_checked": a["matches"], "home_stats_attempted": h["stats_attempted"], "away_stats_attempted": a["stats_attempted"], "home_stats_nonempty": h["stats_nonempty"], "away_stats_nonempty": a["stats_nonempty"], "home_stats_with_corners": h["stats_with_corners"], "away_stats_with_corners": a["stats_with_corners"], "stats_budget_remaining": away_budget[0]},
         "note": "Promedios calculados con partidos finalizados de la misma competición y temporada. La muestra cuenta únicamente partidos con estadísticas de córners disponibles.",
     })
