@@ -104,3 +104,16 @@ El escáner integra `ai_engine.live_corner_capture.capture_live_corner_snapshot`
 - La base de datos está excluida de Git. En despliegues con sistema de archivos efímero, configura `FOOTBALL_LAB_DB_PATH` hacia un volumen persistente antes de confiar en la acumulación entre reinicios.
 
 **Importante:** estas filas son instantáneas provisionales. No se consideran todavía observaciones históricas de resultado ni alimentan los modelos. Para eso falta verificar el total final de córners de cada partido y calcular los córners posteriores a cada minuto capturado. Esa etapa debe usar estadísticas finales ya disponibles o una consulta de cierre presupuestada, sin convertir conteos parciales en resultados.
+
+
+## Cierre verificado de snapshots de córners
+
+`live_corner_finalize.finalize_live_corner_fixture(database_path, completed_fixture, final_statistics)` transforma snapshots provisionales en observaciones históricas solo cuando recibe el fixture en estado `FT`, `AET` o `PEN` y las estadísticas finales completas por ID de equipo.
+
+- Comprueba identidad de fixture/equipos/liga y que los córners finales no sean inferiores a ningún snapshot guardado.
+- Por cada minuto capturado crea dos filas (perspectiva local y visitante) en `live_corner_observations`.
+- Calcula `corners_for_after` y `corners_against_after` como diferencia entre el total final verificado y el conteo observado en ese minuto.
+- Usa `INSERT OR IGNORE` con la clave partido/equipo/sede/minuto; repetir el cierre no duplica filas.
+- Si falta el resultado final, las estadísticas están incompletas o no coinciden los equipos, no convierte el snapshot en histórico.
+
+La integración con `build_automatic_history` reutiliza las respuestas de estadísticas de partidos finalizados que ya se solicitan para el análisis de forma reciente. No crea consultas adicionales: también ejecuta el cierre cuando la respuesta ya está en la caché de sesión. Por tanto, un partido capturado se cierra cuando vuelve a aparecer en el flujo histórico de un análisis posterior dentro de la misma liga/temporada y se dispone de sus estadísticas. No es un proceso en segundo plano ni garantiza el cierre inmediato al pitazo final. El presupuesto histórico existente sigue siendo el límite de solicitudes.
