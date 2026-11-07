@@ -104,3 +104,15 @@ El escáner mantiene ahora un ledger independiente y append-only en SQLite, por 
 - La base SQLite reside en el disco del host. En despliegues con almacenamiento efímero, configura un volumen persistente o una ruta persistente antes de usarla como histórico a largo plazo.
 
 El ledger no emite apuestas ni cambia umbrales, cálculos o presentación de la app. Las probabilidades registradas siguen siendo experimentales hasta completar validación cronológica con resultados verificados.
+
+## Histórico minuto a minuto para córners en vivo
+
+El módulo `ai_engine.live_corner_history.load_live_corner_history_csv` permite incorporar un histórico explícito para el estimador de córners restantes. El archivo CSV debe contener estas columnas:
+
+- `fixture_id`, `league`, `team`, `venue` (`home`/`away`), `minute`
+- `corners_for`, `corners_against`: córners acumulados hasta el minuto indicado.
+- `corners_for_after`, `corners_against_after`: córners adicionales obtenidos después de ese corte hasta el final del partido.
+
+Cada observación debe corresponder a un partido finalizado y a un corte temporal real. El cargador valida números, minuto, sede, columnas e identidad del partido; informa filas inválidas y duplicados, y no inventa observaciones. No transforma promedios de partido completo en datos minuto a minuto.
+
+Este cargador es una base de entrada y validación: la app todavía no consume automáticamente este archivo ni registra snapshots en vivo para construirlo. Hasta conectar una fuente histórica suficiente, el modelo live de córners debe abstenerse. El histórico prepartido de equipos no sustituye esta fuente.
