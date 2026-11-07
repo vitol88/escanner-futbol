@@ -74,5 +74,43 @@ class BinaryForecastEvaluationTests(unittest.TestCase):
             evaluate_forecasts_by_group([], group_key=" ")
 
 
+    def test_chronological_holdout_keeps_fixture_snapshots_together(self):
+        from ai_engine.evaluation import evaluate_chronological_holdout
+        rows = []
+        for index in range(10):
+            for snapshot in range(2):
+                rows.append({
+                    "fixture_id": f"fx-{index}",
+                    "recorded_at": f"2026-01-{index + 1:02d}T12:0{snapshot}:00",
+                    "estimated_probability_exploratory": 0.8,
+                    "outcome": 1,
+                    "outcome_verified": True,
+                })
+        result = evaluate_chronological_holdout(rows, minimum_train_fixtures=5, minimum_test_fixtures=2)
+        self.assertTrue(result["available"])
+        self.assertEqual(result["train_fixture_count"], 8)
+        self.assertEqual(result["test_fixture_count"], 2)
+        self.assertEqual(result["train_row_count"], 16)
+        self.assertEqual(result["test_row_count"], 4)
+        self.assertEqual(result["test_metrics"]["sample_size"], 4)
+        self.assertLess(result["train_last_timestamp"], result["test_first_timestamp"])
+
+    def test_chronological_holdout_excludes_bad_temporal_rows(self):
+        from ai_engine.evaluation import evaluate_chronological_holdout
+        rows = [
+            {"fixture_id": "a", "recorded_at": "2026-01-01T00:00:00"},
+            {"fixture_id": "b", "recorded_at": "bad-date"},
+            {"fixture_id": "", "recorded_at": "2026-01-03T00:00:00"},
+        ]
+        result = evaluate_chronological_holdout(rows, minimum_train_fixtures=1, minimum_test_fixtures=1)
+        self.assertEqual(result["excluded_temporal_rows"], 2)
+        self.assertFalse(result["available"])
+
+    def test_chronological_holdout_validates_configuration(self):
+        from ai_engine.evaluation import evaluate_chronological_holdout
+        with self.assertRaises(ValueError):
+            evaluate_chronological_holdout([], train_fraction=1.0)
+        with self.assertRaises(ValueError):
+            evaluate_chronological_holdout([], minimum_test_fixtures=0)
 if __name__ == "__main__":
     unittest.main()
