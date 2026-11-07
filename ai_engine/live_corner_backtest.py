@@ -49,15 +49,20 @@ def run_live_corner_baseline_backtest(
     min_train_fixtures: int = 5,
     min_test_fixtures: int = 2,
     min_league_test_fixtures: int = 2,
+    min_bucket_test_fixtures: int = 2,
 ) -> dict[str, Any]:
-    """Train on earlier fixtures and evaluate on the latest chronological fixtures.
+    """Train on earlier kickoff times and evaluate on the latest chronological block.
 
     All minute snapshots and both team perspectives from a fixture stay together.
-    Prediction fallback is league+minute bucket, league-wide, then global.
+    Fixtures sharing the same kickoff timestamp also stay on the same side of the
+    split. Prediction fallback is league+minute bucket, league-wide, then global.
     """
     if not 0.05 <= test_fraction <= 0.5:
         raise ValueError("test_fraction must be between 0.05 and 0.5")
-    if min_train_fixtures < 1 or min_test_fixtures < 1 or min_league_test_fixtures < 1:
+    if min(
+        min_train_fixtures, min_test_fixtures,
+        min_league_test_fixtures, min_bucket_test_fixtures,
+    ) < 1:
         raise ValueError("minimum fixture counts must be positive")
     path = Path(database_path)
     if not path.exists():
@@ -105,24 +110,36 @@ def run_live_corner_baseline_backtest(
             }
         timestamps[fixture_id] = timestamp
 
-    ordered_fixtures = sorted(timestamps, key=lambda fixture_id: (timestamps[fixture_id], fixture_id))
-    test_count = max(min_test_fixtures, int(math.ceil(len(ordered_fixtures) * test_fraction)))
-    test_count = min(test_count, len(ordered_fixtures) - min_train_fixtures)
-    if test_count < min_test_fixtures or len(ordered_fixtures) - test_count < min_train_fixtures:
+    fixtures_by_timestamp: dict[int, set[str]] = {}
+    for fixture_id, timestamp in timestamps.items():
+        fixtures_by_timestamp.setdefault(timestamp, set()).add(fixture_id)
+    ordered_timestamps = sorted(fixtures_by_timestamp)
+    target_test_fixtures = max(
+        min_test_fixtures, int(math.ceil(len(timestamps) * test_fraction))
+    )
+    test_timestamps: set[int] = set()
+    test_fixture_ids: set[str] = set()
+    for timestamp in reversed(ordered_timestamps):
+        test_timestamps.add(timestamp)
+        test_fixture_ids.update(fixtures_by_timestamp[timestamp])
+        if len(test_fixture_ids) >= target_test_fixtures:
+            break
+    train_ids = set(timestamps) - test_fixture_ids
+    test_ids = test_fixture_ids
+    if len(train_ids) < min_train_fixtures or len(test_ids) < min_test_fixtures:
         return {
             "available": False, "reason": "insufficient_fixture_count_for_chronological_split",
-            "fixtures": len(ordered_fixtures), "required_train_fixtures": min_train_fixtures,
+            "fixtures": len(timestamps), "required_train_fixtures": min_train_fixtures,
             "required_test_fixtures": min_test_fixtures,
         }
 
-    train_ids = set(ordered_fixtures[:-test_count])
-    test_ids = set(ordered_fixtures[-test_count:])
     train = [row for row in rows if str(row["fixture_id"]) in train_ids]
     test = [row for row in rows if str(row["fixture_id"]) in test_ids]
     overall = _metrics(test, train)
 
     league_ids = sorted({str(row["league"] or "Unknown") for row in test})
     by_league = []
+    by_league_minute_bucket = []
     for league in league_ids:
         league_test = [row for row in test if str(row["league"] or "Unknown") == league]
         league_train = [row for row in train if str(row["league"] or "Unknown") == league]
@@ -134,27 +151,65 @@ def run_live_corner_baseline_backtest(
                 "test_fixtures": fixture_count,
                 "required_test_fixtures": min_league_test_fixtures,
             })
-            continue
-        metrics = _metrics(league_test, league_train or train)
-        by_league.append({
-            "league": league, "available": True,
-            "train_fixtures_in_league": len({str(row["fixture_id"]) for row in league_train}),
-            "test_fixtures": fixture_count,
-            **metrics,
-        })
+        else:
+            metrics = _metrics(league_test, league_train or train)
+            by_league.append({
+                "league": league, "available": True,
+                "train_fixtures_in_league": len({str(row["fixture_id"]) for row in league_train}),
+                "test_fixtures": fixture_count,
+                "training_source": "league" if league_train else "global_fallback",
+                **metrics,
+            })
+
+        buckets = sorted({_minute_bucket(row["minute"]) for row in league_test})
+        for bucket in buckets:
+            bucket_test = [
+                row for row in league_test if _minute_bucket(row["minute"]) == bucket
+            ]
+            bucket_train = [
+                row for row in league_train if _minute_bucket(row["minute"]) == bucket
+            ]
+            bucket_test_fixtures = len({str(row["fixture_id"]) for row in bucket_test})
+            bucket_train_fixtures = len({str(row["fixture_id"]) for row in bucket_train})
+            if bucket_test_fixtures < min_bucket_test_fixtures:
+                by_league_minute_bucket.append({
+                    "league": league, "minute_bucket": bucket, "available": False,
+                    "reason": "insufficient_test_fixtures_for_bucket",
+                    "train_fixtures_in_bucket": bucket_train_fixtures,
+                    "test_fixtures": bucket_test_fixtures,
+                    "required_test_fixtures": min_bucket_test_fixtures,
+                })
+                continue
+            metrics = _metrics(bucket_test, bucket_train or league_train or train)
+            by_league_minute_bucket.append({
+                "league": league, "minute_bucket": bucket, "available": True,
+                "train_fixtures_in_bucket": bucket_train_fixtures,
+                "test_fixtures": bucket_test_fixtures,
+                "training_source": (
+                    "league_minute_bucket" if bucket_train
+                    else "league_fallback" if league_train else "global_fallback"
+                ),
+                **metrics,
+            })
 
     return {
         "available": True,
         "evaluation": "chronological_fixture_holdout_minute_bucket_mean_baseline",
-        "warning": "Baseline only; not evidence of betting profitability or model superiority.",
+        "warning": (
+            "Baseline only; not evidence of betting profitability or model superiority. "
+            "Read league and minute-bucket metrics together with their fixture counts."
+        ),
         "split": {
-            "method": "chronological_fixture_timestamp",
+            "method": "chronological_fixture_timestamp_grouped",
             "train_fixtures": len(train_ids), "test_fixtures": len(test_ids),
             "train_observations": len(train), "test_observations": len(test),
             "fixture_overlap": len(train_ids & test_ids),
             "train_latest_timestamp": max(timestamps[item] for item in train_ids),
             "test_earliest_timestamp": min(timestamps[item] for item in test_ids),
+            "distinct_kickoff_timestamps": len(ordered_timestamps),
+            "test_kickoff_timestamp_groups": len(test_timestamps),
         },
         "metrics": overall,
         "by_league": by_league,
+        "by_league_minute_bucket": by_league_minute_bucket,
     }
