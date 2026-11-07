@@ -92,7 +92,20 @@ def evaluate_chronological_holdout(
         "train_last_timestamp": datetime.fromtimestamp(train_items[-1][1]["first_timestamp"], timezone.utc).isoformat() if train_items else None,
         "test_first_timestamp": datetime.fromtimestamp(test_items[0][1]["first_timestamp"], timezone.utc).isoformat() if test_items else None,
         "test_metrics": metrics,
-        "warnings": ["Partición por partido completo: no mezcla snapshots del mismo fixture.", "Solo se puntúan resultados verificados del bloque cronológico posterior.", "No entrena modelos ni demuestra rentabilidad futura."],
+        "test_metrics_by_market": evaluate_forecasts_by_group(
+            test_rows, group_key="market", probability_key=probability_key,
+            outcome_key=outcome_key, verified_key=verified_key,
+        ) if enough else [],
+        "test_metrics_by_league": evaluate_forecasts_by_group(
+            test_rows, group_key="league", probability_key=probability_key,
+            outcome_key=outcome_key, verified_key=verified_key,
+        ) if enough else [],
+        "warnings": [
+            "Partición por partido completo: no mezcla snapshots del mismo fixture.",
+            "Solo se puntúan resultados verificados del bloque cronológico posterior.",
+            "Los desgloses por mercado y liga usan exclusivamente el bloque de prueba posterior.",
+            "No entrena modelos ni demuestra rentabilidad futura.",
+        ],
     }
 def evaluate_forecasts_by_group(
     rows: list[dict[str, Any]],
