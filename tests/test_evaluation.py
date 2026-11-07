@@ -90,7 +90,7 @@ class BinaryForecastEvaluationTests(unittest.TestCase):
             for snapshot in range(2):
                 rows.append({
                     "fixture_id": f"fx-{index}",
-                    "recorded_at": f"2026-01-{index + 1:02d}T12:0{snapshot}:00",
+                    "recorded_at": f"2026-01-{index + 1:02d}T12:0{snapshot}:00Z",
                     "estimated_probability_exploratory": 0.8,
                     "outcome": 1,
                     "outcome_verified": True,
@@ -110,7 +110,7 @@ class BinaryForecastEvaluationTests(unittest.TestCase):
         for index in range(10):
             rows.append({
                 "fixture_id": f"fx-{index}",
-                "recorded_at": f"2026-02-{index + 1:02d}T12:00:00",
+                "recorded_at": f"2026-02-{index + 1:02d}T12:00:00+00:00",
                 "market": "Corners" if index < 8 else "Goals",
                 "league": "League A" if index < 8 else "League B",
                 "estimated_probability_exploratory": 0.8,
@@ -131,10 +131,10 @@ class BinaryForecastEvaluationTests(unittest.TestCase):
         rows = [
             {"fixture_id": "a", "recorded_at": "2026-01-01T00:00:00"},
             {"fixture_id": "b", "recorded_at": "bad-date"},
-            {"fixture_id": "", "recorded_at": "2026-01-03T00:00:00"},
+            {"fixture_id": "", "recorded_at": "2026-01-03T00:00:00Z"},
         ]
         result = evaluate_chronological_holdout(rows, minimum_train_fixtures=1, minimum_test_fixtures=1)
-        self.assertEqual(result["excluded_temporal_rows"], 2)
+        self.assertEqual(result["excluded_temporal_rows"], 3)
         self.assertFalse(result["available"])
 
     def test_chronological_holdout_validates_configuration(self):
