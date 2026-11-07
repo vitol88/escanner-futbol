@@ -15,6 +15,7 @@ from ai_engine.data_engine import FootballDataEngine
 from models.live_context import qualifies_as_corner_candidate, summarize_live_context
 from ai_engine.evaluation import evaluate_binary_forecasts, evaluate_forecasts_by_group, evaluate_chronological_holdout
 from ai_engine.dataset_audit import audit_forecast_dataset
+from ai_engine.prediction_schema import normalize_prediction_record
 from models.automatic_history import build_automatic_history
 from models.deep_goal_context import build_deep_goal_context
 from models.probabilities import (
@@ -7957,17 +7958,28 @@ else:
             for market, probability in tips:
                 fixture_data = fixture.get("fixture") or {}
                 goals_data = fixture.get("goals") or {}
+                recorded_at = datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
                 row = {
-                    "recorded_at": datetime.now().isoformat(timespec="seconds"),
+                    "recorded_at": recorded_at,
                     "fixture_id": fixture_data.get("id"),
+                    "league_id": (fixture.get("league") or {}).get("id"),
                     "league": (fixture.get("league") or {}).get("name"),
                     "home": ((fixture.get("teams") or {}).get("home") or {}).get("name"),
                     "away": ((fixture.get("teams") or {}).get("away") or {}).get("name"),
+                    "phase": "live",
                     "minute": context.get("elapsed"),
                     "score_home": goals_data.get("home"),
                     "score_away": goals_data.get("away"),
                     "market": market,
+                    "market_type": "goals",
+                    "probability": round(float(probability), 4),
                     "estimated_probability_exploratory": round(float(probability), 4),
+                    "model_id": "estimate_live_goal_markets",
+                    "source": "football_lab_live_scanner",
+                    "snapshot_id": ":".join(str(value) for value in (
+                        fixture_data.get("id"), context.get("elapsed"),
+                        goals_data.get("home"), goals_data.get("away"),
+                    )),
                     "context_status": context.get("context_status"),
                     "corners_total": context.get("corners_total"),
                     "shots_total": context.get("shots_total"),
@@ -7977,6 +7989,12 @@ else:
                     "outcome": "",
                     "outcome_verified": "",
                 }
+                normalized_row = normalize_prediction_record(row)
+                row.update({
+                    "schema_version": normalized_row["schema_version"],
+                    "prediction_id": normalized_row["prediction_id"],
+                    "timestamp_status": normalized_row["timestamp_status"],
+                })
                 row_key = (str(row["fixture_id"]), str(row["market"]), str(row["minute"]),
                            str(row["score_home"]), str(row["score_away"]))
                 if row_key not in existing_keys:
@@ -7987,7 +8005,12 @@ else:
             if signal_rows:
                 SIGNAL_HISTORY_PATH.parent.mkdir(parents=True, exist_ok=True)
                 with SIGNAL_HISTORY_PATH.open("w", encoding="utf-8-sig", newline="") as history_file:
-                    writer = csv.DictWriter(history_file, fieldnames=list(signal_rows[0].keys()))
+                    # Registros antiguos y nuevos pueden tener columnas distintas.
+                    # Unimos las claves para conservar las filas legacy sin perder metadatos nuevos.
+                    fieldnames = list(dict.fromkeys(
+                        key for saved_row in signal_rows for key in saved_row.keys()
+                    ))
+                    writer = csv.DictWriter(history_file, fieldnames=fieldnames, extrasaction="ignore")
                     writer.writeheader()
                     writer.writerows(signal_rows)
         except OSError as history_exc:
