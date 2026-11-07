@@ -46,16 +46,16 @@ class LiveCornerCaptureTests(unittest.TestCase):
     def test_same_minute_is_upserted_monotonically(self):
         capture_live_corner_snapshot(self.db, self.fixture, self.stats, captured_at=self.stamp)
         updated_stats = [
-            {"statistics": [{"type": "Corner Kicks", "value": 6}]},
-            {"statistics": [{"type": "Corner Kicks", "value": 4}]},
+            {"team": {"id": 1}, "statistics": [{"type": "Corner Kicks", "value": 6}]},
+            {"team": {"id": 2}, "statistics": [{"type": "Corner Kicks", "value": 4}]},
         ]
         updated = capture_live_corner_snapshot(
             self.db, self.fixture, updated_stats, captured_at=self.stamp
         )
         self.assertFalse(updated["inserted"])
         lower_stats = [
-            {"statistics": [{"type": "Corner Kicks", "value": 4}]},
-            {"statistics": [{"type": "Corner Kicks", "value": 2}]},
+            {"team": {"id": 1}, "statistics": [{"type": "Corner Kicks", "value": 4}]},
+            {"team": {"id": 2}, "statistics": [{"type": "Corner Kicks", "value": 2}]},
         ]
         capture_live_corner_snapshot(
             self.db, self.fixture, lower_stats, captured_at=self.stamp
@@ -86,8 +86,34 @@ class LiveCornerCaptureTests(unittest.TestCase):
         self.assertEqual(count_live_corner_snapshots(self.db), 0)
 
     def test_rejects_missing_corner_counts(self):
-        missing = [{"statistics": []}, {"statistics": []}]
+        missing = [
+            {"team": {"id": 1}, "statistics": []},
+            {"team": {"id": 2}, "statistics": []},
+        ]
         result = capture_live_corner_snapshot(self.db, self.fixture, missing)
+        self.assertFalse(result["stored"])
+        self.assertEqual(result["reason"], "corner_statistics_unavailable")
+
+    def test_matches_team_ids_when_statistics_rows_are_reversed(self):
+        reversed_stats = [
+            {"team": {"id": 2}, "statistics": [{"type": "Corner Kicks", "value": 8}]},
+            {"team": {"id": 1}, "statistics": [{"type": "Corner Kicks", "value": 5}]},
+        ]
+        result = capture_live_corner_snapshot(
+            self.db, self.fixture, reversed_stats, captured_at=self.stamp
+        )
+        self.assertTrue(result["stored"])
+        self.assertEqual(result["home_corners"], 5)
+        self.assertEqual(result["away_corners"], 8)
+
+    def test_rejects_statistics_without_matching_team_ids(self):
+        unidentified_stats = [
+            {"statistics": [{"type": "Corner Kicks", "value": 5}]},
+            {"statistics": [{"type": "Corner Kicks", "value": 8}]},
+        ]
+        result = capture_live_corner_snapshot(
+            self.db, self.fixture, unidentified_stats, captured_at=self.stamp
+        )
         self.assertFalse(result["stored"])
         self.assertEqual(result["reason"], "corner_statistics_unavailable")
 
