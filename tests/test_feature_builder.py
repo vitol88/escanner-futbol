@@ -61,6 +61,25 @@ class FeatureBuilderTests(unittest.TestCase):
         self.assertEqual(result["live"]["home_possession"], 58)
         self.assertEqual(result["data_quality"]["goal_sample"], 7)
         self.assertEqual(result["data_quality"]["corner_sample"], 5)
+        self.assertFalse(result["data_quality"]["card_history_available"])
+        self.assertEqual(result["data_quality"]["card_history_sample"], 0)
+
+
+    def test_reports_card_history_and_referee_sample_by_league(self):
+        history = {
+            "card_history_rows": [
+                {"league_id": 39, "home_yellow_cards": 2, "away_yellow_cards": 3, "referee": "Referee Test"},
+                {"league_id": 39, "home_yellow_cards": 1, "away_yellow_cards": 1, "referee": "Other Referee"},
+                {"league_id": 140, "home_yellow_cards": 4, "away_yellow_cards": 2, "referee": "Referee Test"},
+                {"league_id": 39, "home_yellow_cards": None, "away_yellow_cards": 2, "referee": "Referee Test"},
+            ]
+        }
+        result = build_model_features(self._snapshot(), history)
+        self.assertTrue(result["data_quality"]["card_history_available"])
+        self.assertEqual(result["data_quality"]["card_history_sample"], 2)
+        self.assertEqual(result["data_quality"]["referee_card_history_sample"], 1)
+        self.assertEqual(result["cards"]["historical_sample"], 2)
+        self.assertEqual(result["cards"]["referee_historical_sample"], 1)
 
     def test_missing_history_and_statistics_stay_missing(self):
         snapshot = self._snapshot()
