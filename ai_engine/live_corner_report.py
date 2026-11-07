@@ -23,7 +23,9 @@ def build_live_corner_report(
     return {
         "database_path": str(path),
         "audit": audit_live_corner_database(path),
-        "backtest": run_live_corner_baseline_backtest(\n            path, over_under_lines=over_under_lines\n        ),
+        "backtest": run_live_corner_baseline_backtest(
+            path, over_under_lines=over_under_lines
+        ),
         "safety": {
             "read_only": True,
             "api_requests": 0,
