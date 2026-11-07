@@ -19,6 +19,7 @@ from ai_engine.evaluation import evaluate_binary_forecasts, evaluate_forecasts_b
 from ai_engine.dataset_audit import audit_forecast_dataset
 from ai_engine.prediction_schema import normalize_prediction_record
 from ai_engine.prediction_ledger import append_prediction_records
+from ai_engine.telegram_publisher import send_telegram_signal
 from models.automatic_history import build_automatic_history
 from models.deep_goal_context import build_deep_goal_context
 from models.probabilities import (
@@ -8000,6 +8001,7 @@ else:
              str(row.get("score_home")), str(row.get("score_away")))
             for row in signal_rows
         }
+        new_signal_rows = []
         for fixture, estimate, tips, context in goal_results_with_context:
             for market, probability in tips:
                 fixture_data = fixture.get("fixture") or {}
@@ -8045,8 +8047,34 @@ else:
                            str(row["score_home"]), str(row["score_away"]))
                 if row_key not in existing_keys:
                     signal_rows.append(row)
+                    new_signal_rows.append(row)
                     existing_keys.add(row_key)
         st.session_state.signal_rows = signal_rows
+        # Queue only genuinely new signals. Failed Telegram sends remain pending for a later scan.
+        telegram_pending = st.session_state.setdefault("telegram_pending_rows", [])
+        telegram_pending.extend(new_signal_rows)
+        try:
+            telegram_token = str(st.secrets.get("TELEGRAM_BOT_TOKEN", "") or os.getenv("TELEGRAM_BOT_TOKEN", "")).strip()
+            telegram_chat_id = str(st.secrets.get("TELEGRAM_CHAT_ID", "") or os.getenv("TELEGRAM_CHAT_ID", "-1004668474905")).strip()
+        except Exception:
+            telegram_token = str(os.getenv("TELEGRAM_BOT_TOKEN", "")).strip()
+            telegram_chat_id = str(os.getenv("TELEGRAM_CHAT_ID", "-1004668474905")).strip()
+        if telegram_token and telegram_chat_id and telegram_pending:
+            still_pending = []
+            sent_count = 0
+            for pending_row in telegram_pending:
+                sent, detail = send_telegram_signal(pending_row, telegram_token, telegram_chat_id)
+                if sent:
+                    sent_count += 1
+                else:
+                    still_pending.append(pending_row)
+            st.session_state.telegram_pending_rows = still_pending
+            st.session_state.telegram_publish_status = (
+                f"{sent_count} señal(es) publicadas en Telegram."
+                if sent_count else "No se pudo publicar; se reintentará en el próximo escaneo."
+            )
+        elif new_signal_rows:
+            st.session_state.telegram_publish_status = "Señales en espera: configura TELEGRAM_BOT_TOKEN en los secretos del despliegue."
         try:
             if signal_rows:
                 SIGNAL_HISTORY_PATH.parent.mkdir(parents=True, exist_ok=True)
