@@ -280,9 +280,18 @@ class FootballDataEngine:
             raise ValueError("fixture_id es obligatorio.")
         key = cache_key("fixture_statistics", fixture=fixture_id)
         if key not in self._cache:
-            payload = self._api_get("fixtures/statistics", {"fixture": fixture_id})
-            response = payload.get("response", []) if isinstance(payload, dict) else []
-            self._cache[key] = response if isinstance(response, list) else []
+            # Reuse the legacy Streamlit stats_cache entry when this adapter is
+            # introduced into the existing scanner; do not request the same
+            # fixture statistics a second time.
+            legacy_key = str(fixture_id)
+            if legacy_key in self._cache and isinstance(self._cache[legacy_key], list):
+                self._cache[key] = self._cache[legacy_key]
+            elif fixture_id in self._cache and isinstance(self._cache[fixture_id], list):
+                self._cache[key] = self._cache[fixture_id]
+            else:
+                payload = self._api_get("fixtures/statistics", {"fixture": fixture_id})
+                response = payload.get("response", []) if isinstance(payload, dict) else []
+                self._cache[key] = response if isinstance(response, list) else []
         return self._cache[key]
 
     def get_fixture_events(self, fixture_id: int | str) -> list[dict[str, Any]]:
