@@ -7951,7 +7951,6 @@ else:
 
         # Auditable signal log: avoid duplicate rows when Streamlit reruns the same scan.
         signal_rows = st.session_state.get("signal_rows", [])
-        new_prediction_records = []
         existing_keys = {
             (str(row.get("fixture_id")), str(row.get("market")), str(row.get("minute")),
              str(row.get("score_home")), str(row.get("score_away")))
@@ -8002,8 +8001,6 @@ else:
                            str(row["score_home"]), str(row["score_away"]))
                 if row_key not in existing_keys:
                     signal_rows.append(row)
-                    if normalized_row["valid"]:
-                        new_prediction_records.append(normalized_row)
                     existing_keys.add(row_key)
         st.session_state.signal_rows = signal_rows
         try:
