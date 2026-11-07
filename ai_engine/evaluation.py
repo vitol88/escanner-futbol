@@ -5,6 +5,7 @@ This module is deliberately pure: it does not fetch data, write files, or make p
 from __future__ import annotations
 
 import math
+from datetime import datetime, timezone
 from typing import Any
 
 
@@ -24,6 +25,75 @@ def _outcome(value: Any) -> int | None:
 
 
 
+
+def evaluate_chronological_holdout(
+    rows: list[dict[str, Any]],
+    *,
+    timestamp_key: str = "recorded_at",
+    fixture_key: str = "fixture_id",
+    train_fraction: float = 0.8,
+    minimum_train_fixtures: int = 5,
+    minimum_test_fixtures: int = 5,
+    probability_key: str = "estimated_probability_exploratory",
+    outcome_key: str = "outcome",
+    verified_key: str = "outcome_verified",
+) -> dict[str, Any]:
+    """Evaluate later unseen fixtures using a deterministic chronological holdout.
+
+    All snapshots for one fixture remain in one partition, avoiding fixture leakage.
+    Only verified outcomes in the later test partition are scored.
+    """
+    if isinstance(train_fraction, bool) or not isinstance(train_fraction, (int, float)) or not 0 < train_fraction < 1:
+        raise ValueError("train_fraction debe estar entre 0 y 1")
+    for name, value in (("minimum_train_fixtures", minimum_train_fixtures), ("minimum_test_fixtures", minimum_test_fixtures)):
+        if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+            raise ValueError(f"{name} debe ser un entero mayor que cero")
+
+    fixtures: dict[str, dict[str, Any]] = {}
+    excluded_temporal = 0
+    for row in rows if isinstance(rows, list) else []:
+        if not isinstance(row, dict):
+            excluded_temporal += 1
+            continue
+        fixture_id = str(row.get(fixture_key, "") or "").strip()
+        raw_timestamp = str(row.get(timestamp_key, "") or "").strip()
+        if not fixture_id or not raw_timestamp:
+            excluded_temporal += 1
+            continue
+        try:
+            parsed = datetime.fromisoformat(raw_timestamp.replace("Z", "+00:00"))
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=timezone.utc)
+            epoch = parsed.timestamp()
+        except (TypeError, ValueError, OverflowError, OSError):
+            excluded_temporal += 1
+            continue
+        entry = fixtures.setdefault(fixture_id, {"first_timestamp": epoch, "rows": []})
+        entry["first_timestamp"] = min(entry["first_timestamp"], epoch)
+        entry["rows"].append(row)
+
+    ordered = sorted(fixtures.items(), key=lambda item: (item[1]["first_timestamp"], item[0]))
+    fixture_count = len(ordered)
+    split_at = int(fixture_count * float(train_fraction))
+    if fixture_count >= 2:
+        split_at = min(fixture_count - 1, max(1, split_at))
+    train_items, test_items = ordered[:split_at], ordered[split_at:]
+    train_rows = [row for _, item in train_items for row in item["rows"]]
+    test_rows = [row for _, item in test_items for row in item["rows"]]
+    enough = len(train_items) >= minimum_train_fixtures and len(test_items) >= minimum_test_fixtures
+    metrics = evaluate_binary_forecasts(test_rows, probability_key=probability_key, outcome_key=outcome_key, verified_key=verified_key) if enough else evaluate_binary_forecasts([], probability_key=probability_key, outcome_key=outcome_key, verified_key=verified_key)
+    return {
+        "available": enough,
+        "train_fixture_count": len(train_items),
+        "test_fixture_count": len(test_items),
+        "train_row_count": len(train_rows),
+        "test_row_count": len(test_rows),
+        "excluded_temporal_rows": excluded_temporal,
+        "train_last_timestamp": datetime.fromtimestamp(train_items[-1][1]["first_timestamp"], timezone.utc).isoformat() if train_items else None,
+        "test_first_timestamp": datetime.fromtimestamp(test_items[0][1]["first_timestamp"], timezone.utc).isoformat() if test_items else None,
+        "test_metrics": metrics,
+        "warnings": ["Partición por partido completo: no mezcla snapshots del mismo fixture.", "Solo se puntúan resultados verificados del bloque cronológico posterior.", "No entrena modelos ni demuestra rentabilidad futura."],
+    }
 def evaluate_forecasts_by_group(
     rows: list[dict[str, Any]],
     *,
