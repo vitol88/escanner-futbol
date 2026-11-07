@@ -63,6 +63,12 @@ def _human_summary(report: dict) -> str:
                 if backtest.get("mae_improvement_vs_global_mean") is not None
                 else "- Mejora vs referencia global: no calculable (MAE de referencia = 0)"
             ),
+            (
+                f"- Evaluación rolling-origin: {backtest['rolling_origin']['fold_count']} bloques, "
+                f"MAE ponderado {backtest['rolling_origin']['weighted_mae_remaining_corners']:.3f}"
+                if backtest.get("rolling_origin", {}).get("available")
+                else f"- Evaluación rolling-origin no disponible: {backtest.get('rolling_origin', {}).get('reason', 'unknown')}"
+            ),
             f"- Desgloses por liga/minuto: {len(backtest.get('by_league_minute_bucket', []))}",
             "- Interpretación: baseline experimental; no demuestra rentabilidad.",
         ])
