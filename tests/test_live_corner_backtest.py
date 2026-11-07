@@ -194,7 +194,7 @@ class LiveCornerBacktestTests(unittest.TestCase):
         self.assertEqual(evaluations[0]["observations"], result["metrics"]["observations"])
         self.assertEqual(evaluations[0]["confusion_matrix"]["true_over"], 0)
         self.assertEqual(evaluations[0]["confusion_matrix"]["missed_over"], 12)
-        self.assertIsNotNone(evaluations[0]["balanced_accuracy"])
+        # This synthetic holdout contains only over outcomes, so balanced accuracy\n        # is deliberately unavailable rather than masking the missing under class.\n        self.assertIsNone(evaluations[0]["balanced_accuracy"])
         self.assertIn("no probability", evaluations[0]["warning"])
 
     def test_over_under_lines_require_unique_nonnegative_half_points(self):
