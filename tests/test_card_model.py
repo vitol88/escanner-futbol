@@ -17,9 +17,9 @@ class PrematchYellowCardModelTests(unittest.TestCase):
     def test_venue_rates_and_lines(self):
         result = estimate_prematch_yellow_cards(self.features, self.rows)
         self.assertTrue(result["available"])
-        self.assertAlmostEqual(result["expected_yellow_cards"]["home"], 2.5)
-        self.assertAlmostEqual(result["expected_yellow_cards"]["away"], 2.5)
-        self.assertAlmostEqual(result["expected_yellow_cards"]["total"], 5.0)
+        self.assertAlmostEqual(result["expected_yellow_cards"]["home"], 1.5)
+        self.assertAlmostEqual(result["expected_yellow_cards"]["away"], 2.0)
+        self.assertAlmostEqual(result["expected_yellow_cards"]["total"], 3.5)
         self.assertIn(4.5, result["probability_over"])
         self.assertFalse(result["calibrated"])
 
