@@ -230,6 +230,50 @@ def evaluate_forecasts_by_market_line(
         })
     return results
 
+def _deduplicate_fixture_snapshots(
+    scored_rows: list[tuple[float, int, dict[str, Any]]],
+) -> tuple[list[tuple[float, int]], int]:
+    """Keep the latest verified snapshot per fixture/event/model.
+
+    Raw ledger rows are never changed. Rows without enough identity or a
+    parseable timestamp remain individually scoreable rather than being
+    guessed into a group.
+    """
+    selected: dict[tuple[str, ...], tuple[float, int, float, int]] = {}
+    passthrough: list[tuple[float, int]] = []
+    duplicates = 0
+    for index, (probability, outcome, row) in enumerate(scored_rows):
+        fixture = str(row.get("fixture_id") or "").strip()
+        market = str(row.get("market_type") or row.get("market") or "").strip()
+        selection = str(row.get("selection") or "").strip()
+        raw_timestamp = str(row.get("recorded_at") or "").strip()
+        if not fixture or not market or not selection or not raw_timestamp:
+            passthrough.append((probability, outcome))
+            continue
+        try:
+            timestamp = datetime.fromisoformat(raw_timestamp.replace("Z", "+00:00"))
+            order = timestamp.timestamp() if timestamp.tzinfo else timestamp.replace(tzinfo=timezone.utc).timestamp()
+        except (TypeError, ValueError, OverflowError, OSError):
+            passthrough.append((probability, outcome))
+            continue
+        key = (
+            fixture, market, selection,
+            str(row.get("line") or "").strip(),
+            str(row.get("phase") or "unknown").strip(),
+            str(row.get("model_id") or "unknown").strip(),
+            str(row.get("model_version") or "unknown").strip(),
+        )
+        previous = selected.get(key)
+        if previous is None:
+            selected[key] = (order, index, probability, outcome)
+        else:
+            duplicates += 1
+            if (order, index) > (previous[0], previous[1]):
+                selected[key] = (order, index, probability, outcome)
+    retained = passthrough + [(item[2], item[3]) for item in selected.values()]
+    return retained, duplicates
+
+
 def evaluate_binary_forecasts(
     rows: list[dict[str, Any]],
     *,
@@ -249,7 +293,7 @@ def evaluate_binary_forecasts(
     if isinstance(minimum_sample, bool) or not isinstance(minimum_sample, int) or minimum_sample < 1:
         raise ValueError("minimum_sample debe ser un entero mayor que cero")
 
-    scored: list[tuple[float, int]] = []
+    scored_rows: list[tuple[float, int, dict[str, Any]]] = []
     excluded = 0
     for row in rows if isinstance(rows, list) else []:
         if not isinstance(row, dict) or not _verified(row.get(verified_key, "")):
@@ -273,7 +317,7 @@ def evaluate_binary_forecasts(
     n = len(scored)
     if not n:
         return {
-            "sample_size": 0, "excluded": excluded, "brier_score": None,
+            "sample_size": 0, "raw_verified_sample_size": 0,\n            "deduplicated_snapshots": duplicate_snapshots, "excluded": excluded, "brier_score": None,
             "log_loss": None, "mean_probability": None, "observed_rate": None,
             "calibration_gap": None, "reliability": [],
             "minimum_sample": minimum_sample, "minimum_sample_reached": False,
