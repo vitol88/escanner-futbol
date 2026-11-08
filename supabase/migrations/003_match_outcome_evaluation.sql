@@ -48,7 +48,65 @@ select
     s.recorded_at,
     s.snapshot_json->'match'->>'home' as home_team,
     s.snapshot_json->'match'->>'away' as away_team,
-    nullif(s.snapshot_json->'match'->>'minute', '')::integer as minute_at_capture,
+    case
+        when s.snapshot_json->'match'->>'minute' ~ '^\\d+
+    nullif(s.snapshot_json->'match'->>'home_score', '')::integer as home_score_at_capture,
+    nullif(s.snapshot_json->'match'->>'away_score', '')::integer as away_score_at_capture,
+    o.final_home_score,
+    o.final_away_score,
+    (o.final_home_score + o.final_away_score) as actual_final_goals,
+    case
+        when s.analysis_type = 'goals'
+         and nullif(s.snapshot_json->'outputs'->>'expected_total_goals_remaining', '') is not null
+         and nullif(s.snapshot_json->'match'->>'home_score', '') is not null
+         and nullif(s.snapshot_json->'match'->>'away_score', '') is not null
+        then
+            (nullif(s.snapshot_json->'match'->>'home_score', '')::numeric
+             + nullif(s.snapshot_json->'match'->>'away_score', '')::numeric
+             + nullif(s.snapshot_json->'outputs'->>'expected_total_goals_remaining', '')::numeric)
+        else null
+    end as projected_final_goals,
+    case
+        when s.analysis_type = 'goals'
+         and o.fixture_id is not null
+         and nullif(s.snapshot_json->'outputs'->>'expected_total_goals_remaining', '') is not null
+         and nullif(s.snapshot_json->'match'->>'home_score', '') is not null
+         and nullif(s.snapshot_json->'match'->>'away_score', '') is not null
+        then abs(
+            (nullif(s.snapshot_json->'match'->>'home_score', '')::numeric
+             + nullif(s.snapshot_json->'match'->>'away_score', '')::numeric
+             + nullif(s.snapshot_json->'outputs'->>'expected_total_goals_remaining', '')::numeric)
+            - (o.final_home_score + o.final_away_score)::numeric
+        )
+        else null
+    end as goals_absolute_error,
+    nullif(s.snapshot_json->'outputs'->>'projected_total_corners', '')::numeric
+        as projected_final_corners,
+    o.final_total_corners,
+    case
+        when s.analysis_type = 'corners'
+         and o.final_total_corners is not null
+         and nullif(s.snapshot_json->'outputs'->>'projected_total_corners', '') is not null
+        then abs(
+            nullif(s.snapshot_json->'outputs'->>'projected_total_corners', '')::numeric
+            - o.final_total_corners::numeric
+        )
+        else null
+    end as corners_absolute_error,
+    o.final_total_yellow_cards,
+    o.source as result_source,
+    o.verified_at as result_verified_at
+from public.analysis_snapshots s
+left join public.latest_match_outcomes o
+    on o.fixture_id = s.fixture_id
+where s.analysis_type in ('goals', 'corners');
+
+-- RLS is enabled intentionally. Access is expected through the server-side
+-- Supabase secret/service-role key; do not expose that key in client code.
+
+        then (s.snapshot_json->'match'->>'minute')::integer
+        else null
+    end as minute_at_capture,
     nullif(s.snapshot_json->'match'->>'home_score', '')::integer as home_score_at_capture,
     nullif(s.snapshot_json->'match'->>'away_score', '')::integer as away_score_at_capture,
     o.final_home_score,
