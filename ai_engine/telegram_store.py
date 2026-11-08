@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import hashlib
-import json
+from datetime import datetime, timezone
 from typing import Any
 
 import requests
@@ -91,7 +91,7 @@ def update_telegram_alert(
     updater = patch or requests.patch
     payload = {"status": status, "error": error[:500] or None}
     if status == "sent":
-        payload["sent_at"] = "now()"
+        payload["sent_at"] = datetime.now(timezone.utc).isoformat()
     try:
         response = updater(
             f"{url}/rest/v1/telegram_alerts",
