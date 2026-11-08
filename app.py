@@ -9029,16 +9029,11 @@ else:
                                 "Brier": item["brier_score"],
                                 "Log loss": item["log_loss"],
                                 "Brecha calibración": item["calibration_gap"],
-                                "Elegibilidad": assess_model_readiness(
-                                    item,
-                                    model_id=item["model_id"],
-                                    model_version=item["model_version"],
-                                )["status"],
-                                "Motivo / control": " | ".join(assess_model_readiness(
-                                    item,
-                                    model_id=item["model_id"],
-                                    model_version=item["model_version"],
-                                )["reasons"]) or "Solo seguimiento; no habilita apuestas automáticamente",
+                                "Diagnóstico": (
+                                    "Muestra insuficiente" if not item["minimum_sample_reached"]
+                                    else "Revisar calibración" if item["calibration_gap"] is not None and item["calibration_gap"] >= 0.10
+                                    else "Descriptivo; no habilita apuestas"
+                                ),
                             } for item in ledger_temporal["test_metrics_by_market"]],
                             use_container_width=True,
                             hide_index=True,
@@ -9082,11 +9077,8 @@ else:
                                 "Brier": item["brier_score"],
                                 "Log loss": item["log_loss"],
                                 "Brecha calibración": item["calibration_gap"],
-                                "Diagnóstico": (
-                                    "Muestra insuficiente" if not item["minimum_sample_reached"]
-                                    else "Revisar calibración" if item["calibration_gap"] is not None and item["calibration_gap"] >= 0.10
-                                    else "Sin alerta de muestra"
-                                ),
+                                "Elegibilidad": item["readiness_status"],
+                                "Motivo / control": " | ".join(item["readiness_reasons"]) or "Solo seguimiento controlado; no habilita apuestas",
                             } for item in model_breakdown],
                             use_container_width=True,
                             hide_index=True,
