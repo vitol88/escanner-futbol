@@ -20,7 +20,7 @@ from ai_engine.dataset_audit import audit_forecast_dataset
 from ai_engine.prediction_schema import normalize_prediction_record
 from ai_engine.prediction_ledger import append_prediction_records
 from ai_engine.telegram_publisher import send_telegram_signal
-from ai_engine.telegram_store import reserve_telegram_alert, update_telegram_alert
+from ai_engine.telegram_store import reserve_telegram_alert, update_telegram_alert, check_supabase_connection
 from models.automatic_history import build_automatic_history
 from models.deep_goal_context import build_deep_goal_context
 from models.probabilities import (
@@ -3718,6 +3718,21 @@ with st.sidebar:
                     st.rerun()
     else:
         st.caption("Haz clic en la tarjeta de un partido para seleccionar el encuentro y habilitar estas herramientas.")
+
+    with st.expander("DIAGNÓSTICO DE CONEXIÓN", expanded=False):
+        st.caption("Prueba de solo lectura. No envía mensajes a Telegram ni crea registros.")
+        if st.button("VERIFICAR SUPABASE", key="verify_supabase_connection", use_container_width=True):
+            try:
+                _supabase_url_check = str(st.secrets.get("SUPABASE_URL", "") or os.getenv("SUPABASE_URL", "")).strip()
+                _supabase_key_check = str(st.secrets.get("SUPABASE_SECRET_KEY", "") or os.getenv("SUPABASE_SECRET_KEY", "")).strip()
+            except Exception:
+                _supabase_url_check = str(os.getenv("SUPABASE_URL", "")).strip()
+                _supabase_key_check = str(os.getenv("SUPABASE_SECRET_KEY", "")).strip()
+            _supabase_ok, _supabase_message = check_supabase_connection(_supabase_url_check, _supabase_key_check)
+            if _supabase_ok:
+                st.success(_supabase_message)
+            else:
+                st.error(_supabase_message)
 
 
 def get_api_key() -> str:
