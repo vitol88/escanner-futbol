@@ -98,3 +98,13 @@ def evaluate_candidates(
     """Evaluate candidates and return eligible opportunities only."""
     evaluated = [evaluate_opportunity(item, **thresholds) for item in candidates]
     return [item for item in evaluated if item.get("eligible")]
+
+
+def classify_goal_tip_market(selection: Any) -> str:
+    """Map the scanner's exact live goal-tip labels to their market family."""
+    label = str(selection or "").strip().casefold()
+    if label == "empate final":
+        return "draw"
+    if label.startswith("ambos equipos marcan"):
+        return "btts"
+    return "goals"
