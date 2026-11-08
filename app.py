@@ -5805,6 +5805,8 @@ else:
                         for match in league_matches:
                             match_fixture = match.get("fixture") or {}
                             match_id = match_fixture.get("id")
+                            # Compatibilidad: algunos bloques de análisis usan el alias fixture_id.
+                            fixture_id = match_id
                             match_teams = match.get("teams") or {}
                             match_home = match_teams.get("home") or {}
                             match_away = match_teams.get("away") or {}
