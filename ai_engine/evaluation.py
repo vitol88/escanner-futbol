@@ -253,7 +253,7 @@ def evaluate_model_version_comparability(
     if isinstance(minimum_common_fixtures, bool) or not isinstance(minimum_common_fixtures, int) or minimum_common_fixtures < 1:
         raise ValueError("minimum_common_fixtures debe ser un entero mayor que cero")
 
-    cohorts: dict[tuple[str, str, str, str, str], dict[str, dict[str, tuple[float, int, float | None]]]] = {}
+    cohorts: dict[tuple[str, str, str, str, str], dict[str, dict[str, tuple[float, int | None, float | None]]]] = {}
     for row_index, row in enumerate(rows if isinstance(rows, list) else []):
         if not isinstance(row, dict) or not _verified(row.get(verified_key, "")):
             continue
@@ -265,8 +265,6 @@ def evaluate_model_version_comparability(
         selection = str(row.get("selection") or "unknown").strip() or "unknown"
         phase = str(row.get("phase") or "unknown").strip() or "unknown"
         outcome = _outcome(row.get(outcome_key))
-        if outcome is None:
-            continue
         try:
             probability = float(row.get(probability_key))
             if not math.isfinite(probability) or not 0 <= probability <= 1:
@@ -328,7 +326,8 @@ def evaluate_model_version_comparability(
                     "log_loss_delta_b_minus_a": None,
                 }
                 if comparable and all(
-                    versions[version_a][fixture][2] is not None
+                    versions[version_a][fixture][1] is not None
+                    and versions[version_a][fixture][2] is not None
                     and versions[version_b][fixture][2] is not None
                     for fixture in common
                 ):
