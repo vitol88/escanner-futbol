@@ -6704,22 +6704,14 @@ else:
                                             except Exception as _h2h_exc:
                                                 st.session_state.h2h_cache[h2h_key] = {"error": str(_h2h_exc)}
                                         h2h_data = st.session_state.get("h2h_cache", {}).get(h2h_key)
-                        if isinstance(h2h_data, list):
-                            persist_analysis_snapshot(
-                                fixture_id, "h2h",
-                                {"home": home_name, "away": away_name, "minute": minute,
-                                 "home_score": home_score, "away_score": away_score},
-                                {"home_team_id": home_id, "away_team_id": away_id, "requested_last": 5},
-                                {"matches": h2h_data, "matches_returned": len(h2h_data)},
-                            )
-                        if isinstance(h2h_data, list):
-                            persist_analysis_snapshot(
-                                fixture_id, "h2h",
-                                {"home": home_name, "away": away_name, "minute": minute,
-                                 "home_score": home_score, "away_score": away_score},
-                                {"home_team_id": home_id, "away_team_id": away_id, "requested_last": 5},
-                                {"matches": h2h_data, "matches_returned": len(h2h_data)},
-                            )
+                                        if isinstance(h2h_data, list):
+                                            persist_analysis_snapshot(
+                                                fixture_id, "h2h",
+                                                {"home": home_name, "away": away_name, "minute": minute,
+                                                 "home_score": home_score, "away_score": away_score},
+                                                {"home_team_id": home_id, "away_team_id": away_id, "requested_last": 5},
+                                                {"matches": h2h_data, "matches_returned": len(h2h_data)},
+                                            )
                                         st.markdown('<div class="h2h-page-kicker">HISTORIAL <span>·</span> ENFRENTAMIENTOS DIRECTOS</div>', unsafe_allow_html=True)
                                         if isinstance(h2h_data, dict) and h2h_data.get("error"):
                                             st.warning(f"No se pudieron consultar los enfrentamientos: {h2h_data['error']}")
