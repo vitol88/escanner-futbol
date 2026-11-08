@@ -8859,7 +8859,9 @@ else:
                             import math
                             suggested_line = max(0.5, math.floor(projected * 2) / 2)
                             line_text = str(int(suggested_line)) if suggested_line.is_integer() else f"{suggested_line:.1f}"
-                            remaining_expected = max(0.0, projected - total_now)                            persist_analysis_snapshot(
+                            remaining_expected = max(0.0, projected - total_now)
+                            fixture_id = ((item.get("fixture") or {}).get("fixture") or {}).get("id")
+                            persist_analysis_snapshot(
                                 fixture_id, "corners",
                                 {"league": (((item.get("fixture") or {}).get("league") or {}).get("name")),
                                  "home": ((((item.get("fixture") or {}).get("teams") or {}).get("home") or {}).get("name")),
