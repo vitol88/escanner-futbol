@@ -20,7 +20,8 @@ from ai_engine.evaluation import evaluate_binary_forecasts, evaluate_forecasts_b
 from ai_engine.dataset_audit import audit_forecast_dataset
 from ai_engine.prediction_schema import PREDICTION_SCHEMA_VERSION, normalize_prediction_record
 from ai_engine.prediction_ledger import append_prediction_records, load_prediction_records
-from ai_engine.outcome_ledger import load_verified_outcomes
+from ai_engine.outcome_ledger import load_verified_outcomes, record_verified_outcome
+from ai_engine.settlement import resolve_binary_outcome
 from ai_engine.telegram_publisher import send_telegram_signal, send_telegram_test_message
 from ai_engine.telegram_store import reserve_telegram_alert, update_telegram_alert, check_supabase_connection, test_supabase_duplicate_protection
 from models.automatic_history import build_automatic_history
@@ -8941,6 +8942,124 @@ else:
                 else:
                     st.info("Aún no hay resultados verificados en la tabla de auditoría.")
                 st.caption("Los resultados se unen al pronóstico solo para consulta. La tabla original de pronósticos y el historial de correcciones permanecen intactos.")
+            st.markdown("#### Verificación manual de resultados")
+            st.caption(
+                "Selecciona un pronóstico, introduce los datos finales comprobados y revisa la resolución. "
+                "Nada se guarda hasta pulsar Confirmar y registrar resultado."
+            )
+            if "prediction_ledger_snapshot" not in st.session_state:
+                st.info("Primero consulta el registro central para cargar los pronósticos disponibles.")
+            else:
+                existing_outcomes = st.session_state.get("prediction_outcome_snapshot", {})
+                pending_predictions = [
+                    item for item in st.session_state.prediction_ledger_snapshot
+                    if item.get("prediction_id")
+                    and str(item.get("prediction_id")) not in existing_outcomes
+                ]
+                supported_predictions = [
+                    item for item in pending_predictions
+                    if str(item.get("market_type") or "").strip().casefold()
+                    in {"goals", "draw", "btts", "corners", "yellow_cards"}
+                    and item.get("selection")
+                ]
+                st.caption(
+                    f"Pendientes: {len(pending_predictions)} · "
+                    f"Con mercado y selección compatibles: {len(supported_predictions)}."
+                )
+                if not supported_predictions:
+                    st.info("No hay pronósticos pendientes con mercado y selección reconocidos. Los casos ambiguos se mantienen fuera de la verificación.")
+                else:
+                    prediction_options = {}
+                    for item in supported_predictions:
+                        match_label = item.get("match") or "Partido sin nombre"
+                        market_label = item.get("market") or item.get("market_type") or "Mercado"
+                        selection_label = item.get("selection") or "Selección"
+                        timestamp_label = item.get("recorded_at") or "Fecha N/D"
+                        label = f"{match_label} · {market_label}: {selection_label} · {timestamp_label} · ID {item['prediction_id'][:8]}"
+                        prediction_options[label] = item
+                    selected_label = st.selectbox(
+                        "Pronóstico pendiente",
+                        list(prediction_options.keys()),
+                        key="manual_outcome_prediction_select",
+                    )
+                    selected_prediction = prediction_options[selected_label]
+                    selected_market_type = str(selected_prediction.get("market_type") or "").strip().casefold()
+                    st.write(
+                        f"**Selección:** {selected_prediction.get('selection')}  "
+                        f"· **Mercado:** {selected_prediction.get('market') or selected_market_type}"
+                    )
+                    final_data = {}
+                    if selected_market_type in {"goals", "draw", "btts"}:
+                        score_cols = st.columns(2)
+                        final_data["final_home_score"] = score_cols[0].number_input(
+                            "Goles del local (final)", min_value=0, max_value=30, value=0,
+                            step=1, key="manual_outcome_home_score"
+                        )
+                        final_data["final_away_score"] = score_cols[1].number_input(
+                            "Goles del visitante (final)", min_value=0, max_value=30, value=0,
+                            step=1, key="manual_outcome_away_score"
+                        )
+                    elif selected_market_type == "corners":
+                        final_data["final_total_corners"] = st.number_input(
+                            "Córners totales finales", min_value=0, max_value=100, value=0,
+                            step=1, key="manual_outcome_total_corners"
+                        )
+                    elif selected_market_type == "yellow_cards":
+                        final_data["final_total_yellow_cards"] = st.number_input(
+                            "Tarjetas amarillas totales finales", min_value=0, max_value=30, value=0,
+                            step=1, key="manual_outcome_total_yellow_cards"
+                        )
+                    resolution = resolve_binary_outcome(
+                        market_type=selected_market_type,
+                        selection=str(selected_prediction.get("selection") or ""),
+                        **final_data,
+                    )
+                    if resolution.get("resolved"):
+                        st.success(
+                            "Resultado calculado para revisión: "
+                            + ("ACERTADO" if resolution["outcome"] == 1 else "NO ACERTADO")
+                        )
+                        st.caption("Comprueba que los datos finales corresponden al partido y al mercado seleccionados antes de confirmar.")
+                    else:
+                        st.warning(
+                            "No se puede resolver automáticamente este caso: "
+                            + str(resolution.get("reason") or "datos no compatibles")
+                            + ". No se registrará ningún resultado."
+                        )
+                    source_value = st.text_input(
+                        "Fuente de comprobación",
+                        value="Marcador/estadística final comprobada manualmente",
+                        key="manual_outcome_source",
+                    )
+                    verifier_value = st.text_input(
+                        "Verificado por",
+                        placeholder="Escribe tu identificador o iniciales",
+                        key="manual_outcome_verifier",
+                    )
+                    if st.button(
+                        "Confirmar y registrar resultado",
+                        key="confirm_manual_outcome",
+                        type="primary",
+                        disabled=not resolution.get("resolved") or not source_value.strip() or not verifier_value.strip(),
+                    ):
+                        try:
+                            saved = record_verified_outcome(
+                                PREDICTION_LEDGER_PATH,
+                                str(selected_prediction["prediction_id"]),
+                                int(resolution["outcome"]),
+                                source=source_value.strip(),
+                                verified_by=verifier_value.strip(),
+                            )
+                            if saved.get("inserted"):
+                                st.success("Resultado verificado y guardado en el registro de auditoría.")
+                            elif saved.get("duplicate"):
+                                st.info("Ese resultado ya estaba registrado; no se creó un duplicado.")
+                            st.session_state.prediction_ledger_snapshot = load_prediction_records(PREDICTION_LEDGER_PATH)
+                            st.session_state.prediction_outcome_snapshot = load_verified_outcomes(PREDICTION_LEDGER_PATH)
+                            st.rerun()
+                        except (OSError, ValueError, TypeError, KeyError) as save_exc:
+                            st.error(f"No se pudo registrar el resultado: {save_exc}")
+
             market_status = [
                 ("Córners", "Consulta automática de promedios recientes local/visitante y combinación exploratoria con el ritmo en vivo; pendiente de validación."),
                 ("Goles", "Probabilidades exploratorias basadas en medias históricas de liga; aún no calibradas."),
