@@ -16,7 +16,7 @@ from ai_engine.opportunity_engine import evaluate_opportunity, classify_goal_tip
 from ai_engine.live_corner_capture import capture_live_corner_snapshot
 from ai_engine.live_corner_finalize import finalize_live_corner_fixture
 from models.live_context import qualifies_as_corner_candidate, summarize_live_context
-from ai_engine.evaluation import evaluate_binary_forecasts, evaluate_forecasts_by_group, evaluate_chronological_holdout
+from ai_engine.evaluation import evaluate_binary_forecasts, evaluate_forecasts_by_group, evaluate_forecasts_by_market, evaluate_chronological_holdout
 from ai_engine.dataset_audit import audit_forecast_dataset
 from ai_engine.prediction_schema import PREDICTION_SCHEMA_VERSION, normalize_prediction_record
 from ai_engine.prediction_ledger import append_prediction_records, load_prediction_records
@@ -9184,7 +9184,7 @@ else:
                             st.info("Aún no hay suficientes partidos con fecha válida para la prueba cronológica. Se requieren al menos 5 partidos anteriores y 5 posteriores.")
 
                         st.markdown("#### Rendimiento por mercado")
-                        market_groups = evaluate_forecasts_by_group(uploaded_rows, group_key="market")
+                        market_groups = evaluate_forecasts_by_market(uploaded_rows)
                         if market_groups:
                             st.dataframe(
                                 [{
