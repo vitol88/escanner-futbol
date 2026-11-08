@@ -23,6 +23,7 @@ from ai_engine.prediction_ledger import append_prediction_records, load_predicti
 from ai_engine.supabase_prediction_ledger import append_supabase_prediction_records, load_supabase_prediction_records
 from ai_engine.supabase_analysis_snapshots import build_analysis_snapshot, append_supabase_analysis_snapshots
 from ai_engine.supabase_outcome_sync import sync_finished_fixture_outcomes
+from ai_engine.supabase_evaluation import load_supabase_evaluations, summarize_supabase_evaluations
 from ai_engine.outcome_ledger import load_verified_outcomes, record_verified_outcome
 from ai_engine.settlement import resolve_binary_outcome
 from ai_engine.telegram_publisher import send_telegram_signal, send_telegram_test_message
@@ -8988,6 +8989,38 @@ else:
                     st.caption(f"Y {len(_outcome_result['errors']) - 5} errores adicionales.")
             if st.session_state.get("outcome_sync_error"):
                 st.error(f"No se pudo sincronizar los resultados: {st.session_state['outcome_sync_error']}")
+
+            st.markdown("#### Evaluación histórica · Supabase")
+            st.caption("Métricas calculadas desde la vista analysis_snapshot_evaluation. Solo cuenta pronósticos con resultado final verificado.")
+            if st.button("Actualizar evaluación del modelo", key="refresh_supabase_evaluation"):
+                try:
+                    _eval_url = str(st.secrets.get("SUPABASE_URL", "") or os.getenv("SUPABASE_URL", "")).strip()
+                    _eval_key = str(st.secrets.get("SUPABASE_SECRET_KEY", "") or os.getenv("SUPABASE_SECRET_KEY", "")).strip()
+                    _eval_rows = load_supabase_evaluations(_eval_url, _eval_key)
+                    st.session_state["supabase_evaluation_rows"] = _eval_rows
+                    st.session_state["supabase_evaluation_summary"] = summarize_supabase_evaluations(_eval_rows)
+                    st.session_state["supabase_evaluation_error"] = ""
+                except Exception as _eval_exc:
+                    st.session_state["supabase_evaluation_error"] = f"{type(_eval_exc).__name__}: {_eval_exc}"
+            _eval_summary = st.session_state.get("supabase_evaluation_summary")
+            if _eval_summary:
+                _eval_cols = st.columns(4)
+                _eval_cols[0].metric("Análisis guardados", _eval_summary["total"])
+                _eval_cols[1].metric("Con resultado verificado", _eval_summary["verified"])
+                _eval_cols[2].metric("Pendientes", _eval_summary["pending"])
+                _eval_cols[3].metric("Partidos distintos", _eval_summary["fixtures"])
+                st.markdown("**Precisión de goles**")
+                _goal_cols = st.columns(3)
+                _goal_cols[0].metric("Muestras", _eval_summary["goals_count"])
+                _goal_cols[1].metric("Error medio absoluto", f'{_eval_summary["goals_mae"]:.2f}' if _eval_summary["goals_mae"] is not None else "N/D")
+                _goal_cols[2].metric("Sesgo (proyección − real)", f'{_eval_summary["goals_bias"]:+.2f}' if _eval_summary["goals_bias"] is not None else "N/D")
+                st.markdown("**Precisión de córners**")
+                _corner_cols = st.columns(3)
+                _corner_cols[0].metric("Muestras", _eval_summary["corners_count"])
+                _corner_cols[1].metric("Error medio absoluto", f'{_eval_summary["corners_mae"]:.2f}' if _eval_summary["corners_mae"] is not None else "N/D")
+                _corner_cols[2].metric("Sesgo (proyección − real)", f'{_eval_summary["corners_bias"]:+.2f}' if _eval_summary["corners_bias"] is not None else "N/D")
+            if st.session_state.get("supabase_evaluation_error"):
+                st.error(f"No se pudo cargar la evaluación: {st.session_state['supabase_evaluation_error']}")
 
             st.markdown("#### Registro central de pronósticos · SQLite")
             st.caption("Consulta de solo lectura del historial persistido. No modifica pronósticos ni completa resultados automáticamente.")
