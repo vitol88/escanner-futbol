@@ -166,6 +166,42 @@ class PredictionSchemaTests(unittest.TestCase):
         self.assertEqual(result["estimated_edge"], 0.1638)
         self.assertEqual(result["expected_value"], 0.344)
 
+    def test_csv_odds_metadata_is_parsed_as_finite_numbers(self):
+        result = normalize_prediction_record({
+            "recorded_at": "2026-11-07T18:00:00Z",
+            "fixture_id": "789",
+            "market": "Over 2.5 goles",
+            "probability": "0.72",
+            "odds_decimal": "2.10",
+            "odds_verified": "true",
+            "implied_probability": "0.47619",
+            "estimated_edge": "0.24381",
+            "expected_value": "0.512",
+        })
+        self.assertTrue(result["odds_verified"])
+        self.assertEqual(result["odds_decimal"], 2.1)
+        self.assertAlmostEqual(result["implied_probability"], 0.47619)
+        self.assertAlmostEqual(result["estimated_edge"], 0.24381)
+        self.assertEqual(result["expected_value"], 0.512)
+
+    def test_invalid_odds_metadata_is_not_marked_verified(self):
+        result = normalize_prediction_record({
+            "recorded_at": "2026-11-07T18:00:00Z",
+            "fixture_id": "790",
+            "market": "Over 2.5 goles",
+            "probability": 0.72,
+            "odds_decimal": "NaN",
+            "odds_verified": "true",
+            "implied_probability": "Infinity",
+            "estimated_edge": "not-a-number",
+            "expected_value": "",
+        })
+        self.assertFalse(result["odds_verified"])
+        self.assertIsNone(result["odds_decimal"])
+        self.assertIsNone(result["implied_probability"])
+        self.assertIsNone(result["estimated_edge"])
+        self.assertIsNone(result["expected_value"])
+
     def test_dataset_counts_duplicates_and_invalid_records(self):
         base = {
             "recorded_at": "2026-11-06T19:14:00Z",
