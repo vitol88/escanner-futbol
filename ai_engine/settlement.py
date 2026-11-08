@@ -96,8 +96,10 @@ def resolve_binary_outcome(
         if normalized in {"away", "visitante", "gana visitante"}:
             return {"resolved": True, "outcome": int(away > home), "reason": "final_score"}
 
+        total = home + away
+
         # Formato de selección por umbral absoluto: "Total final: 3 goles o más".
-        total_threshold = re.match(r"^total final:\\s*(\\d+)\\s+goles?\\s+o\\s+más", pick, flags=re.IGNORECASE)
+        total_threshold = re.match(r"^total final:\s*(\d+)\s+goles?\s+o\s+más", pick, flags=re.IGNORECASE)
         if total_threshold:
             return {
                 "resolved": True,
@@ -122,7 +124,7 @@ def resolve_binary_outcome(
                 "reason": "final_team_score",
             }
 
-        named_team_match = re.match(r"^(.+?):\\s*terminará\\s+con\\s+(\\d+)\\s+goles?\\s+o\\s+más$", pick, flags=re.IGNORECASE)
+        named_team_match = re.match(r"^(.+?):\s*terminará\s+con\s+(\d+)\s+goles?\s+o\s+más$", pick, flags=re.IGNORECASE)
         if named_team_match:
             team_name = named_team_match.group(1).strip().casefold()
             if home_team_name and team_name == str(home_team_name).strip().casefold():
@@ -137,7 +139,6 @@ def resolve_binary_outcome(
                 "reason": "final_team_score",
             }
 
-        total = home + away
         for direction in ("over", "under"):
             line = _line_from_selection(pick, direction, ("", " goles"))
             if line is not None:
