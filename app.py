@@ -20,6 +20,7 @@ from ai_engine.evaluation import evaluate_binary_forecasts, evaluate_forecasts_b
 from ai_engine.dataset_audit import audit_forecast_dataset, audit_prediction_history
 from ai_engine.prediction_schema import PREDICTION_SCHEMA_VERSION, normalize_prediction_record
 from ai_engine.prediction_ledger import append_prediction_records, load_prediction_records
+from ai_engine.supabase_prediction_ledger import append_supabase_prediction_records, load_supabase_prediction_records
 from ai_engine.outcome_ledger import load_verified_outcomes, record_verified_outcome
 from ai_engine.settlement import resolve_binary_outcome
 from ai_engine.telegram_publisher import send_telegram_signal, send_telegram_test_message
@@ -8284,15 +8285,24 @@ else:
         }
         if ledger_records_to_sync:
             try:
-                # Re-submit canonical CSV rows on each scan: SQLite ignores rows
-                # already committed and retries any records missed by a prior failure.
                 st.session_state.prediction_ledger_last_write = append_prediction_records(
                     PREDICTION_LEDGER_PATH, ledger_records_to_sync
                 )
                 st.session_state.prediction_ledger_write_error = ""
             except Exception as ledger_exc:
-                # A ledger failure must not interrupt the live scanner or its legacy log.
                 st.session_state.prediction_ledger_write_error = str(ledger_exc)
+            try:
+                _sb_url = str(st.secrets.get("SUPABASE_URL", "") or os.getenv("SUPABASE_URL", "")).strip()
+                _sb_key = str(st.secrets.get("SUPABASE_SECRET_KEY", "") or os.getenv("SUPABASE_SECRET_KEY", "")).strip()
+                if _sb_url and _sb_key:
+                    st.session_state.prediction_supabase_last_write = append_supabase_prediction_records(
+                        ledger_records_to_sync, _sb_url, _sb_key
+                    )
+                    st.session_state.prediction_supabase_write_error = ""
+            except Exception as supabase_ledger_exc:
+                st.session_state.prediction_supabase_write_error = (
+                    f"{type(supabase_ledger_exc).__name__}: {supabase_ledger_exc}"
+                )
         st.session_state.last_scan_api_calls = st.session_state.api_request_count - scan_api_calls_start
 
     # El panel global de escaneo no debe mezclarse con la pantalla individual seleccionada.
@@ -8904,6 +8914,20 @@ else:
                     ) if recovery_valid else {
                         "received": 0, "valid": 0, "invalid": 0, "inserted": 0, "duplicates": 0
                     }
+                    _sb_url = str(st.secrets.get("SUPABASE_URL", "") or os.getenv("SUPABASE_URL", "")).strip()
+                    _sb_key = str(st.secrets.get("SUPABASE_SECRET_KEY", "") or os.getenv("SUPABASE_SECRET_KEY", "")).strip()
+                    supabase_result = None
+                    supabase_read_error = ""
+                    remote_ledger_rows = None
+                    if _sb_url and _sb_key:
+                        try:
+                            if recovery_valid:
+                                supabase_result = append_supabase_prediction_records(
+                                    recovery_valid, _sb_url, _sb_key
+                                )
+                            remote_ledger_rows = load_supabase_prediction_records(_sb_url, _sb_key)
+                        except Exception as supabase_exc:
+                            supabase_read_error = f"{type(supabase_exc).__name__}: {supabase_exc}"
                     try:
                         csv_size_bytes = SIGNAL_HISTORY_PATH.stat().st_size if SIGNAL_HISTORY_PATH.exists() else 0
                     except OSError:
@@ -8918,9 +8942,15 @@ else:
                         "sqlite_exists": PREDICTION_LEDGER_PATH.exists(),
                         "sqlite_path": str(PREDICTION_LEDGER_PATH),
                         "paths_are_absolute": SIGNAL_HISTORY_PATH.is_absolute() and PREDICTION_LEDGER_PATH.is_absolute(),
+                        "supabase_configured": bool(_sb_url and _sb_key),
+                        "supabase_rows": len(remote_ledger_rows) if remote_ledger_rows is not None else None,
+                        "supabase_error": supabase_read_error,
                         **recovery_result,
                     }
-                    ledger_rows = load_prediction_records(PREDICTION_LEDGER_PATH)
+                    ledger_rows = (
+                        remote_ledger_rows if remote_ledger_rows is not None
+                        else load_prediction_records(PREDICTION_LEDGER_PATH)
+                    )
                     verified_outcomes = load_verified_outcomes(PREDICTION_LEDGER_PATH)
                     st.session_state.prediction_ledger_snapshot = ledger_rows
                     st.session_state.prediction_outcome_snapshot = verified_outcomes
@@ -8949,8 +8979,15 @@ else:
                     st.warning("No se encontró el CSV histórico en la ruta configurada. La base central no puede recuperar filas desde ese archivo.")
                 elif recovery_diagnostics.get("csv_rows", 0) and not recovery_diagnostics.get("valid_rows", 0):
                     st.warning("El CSV contiene filas, pero ninguna cumple el esquema mínimo del registro central. Revisa los campos requeridos antes de migrar; no se descartó ni modificó el CSV.")
+                if recovery_diagnostics.get("supabase_configured"):
+                    if recovery_diagnostics.get("supabase_error"):
+                        st.error(f"Almacenamiento remoto Supabase no disponible: {recovery_diagnostics['supabase_error']}")
+                    else:
+                        st.success(f"Supabase conectado: {recovery_diagnostics.get('supabase_rows', 0)} pronóstico(s) persistidos remotamente.")
+                else:
+                    st.warning("Supabase no está configurado para el registro de pronósticos. SQLite local puede perderse si el alojamiento reinicia su disco.")
                 if not recovery_diagnostics.get("paths_are_absolute"):
-                    st.info("Al menos una ruta de almacenamiento es relativa. La persistencia después de reinicios depende de la plataforma de alojamiento y de si conserva el disco local; configura rutas/volúmenes persistentes si corresponde.")
+                    st.info("Al menos una ruta de almacenamiento es relativa. La persistencia local después de reinicios depende de la plataforma; Supabase evita depender de ese disco.")
             if st.session_state.get("prediction_ledger_read_error"):
                 st.warning(f"No se pudo consultar el registro central: {st.session_state.prediction_ledger_read_error}")
             elif "prediction_ledger_snapshot" in st.session_state:
