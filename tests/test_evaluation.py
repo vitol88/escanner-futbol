@@ -184,5 +184,46 @@ class BinaryForecastEvaluationTests(unittest.TestCase):
         self.assertEqual(breakdown[0]["line"], "3.5")
         self.assertEqual(breakdown[0]["sample_size"], 2)
 
+
+    def test_market_breakdown_uses_canonical_type_not_selection_label(self):
+        from ai_engine.evaluation import evaluate_forecasts_by_market
+        rows = [
+            {"market": "Empate final", "market_type": "draw", "probability": 0.7,
+             "outcome": 1, "outcome_verified": True},
+            {"market": "Gana local", "market_type": "goals", "probability": 0.6,
+             "outcome": 1, "outcome_verified": True},
+            {"market": "Más de 2.5 goles", "market_type": "goals", "probability": 0.8,
+             "outcome": 1, "outcome_verified": True},
+            {"market": "Ambos equipos marcan: Sí", "market_type": "btts", "probability": 0.5,
+             "outcome": 0, "outcome_verified": True},
+        ]
+        result = evaluate_forecasts_by_market(rows, minimum_sample=1)
+        self.assertEqual([item["group"] for item in result], ["btts", "draw", "goals"])
+        goals = next(item for item in result if item["group"] == "goals")
+        self.assertEqual(goals["sample_size"], 2)
+
+    def test_market_breakdown_keeps_legacy_fallback(self):
+        from ai_engine.evaluation import evaluate_forecasts_by_market
+        rows = [
+            {"market": "Corners", "probability": 0.8, "outcome": 1, "outcome_verified": True},
+            {"market": "Corners", "probability": 0.3, "outcome": 0, "outcome_verified": True},
+        ]
+        result = evaluate_forecasts_by_market(rows, minimum_sample=2)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["group"], "Corners")
+        self.assertEqual(result[0]["sample_size"], 2)
+
+    def test_market_line_breakdown_prefers_canonical_type(self):
+        from ai_engine.evaluation import evaluate_forecasts_by_market_line
+        rows = [
+            {"market": "Más de 2.5 goles", "market_type": "goals", "selection": "over",
+             "line": "2.5", "probability": 0.8, "outcome": 1, "outcome_verified": True},
+            {"market": "Menos de 2.5 goles", "market_type": "goals", "selection": "under",
+             "line": "2.5", "probability": 0.4, "outcome": 0, "outcome_verified": True},
+        ]
+        result = evaluate_forecasts_by_market_line(rows, minimum_sample=1)
+        self.assertEqual({item["market"] for item in result}, {"goals"})
+        self.assertEqual({item["selection"] for item in result}, {"over", "under"})
+
 if __name__ == "__main__":
     unittest.main()
