@@ -299,13 +299,21 @@ def evaluate_model_version_comparability(
         for index, version_a in enumerate(version_names):
             for version_b in version_names[index + 1:]:
                 common = sorted(set(versions[version_a]) & set(versions[version_b]))
-                # A pair is valid only if the verified result agrees for the same fixture.
-                common = [
+                # Keep raw verified overlap distinct from fixtures with an agreed,
+                # known outcome and two valid probabilities suitable for paired scoring.
+                matching_outcome_fixtures = [
                     fixture for fixture in common
-                    if versions[version_a][fixture][1] == versions[version_b][fixture][1]
+                    if versions[version_a][fixture][1] is not None
+                    and versions[version_a][fixture][1] == versions[version_b][fixture][1]
+                ]
+                paired_metric_fixtures = [
+                    fixture for fixture in matching_outcome_fixtures
+                    if versions[version_a][fixture][2] is not None
+                    and versions[version_b][fixture][2] is not None
                 ]
                 common_count = len(common)
                 comparable = common_count >= minimum_common_fixtures
+                paired_metrics_available = len(paired_metric_fixtures) >= minimum_common_fixtures
                 item = {
                     "market": cohort_key[0],
                     "selection": cohort_key[1],
@@ -315,6 +323,9 @@ def evaluate_model_version_comparability(
                     "version_a": version_a,
                     "version_b": version_b,
                     "common_fixture_count": common_count,
+                    "matching_outcome_fixture_count": len(matching_outcome_fixtures),
+                    "paired_metric_fixture_count": len(paired_metric_fixtures),
+                    "paired_metrics_available": paired_metrics_available,
                     "minimum_common_fixtures": minimum_common_fixtures,
                     "comparable_cohort": comparable,
                     "status": "Cohorte común suficiente" if comparable else "No comparable: partidos comunes insuficientes",
@@ -325,23 +336,19 @@ def evaluate_model_version_comparability(
                     "log_loss_b": None,
                     "log_loss_delta_b_minus_a": None,
                 }
-                if comparable and all(
-                    versions[version_a][fixture][1] is not None
-                    and versions[version_a][fixture][2] is not None
-                    and versions[version_b][fixture][2] is not None
-                    for fixture in common
-                ):
-                    outcomes = [versions[version_a][fixture][1] for fixture in common]
-                    probabilities_a = [versions[version_a][fixture][2] for fixture in common]
-                    probabilities_b = [versions[version_b][fixture][2] for fixture in common]
+                if paired_metrics_available:
+                    metric_count = len(paired_metric_fixtures)
+                    outcomes = [versions[version_a][fixture][1] for fixture in paired_metric_fixtures]
+                    probabilities_a = [versions[version_a][fixture][2] for fixture in paired_metric_fixtures]
+                    probabilities_b = [versions[version_b][fixture][2] for fixture in paired_metric_fixtures]
                     def _losses(probabilities: list[float]) -> tuple[float, float]:
-                        brier = sum((p - y) ** 2 for p, y in zip(probabilities, outcomes)) / common_count
+                        brier = sum((p - y) ** 2 for p, y in zip(probabilities, outcomes) ) / metric_count
                         epsilon = 1e-15
                         log_loss = -sum(
                             y * math.log(min(1 - epsilon, max(epsilon, p)))
                             + (1 - y) * math.log(min(1 - epsilon, max(epsilon, 1 - p)))
                             for p, y in zip(probabilities, outcomes)
-                        ) / common_count
+                         ) / metric_count
                         return brier, log_loss
                     brier_a, log_a = _losses(probabilities_a)  # type: ignore[arg-type]
                     brier_b, log_b = _losses(probabilities_b)  # type: ignore[arg-type]
