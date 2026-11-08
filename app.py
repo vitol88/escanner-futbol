@@ -8887,12 +8887,35 @@ else:
             st.caption("Consulta de solo lectura del historial persistido. No modifica pronósticos ni completa resultados automáticamente.")
             if st.button("Consultar registro central", key="load_prediction_ledger_summary"):
                 try:
+                    # Reconcile the central ledger from the durable legacy CSV at read time too.
+                    # This recovers valid historical rows even if no new scan has run in this session.
+                    csv_rows_for_recovery = []
+                    if SIGNAL_HISTORY_PATH.exists():
+                        with SIGNAL_HISTORY_PATH.open("r", encoding="utf-8-sig", newline="") as history_file:
+                            csv_rows_for_recovery = list(csv.DictReader(history_file))
+                    recovery_rows = [
+                        normalize_prediction_record(row)
+                        for row in csv_rows_for_recovery
+                        if isinstance(row, dict)
+                    ]
+                    recovery_valid = [row for row in recovery_rows if row["valid"]]
+                    recovery_result = append_prediction_records(
+                        PREDICTION_LEDGER_PATH, recovery_valid
+                    ) if recovery_valid else {
+                        "received": 0, "valid": 0, "invalid": 0, "inserted": 0, "duplicates": 0
+                    }
+                    st.session_state.prediction_ledger_recovery_diagnostics = {
+                        "csv_rows": len(csv_rows_for_recovery),
+                        "valid_rows": len(recovery_valid),
+                        "invalid_rows": len(recovery_rows) - len(recovery_valid),
+                        **recovery_result,
+                    }
                     ledger_rows = load_prediction_records(PREDICTION_LEDGER_PATH)
                     verified_outcomes = load_verified_outcomes(PREDICTION_LEDGER_PATH)
                     st.session_state.prediction_ledger_snapshot = ledger_rows
                     st.session_state.prediction_outcome_snapshot = verified_outcomes
                     st.session_state.prediction_ledger_read_error = ""
-                except (OSError, ValueError, TypeError) as ledger_read_exc:
+                except (OSError, ValueError, TypeError, KeyError) as ledger_read_exc:
                     st.session_state.prediction_ledger_read_error = str(ledger_read_exc)
             if st.session_state.get("prediction_ledger_read_error"):
                 st.warning(f"No se pudo consultar el registro central: {st.session_state.prediction_ledger_read_error}")
