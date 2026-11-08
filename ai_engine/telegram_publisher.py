@@ -89,3 +89,42 @@ def send_telegram_signal(
     except Exception as exc:
         # Do not return exception text: request errors can contain the bot token URL.
         return False, f"No se pudo publicar ({type(exc).__name__})."
+
+
+
+def send_telegram_test_message(
+    bot_token: str,
+    chat_id: str,
+    *,
+    post: Callable[..., Any] | None = None,
+    timeout: float = 8.0,
+) -> tuple[bool, str]:
+    """Send a clearly labeled connectivity test; never touches Supabase or alert rows."""
+    token = str(bot_token or "").strip()
+    destination = str(chat_id or "").strip()
+    if not token:
+        return False, "Falta configurar TELEGRAM_BOT_TOKEN."
+    if not destination:
+        return False, "Falta configurar TELEGRAM_CHAT_ID."
+    sender = post or requests.post
+    try:
+        response = sender(
+            f"{TELEGRAM_API_BASE}/bot{token}/sendMessage",
+            json={
+                "chat_id": destination,
+                "text": (
+                    "🧪 PRUEBA DE CONEXIÓN · FOOTBALL LAB\\n\\n"
+                    "Este es un mensaje de prueba técnica. No es una señal de apuesta "
+                    "ni corresponde a un partido real.\\n\\n"
+                    "Si recibes este mensaje, el bot y el canal están comunicándose correctamente."
+                ),
+            },
+            timeout=timeout,
+        )
+        response.raise_for_status()
+        payload = response.json()
+        if not payload.get("ok"):
+            return False, "Telegram rechazó el mensaje de prueba."
+        return True, "Mensaje de prueba enviado correctamente al canal de Telegram."
+    except Exception as exc:
+        return False, f"No se pudo enviar la prueba ({type(exc).__name__})."
