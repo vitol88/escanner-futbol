@@ -11,7 +11,7 @@ import math
 from datetime import datetime, timezone
 from typing import Any
 
-PREDICTION_SCHEMA_VERSION = "1.0"
+PREDICTION_SCHEMA_VERSION = "1.1"
 
 
 def _parse_timestamp(value: Any) -> tuple[str | None, str]:
@@ -121,6 +121,8 @@ def normalize_prediction_record(row: dict[str, Any]) -> dict[str, Any]:
         "fixture_id": fixture_id,
         "phase": phase,
         "market": market,
+        "market_type": record["market_type"],
+        "selection": record["selection"],
         "line": record["line"],
         "minute": record["minute"],
         "score_home": record["score_home"],
