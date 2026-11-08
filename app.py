@@ -9011,15 +9011,26 @@ else:
                 _eval_cols[3].metric("Partidos distintos", _eval_summary["fixtures"])
                 st.markdown("**Precisión de goles**")
                 _goal_cols = st.columns(3)
-                _goal_cols[0].metric("Muestras", _eval_summary["goals_count"])
+                _goal_cols[0].metric("Capturas evaluadas", _eval_summary["goals_count"])
                 _goal_cols[1].metric("Error medio absoluto", f'{_eval_summary["goals_mae"]:.2f}' if _eval_summary["goals_mae"] is not None else "N/D")
                 _goal_cols[2].metric("Sesgo (proyección − real)", f'{_eval_summary["goals_bias"]:+.2f}' if _eval_summary["goals_bias"] is not None else "N/D")
+                st.caption(
+                    f"Partidos independientes: {_eval_summary['goals_fixtures']} · "
+                    f"Clasificación: {_eval_summary['goals_reliability']}. "
+                    "La clasificación mide volumen de evidencia, no garantiza aciertos."
+                )
                 st.markdown("**Precisión de córners**")
                 _corner_cols = st.columns(3)
-                _corner_cols[0].metric("Muestras", _eval_summary["corners_count"])
+                _corner_cols[0].metric("Capturas evaluadas", _eval_summary["corners_count"])
                 _corner_cols[1].metric("Error medio absoluto", f'{_eval_summary["corners_mae"]:.2f}' if _eval_summary["corners_mae"] is not None else "N/D")
                 _corner_cols[2].metric("Sesgo (proyección − real)", f'{_eval_summary["corners_bias"]:+.2f}' if _eval_summary["corners_bias"] is not None else "N/D")
+                st.caption(
+                    f"Partidos independientes: {_eval_summary['corners_fixtures']} · "
+                    f"Clasificación: {_eval_summary['corners_reliability']}. "
+                    "La clasificación mide volumen de evidencia, no garantiza aciertos."
+                )
                 st.markdown("**Precisión según el minuto de captura**")
+                st.caption("La clasificación de cada tramo se calcula por partidos distintos, no por cantidad de capturas repetidas: menos de 10 = muestra insuficiente; 10–29 = en observación; 30 o más = base amplia en seguimiento.")
                 _minute_rows = summarize_evaluations_by_minute(st.session_state.get("supabase_evaluation_rows", []))
                 if _minute_rows:
                     st.dataframe(_minute_rows, use_container_width=True, hide_index=True)
