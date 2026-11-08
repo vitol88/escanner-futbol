@@ -3764,6 +3764,81 @@ with st.sidebar:
             else:
                 st.error(_telegram_test_message)
 
+        st.divider()
+        st.markdown("**APROBACIÓN MANUAL DE SEÑALES**")
+        st.caption("El escaneo solo prepara señales. Ninguna se publica sin que selecciones y confirmes una individualmente.")
+        _telegram_queue = st.session_state.get("telegram_pending_rows", [])
+        if _telegram_queue:
+            _telegram_options = list(range(len(_telegram_queue)))
+            def _telegram_signal_label(_idx):
+                _row = _telegram_queue[_idx]
+                _match = f"{_row.get('home') or 'Local'} vs {_row.get('away') or 'Visitante'}"
+                _market = str(_row.get("market") or "Mercado")
+                _minute = _row.get("minute")
+                _score = f"{_row.get('score_home', '?')}-{_row.get('score_away', '?')}"
+                _odd = _row.get("verified_live_odd")
+                _edge = _row.get("estimated_edge")
+                return f"{_match} · {_market} · {_minute or '?'}' · {_score} · cuota {_odd:.2f} · edge {_edge:.1%}"
+            _telegram_selected_idx = st.selectbox(
+                "Selecciona una señal para revisar",
+                options=_telegram_options,
+                format_func=_telegram_signal_label,
+                key="telegram_manual_signal_selection",
+            )
+            _telegram_selected_row = _telegram_queue[_telegram_selected_idx]
+            _telegram_detail_cols = st.columns(2)
+            with _telegram_detail_cols[0]:
+                st.metric("Cuota verificada", f"{float(_telegram_selected_row.get('verified_live_odd', 0)):.2f}")
+            with _telegram_detail_cols[1]:
+                st.metric("Ventaja estimada", f"{float(_telegram_selected_row.get('estimated_edge', 0)):.1%}")
+            st.caption(
+                f"Casa: {_telegram_selected_row.get('verified_bookmaker')} · "
+                f"Mercado de cuota: {_telegram_selected_row.get('verified_odds_market')}"
+            )
+            if st.button("ENVIAR ESTA SEÑAL A TELEGRAM", key="telegram_send_selected_signal", use_container_width=True, type="primary"):
+                try:
+                    _manual_token = str(st.secrets.get("TELEGRAM_BOT_TOKEN", "") or os.getenv("TELEGRAM_BOT_TOKEN", "")).strip()
+                    _manual_chat = str(st.secrets.get("TELEGRAM_CHAT_ID", "") or os.getenv("TELEGRAM_CHAT_ID", "-1004668474905")).strip()
+                    _manual_url = str(st.secrets.get("SUPABASE_URL", "") or os.getenv("SUPABASE_URL", "")).strip()
+                    _manual_secret = str(st.secrets.get("SUPABASE_SECRET_KEY", "") or os.getenv("SUPABASE_SECRET_KEY", "")).strip()
+                except Exception:
+                    _manual_token = str(os.getenv("TELEGRAM_BOT_TOKEN", "")).strip()
+                    _manual_chat = str(os.getenv("TELEGRAM_CHAT_ID", "-1004668474905")).strip()
+                    _manual_url = str(os.getenv("SUPABASE_URL", "")).strip()
+                    _manual_secret = str(os.getenv("SUPABASE_SECRET_KEY", "")).strip()
+                if not all((_manual_token, _manual_chat, _manual_url, _manual_secret)):
+                    st.error("Envío detenido: faltan credenciales de Telegram o Supabase.")
+                else:
+                    _reserved, _alert_key, _reserve_detail = reserve_telegram_alert(
+                        _telegram_selected_row, _manual_url, _manual_secret
+                    )
+                    if not _reserved:
+                        if _alert_key:
+                            st.warning("Esta señal ya fue registrada o enviada. Supabase bloqueó el duplicado.")
+                            st.session_state.telegram_pending_rows.pop(_telegram_selected_idx)
+                        else:
+                            st.error(f"No se pudo reservar la señal en Supabase: {_reserve_detail}")
+                    else:
+                        _sent, _send_detail = send_telegram_signal(
+                            _telegram_selected_row, _manual_token, _manual_chat
+                        )
+                        update_telegram_alert(
+                            _alert_key, "sent" if _sent else "failed",
+                            _manual_url, _manual_secret,
+                            error="" if _sent else _send_detail,
+                        )
+                        st.session_state.telegram_pending_rows.pop(_telegram_selected_idx)
+                        if _sent:
+                            st.success("Señal enviada correctamente a Telegram.")
+                        else:
+                            st.error(f"No se pudo enviar la señal: {_send_detail}")
+                    st.rerun()
+        else:
+            st.info("Todavía no hay señales elegibles pendientes. Primero ejecuta un escaneo en vivo; las señales que cumplan los filtros aparecerán aquí para aprobación.")
+
+        if st.session_state.get("telegram_publish_status"):
+            st.caption(st.session_state.telegram_publish_status)
+
 
 def get_api_key() -> str:
     try:
@@ -8134,39 +8209,13 @@ else:
             telegram_chat_id = str(os.getenv("TELEGRAM_CHAT_ID", "-1004668474905")).strip()
             supabase_url = str(os.getenv("SUPABASE_URL", "")).strip()
             supabase_secret_key = str(os.getenv("SUPABASE_SECRET_KEY", "")).strip()
-        if telegram_token and telegram_chat_id and telegram_pending:
-            sent_count = 0
-            skipped_count = 0
-            failed_count = 0
-            if not supabase_url or not supabase_secret_key:
-                st.session_state.telegram_publish_status = "Envío detenido: faltan SUPABASE_URL o SUPABASE_SECRET_KEY."
-            else:
-                for pending_row in telegram_pending:
-                    reserved, alert_key, reserve_detail = reserve_telegram_alert(
-                        pending_row, supabase_url, supabase_secret_key
-                    )
-                    if not reserved:
-                        if alert_key:
-                            skipped_count += 1
-                        else:
-                            failed_count += 1
-                        continue
-                    sent, detail = send_telegram_signal(pending_row, telegram_token, telegram_chat_id)
-                    update_telegram_alert(
-                        alert_key, "sent" if sent else "failed",
-                        supabase_url, supabase_secret_key,
-                        error="" if sent else detail,
-                    )
-                    if sent:
-                        sent_count += 1
-                    else:
-                        failed_count += 1
-                st.session_state.telegram_pending_rows = []
-                st.session_state.telegram_publish_status = (
-                    f"{sent_count} señal(es) publicadas; {skipped_count} duplicada(s) bloqueada(s); "
-                    f"{failed_count} fallo(s)."
-                )
-        elif new_signal_rows:
+        # Modo seguro: el escaneo nunca publica automáticamente. Las señales elegibles
+        # quedan en cola para que el usuario apruebe y envíe una por una desde Diagnóstico.
+        if telegram_pending:
+            st.session_state.telegram_publish_status = (
+                f"{len(telegram_pending)} señal(es) elegible(s) esperando aprobación manual."
+            )
+        elif new_signal_rows and not (telegram_token and telegram_chat_id):
             st.session_state.telegram_publish_status = "Señales en espera: configura TELEGRAM_BOT_TOKEN en los secretos del despliegue."
         try:
             if signal_rows:
