@@ -247,7 +247,7 @@ def _deduplicate_fixture_snapshots(
         market = str(row.get("market_type") or row.get("market") or "").strip()
         selection = str(row.get("selection") or "").strip()
         raw_timestamp = str(row.get("recorded_at") or "").strip()
-        if not fixture or not market or not selection or not raw_timestamp:
+        if not fixture or not raw_timestamp:
             passthrough.append((probability, outcome))
             continue
         try:
@@ -257,7 +257,7 @@ def _deduplicate_fixture_snapshots(
             passthrough.append((probability, outcome))
             continue
         key = (
-            fixture, market, selection,
+            fixture, market or "unknown", selection or "unknown",
             str(row.get("line") or "").strip(),
             str(row.get("phase") or "unknown").strip(),
             str(row.get("model_id") or "unknown").strip(),
