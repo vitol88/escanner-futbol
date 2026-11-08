@@ -101,7 +101,9 @@ class BinaryForecastEvaluationTests(unittest.TestCase):
         self.assertEqual(result["test_fixture_count"], 2)
         self.assertEqual(result["train_row_count"], 16)
         self.assertEqual(result["test_row_count"], 4)
-        self.assertEqual(result["test_metrics"]["sample_size"], 2)\n        self.assertEqual(result["test_metrics"]["raw_verified_sample_size"], 4)\n        self.assertEqual(result["test_metrics"]["deduplicated_snapshots"], 2)
+        self.assertEqual(result["test_metrics"]["sample_size"], 2)
+        self.assertEqual(result["test_metrics"]["raw_verified_sample_size"], 4)
+        self.assertEqual(result["test_metrics"]["deduplicated_snapshots"], 2)
         self.assertLess(result["train_last_timestamp"], result["test_first_timestamp"])
 
     def test_chronological_holdout_breakdowns_use_only_test_fixtures(self):
