@@ -33,12 +33,25 @@ def build_analysis_snapshot(
     now = now.astimezone(timezone.utc)
     minute = match.get("minute")
     bucket = int(now.timestamp() // 300)
-    identity = {
-        "fixture_id": str(fixture_id), "analysis_type": kind,
-        "minute": minute, "home_score": match.get("home_score"),
-        "away_score": match.get("away_score"), "time_bucket": bucket,
+    # El mismo estado exacto dentro de cinco minutos se deduplica, pero un
+    # cambio en estadísticas o proyección genera una captura nueva.
+    state = {
+        "match": _json_safe(match),
+        "inputs": _json_safe(inputs),
+        "outputs": _json_safe(outputs),
     }
-    snapshot_id = sha256(json.dumps(identity, sort_keys=True).encode("utf-8")).hexdigest()
+    identity = {
+        "fixture_id": str(fixture_id),
+        "analysis_type": kind,
+        "minute": minute,
+        "home_score": match.get("home_score"),
+        "away_score": match.get("away_score"),
+        "time_bucket": bucket,
+        "state": state,
+    }
+    snapshot_id = sha256(
+        json.dumps(identity, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
     payload = {
         "snapshot_id": snapshot_id,
         "schema_version": "1.0",
