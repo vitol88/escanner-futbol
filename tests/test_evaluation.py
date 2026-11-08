@@ -392,6 +392,49 @@ class BinaryForecastEvaluationTests(unittest.TestCase):
 
 
 
+    def test_model_version_pairing_uses_latest_snapshot_per_fixture(self):
+        from ai_engine.evaluation import evaluate_model_version_comparability
+
+        common = {
+            "fixture_id": "fx-1", "market_type": "corners", "selection": "over",
+            "line": "8.5", "phase": "live", "model_id": "corners",
+            "outcome": 1, "outcome_verified": True,
+        }
+        rows = [
+            {**common, "model_version": "1.0", "probability": 0.2,
+             "recorded_at": "2026-11-01T10:00:00+00:00"},
+            {**common, "model_version": "1.0", "probability": 0.8,
+             "recorded_at": "2026-11-01T10:05:00+00:00"},
+            {**common, "model_version": "2.0", "probability": 0.7,
+             "recorded_at": "2026-11-01T10:04:00+00:00"},
+        ]
+        result = evaluate_model_version_comparability(
+            rows, probability_key="probability", minimum_common_fixtures=1
+        )
+        self.assertEqual(len(result), 1)
+        self.assertAlmostEqual(result[0]["brier_a"], 0.04)
+        self.assertAlmostEqual(result[0]["brier_b"], 0.09)
+
+    def test_model_version_overlap_can_be_reported_without_valid_paired_probabilities(self):
+        from ai_engine.evaluation import evaluate_model_version_comparability
+
+        rows = []
+        for version in ("1.0", "2.0"):
+            rows.append({
+                "fixture_id": "fx-1", "market_type": "goals", "selection": "over",
+                "line": "2.5", "phase": "pre_match", "model_id": "goals",
+                "model_version": version, "outcome": 1, "outcome_verified": True,
+                "probability": "not-a-number",
+            })
+        result = evaluate_model_version_comparability(
+            rows, probability_key="probability", minimum_common_fixtures=1
+        )
+        self.assertEqual(result[0]["common_fixture_count"], 1)
+        self.assertTrue(result[0]["comparable_cohort"])
+        self.assertIsNone(result[0]["brier_a"])
+        self.assertIsNone(result[0]["log_loss_a"])
+
+
 if __name__ == "__main__":
     unittest.main()
 
