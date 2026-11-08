@@ -429,9 +429,9 @@ class BinaryForecastEvaluationTests(unittest.TestCase):
         }
         rows = [
             # 15:00 UTC is later than 14:30 UTC, despite its earlier local clock.
-            {**common, "model_version": "1.0", "probability": 0.1,
-             "recorded_at": "2026-11-01T09:30:00-05:00"},
             {**common, "model_version": "1.0", "probability": 0.8,
+             "recorded_at": "2026-11-01T10:00:00-05:00"},
+            {**common, "model_version": "1.0", "probability": 0.1,
              "recorded_at": "2026-11-01T14:30:00Z"},
             {**common, "model_version": "2.0", "probability": 0.7,
              "recorded_at": "2026-11-01T15:00:00+00:00"},
