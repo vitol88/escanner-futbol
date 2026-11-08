@@ -9036,11 +9036,16 @@ else:
                         placeholder="Escribe tu identificador o iniciales",
                         key="manual_outcome_verifier",
                     )
+                    final_data_confirmed = st.checkbox(
+                        "Confirmo que los datos finales corresponden a este partido y fueron comprobados.",
+                        value=False,
+                        key="manual_outcome_data_confirmed",
+                    )
                     if st.button(
                         "Confirmar y registrar resultado",
                         key="confirm_manual_outcome",
                         type="primary",
-                        disabled=not resolution.get("resolved") or not source_value.strip() or not verifier_value.strip(),
+                        disabled=not resolution.get("resolved") or not source_value.strip() or not verifier_value.strip() or not final_data_confirmed,
                     ):
                         try:
                             saved = record_verified_outcome(
