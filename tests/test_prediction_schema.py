@@ -141,6 +141,31 @@ class PredictionSchemaTests(unittest.TestCase):
         self.assertEqual(result["snapshot_id"], "123:67:1:0")
         self.assertIsNone(result["outcome"])
 
+    def test_verified_odds_metadata_is_preserved_for_auditing(self):
+        result = normalize_prediction_record({
+            "recorded_at": "2026-11-07T18:00:00Z",
+            "fixture_id": "456",
+            "market": "Empate final",
+            "market_type": "draw",
+            "selection": "Empate final",
+            "probability": 0.64,
+            "odds_decimal": 2.1,
+            "odds_verified": True,
+            "odds_bookmaker": "Casa de prueba",
+            "odds_market": "Empate",
+            "implied_probability": 0.4762,
+            "estimated_edge": 0.1638,
+            "expected_value": 0.344,
+        })
+        self.assertTrue(result["valid"])
+        self.assertTrue(result["odds_verified"])
+        self.assertEqual(result["odds_decimal"], 2.1)
+        self.assertEqual(result["odds_bookmaker"], "Casa de prueba")
+        self.assertEqual(result["odds_market"], "Empate")
+        self.assertEqual(result["implied_probability"], 0.4762)
+        self.assertEqual(result["estimated_edge"], 0.1638)
+        self.assertEqual(result["expected_value"], 0.344)
+
     def test_dataset_counts_duplicates_and_invalid_records(self):
         base = {
             "recorded_at": "2026-11-06T19:14:00Z",
