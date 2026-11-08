@@ -22,16 +22,22 @@ def _non_negative_int(value: Any) -> int | None:
     return int(number)
 
 
-def _line_from_selection(selection: str, direction: str) -> float | None:
+def _line_from_selection(
+    selection: str,
+    direction: str,
+    allowed_suffixes: tuple[str, ...] = ("",),
+) -> float | None:
+    suffix_pattern = "|".join(re.escape(suffix) for suffix in allowed_suffixes)
     match = re.fullmatch(
-        rf"\s*{direction}\s+(\d+(?:\.\d+)?)\s*",
+        rf"\s*(?:{direction}|{'Más de' if direction == 'over' else 'Menos de'})"
+        rf"\s+(\d+(?:[.,]\d+)?)\s*(?:{suffix_pattern})\s*",
         selection,
         flags=re.IGNORECASE,
     )
     if not match:
         return None
     try:
-        value = float(match.group(1))
+        value = float(match.group(1).replace(",", "."))
     except (TypeError, ValueError, OverflowError):
         return None
     return value if math.isfinite(value) and value >= 0 else None
@@ -107,7 +113,7 @@ def resolve_binary_outcome(
 
         total = home + away
         for direction in ("over", "under"):
-            line = _line_from_selection(pick, direction)
+            line = _line_from_selection(pick, direction, ("", " goles"))
             if line is not None:
                 # Equality is not a binary win/loss; never force a push.
                 if total == line:
@@ -122,7 +128,8 @@ def resolve_binary_outcome(
         if total is None:
             return {"resolved": False, "reason": "missing_or_invalid_final_total"}
         for direction in ("over", "under"):
-            line = _line_from_selection(pick, direction)
+            suffixes = ("", " córners") if market == "corners" else ("", " tarjetas amarillas", " tarjetas")
+            line = _line_from_selection(pick, direction, suffixes)
             if line is not None:
                 if total == line:
                     return {"resolved": False, "reason": "push_requires_non_binary_settlement"}
