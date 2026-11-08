@@ -20,6 +20,7 @@ from ai_engine.evaluation import evaluate_binary_forecasts, evaluate_forecasts_b
 from ai_engine.dataset_audit import audit_forecast_dataset
 from ai_engine.prediction_schema import PREDICTION_SCHEMA_VERSION, normalize_prediction_record
 from ai_engine.prediction_ledger import append_prediction_records, load_prediction_records
+from ai_engine.outcome_ledger import load_verified_outcomes
 from ai_engine.telegram_publisher import send_telegram_signal, send_telegram_test_message
 from ai_engine.telegram_store import reserve_telegram_alert, update_telegram_alert, check_supabase_connection, test_supabase_duplicate_protection
 from models.automatic_history import build_automatic_history
@@ -8878,7 +8879,9 @@ else:
             if st.button("Consultar registro central", key="load_prediction_ledger_summary"):
                 try:
                     ledger_rows = load_prediction_records(PREDICTION_LEDGER_PATH)
+                    verified_outcomes = load_verified_outcomes(PREDICTION_LEDGER_PATH)
                     st.session_state.prediction_ledger_snapshot = ledger_rows
+                    st.session_state.prediction_outcome_snapshot = verified_outcomes
                     st.session_state.prediction_ledger_read_error = ""
                 except (OSError, ValueError, TypeError) as ledger_read_exc:
                     st.session_state.prediction_ledger_read_error = str(ledger_read_exc)
@@ -8886,12 +8889,26 @@ else:
                 st.warning(f"No se pudo consultar el registro central: {st.session_state.prediction_ledger_read_error}")
             elif "prediction_ledger_snapshot" in st.session_state:
                 ledger_rows = st.session_state.prediction_ledger_snapshot
+                verified_outcomes = st.session_state.get("prediction_outcome_snapshot", {})
+                # Join only in memory for reporting; the original prediction rows remain immutable.
+                ledger_report_rows = []
+                for item in ledger_rows:
+                    report_item = dict(item)
+                    verified_result = verified_outcomes.get(str(item.get("prediction_id") or ""))
+                    if verified_result:
+                        report_item.update({
+                            "outcome": verified_result["outcome"],
+                            "outcome_verified": True,
+                            "outcome_source": verified_result["outcome_source"],
+                            "outcome_verified_at": verified_result["outcome_verified_at"],
+                        })
+                    ledger_report_rows.append(report_item)
                 ledger_verified = sum(
-                    1 for item in ledger_rows
+                    1 for item in ledger_report_rows
                     if item.get("outcome_verified") and item.get("outcome") in (0, 1)
                 )
                 ledger_odds_verified = sum(1 for item in ledger_rows if item.get("odds_verified"))
-                ledger_metrics = evaluate_binary_forecasts(ledger_rows, probability_key="probability")
+                ledger_metrics = evaluate_binary_forecasts(ledger_report_rows, probability_key="probability")
                 ledger_cols = st.columns(4)
                 ledger_cols[0].metric("Pronósticos guardados", len(ledger_rows))
                 ledger_cols[1].metric("Resultados verificados", ledger_verified)
@@ -8906,7 +8923,24 @@ else:
                     )
                 else:
                     st.info("El registro aún no contiene resultados binarios verificados suficientes para calcular métricas.")
-                st.caption("El registro se conserva como historial append-only: esta consulta no altera las filas existentes.")
+                if verified_outcomes:
+                    st.markdown("##### Últimos resultados verificados")
+                    result_rows = []
+                    for item in reversed(ledger_report_rows):
+                        if not item.get("outcome_verified"):
+                            continue
+                        result_rows.append({
+                            "Partido": item.get("match") or item.get("fixture_id") or "N/D",
+                            "Mercado": item.get("market") or "N/D",
+                            "Selección": item.get("selection") or "N/D",
+                            "Resultado": "Acertado" if item.get("outcome") == 1 else "No acertado",
+                            "Fuente": item.get("outcome_source") or "N/D",
+                            "Verificado": item.get("outcome_verified_at") or "N/D",
+                        })
+                    st.dataframe(result_rows[:30], use_container_width=True, hide_index=True)
+                else:
+                    st.info("Aún no hay resultados verificados en la tabla de auditoría.")
+                st.caption("Los resultados se unen al pronóstico solo para consulta. La tabla original de pronósticos y el historial de correcciones permanecen intactos.")
             market_status = [
                 ("Córners", "Consulta automática de promedios recientes local/visitante y combinación exploratoria con el ritmo en vivo; pendiente de validación."),
                 ("Goles", "Probabilidades exploratorias basadas en medias históricas de liga; aún no calibradas."),
