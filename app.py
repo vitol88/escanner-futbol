@@ -8934,6 +8934,122 @@ else:
                         )
                 else:
                     st.info("El registro aún no contiene resultados binarios verificados suficientes para calcular métricas.")
+
+                # La lectura cronológica evita presentar métricas del histórico completo
+                # como si fueran una prueba independiente. Solo el bloque posterior se puntúa.
+                st.markdown("#### Auditoría de calidad por mercado y versión")
+                ledger_temporal = evaluate_chronological_holdout(
+                    ledger_report_rows,
+                    probability_key="probability",
+                )
+                if ledger_temporal["available"]:
+                    temporal_metrics = ledger_temporal["test_metrics"]
+                    st.caption(
+                        f"Prueba cronológica independiente: {ledger_temporal['train_fixture_count']} "
+                        f"partidos anteriores para desarrollo y {ledger_temporal['test_fixture_count']} "
+                        f"partidos posteriores para evaluación. Los snapshots de un mismo partido "
+                        "permanecen en una sola partición."
+                    )
+                    temporal_cols = st.columns(4)
+                    temporal_cols[0].metric("Partidos de prueba", ledger_temporal["test_fixture_count"])
+                    temporal_cols[1].metric("Eventos independientes", temporal_metrics["sample_size"])
+                    temporal_cols[2].metric(
+                        "Brier de prueba",
+                        f"{temporal_metrics['brier_score']:.3f}" if temporal_metrics["brier_score"] is not None else "N/D",
+                    )
+                    temporal_cols[3].metric(
+                        "Brecha de calibración",
+                        f"{temporal_metrics['calibration_gap']:.1%}" if temporal_metrics["calibration_gap"] is not None else "N/D",
+                    )
+
+                    st.markdown("##### Resultados posteriores por mercado")
+                    if ledger_temporal["test_metrics_by_market"]:
+                        st.dataframe(
+                            [{
+                                "Mercado": item["group"],
+                                "Muestra independiente": item["sample_size"],
+                                "Brier": item["brier_score"],
+                                "Log loss": item["log_loss"],
+                                "Brecha calibración": item["calibration_gap"],
+                                "Diagnóstico": (
+                                    "Muestra insuficiente" if not item["minimum_sample_reached"]
+                                    else "Revisar calibración" if item["calibration_gap"] is not None and item["calibration_gap"] >= 0.10
+                                    else "Sin alerta de muestra"
+                                ),
+                            } for item in ledger_temporal["test_metrics_by_market"]],
+                            use_container_width=True,
+                            hide_index=True,
+                        )
+                    else:
+                        st.caption("No hay mercados identificables en el bloque de prueba.")
+
+                    st.markdown("##### Resultados posteriores por liga")
+                    if ledger_temporal["test_metrics_by_league"]:
+                        st.dataframe(
+                            [{
+                                "Liga": item["group"],
+                                "Muestra independiente": item["sample_size"],
+                                "Brier": item["brier_score"],
+                                "Log loss": item["log_loss"],
+                                "Brecha calibración": item["calibration_gap"],
+                                "Diagnóstico": (
+                                    "Muestra insuficiente" if not item["minimum_sample_reached"]
+                                    else "Revisar calibración" if item["calibration_gap"] is not None and item["calibration_gap"] >= 0.10
+                                    else "Sin alerta de muestra"
+                                ),
+                            } for item in ledger_temporal["test_metrics_by_league"]],
+                            use_container_width=True,
+                            hide_index=True,
+                        )
+                    else:
+                        st.caption("No hay ligas identificables en el bloque de prueba.")
+
+                    st.markdown("##### Resultados posteriores por mercado, línea y versión del modelo")
+                    model_breakdown = ledger_temporal.get("test_metrics_by_market_line", [])
+                    if model_breakdown:
+                        st.dataframe(
+                            [{
+                                "Mercado": item["market"],
+                                "Selección": item["selection"],
+                                "Línea": item["line"],
+                                "Fase": item["phase"],
+                                "Modelo": item["model_id"],
+                                "Versión": item["model_version"],
+                                "Muestra independiente": item["sample_size"],
+                                "Brier": item["brier_score"],
+                                "Log loss": item["log_loss"],
+                                "Brecha calibración": item["calibration_gap"],
+                                "Diagnóstico": (
+                                    "Muestra insuficiente" if not item["minimum_sample_reached"]
+                                    else "Revisar calibración" if item["calibration_gap"] is not None and item["calibration_gap"] >= 0.10
+                                    else "Sin alerta de muestra"
+                                ),
+                            } for item in model_breakdown],
+                            use_container_width=True,
+                            hide_index=True,
+                        )
+                    else:
+                        st.info(
+                            "No hay suficientes metadatos de mercado y línea en la prueba posterior "
+                            "para separar versiones de modelo. Los campos ausentes no se infieren."
+                        )
+                    st.caption(
+                        "La etiqueta «Revisar calibración» señala una brecha descriptiva de al menos 10 puntos "
+                        "porcentuales; no demuestra por sí sola un sesgo estadístico. Las muestras pequeñas "
+                        "no se usan para comparar ni habilitar modelos."
+                    )
+                else:
+                    st.warning(
+                        "La auditoría cronológica aún no está disponible: se requieren al menos 5 partidos "
+                        "anteriores y 5 posteriores con fecha y zona horaria válidas. No se sustituye esta "
+                        "prueba por métricas del histórico completo."
+                    )
+                    if ledger_temporal.get("excluded_temporal_rows"):
+                        st.caption(
+                            f"Registros excluidos por identificador o fecha inválida/sin zona horaria: "
+                            f"{ledger_temporal['excluded_temporal_rows']}."
+                        )
+
                 if verified_outcomes:
                     st.markdown("##### Últimos resultados verificados")
                     result_rows = []
