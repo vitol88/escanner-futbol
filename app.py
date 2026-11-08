@@ -8916,6 +8916,10 @@ else:
                 ledger_cols[1].metric("Resultados verificados", ledger_verified)
                 ledger_cols[2].metric("Cuotas verificadas", ledger_odds_verified)
                 ledger_cols[3].metric("Muestra evaluable", ledger_metrics["sample_size"])
+                st.caption(
+                    f"Registros verificados válidos: {ledger_metrics['raw_verified_sample_size']} · "
+                    f"Snapshots repetidos excluidos del cálculo: {ledger_metrics['deduplicated_snapshots']}."
+                )
                 if ledger_metrics["sample_size"]:
                     st.caption(
                         f"Brier: {ledger_metrics['brier_score']:.3f} · "
@@ -8923,6 +8927,11 @@ else:
                         f"Brecha de calibración: {ledger_metrics['calibration_gap']:.1%}. "
                         "Son métricas descriptivas; no demuestran rentabilidad."
                     )
+                    if not ledger_metrics["minimum_sample_reached"]:
+                        st.warning(
+                            f"Muestra pequeña: {ledger_metrics['sample_size']} eventos independientes evaluables. "
+                            f"Se recomiendan al menos {ledger_metrics['minimum_sample']} para empezar a interpretar la calibración."
+                        )
                 else:
                     st.info("El registro aún no contiene resultados binarios verificados suficientes para calcular métricas.")
                 if verified_outcomes:
@@ -9110,12 +9119,17 @@ else:
                         "La auditoría no modifica el archivo ni completa resultados."
                     )
                     metrics = evaluate_binary_forecasts(uploaded_rows)
-                    metric_cols = st.columns(5)
-                    metric_cols[0].metric("Muestra verificada", metrics["sample_size"])
+                    metric_cols = st.columns(6)
+                    metric_cols[0].metric("Eventos evaluables", metrics["sample_size"])
                     metric_cols[1].metric("Brier score", f"{metrics['brier_score']:.3f}" if metrics["brier_score"] is not None else "N/D")
                     metric_cols[2].metric("Log loss", f"{metrics['log_loss']:.3f}" if metrics["log_loss"] is not None else "N/D")
                     metric_cols[3].metric("Brecha calibración", f"{metrics['calibration_gap']:.1%}" if metrics["calibration_gap"] is not None else "N/D")
-                    metric_cols[4].metric("Filas excluidas", metrics["excluded"])
+                    metric_cols[4].metric("Snapshots repetidos", metrics["deduplicated_snapshots"])
+                    metric_cols[5].metric("Filas excluidas", metrics["excluded"])
+                    st.caption(
+                        f"Registros verificados válidos antes de deduplicar: {metrics['raw_verified_sample_size']}. "
+                        "La muestra evaluable cuenta como máximo un snapshot por partido, evento y versión del modelo."
+                    )
                     if metrics["sample_size"]:
                         st.caption(
                             f"Probabilidad media pronosticada: {metrics['mean_probability']:.1%} frente a "
@@ -9124,7 +9138,7 @@ else:
                         )
                         if not metrics["minimum_sample_reached"]:
                             st.warning(
-                                f"Muestra todavía pequeña: {metrics['sample_size']} registros válidos; "
+                                f"Muestra todavía pequeña: {metrics['sample_size']} eventos independientes evaluables; "
                                 f"se recomienda reunir al menos {metrics['minimum_sample']} antes de interpretar la calibración."
                             )
                     else:
