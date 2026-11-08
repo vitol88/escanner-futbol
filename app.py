@@ -20,6 +20,7 @@ from ai_engine.dataset_audit import audit_forecast_dataset
 from ai_engine.prediction_schema import normalize_prediction_record
 from ai_engine.prediction_ledger import append_prediction_records
 from ai_engine.telegram_publisher import send_telegram_signal
+from ai_engine.telegram_store import reserve_telegram_alert, update_telegram_alert
 from models.automatic_history import build_automatic_history
 from models.deep_goal_context import build_deep_goal_context
 from models.probabilities import (
@@ -8081,23 +8082,45 @@ else:
         try:
             telegram_token = str(st.secrets.get("TELEGRAM_BOT_TOKEN", "") or os.getenv("TELEGRAM_BOT_TOKEN", "")).strip()
             telegram_chat_id = str(st.secrets.get("TELEGRAM_CHAT_ID", "") or os.getenv("TELEGRAM_CHAT_ID", "-1004668474905")).strip()
+            supabase_url = str(st.secrets.get("SUPABASE_URL", "") or os.getenv("SUPABASE_URL", "")).strip()
+            supabase_secret_key = str(st.secrets.get("SUPABASE_SECRET_KEY", "") or os.getenv("SUPABASE_SECRET_KEY", "")).strip()
         except Exception:
             telegram_token = str(os.getenv("TELEGRAM_BOT_TOKEN", "")).strip()
             telegram_chat_id = str(os.getenv("TELEGRAM_CHAT_ID", "-1004668474905")).strip()
+            supabase_url = str(os.getenv("SUPABASE_URL", "")).strip()
+            supabase_secret_key = str(os.getenv("SUPABASE_SECRET_KEY", "")).strip()
         if telegram_token and telegram_chat_id and telegram_pending:
-            still_pending = []
             sent_count = 0
-            for pending_row in telegram_pending:
-                sent, detail = send_telegram_signal(pending_row, telegram_token, telegram_chat_id)
-                if sent:
-                    sent_count += 1
-                else:
-                    still_pending.append(pending_row)
-            st.session_state.telegram_pending_rows = still_pending
-            st.session_state.telegram_publish_status = (
-                f"{sent_count} señal(es) publicadas en Telegram."
-                if sent_count else "No se pudo publicar; se reintentará en el próximo escaneo."
-            )
+            skipped_count = 0
+            failed_count = 0
+            if not supabase_url or not supabase_secret_key:
+                st.session_state.telegram_publish_status = "Envío detenido: faltan SUPABASE_URL o SUPABASE_SECRET_KEY."
+            else:
+                for pending_row in telegram_pending:
+                    reserved, alert_key, reserve_detail = reserve_telegram_alert(
+                        pending_row, supabase_url, supabase_secret_key
+                    )
+                    if not reserved:
+                        if alert_key:
+                            skipped_count += 1
+                        else:
+                            failed_count += 1
+                        continue
+                    sent, detail = send_telegram_signal(pending_row, telegram_token, telegram_chat_id)
+                    update_telegram_alert(
+                        alert_key, "sent" if sent else "failed",
+                        supabase_url, supabase_secret_key,
+                        error="" if sent else detail,
+                    )
+                    if sent:
+                        sent_count += 1
+                    else:
+                        failed_count += 1
+                st.session_state.telegram_pending_rows = []
+                st.session_state.telegram_publish_status = (
+                    f"{sent_count} señal(es) publicadas; {skipped_count} duplicada(s) bloqueada(s); "
+                    f"{failed_count} fallo(s)."
+                )
         elif new_signal_rows:
             st.session_state.telegram_publish_status = "Señales en espera: configura TELEGRAM_BOT_TOKEN en los secretos del despliegue."
         try:
