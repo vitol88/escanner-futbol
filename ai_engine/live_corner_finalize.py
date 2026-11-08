@@ -6,18 +6,33 @@ from contextlib import closing
 from pathlib import Path
 from typing import Any
 
-from ai_engine.live_corner_capture import _corner_value, _connect
+from ai_engine.live_corner_capture import _connect
 
 _FINISHED_STATUSES = {"FT", "AET", "PEN"}
 
 
 def _team_corner_count(statistics: list[dict[str, Any]], team_id: Any) -> int | None:
+    """Read a corner count only from the matching team's own statistics row."""
     target = str(team_id or "").strip()
     if not target:
         return None
-    for row in statistics:
-        if str((row.get("team") or {}).get("id") or "").strip() == target:
-            return _corner_value([{"statistics": row.get("statistics") or []}], 0)
+    for row in statistics or []:
+        if str((row.get("team") or {}).get("id") or "").strip() != target:
+            continue
+        for item in row.get("statistics") or []:
+            if item.get("type") != "Corner Kicks":
+                continue
+            value = item.get("value")
+            if isinstance(value, bool) or value is None:
+                return None
+            try:
+                number = float(str(value).strip())
+            except (TypeError, ValueError, OverflowError):
+                return None
+            if number < 0 or not number.is_integer():
+                return None
+            return int(number)
+        return None
     return None
 
 
