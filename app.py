@@ -16,7 +16,7 @@ from ai_engine.opportunity_engine import evaluate_opportunity, classify_goal_tip
 from ai_engine.live_corner_capture import capture_live_corner_snapshot
 from ai_engine.live_corner_finalize import finalize_live_corner_fixture
 from models.live_context import qualifies_as_corner_candidate, summarize_live_context
-from ai_engine.evaluation import evaluate_binary_forecasts, evaluate_forecasts_by_group, evaluate_forecasts_by_market, evaluate_chronological_holdout, assess_model_readiness
+from ai_engine.evaluation import evaluate_binary_forecasts, evaluate_forecasts_by_group, evaluate_forecasts_by_market, evaluate_chronological_holdout, assess_model_readiness, evaluate_model_version_comparability
 from ai_engine.dataset_audit import audit_forecast_dataset
 from ai_engine.prediction_schema import PREDICTION_SCHEMA_VERSION, normalize_prediction_record
 from ai_engine.prediction_ledger import append_prediction_records, load_prediction_records
@@ -9076,6 +9076,31 @@ else:
                             "No hay suficientes metadatos de mercado y línea en la prueba posterior "
                             "para separar versiones de modelo. Los campos ausentes no se infieren."
                         )
+                    st.markdown("##### Comparabilidad entre versiones (mismos partidos)")
+                    version_comparisons = ledger_temporal.get("test_model_version_comparability", [])
+                    if version_comparisons:
+                        st.dataframe(
+                            [{
+                                "Mercado": item["market"],
+                                "Selección": item["selection"],
+                                "Línea": item["line"],
+                                "Fase": item["phase"],
+                                "Modelo": item["model_id"],
+                                "Versión A": item["version_a"],
+                                "Versión B": item["version_b"],
+                                "Partidos comunes verificados": item["common_fixture_count"],
+                                "Comparabilidad": item["status"],
+                            } for item in version_comparisons],
+                            use_container_width=True,
+                            hide_index=True,
+                        )
+                    else:
+                        st.caption("No hay dos versiones del mismo modelo con una definición de mercado idéntica para comparar.")
+                    st.caption(
+                        "Solo se considera comparable una pareja de versiones cuando comparte al menos 30 partidos "
+                        "con resultado verificado y la misma definición de mercado, selección, línea y fase. "
+                        "Esta comprobación mide solapamiento, no declara un ganador."
+                    )
                     st.caption(
                         "La elegibilidad exige al menos 30 eventos independientes en la prueba cronológica, "
                         "brecha de calibración inferior al 10% e identificación completa de modelo y versión. "
