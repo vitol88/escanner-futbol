@@ -19,7 +19,7 @@ from ai_engine.evaluation import evaluate_binary_forecasts, evaluate_forecasts_b
 from ai_engine.dataset_audit import audit_forecast_dataset
 from ai_engine.prediction_schema import normalize_prediction_record
 from ai_engine.prediction_ledger import append_prediction_records
-from ai_engine.telegram_publisher import send_telegram_signal
+from ai_engine.telegram_publisher import send_telegram_signal, send_telegram_test_message
 from ai_engine.telegram_store import reserve_telegram_alert, update_telegram_alert, check_supabase_connection, test_supabase_duplicate_protection
 from models.automatic_history import build_automatic_history
 from models.deep_goal_context import build_deep_goal_context
@@ -3746,6 +3746,23 @@ with st.sidebar:
                 st.success(_test_message)
             else:
                 st.error(_test_message)
+
+        st.divider()
+        st.caption("Esta prueba envía un mensaje técnico al canal. No crea señales ni registros en Supabase.")
+        if st.button("ENVIAR MENSAJE DE PRUEBA A TELEGRAM", key="test_telegram_delivery", use_container_width=True):
+            try:
+                _telegram_test_token = str(st.secrets.get("TELEGRAM_BOT_TOKEN", "") or os.getenv("TELEGRAM_BOT_TOKEN", "")).strip()
+                _telegram_test_chat = str(st.secrets.get("TELEGRAM_CHAT_ID", "") or os.getenv("TELEGRAM_CHAT_ID", "")).strip()
+            except Exception:
+                _telegram_test_token = str(os.getenv("TELEGRAM_BOT_TOKEN", "")).strip()
+                _telegram_test_chat = str(os.getenv("TELEGRAM_CHAT_ID", "")).strip()
+            _telegram_test_ok, _telegram_test_message = send_telegram_test_message(
+                _telegram_test_token, _telegram_test_chat
+            )
+            if _telegram_test_ok:
+                st.success(_telegram_test_message)
+            else:
+                st.error(_telegram_test_message)
 
 
 def get_api_key() -> str:
