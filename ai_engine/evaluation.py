@@ -273,24 +273,28 @@ def evaluate_model_version_comparability(
             probability = None
         if not all((fixture_id, market, line, model_id, version)) or version.casefold() == "unknown":
             continue
-        # Use the newest timestamp when available; input order breaks ties and
-        # provides deterministic handling for legacy rows without timestamps.
-        timestamp = float(row_index)
+        # Compare absolute instants only when a timezone is explicit. Naive,
+        # malformed or missing timestamps use stable input-order fallback and
+        # never masquerade as UTC. Aware timestamps outrank legacy fallbacks.
+        snapshot_order = (0, float(row_index), row_index)
         for timestamp_key in ("recorded_at", "created_at", "timestamp"):
             raw_timestamp = str(row.get(timestamp_key) or "").strip()
-            if raw_timestamp:
-                try:
-                    parsed = datetime.fromisoformat(raw_timestamp.replace("Z", "+00:00"))
-                    if parsed.tzinfo is not None:
-                        timestamp = parsed.astimezone(timezone.utc).timestamp()
-                except (TypeError, ValueError, OverflowError, OSError):
-                    pass
-                break
+            if not raw_timestamp:
+                continue
+            try:
+                parsed = datetime.fromisoformat(raw_timestamp.replace("Z", "+00:00"))
+                if parsed.tzinfo is not None:
+                    snapshot_order = (
+                        1, parsed.astimezone(timezone.utc).timestamp(), row_index
+                    )
+                    break
+            except (TypeError, ValueError, OverflowError, OSError):
+                continue
         cohort_key = (market, selection, line, phase, model_id)
         version_rows = cohorts.setdefault(cohort_key, {}).setdefault(version, {})
         previous = version_rows.get(fixture_id)
-        if previous is None or timestamp >= previous[0]:
-            version_rows[fixture_id] = (timestamp, outcome, probability)
+        if previous is None or snapshot_order >= previous[0]:
+            version_rows[fixture_id] = (snapshot_order, outcome, probability)
 
     comparisons = []
     for cohort_key in sorted(cohorts, key=lambda item: tuple(part.casefold() for part in item)):
