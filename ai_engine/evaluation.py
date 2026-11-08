@@ -238,21 +238,23 @@ def evaluate_model_version_comparability(
     rows: list[dict[str, Any]],
     *,
     fixture_key: str = "fixture_id",
+    probability_key: str = "estimated_probability_exploratory",
+    outcome_key: str = "outcome",
     verified_key: str = "outcome_verified",
     minimum_common_fixtures: int = 30,
 ) -> list[dict[str, Any]]:
     """Report whether model versions share enough verified fixtures to compare.
 
     Versions are paired only within the exact same market, selection, line,
-    phase and model_id. A fixture counts only when both versions have a
-    verified outcome for that event. This reports cohort overlap; it does not
-    claim either version performed better.
+    phase and model_id. Metrics use the exact common fixture set, one latest
+    valid snapshot per fixture/version, and matching verified outcomes. Negative
+    deltas (B minus A) favor version B on the corresponding loss metric.
     """
     if isinstance(minimum_common_fixtures, bool) or not isinstance(minimum_common_fixtures, int) or minimum_common_fixtures < 1:
         raise ValueError("minimum_common_fixtures debe ser un entero mayor que cero")
 
-    cohorts: dict[tuple[str, str, str, str, str], dict[str, set[str]]] = {}
-    for row in rows if isinstance(rows, list) else []:
+    cohorts: dict[tuple[str, str, str, str, str], dict[str, dict[str, tuple[float, int, int]]]] = {}
+    for row_index, row in enumerate(rows if isinstance(rows, list) else []):
         if not isinstance(row, dict) or not _verified(row.get(verified_key, "")):
             continue
         fixture_id = str(row.get(fixture_key) or "").strip()
@@ -262,10 +264,33 @@ def evaluate_model_version_comparability(
         version = str(row.get("model_version") or "").strip()
         selection = str(row.get("selection") or "unknown").strip() or "unknown"
         phase = str(row.get("phase") or "unknown").strip() or "unknown"
+        outcome = _outcome(row.get(outcome_key))
+        try:
+            probability = float(row.get(probability_key))
+        except (TypeError, ValueError, OverflowError):
+            continue
+        if not math.isfinite(probability) or not 0 <= probability <= 1 or outcome is None:
+            continue
         if not all((fixture_id, market, line, model_id, version)) or version.casefold() == "unknown":
             continue
+        # Use the newest timestamp when available; input order breaks ties and
+        # provides deterministic handling for legacy rows without timestamps.
+        timestamp = float(row_index)
+        for timestamp_key in ("recorded_at", "created_at", "timestamp"):
+            raw_timestamp = str(row.get(timestamp_key) or "").strip()
+            if raw_timestamp:
+                try:
+                    parsed = datetime.fromisoformat(raw_timestamp.replace("Z", "+00:00"))
+                    if parsed.tzinfo is not None:
+                        timestamp = parsed.astimezone(timezone.utc).timestamp()
+                except (TypeError, ValueError, OverflowError, OSError):
+                    pass
+                break
         cohort_key = (market, selection, line, phase, model_id)
-        cohorts.setdefault(cohort_key, {}).setdefault(version, set()).add(fixture_id)
+        version_rows = cohorts.setdefault(cohort_key, {}).setdefault(version, {})
+        previous = version_rows.get(fixture_id)
+        if previous is None or timestamp >= previous[0]:
+            version_rows[fixture_id] = (timestamp, outcome, probability)
 
     comparisons = []
     for cohort_key in sorted(cohorts, key=lambda item: tuple(part.casefold() for part in item)):
@@ -273,9 +298,15 @@ def evaluate_model_version_comparability(
         version_names = sorted(versions, key=str.casefold)
         for index, version_a in enumerate(version_names):
             for version_b in version_names[index + 1:]:
-                common = versions[version_a] & versions[version_b]
+                common = sorted(set(versions[version_a]) & set(versions[version_b]))
+                # A pair is valid only if the verified result agrees for the same fixture.
+                common = [
+                    fixture for fixture in common
+                    if versions[version_a][fixture][1] == versions[version_b][fixture][1]
+                ]
                 common_count = len(common)
-                comparisons.append({
+                comparable = common_count >= minimum_common_fixtures
+                item = {
                     "market": cohort_key[0],
                     "selection": cohort_key[1],
                     "line": cohort_key[2],
@@ -285,9 +316,39 @@ def evaluate_model_version_comparability(
                     "version_b": version_b,
                     "common_fixture_count": common_count,
                     "minimum_common_fixtures": minimum_common_fixtures,
-                    "comparable_cohort": common_count >= minimum_common_fixtures,
-                    "status": "Cohorte común suficiente" if common_count >= minimum_common_fixtures else "No comparable: partidos comunes insuficientes",
-                })
+                    "comparable_cohort": comparable,
+                    "status": "Cohorte común suficiente" if comparable else "No comparable: partidos comunes insuficientes",
+                    "brier_a": None,
+                    "brier_b": None,
+                    "brier_delta_b_minus_a": None,
+                    "log_loss_a": None,
+                    "log_loss_b": None,
+                    "log_loss_delta_b_minus_a": None,
+                }
+                if comparable:
+                    outcomes = [versions[version_a][fixture][1] for fixture in common]
+                    probabilities_a = [versions[version_a][fixture][2] for fixture in common]
+                    probabilities_b = [versions[version_b][fixture][2] for fixture in common]
+                    def _losses(probabilities: list[float]) -> tuple[float, float]:
+                        brier = sum((p - y) ** 2 for p, y in zip(probabilities, outcomes)) / common_count
+                        epsilon = 1e-15
+                        log_loss = -sum(
+                            y * math.log(min(1 - epsilon, max(epsilon, p)))
+                            + (1 - y) * math.log(min(1 - epsilon, max(epsilon, 1 - p)))
+                            for p, y in zip(probabilities, outcomes)
+                        ) / common_count
+                        return brier, log_loss
+                    brier_a, log_a = _losses(probabilities_a)
+                    brier_b, log_b = _losses(probabilities_b)
+                    item.update({
+                        "brier_a": brier_a,
+                        "brier_b": brier_b,
+                        "brier_delta_b_minus_a": brier_b - brier_a,
+                        "log_loss_a": log_a,
+                        "log_loss_b": log_b,
+                        "log_loss_delta_b_minus_a": log_b - log_a,
+                    })
+                comparisons.append(item)
     return comparisons
 
 
