@@ -51,6 +51,8 @@ def resolve_binary_outcome(
     final_away_score: Any = None,
     final_total_corners: Any = None,
     final_total_yellow_cards: Any = None,
+    home_team_name: str | None = None,
+    away_team_name: str | None = None,
 ) -> dict[str, Any]:
     """Resolve only supported, unambiguous binary selections from final data.
 
@@ -74,7 +76,7 @@ def resolve_binary_outcome(
             return {"resolved": False, "reason": "missing_or_invalid_final_score"}
 
         if market == "btts":
-            if normalized in {"yes", "sí", "si", "ambos equipos marcan: sí", "ambos equipos marcan: si"}:
+            if normalized.startswith("ambos equipos marcan") or normalized in {"yes", "sí", "si"}:
                 result = int(home > 0 and away > 0)
             elif normalized in {"no", "ambos equipos marcan: no"}:
                 result = int(not (home > 0 and away > 0))
@@ -94,6 +96,15 @@ def resolve_binary_outcome(
         if normalized in {"away", "visitante", "gana visitante"}:
             return {"resolved": True, "outcome": int(away > home), "reason": "final_score"}
 
+        # Formato de selección por umbral absoluto: "Total final: 3 goles o más".
+        total_threshold = re.match(r"^total final:\\s*(\\d+)\\s+goles?\\s+o\\s+más", pick, flags=re.IGNORECASE)
+        if total_threshold:
+            return {
+                "resolved": True,
+                "outcome": int(total >= int(total_threshold.group(1))),
+                "reason": "final_score",
+            }
+
         # Formato real del escáner: "<equipo> marcará al menos 1 gol
         # (más de 0.5 goles del local/visitante)". Se liquida con el marcador
         # del lado indicado, nunca con el total de goles del partido.
@@ -108,6 +119,21 @@ def resolve_binary_outcome(
             return {
                 "resolved": True,
                 "outcome": int(side_score >= 1),
+                "reason": "final_team_score",
+            }
+
+        named_team_match = re.match(r"^(.+?):\\s*terminará\\s+con\\s+(\\d+)\\s+goles?\\s+o\\s+más$", pick, flags=re.IGNORECASE)
+        if named_team_match:
+            team_name = named_team_match.group(1).strip().casefold()
+            if home_team_name and team_name == str(home_team_name).strip().casefold():
+                side_score = home
+            elif away_team_name and team_name == str(away_team_name).strip().casefold():
+                side_score = away
+            else:
+                return {"resolved": False, "reason": "team_side_not_verified"}
+            return {
+                "resolved": True,
+                "outcome": int(side_score >= int(named_team_match.group(2))),
                 "reason": "final_team_score",
             }
 
