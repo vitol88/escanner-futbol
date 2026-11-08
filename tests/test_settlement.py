@@ -50,6 +50,34 @@ class SettlementTests(unittest.TestCase):
             final_home_score=2, final_away_score=0,
         )["outcome"], 1)
 
+    def test_real_spanish_goal_market_labels(self):
+        self.assertEqual(resolve_binary_outcome(
+            market_type="goals", selection="Más de 2.5 goles",
+            final_home_score=2, final_away_score=1,
+        )["outcome"], 1)
+        self.assertEqual(resolve_binary_outcome(
+            market_type="goals", selection="Menos de 2,5 goles",
+            final_home_score=1, final_away_score=0,
+        )["outcome"], 1)
+        self.assertEqual(resolve_binary_outcome(
+            market_type="goals", selection="Gana local",
+            final_home_score=2, final_away_score=0,
+        )["outcome"], 1)
+        self.assertEqual(resolve_binary_outcome(
+            market_type="goals", selection="Gana visitante",
+            final_home_score=0, final_away_score=1,
+        )["outcome"], 1)
+
+    def test_real_spanish_corner_and_card_labels(self):
+        self.assertEqual(resolve_binary_outcome(
+            market_type="corners", selection="Más de 8.5 córners",
+            final_total_corners=9,
+        )["outcome"], 1)
+        self.assertEqual(resolve_binary_outcome(
+            market_type="yellow_cards", selection="Menos de 4.5 tarjetas amarillas",
+            final_total_yellow_cards=3,
+        )["outcome"], 1)
+
     def test_corner_and_card_totals(self):
         self.assertEqual(resolve_binary_outcome(
             market_type="corners", selection="Over 8.5",
