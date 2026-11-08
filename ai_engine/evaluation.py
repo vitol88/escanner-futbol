@@ -189,7 +189,7 @@ def evaluate_forecasts_by_market_line(
     verified_key: str = "outcome_verified",
     minimum_sample: int = 30,
 ) -> list[dict[str, Any]]:
-    """Evaluate separately by market, selection, line, phase and model version.
+    """Evaluate separately by league, market, selection, line, phase and model version.
 
     Keeping lines and model versions separate avoids pooling unlike binary
     events into one calibration statistic. Rows missing market or line are
@@ -253,8 +253,8 @@ def evaluate_model_version_comparability(
 ) -> list[dict[str, Any]]:
     """Report whether model versions share enough verified fixtures to compare.
 
-    Versions are paired only within the exact same market, selection, line,
-    phase and model_id. Metrics use the exact common fixture set, one latest
+    Versions are paired only within the exact same league, market, selection,
+    line, phase and model_id. Metrics use the exact common fixture set, one latest
     valid snapshot per fixture/version, and matching verified outcomes. Negative
     deltas (B minus A) favor version B on the corresponding loss metric.
     """
