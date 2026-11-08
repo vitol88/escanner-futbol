@@ -92,6 +92,16 @@ El botón seleccionado queda resaltado en amarillo y el panel de análisis apare
 El módulo puro `ai_engine.dataset_audit.audit_forecast_dataset` permite revisar un CSV exportado sin modificarlo: identifica registros con metadatos o probabilidades inválidas, duplicados por partido/mercado/minuto/marcador y resultados explícitamente verificados. Esta auditoría mide calidad estructural; no sustituye el evaluador de calibración, no completa resultados faltantes y no calcula rentabilidad.
 
 
+## Persistencia remota del registro central (Supabase)
+
+Para conservar los pronósticos aunque Streamlit Community Cloud reinicie su disco, la app puede sincronizar el ledger con Supabase usando los secretos existentes `SUPABASE_URL` y `SUPABASE_SECRET_KEY`.
+
+Antes de usar esta función, ejecuta una sola vez el SQL de `supabase/migrations/001_prediction_ledger.sql` en el SQL Editor del proyecto Supabase. La migración crea `public.prediction_ledger`, con `prediction_id` como clave primaria para evitar duplicados. No elimina ni modifica `telegram_alerts`.
+
+Con la tabla creada, cada escaneo sincroniza los pronósticos válidos y **Consultar registro central** lee el histórico remoto. SQLite local se conserva como caché/fallback. Si la tabla remota no existe o Supabase no responde, la interfaz muestra el error y no presenta el disco local como persistencia garantizada.
+
+Los CSV históricos que no estén presentes en el entorno desplegado deben importarse desde una copia exportada previamente; la conexión remota no puede recuperar archivos que ya no están en el host. No borres la copia original después de importarla hasta comprobar los contadores y la exportación desde Supabase.
+
 ## Registro central de pronósticos (SQLite)
 
 El escáner mantiene ahora un ledger independiente y append-only en SQLite, por defecto `registro_pronosticos_football_lab.sqlite3`. La ruta se puede configurar con `PREDICTION_LEDGER_PATH`.
