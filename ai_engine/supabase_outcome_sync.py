@@ -120,6 +120,12 @@ def sync_finished_fixture_outcomes(supabase_url: str, secret_key: str, api_get,
                 continue
             finished += 1
             previous = existing.get(fixture_id) or {}
+            # La API puede omitir estadísticas temporalmente. Nunca reemplazar
+            # un dato final ya verificado por NULL; sí permitir completar NULL
+            # cuando una consulta posterior devuelve el dato real.
+            for stat_field in ("final_total_corners", "final_total_yellow_cards"):
+                if event.get(stat_field) is None and previous.get(stat_field) is not None:
+                    event[stat_field] = previous[stat_field]
             fields = ("final_home_score", "final_away_score",
                       "final_total_corners", "final_total_yellow_cards")
             if previous and all(previous.get(field) == event.get(field) for field in fields):
