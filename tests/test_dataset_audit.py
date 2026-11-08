@@ -75,3 +75,66 @@ class ForecastDatasetAuditTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PredictionHistoryIntegrityAuditTests(unittest.TestCase):
+    def row(self, **updates):
+        row = {
+            "fixture_id": "fixture-1", "market": "total_goals",
+            "market_type": "goals", "selection": "over", "line": "2.5",
+            "phase": "live", "model_id": "goal-model", "model_version": "1.0",
+            "recorded_at": "2026-11-07T18:00:00Z", "probability": 0.72,
+            "outcome": 1, "outcome_verified": True,
+        }
+        row.update(updates)
+        return row
+
+    def test_exact_duplicate_snapshot_is_reported(self):
+        from ai_engine.dataset_audit import audit_prediction_history
+        result = audit_prediction_history([self.row(), self.row()])
+        self.assertEqual(result["exact_duplicate_rows"], 1)
+        self.assertEqual(result["exact_duplicate_groups"], 1)
+
+    def test_later_snapshot_is_not_a_duplicate(self):
+        from ai_engine.dataset_audit import audit_prediction_history
+        result = audit_prediction_history([
+            self.row(),
+            self.row(recorded_at="2026-11-07T18:01:00Z", probability=0.75),
+        ])
+        self.assertEqual(result["exact_duplicate_rows"], 0)
+
+    def test_conflicting_verified_outcomes_are_flagged_across_versions(self):
+        from ai_engine.dataset_audit import audit_prediction_history
+        result = audit_prediction_history([
+            self.row(model_version="1.0", outcome=1),
+            self.row(model_version="2.0", outcome=0),
+        ])
+        self.assertEqual(result["contradictory_verified_outcome_groups"], 1)
+
+    def test_different_market_definitions_are_not_mixed(self):
+        from ai_engine.dataset_audit import audit_prediction_history
+        result = audit_prediction_history([
+            self.row(outcome=1),
+            self.row(selection="under", outcome=0),
+            self.row(line="3.5", outcome=0),
+            self.row(phase="pre_match", outcome=0),
+            self.row(market_type="btts", market="btts", outcome=0),
+        ])
+        self.assertEqual(result["contradictory_verified_outcome_groups"], 0)
+
+    def test_missing_metadata_and_invalid_probabilities_are_reported(self):
+        from ai_engine.dataset_audit import audit_prediction_history
+        result = audit_prediction_history([
+            self.row(fixture_id="", model_version="", probability=1.4),
+        ])
+        self.assertEqual(result["missing_metadata"]["fixture_id"], 1)
+        self.assertEqual(result["missing_metadata"]["model_version"], 1)
+        self.assertEqual(result["invalid_probability_rows"], 1)
+
+    def test_unverified_outcomes_do_not_create_contradictions(self):
+        from ai_engine.dataset_audit import audit_prediction_history
+        result = audit_prediction_history([
+            self.row(outcome=1, outcome_verified=False),
+            self.row(outcome=0, outcome_verified=False),
+        ])
+        self.assertEqual(result["contradictory_verified_outcome_groups"], 0)
