@@ -419,6 +419,56 @@ class BinaryForecastEvaluationTests(unittest.TestCase):
         self.assertAlmostEqual(result[0]["brier_b"], 0.09)
 
 
+    def test_model_version_latest_snapshot_normalizes_timezone_offsets_and_input_order(self):
+        from ai_engine.evaluation import evaluate_model_version_comparability
+
+        common = {
+            "fixture_id": "fx-offset", "market_type": "goals", "selection": "over",
+            "line": "2.5", "phase": "live", "model_id": "goals",
+            "outcome": 1, "outcome_verified": True,
+        }
+        rows = [
+            # 15:00 UTC is later than 14:30 UTC, despite its earlier local clock.
+            {**common, "model_version": "1.0", "probability": 0.1,
+             "recorded_at": "2026-11-01T09:30:00-05:00"},
+            {**common, "model_version": "1.0", "probability": 0.8,
+             "recorded_at": "2026-11-01T14:30:00Z"},
+            {**common, "model_version": "2.0", "probability": 0.7,
+             "recorded_at": "2026-11-01T15:00:00+00:00"},
+        ]
+        result = evaluate_model_version_comparability(
+            rows, probability_key="probability", minimum_common_fixtures=1
+        )
+        self.assertAlmostEqual(result[0]["brier_a"], 0.04)
+        self.assertAlmostEqual(result[0]["brier_b"], 0.09)
+
+        shuffled = [rows[1], rows[0], rows[2]]
+        shuffled_result = evaluate_model_version_comparability(
+            shuffled, probability_key="probability", minimum_common_fixtures=1
+        )
+        self.assertAlmostEqual(shuffled_result[0]["brier_a"], 0.04)
+
+    def test_model_version_timestamp_fallback_uses_first_parseable_timezone_field(self):
+        from ai_engine.evaluation import evaluate_model_version_comparability
+
+        common = {
+            "fixture_id": "fx-fallback", "market_type": "goals", "selection": "over",
+            "line": "2.5", "phase": "live", "model_id": "goals",
+            "outcome": 1, "outcome_verified": True,
+        }
+        rows = [
+            {**common, "model_version": "1.0", "probability": 0.2,
+             "recorded_at": "invalid", "created_at": "2026-11-01T10:00:00Z"},
+            {**common, "model_version": "1.0", "probability": 0.8,
+             "recorded_at": "2026-11-01T10:05:00Z"},
+            {**common, "model_version": "2.0", "probability": 0.7,
+             "recorded_at": "2026-11-01T10:04:00Z"},
+        ]
+        result = evaluate_model_version_comparability(
+            rows, probability_key="probability", minimum_common_fixtures=1
+        )
+        self.assertAlmostEqual(result[0]["brier_a"], 0.04)
+
     def test_model_version_overlap_does_not_count_unknown_or_disagreeing_outcomes_as_scoring_data(self):
         from ai_engine.evaluation import evaluate_model_version_comparability
 
