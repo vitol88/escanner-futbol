@@ -20,7 +20,7 @@ from ai_engine.dataset_audit import audit_forecast_dataset
 from ai_engine.prediction_schema import normalize_prediction_record
 from ai_engine.prediction_ledger import append_prediction_records
 from ai_engine.telegram_publisher import send_telegram_signal
-from ai_engine.telegram_store import reserve_telegram_alert, update_telegram_alert, check_supabase_connection
+from ai_engine.telegram_store import reserve_telegram_alert, update_telegram_alert, check_supabase_connection, test_supabase_duplicate_protection
 from models.automatic_history import build_automatic_history
 from models.deep_goal_context import build_deep_goal_context
 from models.probabilities import (
@@ -3733,6 +3733,19 @@ with st.sidebar:
                 st.success(_supabase_message)
             else:
                 st.error(_supabase_message)
+
+        if st.button("PROBAR PROTECCIÓN CONTRA DUPLICADOS", key="test_supabase_dedup", use_container_width=True):
+            try:
+                _supabase_url_test = str(st.secrets.get("SUPABASE_URL", "") or os.getenv("SUPABASE_URL", "")).strip()
+                _supabase_key_test = str(st.secrets.get("SUPABASE_SECRET_KEY", "") or os.getenv("SUPABASE_SECRET_KEY", "")).strip()
+            except Exception:
+                _supabase_url_test = str(os.getenv("SUPABASE_URL", "")).strip()
+                _supabase_key_test = str(os.getenv("SUPABASE_SECRET_KEY", "")).strip()
+            _test_ok, _test_message = test_supabase_duplicate_protection(_supabase_url_test, _supabase_key_test)
+            if _test_ok:
+                st.success(_test_message)
+            else:
+                st.error(_test_message)
 
 
 def get_api_key() -> str:
