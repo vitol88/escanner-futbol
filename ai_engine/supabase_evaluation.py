@@ -73,3 +73,40 @@ def summarize_supabase_evaluations(rows: list[dict[str, Any]]) -> dict[str, Any]
         "corners_bias": _mean(corners, "projected_final_corners") - _mean(corners, "final_total_corners")
             if corners and _mean(corners, "projected_final_corners") is not None and _mean(corners, "final_total_corners") is not None else None,
     }
+
+
+def summarize_evaluations_by_minute(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Group verified prediction errors by market and capture-minute band."""
+    bands = (
+        ("0-29", 0, 29),
+        ("30-59", 30, 59),
+        ("60-74", 60, 74),
+        ("75-90+", 75, 200),
+    )
+    verified = [row for row in rows if row.get("result_verified_at")]
+    output: list[dict[str, Any]] = []
+    for market, error_field in (
+        ("goals", "goals_absolute_error"),
+        ("corners", "corners_absolute_error"),
+    ):
+        for label, low, high in bands:
+            group = []
+            for row in verified:
+                if row.get("analysis_type") != market or row.get(error_field) is None:
+                    continue
+                try:
+                    minute = int(row.get("minute_at_capture"))
+                except (TypeError, ValueError):
+                    continue
+                if low <= minute <= high:
+                    group.append(row)
+            if not group:
+                continue
+            output.append({
+                "Mercado": market,
+                "Minuto de captura": label,
+                "Muestras": len(group),
+                "Partidos distintos": len({str(r.get("fixture_id")) for r in group if r.get("fixture_id")}),
+                "Error medio absoluto": round(_mean(group, error_field), 2),
+            })
+    return output
