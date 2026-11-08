@@ -216,5 +216,21 @@ class PredictionSchemaTests(unittest.TestCase):
         self.assertEqual(result["duplicate_count"], 1)
 
 
+    def test_selection_is_preserved_as_distinct_event_identity(self):
+        base = {
+            "recorded_at": "2026-11-08T18:00:00Z",
+            "fixture_id": "fixture-selection",
+            "market": "Total final: 3 goles o más",
+            "market_type": "goals",
+            "probability": 0.64,
+            "model_id": "estimate_live_goal_markets",
+            "snapshot_id": "fixture-selection:70:1:1",
+        }
+        over = normalize_prediction_record({**base, "selection": "Total final: 3 goles o más"})
+        under = normalize_prediction_record({**base, "selection": "Total final: menos de 3 goles"})
+        self.assertEqual(over["selection"], "Total final: 3 goles o más")
+        self.assertNotEqual(over["prediction_id"], under["prediction_id"])
+
+
 if __name__ == "__main__":
     unittest.main()
