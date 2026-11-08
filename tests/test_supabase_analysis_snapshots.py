@@ -20,6 +20,17 @@ class AnalysisSnapshotTests(unittest.TestCase):
         self.assertEqual(a["snapshot_id"], b["snapshot_id"])
         self.assertEqual(a["outputs"]["expected_goals_remaining"], 0.8)
 
+    def test_changed_live_data_within_same_bucket_gets_new_id(self):
+        moment = datetime(2026, 11, 8, 18, 1, tzinfo=timezone.utc)
+        base = dict(fixture_id=123, analysis_type="corners",
+                    match={"minute": 67, "home_score": 1, "away_score": 0},
+                    inputs={"home_corners": 4}, outputs={"projected_total": 9.5})
+        first = build_analysis_snapshot(**base, recorded_at=moment)
+        changed = dict(base)
+        changed["inputs"] = {"home_corners": 5}
+        second = build_analysis_snapshot(**changed, recorded_at=moment)
+        self.assertNotEqual(first["snapshot_id"], second["snapshot_id"])
+
     def test_different_analysis_types_have_distinct_ids(self):
         base = dict(fixture_id=123, match={"minute": 20}, inputs={}, outputs={})
         a = build_analysis_snapshot(analysis_type="goals", **base)
