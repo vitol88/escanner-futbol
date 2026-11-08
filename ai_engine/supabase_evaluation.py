@@ -54,6 +54,25 @@ def _mean(rows: list[dict[str, Any]], field: str) -> float | None:
     return sum(values) / len(values) if values else None
 
 
+
+def classify_sample_reliability(independent_matches: int) -> str:
+    """Describe evidence volume without implying statistical significance."""
+    count = max(0, int(independent_matches or 0))
+    if count < 10:
+        return "Muestra insuficiente"
+    if count < 30:
+        return "En observación"
+    return "Base amplia · seguimiento"
+
+
+def _distinct_fixtures(rows: list[dict[str, Any]]) -> int:
+    return len({
+        str(row.get("fixture_id")).strip()
+        for row in rows
+        if row.get("fixture_id") not in (None, "")
+    })
+
+
 def summarize_supabase_evaluations(rows: list[dict[str, Any]]) -> dict[str, Any]:
     verified = [row for row in rows if row.get("result_verified_at")]
     goals = [row for row in verified if row.get("goals_absolute_error") is not None]
@@ -65,10 +84,14 @@ def summarize_supabase_evaluations(rows: list[dict[str, Any]]) -> dict[str, Any]
         "pending": len(rows) - len(verified),
         "fixtures": len(fixtures),
         "goals_count": len(goals),
+        "goals_fixtures": _distinct_fixtures(goals),
+        "goals_reliability": classify_sample_reliability(_distinct_fixtures(goals)),
         "goals_mae": _mean(goals, "goals_absolute_error"),
         "goals_bias": _mean(goals, "projected_final_goals") - _mean(goals, "actual_final_goals")
             if goals and _mean(goals, "projected_final_goals") is not None and _mean(goals, "actual_final_goals") is not None else None,
         "corners_count": len(corners),
+        "corners_fixtures": _distinct_fixtures(corners),
+        "corners_reliability": classify_sample_reliability(_distinct_fixtures(corners)),
         "corners_mae": _mean(corners, "corners_absolute_error"),
         "corners_bias": _mean(corners, "projected_final_corners") - _mean(corners, "final_total_corners")
             if corners and _mean(corners, "projected_final_corners") is not None and _mean(corners, "final_total_corners") is not None else None,
@@ -107,6 +130,7 @@ def summarize_evaluations_by_minute(rows: list[dict[str, Any]]) -> list[dict[str
                 "Minuto de captura": label,
                 "Muestras": len(group),
                 "Partidos distintos": len({str(r.get("fixture_id")) for r in group if r.get("fixture_id")}),
+                "Clasificación": classify_sample_reliability(_distinct_fixtures(group)),
                 "Error medio absoluto": round(_mean(group, error_field), 2),
             })
     return output
