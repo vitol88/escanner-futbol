@@ -8153,7 +8153,11 @@ else:
                     "score_home": goals_data.get("home"),
                     "score_away": goals_data.get("away"),
                     "market": market,
-                    "market_type": "goals",
+                    "market_type": (
+                        "draw" if str(market).strip().casefold() == "empate final"
+                        else "btts" if str(market).strip().casefold().startswith("ambos equipos marcan")
+                        else "goals"
+                    ),
                     "probability": round(float(probability), 4),
                     "estimated_probability_exploratory": round(float(probability), 4),
                     "model_id": "estimate_live_goal_markets",
@@ -8188,8 +8192,14 @@ else:
                     if verified_odds:
                         # Segunda validación centralizada: solo admite cuota real
                         # del mercado exacto, fixture identificado y EV mínimo.
+                        _tip_key = str(market).strip().casefold()
+                        _market_type = (
+                            "draw" if _tip_key == "empate final"
+                            else "btts" if _tip_key.startswith("ambos equipos marcan")
+                            else "goals"
+                        )
                         _opportunity = evaluate_opportunity({
-                            "market": "goals",
+                            "market": _market_type,
                             "selection": str(market),
                             "probability": float(probability),
                             "odds": float(verified_odds["odd"]),
