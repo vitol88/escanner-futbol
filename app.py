@@ -21,6 +21,7 @@ from ai_engine.dataset_audit import audit_forecast_dataset, audit_prediction_his
 from ai_engine.prediction_schema import PREDICTION_SCHEMA_VERSION, normalize_prediction_record
 from ai_engine.prediction_ledger import append_prediction_records, load_prediction_records
 from ai_engine.supabase_prediction_ledger import append_supabase_prediction_records, load_supabase_prediction_records
+from ai_engine.supabase_analysis_snapshots import build_analysis_snapshot, append_supabase_analysis_snapshots
 from ai_engine.outcome_ledger import load_verified_outcomes, record_verified_outcome
 from ai_engine.settlement import resolve_binary_outcome
 from ai_engine.telegram_publisher import send_telegram_signal, send_telegram_test_message
@@ -45,6 +46,22 @@ from models.live_odds import (
 
 API_BASE = "https://v3.football.api-sports.io"
 TIMEOUT_SECONDS = 15
+def persist_analysis_snapshot(fixture_id, analysis_type, match_data, inputs, outputs):
+    """Persistir el análisis sin convertirlo en una apuesta."""
+    try:
+        supabase_url = str(st.secrets.get("SUPABASE_URL", "") or os.getenv("SUPABASE_URL", "")).strip()
+        secret_key = str(st.secrets.get("SUPABASE_SECRET_KEY", "") or os.getenv("SUPABASE_SECRET_KEY", "")).strip()
+        if not supabase_url or not secret_key:
+            return {"inserted": 0, "duplicates": 0, "skipped": True}
+        snapshot = build_analysis_snapshot(fixture_id=fixture_id, analysis_type=analysis_type, match=match_data, inputs=inputs, outputs=outputs)
+        result = append_supabase_analysis_snapshots([snapshot], supabase_url, secret_key)
+        st.session_state["analysis_snapshot_last_result"] = {"type": analysis_type, "fixture_id": str(fixture_id), **result}
+        st.session_state["analysis_snapshot_last_error"] = ""
+        return result
+    except Exception as exc:
+        st.session_state["analysis_snapshot_last_error"] = f"{type(exc).__name__}: {exc}"
+        return {"inserted": 0, "duplicates": 0, "error": str(exc)}
+
 LIVE_CORNER_CAPTURE_DB = Path(os.environ.get(
     "FOOTBALL_LAB_DB_PATH",
     str(Path(__file__).resolve().parent / "data" / "football_lab.sqlite3"),
@@ -6687,6 +6704,14 @@ else:
                                             except Exception as _h2h_exc:
                                                 st.session_state.h2h_cache[h2h_key] = {"error": str(_h2h_exc)}
                                         h2h_data = st.session_state.get("h2h_cache", {}).get(h2h_key)
+                        if isinstance(h2h_data, list):
+                            persist_analysis_snapshot(
+                                fixture_id, "h2h",
+                                {"home": home_name, "away": away_name, "minute": minute,
+                                 "home_score": home_score, "away_score": away_score},
+                                {"home_team_id": home_id, "away_team_id": away_id, "requested_last": 5},
+                                {"matches": h2h_data, "matches_returned": len(h2h_data)},
+                            )
                                         st.markdown('<div class="h2h-page-kicker">HISTORIAL <span>·</span> ENFRENTAMIENTOS DIRECTOS</div>', unsafe_allow_html=True)
                                         if isinstance(h2h_data, dict) and h2h_data.get("error"):
                                             st.warning(f"No se pudieron consultar los enfrentamientos: {h2h_data['error']}")
@@ -8461,6 +8486,28 @@ else:
                         if rationale:
                             st.caption("Contexto observado: " + "; ".join(rationale) + ".")
                     st.caption(f"Referencia usada por el modelo: {estimate.get('baseline_league', 'genérica')} · muestra de liga: {estimate.get('baseline_matches', 0)} partidos · contexto: {context.get('context_status', 'no disponible')}.")
+
+                    # Guardar la captura estadística del análisis de goles.
+                    persist_analysis_snapshot(
+                        fixture_id, "goals",
+                        {"league": (fixture.get("league") or {}).get("name"), "home": home_name, "away": away_name,
+                         "minute": minute, "home_score": home_score, "away_score": away_score,
+                         "status": (match_fixture.get("status") or {}).get("short")},
+                        {"home_shots": home_shots, "away_shots": away_shots,
+                         "home_shots_on_target": home_on, "away_shots_on_target": away_on,
+                         "home_possession": home_poss, "away_possession": away_poss,
+                         "home_corners": home_corners, "away_corners": away_corners,
+                         "baseline_league": estimate.get("baseline_league"),
+                         "baseline_matches": estimate.get("baseline_matches"),
+                         "context_status": context.get("context_status")},
+                        {"available": estimate.get("available"),
+                         "expected_total_goals_remaining": estimate.get("expected_total_goals_remaining"),
+                         "draw_final": estimate.get("draw_final"), "btts_final": estimate.get("btts_final"),
+                         "probability_next_goal": estimate.get("probability_next_goal"),
+                         "over_total_goals": estimate.get("over_total_goals"),
+                         "under_total_goals": estimate.get("under_total_goals"),
+                         "internal_reading": tip_label, "internal_reading_probability": tip_probability},
+                    )
                     odds_by_fixture = st.session_state.get("live_odds_by_fixture", {})
                     match_odds = best_live_odds_by_market(odds_by_fixture.get(str(fixture_id), []))
                     main_options = []
@@ -8812,7 +8859,21 @@ else:
                             import math
                             suggested_line = max(0.5, math.floor(projected * 2) / 2)
                             line_text = str(int(suggested_line)) if suggested_line.is_integer() else f"{suggested_line:.1f}"
-                            remaining_expected = max(0.0, projected - total_now)
+                            remaining_expected = max(0.0, projected - total_now)                            persist_analysis_snapshot(
+                                fixture_id, "corners",
+                                {"league": (((item.get("fixture") or {}).get("league") or {}).get("name")),
+                                 "home": ((((item.get("fixture") or {}).get("teams") or {}).get("home") or {}).get("name")),
+                                 "away": ((((item.get("fixture") or {}).get("teams") or {}).get("away") or {}).get("name")),
+                                 "minute": minute,
+                                 "home_score": (((item.get("fixture") or {}).get("goals") or {}).get("home")),
+                                 "away_score": (((item.get("fixture") or {}).get("goals") or {}).get("away"))},
+                                {"home_corners": item.get("home_corners"), "away_corners": item.get("away_corners"),
+                                 "total_corners_now": total_now, "historical_home_for": history.get("home_corners_for"),
+                                 "historical_away_for": history.get("away_corners_for"), "history_used": history_used,
+                                 "shots_total": shots_total},
+                                {"projected_total_corners": projected, "remaining_expected_corners": remaining_expected,
+                                 "suggested_line": suggested_line, "history_note": history.get("note")},
+                            )
                             # Match live corner markets to real odds from API-Football.
                             # A price alone is never enough: require a provisional model edge.
                             fixture_id = ((item.get("fixture") or {}).get("fixture") or {}).get("id")
