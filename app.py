@@ -9012,6 +9012,8 @@ else:
                     resolution = resolve_binary_outcome(
                         market_type=selected_market_type,
                         selection=str(selected_prediction.get("selection") or ""),
+                        home_team_name=str(selected_prediction.get("home") or ""),
+                        away_team_name=str(selected_prediction.get("away") or ""),
                         **final_data,
                     )
                     if resolution.get("resolved"):
