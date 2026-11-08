@@ -12,6 +12,7 @@ import requests
 import streamlit as st
 
 from ai_engine.data_engine import FootballDataEngine
+from ai_engine.opportunity_engine import evaluate_opportunity
 from ai_engine.live_corner_capture import capture_live_corner_snapshot
 from ai_engine.live_corner_finalize import finalize_live_corner_fixture
 from models.live_context import qualifies_as_corner_candidate, summarize_live_context
@@ -8185,14 +8186,32 @@ else:
                         str(market), float(probability), odds_rows_for_fixture
                     )
                     if verified_odds:
-                        row.update({
-                            "verified_live_odd": float(verified_odds["odd"]),
-                            "verified_bookmaker": str(verified_odds.get("bookmaker") or "Casa no identificada"),
-                            "verified_odds_market": str(verified_odds.get("market_label") or ""),
-                            "implied_probability": round(float(verified_odds["implied_probability"]), 4),
-                            "estimated_edge": round(float(verified_odds["estimated_edge"]), 4),
-                        })
-                        new_signal_rows.append(row)
+                        # Segunda validación centralizada: solo admite cuota real
+                        # del mercado exacto, fixture identificado y EV mínimo.
+                        _opportunity = evaluate_opportunity({
+                            "market": "goals",
+                            "selection": str(market),
+                            "probability": float(probability),
+                            "odds": float(verified_odds["odd"]),
+                            "odds_verified": True,
+                            "fixture_id": fixture_data.get("id"),
+                            "fixture": f"{row.get('home') or 'Local'} vs {row.get('away') or 'Visitante'}",
+                            "minute": row.get("minute"),
+                            "score": f"{row.get('score_home', '?')}-{row.get('score_away', '?')}",
+                            "bookmaker": str(verified_odds.get("bookmaker") or ""),
+                            "source": "api-football-live-odds",
+                        }, min_ev=0.02, min_odds=1.35, max_odds=10.0)
+                        if _opportunity.get("eligible"):
+                            row.update({
+                                "verified_live_odd": float(verified_odds["odd"]),
+                                "verified_bookmaker": str(verified_odds.get("bookmaker") or "Casa no identificada"),
+                                "verified_odds_market": str(verified_odds.get("market_label") or ""),
+                                "implied_probability": round(float(verified_odds["implied_probability"]), 4),
+                                "estimated_edge": round(float(verified_odds["estimated_edge"]), 4),
+                                "expected_value": _opportunity["expected_value"],
+                                "opportunity_engine": "v1",
+                            })
+                            new_signal_rows.append(row)
                     existing_keys.add(row_key)
         st.session_state.signal_rows = signal_rows
         # Telegram recibe solo señales nuevas respaldadas por cuota real, mercado coincidente y ventaja mínima.
