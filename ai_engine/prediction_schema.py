@@ -46,6 +46,17 @@ def _verified(value: Any) -> bool:
     }
 
 
+def _optional_finite_float(value: Any) -> float | None:
+    """Parse optional numeric metadata from either JSON or CSV representations."""
+    if value in (None, "") or isinstance(value, bool):
+        return None
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    return parsed if math.isfinite(parsed) else None
+
+
 def _binary(value: Any) -> int | None:
     text = str(value or "").strip().casefold()
     if text in {"1", "true", "yes", "si", "sí"}:
@@ -71,6 +82,10 @@ def normalize_prediction_record(row: dict[str, Any]) -> dict[str, Any]:
     market = str(row.get("market") or "").strip() or None
     verified = _verified(row.get("outcome_verified"))
     outcome = _binary(row.get("outcome")) if verified else None
+    odds_decimal = _optional_finite_float(row.get("odds_decimal"))
+    if odds_decimal is not None and odds_decimal <= 1:
+        odds_decimal = None
+    odds_verified = _verified(row.get("odds_verified")) and odds_decimal is not None
 
     phase = str(row.get("phase") or "").strip().casefold() or "unknown"
     if phase not in {"pre_match", "live", "unknown"}:
@@ -98,13 +113,13 @@ def normalize_prediction_record(row: dict[str, Any]) -> dict[str, Any]:
         "model_version": str(row.get("model_version") or "").strip() or None,
         "source": str(row.get("source") or "").strip() or None,
         "snapshot_id": str(row.get("snapshot_id") or "").strip() or None,
-        "odds_decimal": row.get("odds_decimal") if row.get("odds_decimal") not in ("",) else None,
-        "odds_verified": _verified(row.get("odds_verified")),
+        "odds_decimal": odds_decimal,
+        "odds_verified": odds_verified,
         "odds_bookmaker": str(row.get("odds_bookmaker") or "").strip() or None,
         "odds_market": str(row.get("odds_market") or "").strip() or None,
-        "implied_probability": row.get("implied_probability") if row.get("implied_probability") not in ("",) else None,
-        "estimated_edge": row.get("estimated_edge") if row.get("estimated_edge") not in ("",) else None,
-        "expected_value": row.get("expected_value") if row.get("expected_value") not in ("",) else None,
+        "implied_probability": _optional_finite_float(row.get("implied_probability")),
+        "estimated_edge": _optional_finite_float(row.get("estimated_edge")),
+        "expected_value": _optional_finite_float(row.get("expected_value")),
         "outcome": outcome,
         "outcome_verified": verified and outcome is not None,
     }
