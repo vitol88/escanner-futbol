@@ -247,6 +247,40 @@ class BinaryForecastEvaluationTests(unittest.TestCase):
         self.assertEqual({item["market"] for item in result}, {"goals"})
         self.assertEqual({item["selection"] for item in result}, {"over", "under"})
 
+    def test_market_line_breakdown_never_pools_different_event_definitions(self):
+        from ai_engine.evaluation import evaluate_forecasts_by_market_line
+
+        base = {
+            "market_type": "corners", "selection": "over", "line": "8.5",
+            "phase": "live", "model_id": "corners-model", "model_version": "1.0",
+            "probability": 0.7, "outcome": 1, "outcome_verified": True,
+        }
+        variations = [
+            {"market_type": "goals"},
+            {"selection": "under"},
+            {"line": "9.5"},
+            {"phase": "pre_match"},
+            {"model_id": "other-model"},
+            {"model_version": "2.0"},
+        ]
+        rows = [dict(base)]
+        for change in variations:
+            row = dict(base)
+            row.update(change)
+            rows.append(row)
+
+        result = evaluate_forecasts_by_market_line(rows, minimum_sample=1)
+
+        self.assertEqual(len(result), 1 + len(variations))
+        self.assertTrue(all(item["sample_size"] == 1 for item in result))
+        keys = {
+            (item["market"], item["selection"], item["line"], item["phase"],
+             item["model_id"], item["model_version"])
+            for item in result
+        }
+        self.assertEqual(len(keys), 1 + len(variations))
+
+
 if __name__ == "__main__":
     unittest.main()
 
