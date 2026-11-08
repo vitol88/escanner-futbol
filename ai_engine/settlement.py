@@ -88,6 +88,23 @@ def resolve_binary_outcome(
         if normalized in {"away", "visitante", "gana visitante"}:
             return {"resolved": True, "outcome": int(away > home), "reason": "final_score"}
 
+        # Formato real del escáner: "<equipo> marcará al menos 1 gol
+        # (más de 0.5 goles del local/visitante)". Se liquida con el marcador
+        # del lado indicado, nunca con el total de goles del partido.
+        team_goal_match = re.search(
+            r"marcará\s+al\s+menos\s+1\s+gol\s*"
+            r"\(\s*más\s+de\s+0\.5\s+goles\s+del\s+(local|visitante)\s*\)\s*$",
+            pick,
+            flags=re.IGNORECASE,
+        )
+        if team_goal_match:
+            side_score = home if team_goal_match.group(1).casefold() == "local" else away
+            return {
+                "resolved": True,
+                "outcome": int(side_score >= 1),
+                "reason": "final_team_score",
+            }
+
         total = home + away
         for direction in ("over", "under"):
             line = _line_from_selection(pick, direction)
