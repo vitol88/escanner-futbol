@@ -253,7 +253,7 @@ def evaluate_model_version_comparability(
     if isinstance(minimum_common_fixtures, bool) or not isinstance(minimum_common_fixtures, int) or minimum_common_fixtures < 1:
         raise ValueError("minimum_common_fixtures debe ser un entero mayor que cero")
 
-    cohorts: dict[tuple[str, str, str, str, str], dict[str, dict[str, tuple[float, int, int]]]] = {}
+    cohorts: dict[tuple[str, str, str, str, str], dict[str, dict[str, tuple[float, int, float | None]]]] = {}
     for row_index, row in enumerate(rows if isinstance(rows, list) else []):
         if not isinstance(row, dict) or not _verified(row.get(verified_key, "")):
             continue
@@ -265,12 +265,14 @@ def evaluate_model_version_comparability(
         selection = str(row.get("selection") or "unknown").strip() or "unknown"
         phase = str(row.get("phase") or "unknown").strip() or "unknown"
         outcome = _outcome(row.get(outcome_key))
+        if outcome is None:
+            continue
         try:
             probability = float(row.get(probability_key))
+            if not math.isfinite(probability) or not 0 <= probability <= 1:
+                probability = None
         except (TypeError, ValueError, OverflowError):
-            continue
-        if not math.isfinite(probability) or not 0 <= probability <= 1 or outcome is None:
-            continue
+            probability = None
         if not all((fixture_id, market, line, model_id, version)) or version.casefold() == "unknown":
             continue
         # Use the newest timestamp when available; input order breaks ties and
@@ -325,7 +327,11 @@ def evaluate_model_version_comparability(
                     "log_loss_b": None,
                     "log_loss_delta_b_minus_a": None,
                 }
-                if comparable:
+                if comparable and all(
+                    versions[version_a][fixture][2] is not None
+                    and versions[version_b][fixture][2] is not None
+                    for fixture in common
+                ):
                     outcomes = [versions[version_a][fixture][1] for fixture in common]
                     probabilities_a = [versions[version_a][fixture][2] for fixture in common]
                     probabilities_b = [versions[version_b][fixture][2] for fixture in common]
@@ -338,8 +344,8 @@ def evaluate_model_version_comparability(
                             for p, y in zip(probabilities, outcomes)
                         ) / common_count
                         return brier, log_loss
-                    brier_a, log_a = _losses(probabilities_a)
-                    brier_b, log_b = _losses(probabilities_b)
+                    brier_a, log_a = _losses(probabilities_a)  # type: ignore[arg-type]
+                    brier_b, log_b = _losses(probabilities_b)  # type: ignore[arg-type]
                     item.update({
                         "brier_a": brier_a,
                         "brier_b": brier_b,
