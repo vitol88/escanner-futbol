@@ -312,7 +312,7 @@ def evaluate_binary_forecasts(
         if outcome is None or not math.isfinite(probability) or not 0 <= probability <= 1:
             excluded += 1
             continue
-        scored.append((probability, outcome))
+        scored_rows.append((probability, outcome, row))
 
     n = len(scored)
     if not n:
