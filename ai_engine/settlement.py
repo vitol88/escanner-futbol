@@ -80,8 +80,6 @@ def resolve_binary_outcome(
                 result = int(not (home > 0 and away > 0))
             elif normalized.startswith("ambos equipos marcan (") or normalized in {"yes", "sí", "si", "ambos equipos marcan: sí", "ambos equipos marcan: si"}:
                 result = int(home > 0 and away > 0)
-            elif normalized == "no":
-                result = int(not (home > 0 and away > 0))
             else:
                 return {"resolved": False, "reason": "unsupported_btts_selection"}
             return {"resolved": True, "outcome": result, "reason": "final_score"}
