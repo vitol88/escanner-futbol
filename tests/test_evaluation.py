@@ -281,6 +281,69 @@ class BinaryForecastEvaluationTests(unittest.TestCase):
         self.assertEqual(len(keys), 1 + len(variations))
 
 
+    def test_model_versions_require_same_verified_fixtures_for_comparison(self):
+        from ai_engine.evaluation import evaluate_model_version_comparability
+
+        rows = []
+        for fixture in ("fx-1", "fx-2", "fx-3"):
+            for version in ("1.0", "2.0"):
+                rows.append({
+                    "fixture_id": fixture, "market_type": "corners",
+                    "selection": "over", "line": "8.5", "phase": "live",
+                    "model_id": "corner-model", "model_version": version,
+                    "outcome_verified": True,
+                })
+        rows.extend([
+            {"fixture_id": "fx-4", "market_type": "corners", "selection": "over",
+             "line": "8.5", "phase": "live", "model_id": "corner-model",
+             "model_version": "1.0", "outcome_verified": True},
+            {"fixture_id": "fx-5", "market_type": "corners", "selection": "over",
+             "line": "8.5", "phase": "live", "model_id": "corner-model",
+             "model_version": "2.0", "outcome_verified": True},
+            {"fixture_id": "fx-1", "market_type": "goals", "selection": "over",
+             "line": "2.5", "phase": "live", "model_id": "corner-model",
+             "model_version": "3.0", "outcome_verified": True},
+            {"fixture_id": "fx-1", "market_type": "corners", "selection": "under",
+             "line": "8.5", "phase": "live", "model_id": "corner-model",
+             "model_version": "3.0", "outcome_verified": True},
+            {"fixture_id": "fx-1", "market_type": "corners", "selection": "over",
+             "line": "8.5", "phase": "live", "model_id": "corner-model",
+             "model_version": "3.0", "outcome_verified": False},
+        ])
+
+        result = evaluate_model_version_comparability(rows, minimum_common_fixtures=3)
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual((result[0]["version_a"], result[0]["version_b"]), ("1.0", "2.0"))
+        self.assertEqual(result[0]["common_fixture_count"], 3)
+        self.assertTrue(result[0]["comparable_cohort"])
+
+    def test_model_version_comparison_is_blocked_below_common_fixture_minimum(self):
+        from ai_engine.evaluation import evaluate_model_version_comparability
+
+        rows = []
+        for fixture in ("fx-1", "fx-2"):
+            for version in ("1.0", "2.0"):
+                rows.append({
+                    "fixture_id": fixture, "market_type": "goals",
+                    "selection": "over", "line": "2.5", "phase": "pre_match",
+                    "model_id": "goals-model", "model_version": version,
+                    "outcome_verified": True,
+                })
+
+        result = evaluate_model_version_comparability(rows, minimum_common_fixtures=3)
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["common_fixture_count"], 2)
+        self.assertFalse(result[0]["comparable_cohort"])
+        self.assertIn("No comparable", result[0]["status"])
+
+    def test_model_version_comparability_validates_minimum(self):
+        from ai_engine.evaluation import evaluate_model_version_comparability
+        with self.assertRaises(ValueError):
+            evaluate_model_version_comparability([], minimum_common_fixtures=0)
+
+
 if __name__ == "__main__":
     unittest.main()
 
