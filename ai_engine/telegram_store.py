@@ -24,6 +24,7 @@ def reserve_telegram_alert(
     secret_key: str,
     *,
     post=None,
+    patch=None,
     timeout: float = 8.0,
 ) -> tuple[bool, str, str]:
     """Atomically reserve an alert; unique primary key blocks concurrent duplicates."""
@@ -66,7 +67,34 @@ def reserve_telegram_alert(
         created = response.json()
         if isinstance(created, list) and created:
             return True, alert_key, "Alerta reservada."
-        return False, alert_key, "Alerta duplicada: ya existe en Supabase."
+
+        # A failed delivery may be retried, but sent/reserved alerts remain locked.
+        # The status filter makes the transition atomic: only the first retry can
+        # change failed -> reserved, preventing two concurrent publishers.
+        updater = patch or requests.patch
+        retry_payload = {
+            **payload,
+            "status": "reserved",
+            "error": None,
+            "sent_at": None,
+        }
+        retry_response = updater(
+            f"{url}/rest/v1/telegram_alerts",
+            params={"alert_key": f"eq.{alert_key}", "status": "eq.failed"},
+            headers={
+                "apikey": key,
+                "Authorization": f"Bearer {key}",
+                "Content-Type": "application/json",
+                "Prefer": "return=representation",
+            },
+            json=retry_payload,
+            timeout=timeout,
+        )
+        retry_response.raise_for_status()
+        retried = retry_response.json()
+        if isinstance(retried, list) and retried:
+            return True, alert_key, "Alerta fallida reservada para reintento."
+        return False, alert_key, "Alerta duplicada: ya existe o está en proceso de envío en Supabase."
     except Exception as exc:
         return False, "", f"No se pudo reservar alerta ({type(exc).__name__})."
 
