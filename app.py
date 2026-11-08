@@ -9074,7 +9074,6 @@ else:
                                 "Fase": item["phase"],
                                 "Modelo": item["model_id"],
                                 "Versión": item["model_version"],
-                                "Liga": item.get("league", "unknown"),
                                 "Muestra independiente": item["sample_size"],
                                 "Brier": item["brier_score"],
                                 "Log loss": item["log_loss"],
@@ -9095,6 +9094,7 @@ else:
                     if version_comparisons:
                         st.dataframe(
                             [{
+                                "Liga": item.get("league", "unknown"),
                                 "Mercado": item["market"],
                                 "Selección": item["selection"],
                                 "Línea": item["line"],
