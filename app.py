@@ -8971,7 +8971,10 @@ else:
                 else:
                     prediction_options = {}
                     for item in supported_predictions:
-                        match_label = item.get("match") or "Partido sin nombre"
+                        match_label = item.get("match") or " vs ".join(
+                            str(item.get(team_key) or "").strip()
+                            for team_key in ("home", "away")
+                        ).strip(" vs") or f"Partido {item.get('fixture_id') or 'sin nombre'}"
                         market_label = item.get("market") or item.get("market_type") or "Mercado"
                         selection_label = item.get("selection") or "Selección"
                         timestamp_label = item.get("recorded_at") or "Fecha N/D"
