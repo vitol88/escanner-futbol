@@ -22,6 +22,7 @@ from ai_engine.prediction_schema import PREDICTION_SCHEMA_VERSION, normalize_pre
 from ai_engine.prediction_ledger import append_prediction_records, load_prediction_records
 from ai_engine.supabase_prediction_ledger import append_supabase_prediction_records, load_supabase_prediction_records
 from ai_engine.supabase_analysis_snapshots import build_analysis_snapshot, append_supabase_analysis_snapshots
+from ai_engine.supabase_outcome_sync import sync_finished_fixture_outcomes
 from ai_engine.outcome_ledger import load_verified_outcomes, record_verified_outcome
 from ai_engine.settlement import resolve_binary_outcome
 from ai_engine.telegram_publisher import send_telegram_signal, send_telegram_test_message
@@ -8959,6 +8960,34 @@ else:
         with tab_overview:
             st.subheader("Rendimiento del modelo")
             st.caption("Historial de señales, verificación retrospectiva y evaluación de calidad del pronóstico.")
+
+            st.markdown("#### Resultados finales · Supabase")
+            st.caption("Busca los partidos guardados en el histórico, verifica su estado final en API-Football y registra marcadores, córners y tarjetas amarillas. Los resultados idénticos no se vuelven a insertar.")
+            if st.button("Verificar y sincronizar resultados finales", key="sync_finished_outcomes"):
+                try:
+                    _outcome_url = str(st.secrets.get("SUPABASE_URL", "") or os.getenv("SUPABASE_URL", "")).strip()
+                    _outcome_key = str(st.secrets.get("SUPABASE_SECRET_KEY", "") or os.getenv("SUPABASE_SECRET_KEY", "")).strip()
+                    _outcome_result = sync_finished_fixture_outcomes(
+                        _outcome_url, _outcome_key, api_get
+                    )
+                    st.session_state["outcome_sync_result"] = _outcome_result
+                    st.session_state["outcome_sync_error"] = ""
+                except Exception as _outcome_exc:
+                    st.session_state["outcome_sync_error"] = f"{type(_outcome_exc).__name__}: {_outcome_exc}"
+            _outcome_result = st.session_state.get("outcome_sync_result")
+            if _outcome_result:
+                _outcome_cols = st.columns(4)
+                _outcome_cols[0].metric("Partidos revisados", _outcome_result.get("checked", 0))
+                _outcome_cols[1].metric("Finalizados", _outcome_result.get("finished", 0))
+                _outcome_cols[2].metric("Resultados nuevos", _outcome_result.get("inserted", 0))
+                _outcome_cols[3].metric("Sin cambios", _outcome_result.get("unchanged", 0))
+                st.caption(f"Partidos en histórico: {_outcome_result.get('fixtures_found', 0)} · Sin finalizar/sin datos: {_outcome_result.get('skipped', 0)}")
+                for _outcome_error in (_outcome_result.get("errors") or [])[:5]:
+                    st.warning(_outcome_error)
+                if len(_outcome_result.get("errors") or []) > 5:
+                    st.caption(f"Y {len(_outcome_result['errors']) - 5} errores adicionales.")
+            if st.session_state.get("outcome_sync_error"):
+                st.error(f"No se pudo sincronizar los resultados: {st.session_state['outcome_sync_error']}")
 
             st.markdown("#### Registro central de pronósticos · SQLite")
             st.caption("Consulta de solo lectura del historial persistido. No modifica pronósticos ni completa resultados automáticamente.")
