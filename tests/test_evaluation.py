@@ -565,3 +565,26 @@ class ModelReadinessTests(unittest.TestCase):
             assess_model_readiness({}, model_id="x", model_version="1", minimum_sample=0)
         with self.assertRaises(ValueError):
             assess_model_readiness({}, model_id="x", model_version="1", maximum_calibration_gap=1.1)
+
+
+class LeagueIsolationTests(unittest.TestCase):
+    def test_market_line_metrics_keep_leagues_separate(self):
+        from ai_engine.evaluation import evaluate_forecasts_by_market_line
+        rows = []
+        for league, outcome, probability in (("Premier League", 1, 0.9), ("Liga Colombia", 0, 0.9)):
+            rows.append({"fixture_id": league, "league": league, "market_type": "corners", "selection": "over", "line": "8.5", "phase": "live", "model_id": "corners", "model_version": "1.0", "outcome": outcome, "outcome_verified": True, "probability": probability})
+        result = evaluate_forecasts_by_market_line(rows, probability_key="probability", minimum_sample=1)
+        self.assertEqual({item["league"] for item in result}, {"Premier League", "Liga Colombia"})
+        self.assertEqual(len(result), 2)
+        self.assertNotEqual(result[0]["brier_score"], result[1]["brier_score"])
+
+    def test_version_comparison_does_not_pair_across_leagues(self):
+        from ai_engine.evaluation import evaluate_model_version_comparability
+        rows = []
+        for league in ("Premier League", "Liga Colombia"):
+            for version in ("1.0", "2.0"):
+                rows.append({"fixture_id": "same-id", "league": league, "market_type": "goals", "selection": "over", "line": "2.5", "phase": "live", "model_id": "goals", "model_version": version, "outcome": 1, "outcome_verified": True, "probability": 0.8})
+        result = evaluate_model_version_comparability(rows, probability_key="probability", minimum_common_fixtures=1)
+        self.assertEqual(len(result), 2)
+        self.assertEqual({item["league"] for item in result}, {"Premier League", "Liga Colombia"})
+        self.assertTrue(all(item["common_fixture_count"] == 1 for item in result))
