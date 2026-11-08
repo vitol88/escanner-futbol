@@ -24,7 +24,7 @@ def _verified(value: Any) -> bool:
 
 
 def _binary(value: Any) -> int | None:
-    text = str(value or "").strip().casefold()
+    text = ("" if value is None else str(value)).strip().casefold()
     if text in {"1", "true", "yes", "si", "sí"}:
         return 1
     if text in {"0", "false", "no"}:
