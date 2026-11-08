@@ -3814,10 +3814,10 @@ with st.sidebar:
                     )
                     if not _reserved:
                         if _alert_key:
-                            st.warning("Esta señal ya fue registrada o enviada. Supabase bloqueó el duplicado.")
+                            st.session_state.telegram_manual_result = ("warning", "Esta señal ya fue registrada o enviada. Supabase bloqueó el duplicado.")
                             st.session_state.telegram_pending_rows.pop(_telegram_selected_idx)
                         else:
-                            st.error(f"No se pudo reservar la señal en Supabase: {_reserve_detail}")
+                            st.session_state.telegram_manual_result = ("error", f"No se pudo reservar la señal en Supabase: {_reserve_detail}")
                     else:
                         _sent, _send_detail = send_telegram_signal(
                             _telegram_selected_row, _manual_token, _manual_chat
@@ -3829,13 +3829,23 @@ with st.sidebar:
                         )
                         st.session_state.telegram_pending_rows.pop(_telegram_selected_idx)
                         if _sent:
-                            st.success("Señal enviada correctamente a Telegram.")
+                            st.session_state.telegram_manual_result = ("success", "Señal enviada correctamente a Telegram.")
                         else:
-                            st.error(f"No se pudo enviar la señal: {_send_detail}")
-                    st.rerun()
+                            st.session_state.telegram_manual_result = ("error", f"No se pudo enviar la señal: {_send_detail}")
+                    if all((_manual_token, _manual_chat, _manual_url, _manual_secret)):
+                        st.rerun()
         else:
             st.info("Todavía no hay señales elegibles pendientes. Primero ejecuta un escaneo en vivo; las señales que cumplan los filtros aparecerán aquí para aprobación.")
 
+        _manual_result = st.session_state.pop("telegram_manual_result", None)
+        if _manual_result:
+            _manual_level, _manual_message = _manual_result
+            if _manual_level == "success":
+                st.success(_manual_message)
+            elif _manual_level == "warning":
+                st.warning(_manual_message)
+            else:
+                st.error(_manual_message)
         if st.session_state.get("telegram_publish_status"):
             st.caption(st.session_state.telegram_publish_status)
 
