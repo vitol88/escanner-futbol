@@ -8156,6 +8156,7 @@ else:
                     "score_away": goals_data.get("away"),
                     "market": market,
                     "market_type": classify_goal_tip_market(market),
+                    "selection": str(market),
                     "probability": round(float(probability), 4),
                     "estimated_probability_exploratory": round(float(probability), 4),
                     "model_id": "estimate_live_goal_markets",
