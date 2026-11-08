@@ -23,7 +23,7 @@ from ai_engine.prediction_ledger import append_prediction_records, load_predicti
 from ai_engine.supabase_prediction_ledger import append_supabase_prediction_records, load_supabase_prediction_records
 from ai_engine.supabase_analysis_snapshots import build_analysis_snapshot, append_supabase_analysis_snapshots
 from ai_engine.supabase_outcome_sync import sync_finished_fixture_outcomes
-from ai_engine.supabase_evaluation import load_supabase_evaluations, summarize_supabase_evaluations
+from ai_engine.supabase_evaluation import load_supabase_evaluations, summarize_supabase_evaluations, summarize_evaluations_by_minute
 from ai_engine.outcome_ledger import load_verified_outcomes, record_verified_outcome
 from ai_engine.settlement import resolve_binary_outcome
 from ai_engine.telegram_publisher import send_telegram_signal, send_telegram_test_message
@@ -9019,6 +9019,12 @@ else:
                 _corner_cols[0].metric("Muestras", _eval_summary["corners_count"])
                 _corner_cols[1].metric("Error medio absoluto", f'{_eval_summary["corners_mae"]:.2f}' if _eval_summary["corners_mae"] is not None else "N/D")
                 _corner_cols[2].metric("Sesgo (proyección − real)", f'{_eval_summary["corners_bias"]:+.2f}' if _eval_summary["corners_bias"] is not None else "N/D")
+                st.markdown("**Precisión según el minuto de captura**")
+                _minute_rows = summarize_evaluations_by_minute(st.session_state.get("supabase_evaluation_rows", []))
+                if _minute_rows:
+                    st.dataframe(_minute_rows, use_container_width=True, hide_index=True)
+                else:
+                    st.info("Todavía no hay suficientes muestras verificadas para comparar por minuto.")
             if st.session_state.get("supabase_evaluation_error"):
                 st.error(f"No se pudo cargar la evaluación: {st.session_state['supabase_evaluation_error']}")
 
