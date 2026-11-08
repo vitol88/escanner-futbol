@@ -16,7 +16,7 @@ from ai_engine.opportunity_engine import evaluate_opportunity, classify_goal_tip
 from ai_engine.live_corner_capture import capture_live_corner_snapshot
 from ai_engine.live_corner_finalize import finalize_live_corner_fixture
 from models.live_context import qualifies_as_corner_candidate, summarize_live_context
-from ai_engine.evaluation import evaluate_binary_forecasts, evaluate_forecasts_by_group, evaluate_forecasts_by_market, evaluate_chronological_holdout
+from ai_engine.evaluation import evaluate_binary_forecasts, evaluate_forecasts_by_group, evaluate_forecasts_by_market, evaluate_chronological_holdout, assess_model_readiness
 from ai_engine.dataset_audit import audit_forecast_dataset
 from ai_engine.prediction_schema import PREDICTION_SCHEMA_VERSION, normalize_prediction_record
 from ai_engine.prediction_ledger import append_prediction_records, load_prediction_records
@@ -9009,11 +9009,16 @@ else:
                                 "Brier": item["brier_score"],
                                 "Log loss": item["log_loss"],
                                 "Brecha calibración": item["calibration_gap"],
-                                "Diagnóstico": (
-                                    "Muestra insuficiente" if not item["minimum_sample_reached"]
-                                    else "Revisar calibración" if item["calibration_gap"] is not None and item["calibration_gap"] >= 0.10
-                                    else "Sin alerta de muestra"
-                                ),
+                                "Elegibilidad": assess_model_readiness(
+                                    item,
+                                    model_id=item["model_id"],
+                                    model_version=item["model_version"],
+                                )["status"],
+                                "Motivo / control": " | ".join(assess_model_readiness(
+                                    item,
+                                    model_id=item["model_id"],
+                                    model_version=item["model_version"],
+                                )["reasons"]) or "Solo seguimiento; no habilita apuestas automáticamente",
                             } for item in ledger_temporal["test_metrics_by_market"]],
                             use_container_width=True,
                             hide_index=True,
@@ -9072,9 +9077,9 @@ else:
                             "para separar versiones de modelo. Los campos ausentes no se infieren."
                         )
                     st.caption(
-                        "La etiqueta «Revisar calibración» señala una brecha descriptiva de al menos 10 puntos "
-                        "porcentuales; no demuestra por sí sola un sesgo estadístico. Las muestras pequeñas "
-                        "no se usan para comparar ni habilitar modelos."
+                        "La elegibilidad exige al menos 30 eventos independientes en la prueba cronológica, "
+                        "brecha de calibración inferior al 10% e identificación completa de modelo y versión. "
+                        "«Apto» significa únicamente seguimiento controlado: no autoriza picks ni demuestra rentabilidad."
                     )
                 else:
                     st.warning(
