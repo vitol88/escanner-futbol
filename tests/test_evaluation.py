@@ -53,6 +53,26 @@ class BinaryForecastEvaluationTests(unittest.TestCase):
         self.assertIsNone(result["brier_score"])
         self.assertEqual(result["reliability"], [])
 
+
+    def test_observed_rate_includes_wilson_95_percent_interval(self):
+        rows = [
+            {"probability": 0.7, "outcome": 1, "outcome_verified": True},
+            {"probability": 0.4, "outcome": 0, "outcome_verified": True},
+            {"probability": 0.6, "outcome": 1, "outcome_verified": True},
+            {"probability": 0.3, "outcome": 0, "outcome_verified": True},
+        ]
+        result = evaluate_binary_forecasts(rows, minimum_sample=4)
+        lower, upper = result["observed_rate_ci_95"]
+        self.assertAlmostEqual(result["observed_rate"], 0.5)
+        self.assertLess(lower, result["observed_rate"])
+        self.assertGreater(upper, result["observed_rate"])
+        self.assertGreaterEqual(lower, 0)
+        self.assertLessEqual(upper, 1)
+
+    def test_empty_data_has_no_confidence_interval(self):
+        result = evaluate_binary_forecasts([])
+        self.assertIsNone(result["observed_rate_ci_95"])
+
     def test_invalid_configuration_raises(self):
         with self.assertRaises(ValueError):
             evaluate_binary_forecasts([], bins=0)
