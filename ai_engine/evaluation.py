@@ -381,31 +381,42 @@ def evaluate_model_version_comparability(
 def _deduplicate_fixture_snapshots(
     scored_rows: list[tuple[float, int, dict[str, Any]]],
 ) -> tuple[list[tuple[float, int]], int]:
-    """Keep the latest verified snapshot per fixture/event/model.
+    """Keep one latest snapshot per identifiable fixture/event/model.
 
-    Raw ledger rows are never changed. Rows without enough identity or a
-    parseable timestamp remain individually scoreable rather than being
-    guessed into a group.
+    A timezone-aware timestamp is the strongest ordering signal. If timestamps
+    are absent, naive or malformed, stable input order is used as a fallback
+    for rows with complete event identity. Rows lacking fixture identity remain
+    individually scoreable rather than being guessed into a group. Raw ledger
+    rows are never changed.
     """
-    selected: dict[tuple[str, ...], tuple[float, int, float, int]] = {}
+    selected: dict[tuple[str, ...], tuple[tuple[int, float, int], float, int]] = {}
     passthrough: list[tuple[float, int]] = []
     duplicates = 0
     for index, (probability, outcome, row) in enumerate(scored_rows):
         fixture = str(row.get("fixture_id") or "").strip()
         market = str(row.get("market_type") or row.get("market") or "").strip()
         selection = str(row.get("selection") or "").strip()
-        raw_timestamp = str(row.get("recorded_at") or "").strip()
-        if not fixture or not raw_timestamp:
+        if not fixture or not market:
             passthrough.append((probability, outcome))
             continue
-        try:
-            timestamp = datetime.fromisoformat(raw_timestamp.replace("Z", "+00:00"))
-            order = timestamp.timestamp() if timestamp.tzinfo else timestamp.replace(tzinfo=timezone.utc).timestamp()
-        except (TypeError, ValueError, OverflowError, OSError):
-            passthrough.append((probability, outcome))
-            continue
+
+        # Aware timestamps compare by absolute UTC instant. Legacy timestamps
+        # without timezone and malformed/missing values fall back to row order.
+        order: tuple[int, float, int] = (0, float(index), index)
+        for timestamp_key in ("recorded_at", "created_at", "timestamp"):
+            raw_timestamp = str(row.get(timestamp_key) or "").strip()
+            if not raw_timestamp:
+                continue
+            try:
+                timestamp = datetime.fromisoformat(raw_timestamp.replace("Z", "+00:00"))
+                if timestamp.tzinfo is not None:
+                    order = (1, timestamp.astimezone(timezone.utc).timestamp(), index)
+                    break
+            except (TypeError, ValueError, OverflowError, OSError):
+                continue
+
         key = (
-            fixture, market or "unknown", selection or "unknown",
+            fixture, market, selection or "unknown",
             str(row.get("line") or "").strip(),
             str(row.get("phase") or "unknown").strip(),
             str(row.get("model_id") or "unknown").strip(),
@@ -413,12 +424,13 @@ def _deduplicate_fixture_snapshots(
         )
         previous = selected.get(key)
         if previous is None:
-            selected[key] = (order, index, probability, outcome)
+            selected[key] = (order, probability, outcome)
         else:
             duplicates += 1
-            if (order, index) > (previous[0], previous[1]):
-                selected[key] = (order, index, probability, outcome)
-    retained = passthrough + [(item[2], item[3]) for item in selected.values()]
+            if order >= previous[0]:
+                selected[key] = (order, probability, outcome)
+
+    retained = passthrough + [(item[1], item[2]) for item in selected.values()]
     return retained, duplicates
 
 
