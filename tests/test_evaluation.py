@@ -588,3 +588,42 @@ class LeagueIsolationTests(unittest.TestCase):
         self.assertEqual(len(result), 2)
         self.assertEqual({item["league"] for item in result}, {"Premier League", "Liga Colombia"})
         self.assertTrue(all(item["common_fixture_count"] == 1 for item in result))
+
+
+
+class SnapshotFallbackDeduplicationTests(unittest.TestCase):
+    def test_missing_or_invalid_timestamps_use_input_order_for_identified_fixture(self):
+        from ai_engine.evaluation import evaluate_binary_forecasts
+
+        base = {
+            "fixture_id": "fx-no-time", "market_type": "corners",
+            "selection": "over", "line": "8.5", "phase": "live",
+            "model_id": "corners", "model_version": "1.0",
+            "outcome": 1, "outcome_verified": True,
+        }
+        rows = [
+            {**base, "probability": 0.2},
+            {**base, "probability": 0.8, "recorded_at": "not-a-date"},
+        ]
+        metrics = evaluate_binary_forecasts(
+            rows, probability_key="probability", minimum_sample=1
+        )
+        self.assertEqual(metrics["raw_verified_sample_size"], 2)
+        self.assertEqual(metrics["sample_size"], 1)
+        self.assertEqual(metrics["deduplicated_snapshots"], 1)
+        self.assertAlmostEqual(metrics["brier_score"], 0.04)
+
+    def test_missing_fixture_identity_is_not_guessed_or_collapsed(self):
+        from ai_engine.evaluation import evaluate_binary_forecasts
+
+        rows = [
+            {"market_type": "goals", "probability": 0.8, "outcome": 1,
+             "outcome_verified": True},
+            {"market_type": "goals", "probability": 0.2, "outcome": 0,
+             "outcome_verified": True},
+        ]
+        metrics = evaluate_binary_forecasts(
+            rows, probability_key="probability", minimum_sample=1
+        )
+        self.assertEqual(metrics["sample_size"], 2)
+        self.assertEqual(metrics["deduplicated_snapshots"], 0)
