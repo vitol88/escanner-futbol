@@ -8998,6 +8998,14 @@ else:
                             [{
                                 "Mercado": item["group"],
                                 "Muestra independiente": item["sample_size"],
+                                "Tasa observada": (
+                                    f"{item['observed_rate']:.1%}"
+                                    if item["observed_rate"] is not None else "N/D"
+                                ),
+                                "IC 95% tasa observada": (
+                                    f"{item['observed_rate_ci_95'][0]:.1%} – {item['observed_rate_ci_95'][1]:.1%}"
+                                    if item.get("observed_rate_ci_95") else "N/D"
+                                ),
                                 "Brier": item["brier_score"],
                                 "Log loss": item["log_loss"],
                                 "Brecha calibración": item["calibration_gap"],
