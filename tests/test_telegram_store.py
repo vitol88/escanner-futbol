@@ -49,10 +49,47 @@ def test_reserve_alert_blocks_duplicate():
     reserved, key, detail = reserve_telegram_alert(
         sample_row(), "https://example.supabase.co", "secret",
         post=lambda *a, **k: FakeResponse([]),
+        patch=lambda *a, **k: FakeResponse([]),
     )
     assert reserved is False
     assert key == build_alert_key(sample_row())
     assert "duplicada" in detail
+
+
+def test_failed_alert_can_be_reserved_for_retry():
+    patch_calls = []
+    def fake_patch(url, **kwargs):
+        patch_calls.append((url, kwargs))
+        return FakeResponse([{"alert_key": build_alert_key(sample_row()), "status": "reserved"}])
+
+    reserved, key, detail = reserve_telegram_alert(
+        sample_row(), "https://example.supabase.co", "secret",
+        post=lambda *a, **k: FakeResponse([]),
+        patch=fake_patch,
+    )
+    assert reserved is True
+    assert key == build_alert_key(sample_row())
+    assert "reintento" in detail
+    assert patch_calls[0][1]["params"]["status"] == "eq.failed"
+    assert patch_calls[0][1]["json"]["status"] == "reserved"
+    assert patch_calls[0][1]["json"]["error"] is None
+
+
+def test_sent_alert_cannot_be_retried():
+    patch_calls = []
+    def fake_patch(url, **kwargs):
+        patch_calls.append(kwargs)
+        return FakeResponse([])
+
+    reserved, key, detail = reserve_telegram_alert(
+        sample_row(), "https://example.supabase.co", "secret",
+        post=lambda *a, **k: FakeResponse([]),
+        patch=fake_patch,
+    )
+    assert reserved is False
+    assert key == build_alert_key(sample_row())
+    assert "duplicada" in detail
+    assert patch_calls[0]["params"]["status"] == "eq.failed"
 
 
 def test_update_alert_marks_sent():
@@ -62,4 +99,5 @@ def test_update_alert_marks_sent():
         return FakeResponse([])
     assert update_telegram_alert("abc", "sent", "https://example.supabase.co", "secret", patch=fake_patch)
     assert calls[0][1]["json"]["status"] == "sent"
-    assert calls[0][1]["json"]["sent_at"] == "now()"
+    sent_at = calls[0][1]["json"]["sent_at"]
+    assert isinstance(sent_at, str) and sent_at.endswith("+00:00")
