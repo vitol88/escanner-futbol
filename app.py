@@ -17,7 +17,7 @@ from ai_engine.live_corner_capture import capture_live_corner_snapshot
 from ai_engine.live_corner_finalize import finalize_live_corner_fixture
 from models.live_context import qualifies_as_corner_candidate, summarize_live_context
 from ai_engine.evaluation import evaluate_binary_forecasts, evaluate_forecasts_by_group, evaluate_forecasts_by_market, evaluate_chronological_holdout, assess_model_readiness
-from ai_engine.dataset_audit import audit_forecast_dataset
+from ai_engine.dataset_audit import audit_forecast_dataset, audit_prediction_history
 from ai_engine.prediction_schema import PREDICTION_SCHEMA_VERSION, normalize_prediction_record
 from ai_engine.prediction_ledger import append_prediction_records, load_prediction_records
 from ai_engine.outcome_ledger import load_verified_outcomes, record_verified_outcome
@@ -8911,6 +8911,26 @@ else:
                 )
                 ledger_odds_verified = sum(1 for item in ledger_rows if item.get("odds_verified"))
                 ledger_metrics = evaluate_binary_forecasts(ledger_report_rows, probability_key="probability")
+                history_integrity = audit_prediction_history(ledger_report_rows)
+                st.markdown("##### Integridad del histórico (solo lectura)")
+                integrity_cols = st.columns(4)
+                integrity_cols[0].metric("Duplicados exactos", history_integrity["exact_duplicate_rows"])
+                integrity_cols[1].metric("Conflictos de resultado", history_integrity["contradictory_verified_outcome_groups"])
+                integrity_cols[2].metric("Probabilidades inválidas", history_integrity["invalid_probability_rows"])
+                integrity_cols[3].metric("Resultados verificados inválidos", history_integrity["verified_invalid_outcomes"])
+                missing_integrity = [
+                    {"Campo": field, "Registros sin dato": count}
+                    for field, count in history_integrity["missing_metadata"].items()
+                    if count
+                ]
+                if missing_integrity:
+                    with st.expander("Ver metadatos faltantes"):
+                        st.dataframe(missing_integrity, use_container_width=True, hide_index=True)
+                if history_integrity["contradictory_event_samples"]:
+                    st.warning("Hay eventos con resultados verificados contradictorios para la misma definición de mercado. Requieren revisión manual.")
+                    st.dataframe(history_integrity["contradictory_event_samples"], use_container_width=True, hide_index=True)
+                st.caption("La auditoría distingue duplicados exactos de snapshots legítimos tomados en distintos momentos. No modifica ni elimina el historial; todos los hallazgos requieren revisión manual.")
+
                 # Auditar completitud de metadatos antes de comparar modelos o mercados.
                 metadata_fields = [
                     ("Tipo de mercado", "market_type"),
