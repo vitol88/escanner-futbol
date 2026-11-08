@@ -8911,6 +8911,36 @@ else:
                 )
                 ledger_odds_verified = sum(1 for item in ledger_rows if item.get("odds_verified"))
                 ledger_metrics = evaluate_binary_forecasts(ledger_report_rows, probability_key="probability")
+                # Auditar completitud de metadatos antes de comparar modelos o mercados.
+                metadata_fields = [
+                    ("Tipo de mercado", "market_type"),
+                    ("Selección", "selection"),
+                    ("Línea", "line"),
+                    ("Liga", "league"),
+                    ("Identificador de modelo", "model_id"),
+                    ("Versión de modelo", "model_version"),
+                ]
+                metadata_quality_rows = [
+                    {
+                        "Campo": label,
+                        "Registros sin dato": sum(
+                            1 for item in ledger_rows
+                            if item.get(field) in (None, "") or not str(item.get(field)).strip()
+                        ),
+                    }
+                    for label, field in metadata_fields
+                ]
+                missing_model_versions = next(
+                    item["Registros sin dato"] for item in metadata_quality_rows
+                    if item["Campo"] == "Versión de modelo"
+                )
+                st.markdown("##### Integridad de metadatos")
+                st.dataframe(metadata_quality_rows, use_container_width=True, hide_index=True)
+                if missing_model_versions:
+                    st.warning(
+                        f"{missing_model_versions} de {len(ledger_rows)} pronósticos no tienen versión de modelo "
+                        "registrada. Se agrupan como «unknown» y no deben compararse como si fueran versiones identificadas."
+                    )
                 ledger_cols = st.columns(4)
                 ledger_cols[0].metric("Pronósticos guardados", len(ledger_rows))
                 ledger_cols[1].metric("Resultados verificados", ledger_verified)
