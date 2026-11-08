@@ -6707,10 +6707,10 @@ else:
                                         if isinstance(h2h_data, dict) and isinstance(h2h_data.get("matches"), list):
                                             _h2h_matches_to_save = h2h_data["matches"]
                                             persist_analysis_snapshot(
-                                                fixture_id, "h2h",
-                                                {"home": home_name, "away": away_name, "minute": minute,
-                                                 "home_score": home_score, "away_score": away_score},
-                                                {"home_team_id": home_id, "away_team_id": away_id, "requested_last": 10},
+                                                match_id, "h2h",
+                                                {"home": match_home_name, "away": match_away_name, "minute": match_minute,
+                                                 "home_score": match_goals.get("home"), "away_score": match_goals.get("away")},
+                                                {"home_team_id": match_home_id, "away_team_id": match_away_id, "requested_last": 10},
                                                 {"matches": _h2h_matches_to_save, "matches_returned": len(_h2h_matches_to_save),
                                                  "scope": h2h_data.get("scope")},
                                             )
