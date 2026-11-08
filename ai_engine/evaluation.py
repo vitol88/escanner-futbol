@@ -396,9 +396,10 @@ def _deduplicate_fixture_snapshots(
         fixture = str(row.get("fixture_id") or "").strip()
         market = str(row.get("market_type") or row.get("market") or "").strip()
         selection = str(row.get("selection") or "").strip()
-        if not fixture or not market:
+        if not fixture:
             passthrough.append((probability, outcome))
             continue
+        market = market or "unknown"
 
         # Aware timestamps compare by absolute UTC instant. Legacy timestamps
         # without timezone and malformed/missing values fall back to row order.
