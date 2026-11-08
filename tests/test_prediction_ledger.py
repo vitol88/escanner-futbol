@@ -62,6 +62,28 @@ class PredictionLedgerTests(unittest.TestCase):
             self.assertEqual(result["inserted"], 1)
             self.assertEqual(len(load_prediction_records(path)), 1)
 
+    def test_verified_odds_are_persisted_with_prediction(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ledger.sqlite3"
+            row = self._record(
+                odds_decimal=2.1,
+                odds_verified=True,
+                odds_bookmaker="Casa de prueba",
+                odds_market="Más de 2.5 goles",
+                implied_probability=0.4762,
+                estimated_edge=0.1638,
+                expected_value=0.512,
+            )
+            append_prediction_records(path, [row])
+            saved = load_prediction_records(path)[0]
+            self.assertTrue(saved["odds_verified"])
+            self.assertEqual(saved["odds_decimal"], 2.1)
+            self.assertEqual(saved["odds_bookmaker"], "Casa de prueba")
+            self.assertEqual(saved["odds_market"], "Más de 2.5 goles")
+            self.assertEqual(saved["implied_probability"], 0.4762)
+            self.assertEqual(saved["estimated_edge"], 0.1638)
+            self.assertEqual(saved["expected_value"], 0.512)
+
     def test_verified_outcome_is_only_stored_when_explicit(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "ledger.sqlite3"
