@@ -18,7 +18,7 @@ from ai_engine.live_corner_finalize import finalize_live_corner_fixture
 from models.live_context import qualifies_as_corner_candidate, summarize_live_context
 from ai_engine.evaluation import evaluate_binary_forecasts, evaluate_forecasts_by_group, evaluate_chronological_holdout
 from ai_engine.dataset_audit import audit_forecast_dataset
-from ai_engine.prediction_schema import normalize_prediction_record
+from ai_engine.prediction_schema import PREDICTION_SCHEMA_VERSION, normalize_prediction_record
 from ai_engine.prediction_ledger import append_prediction_records
 from ai_engine.telegram_publisher import send_telegram_signal, send_telegram_test_message
 from ai_engine.telegram_store import reserve_telegram_alert, update_telegram_alert, check_supabase_connection, test_supabase_duplicate_protection
@@ -8265,7 +8265,7 @@ else:
         ledger_records_to_sync = [
             normalize_prediction_record(saved_row)
             for saved_row in signal_rows
-            if saved_row.get("schema_version") == "1.0"
+            if saved_row.get("schema_version") == PREDICTION_SCHEMA_VERSION
         ]
         ledger_records_to_sync = [record for record in ledger_records_to_sync if record["valid"]]
         if ledger_records_to_sync:
