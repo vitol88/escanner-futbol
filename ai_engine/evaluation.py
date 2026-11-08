@@ -398,3 +398,60 @@ def evaluate_binary_forecasts(
         ],
     }
 
+
+
+def assess_model_readiness(
+    metrics: dict[str, Any],
+    *,
+    model_id: str,
+    model_version: str,
+    minimum_sample: int = 30,
+    maximum_calibration_gap: float = 0.10,
+) -> dict[str, Any]:
+    """Apply conservative gates to a chronological holdout model slice.
+
+    Passing means eligible for controlled monitoring only, never an automatic
+    betting recommendation or evidence of profitability.
+    """
+    if isinstance(minimum_sample, bool) or not isinstance(minimum_sample, int) or minimum_sample < 1:
+        raise ValueError("minimum_sample debe ser un entero mayor que cero")
+    if (
+        isinstance(maximum_calibration_gap, bool)
+        or not isinstance(maximum_calibration_gap, (int, float))
+        or not math.isfinite(float(maximum_calibration_gap))
+        or not 0 <= maximum_calibration_gap <= 1
+    ):
+        raise ValueError("maximum_calibration_gap debe estar entre 0 y 1")
+
+    reasons = []
+    sample_size = metrics.get("sample_size", 0)
+    try:
+        sample_size = int(sample_size)
+    except (TypeError, ValueError, OverflowError):
+        sample_size = 0
+    if sample_size < minimum_sample:
+        reasons.append(f"Muestra independiente inferior a {minimum_sample}.")
+    gap = metrics.get("calibration_gap")
+    try:
+        gap = float(gap)
+    except (TypeError, ValueError, OverflowError):
+        gap = math.nan
+    if not math.isfinite(gap):
+        reasons.append("Brecha de calibración no disponible.")
+    elif gap >= maximum_calibration_gap:
+        reasons.append(f"Brecha de calibración igual o superior a {maximum_calibration_gap:.0%}.")
+    if not str(model_id or "").strip() or str(model_id).strip().casefold() == "unknown":
+        reasons.append("Identificador del modelo ausente.")
+    if not str(model_version or "").strip() or str(model_version).strip().casefold() == "unknown":
+        reasons.append("Versión del modelo ausente.")
+
+    eligible = not reasons
+    return {
+        "eligible_for_controlled_monitoring": eligible,
+        "status": "Apto para seguimiento controlado" if eligible else "No habilitado",
+        "reasons": reasons,
+        "sample_size": sample_size,
+        "minimum_sample": minimum_sample,
+        "calibration_gap": gap if math.isfinite(gap) else None,
+        "maximum_calibration_gap": float(maximum_calibration_gap),
+    }
