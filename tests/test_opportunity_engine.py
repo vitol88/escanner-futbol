@@ -1,6 +1,6 @@
 import unittest
 
-from ai_engine.opportunity_engine import evaluate_opportunity, evaluate_candidates
+from ai_engine.opportunity_engine import evaluate_opportunity, evaluate_candidates, classify_goal_tip_market
 
 
 class OpportunityEngineTests(unittest.TestCase):
@@ -17,6 +17,11 @@ class OpportunityEngineTests(unittest.TestCase):
             "score": "1-0",
             "bookmaker": "TestBook",
         }
+
+    def test_goal_tip_market_classification(self):
+        self.assertEqual(classify_goal_tip_market("Empate final"), "draw")
+        self.assertEqual(classify_goal_tip_market("Ambos equipos marcan (falta que marque Local)"), "btts")
+        self.assertEqual(classify_goal_tip_market("Total final: 2 goles o más"), "goals")
 
     def test_positive_value_candidate_is_eligible(self):
         result = evaluate_opportunity(self.base)
