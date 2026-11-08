@@ -99,6 +99,12 @@ def normalize_prediction_record(row: dict[str, Any]) -> dict[str, Any]:
         "source": str(row.get("source") or "").strip() or None,
         "snapshot_id": str(row.get("snapshot_id") or "").strip() or None,
         "odds_decimal": row.get("odds_decimal") if row.get("odds_decimal") not in ("",) else None,
+        "odds_verified": _verified(row.get("odds_verified")),
+        "odds_bookmaker": str(row.get("odds_bookmaker") or "").strip() or None,
+        "odds_market": str(row.get("odds_market") or "").strip() or None,
+        "implied_probability": row.get("implied_probability") if row.get("implied_probability") not in ("",) else None,
+        "estimated_edge": row.get("estimated_edge") if row.get("estimated_edge") not in ("",) else None,
+        "expected_value": row.get("expected_value") if row.get("expected_value") not in ("",) else None,
         "outcome": outcome,
         "outcome_verified": verified and outcome is not None,
     }
