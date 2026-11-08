@@ -24,6 +24,22 @@ class SettlementTests(unittest.TestCase):
             final_home_score=1, final_away_score=1,
         )["outcome"], 1)
 
+    def test_actual_live_team_goal_labels_use_the_correct_side(self):
+        local_pick = "América marcará al menos 1 gol (más de 0.5 goles del local)"
+        away_pick = "Cali marcará al menos 1 gol (más de 0.5 goles del visitante)"
+        self.assertEqual(resolve_binary_outcome(
+            market_type="goals", selection=local_pick,
+            final_home_score=1, final_away_score=0,
+        ), {"resolved": True, "outcome": 1, "reason": "final_team_score"})
+        self.assertEqual(resolve_binary_outcome(
+            market_type="goals", selection=away_pick,
+            final_home_score=2, final_away_score=0,
+        )["outcome"], 0)
+        self.assertEqual(resolve_binary_outcome(
+            market_type="goals", selection=away_pick,
+            final_home_score=0, final_away_score=1,
+        )["outcome"], 1)
+
     def test_btts(self):
         self.assertEqual(resolve_binary_outcome(
             market_type="btts", selection="Yes",
