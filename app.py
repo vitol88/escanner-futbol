@@ -9041,7 +9041,8 @@ else:
                 else:
                     st.warning(
                         "La auditoría cronológica aún no está disponible: se requieren al menos 5 partidos "
-                        "anteriores y 5 posteriores con fecha y zona horaria válidas. No se sustituye esta "
+                        "anteriores y 5 posteriores con fecha y zona horaria válidas (con la partición 80/20 "
+                        "actual, el mínimo práctico es 21 partidos). No se sustituye esta "
                         "prueba por métricas del histórico completo."
                     )
                     if ledger_temporal.get("excluded_temporal_rows"):
