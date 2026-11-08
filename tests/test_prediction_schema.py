@@ -131,6 +131,7 @@ class PredictionSchemaTests(unittest.TestCase):
         }
         result = normalize_prediction_record(row)
         self.assertTrue(result["valid"])
+        self.assertEqual(result["schema_version"], "1.1")
         self.assertEqual(result["phase"], "live")
         self.assertEqual(result["league_id"], "39")
         self.assertEqual(result["market_type"], "goals")
