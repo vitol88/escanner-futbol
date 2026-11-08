@@ -230,6 +230,64 @@ def evaluate_forecasts_by_market_line(
         })
     return results
 
+
+def evaluate_model_version_comparability(
+    rows: list[dict[str, Any]],
+    *,
+    fixture_key: str = "fixture_id",
+    verified_key: str = "outcome_verified",
+    minimum_common_fixtures: int = 30,
+) -> list[dict[str, Any]]:
+    """Report whether model versions share enough verified fixtures to compare.
+
+    Versions are paired only within the exact same market, selection, line,
+    phase and model_id. A fixture counts only when both versions have a
+    verified outcome for that event. This reports cohort overlap; it does not
+    claim either version performed better.
+    """
+    if isinstance(minimum_common_fixtures, bool) or not isinstance(minimum_common_fixtures, int) or minimum_common_fixtures < 1:
+        raise ValueError("minimum_common_fixtures debe ser un entero mayor que cero")
+
+    cohorts: dict[tuple[str, str, str, str, str], dict[str, set[str]]] = {}
+    for row in rows if isinstance(rows, list) else []:
+        if not isinstance(row, dict) or not _verified(row.get(verified_key, "")):
+            continue
+        fixture_id = str(row.get(fixture_key) or "").strip()
+        market = str(row.get("market_type") or row.get("market") or "").strip()
+        line = str(row.get("line") or "").strip()
+        model_id = str(row.get("model_id") or "").strip()
+        version = str(row.get("model_version") or "").strip()
+        selection = str(row.get("selection") or "unknown").strip() or "unknown"
+        phase = str(row.get("phase") or "unknown").strip() or "unknown"
+        if not all((fixture_id, market, line, model_id, version)) or version.casefold() == "unknown":
+            continue
+        cohort_key = (market, selection, line, phase, model_id)
+        cohorts.setdefault(cohort_key, {}).setdefault(version, set()).add(fixture_id)
+
+    comparisons = []
+    for cohort_key in sorted(cohorts, key=lambda item: tuple(part.casefold() for part in item)):
+        versions = cohorts[cohort_key]
+        version_names = sorted(versions, key=str.casefold)
+        for index, version_a in enumerate(version_names):
+            for version_b in version_names[index + 1:]:
+                common = versions[version_a] & versions[version_b]
+                common_count = len(common)
+                comparisons.append({
+                    "market": cohort_key[0],
+                    "selection": cohort_key[1],
+                    "line": cohort_key[2],
+                    "phase": cohort_key[3],
+                    "model_id": cohort_key[4],
+                    "version_a": version_a,
+                    "version_b": version_b,
+                    "common_fixture_count": common_count,
+                    "minimum_common_fixtures": minimum_common_fixtures,
+                    "comparable_cohort": common_count >= minimum_common_fixtures,
+                    "status": "Cohorte común suficiente" if common_count >= minimum_common_fixtures else "No comparable: partidos comunes insuficientes",
+                })
+    return comparisons
+
+
 def _deduplicate_fixture_snapshots(
     scored_rows: list[tuple[float, int, dict[str, Any]]],
 ) -> tuple[list[tuple[float, int]], int]:
