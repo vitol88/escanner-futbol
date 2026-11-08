@@ -9089,6 +9089,12 @@ else:
                                 "Versión A": item["version_a"],
                                 "Versión B": item["version_b"],
                                 "Partidos comunes verificados": item["common_fixture_count"],
+                                "Brier A": round(item["brier_a"], 4) if item["brier_a"] is not None else "N/D",
+                                "Brier B": round(item["brier_b"], 4) if item["brier_b"] is not None else "N/D",
+                                "Delta Brier (B−A)": round(item["brier_delta_b_minus_a"], 4) if item["brier_delta_b_minus_a"] is not None else "N/D",
+                                "Log loss A": round(item["log_loss_a"], 4) if item["log_loss_a"] is not None else "N/D",
+                                "Log loss B": round(item["log_loss_b"], 4) if item["log_loss_b"] is not None else "N/D",
+                                "Delta log loss (B−A)": round(item["log_loss_delta_b_minus_a"], 4) if item["log_loss_delta_b_minus_a"] is not None else "N/D",
                                 "Comparabilidad": item["status"],
                             } for item in version_comparisons],
                             use_container_width=True,
@@ -9099,7 +9105,9 @@ else:
                     st.caption(
                         "Solo se considera comparable una pareja de versiones cuando comparte al menos 30 partidos "
                         "con resultado verificado y la misma definición de mercado, selección, línea y fase. "
-                        "Esta comprobación mide solapamiento, no declara un ganador."
+                        "Los deltas son B menos A: un valor negativo indica menor pérdida para B en esa métrica; "
+                        "son métricas descriptivas del mismo grupo de partidos, no prueban superioridad estadística "
+                        "ni rentabilidad."
                     )
                     st.caption(
                         "La elegibilidad exige al menos 30 eventos independientes en la prueba cronológica, "
