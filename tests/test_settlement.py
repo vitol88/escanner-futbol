@@ -120,5 +120,45 @@ class SettlementTests(unittest.TestCase):
         )["resolved"])
 
 
+    def test_absolute_total_goals_threshold_labels(self):
+        won = resolve_binary_outcome(
+            market_type="goals",
+            selection="Total final: 3 goles o más (+2 desde ahora)",
+            final_home_score=2, final_away_score=1,
+        )
+        lost = resolve_binary_outcome(
+            market_type="goals",
+            selection="Total final: 4 goles o más (+3 desde ahora)",
+            final_home_score=2, final_away_score=1,
+        )
+        self.assertEqual(won["outcome"], 1)
+        self.assertEqual(lost["outcome"], 0)
+
+    def test_dynamic_btts_labels(self):
+        for label in (
+            "Ambos equipos marcan (deben marcar ambos equipos)",
+            "Ambos equipos marcan (falta que marque América)",
+        ):
+            result = resolve_binary_outcome(
+                market_type="btts", selection=label,
+                final_home_score=1, final_away_score=1,
+            )
+            self.assertEqual(result["outcome"], 1)
+
+    def test_named_team_goal_threshold_uses_verified_team_side(self):
+        result = resolve_binary_outcome(
+            market_type="goals",
+            selection="América: terminará con 2 goles o más",
+            final_home_score=2, final_away_score=1,
+            home_team_name="América", away_team_name="Cali",
+        )
+        self.assertEqual(result["outcome"], 1)
+        unresolved = resolve_binary_outcome(
+            market_type="goals",
+            selection="América: terminará con 2 goles o más",
+            final_home_score=2, final_away_score=1,
+        )
+        self.assertFalse(unresolved["resolved"])
+
 if __name__ == "__main__":
     unittest.main()
