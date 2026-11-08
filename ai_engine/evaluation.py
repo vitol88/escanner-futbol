@@ -222,6 +222,10 @@ def evaluate_forecasts_by_market_line(
             verified_key=verified_key,
             minimum_sample=minimum_sample,
         )
+        readiness = assess_model_readiness(
+            metrics, model_id=key[4], model_version=key[5],
+            minimum_sample=minimum_sample,
+        )
         results.append({
             "market": key[0],
             "selection": key[1],
@@ -229,6 +233,8 @@ def evaluate_forecasts_by_market_line(
             "phase": key[3],
             "model_id": key[4],
             "model_version": key[5],
+            "readiness_status": readiness["status"],
+            "readiness_reasons": readiness["reasons"],
             **metrics,
         })
     return results
