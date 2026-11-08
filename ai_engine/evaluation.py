@@ -325,6 +325,7 @@ def evaluate_binary_forecasts(
             "log_loss": None,
             "mean_probability": None,
             "observed_rate": None,
+            "observed_rate_ci_95": None,
             "calibration_gap": None,
             "reliability": [],
         }
@@ -338,6 +339,25 @@ def evaluate_binary_forecasts(
     ) / n
     mean_probability = sum(p for p, _ in scored) / n
     observed_rate = sum(y for _, y in scored) / n
+
+    # Intervalo de Wilson al 95% para la tasa observada. Expone incertidumbre
+    # de la muestra sin presentar una tasa puntual como certeza estadística.
+    successes = sum(y for _, y in scored)
+    z_score = 1.959963984540054
+    denominator = 1 + (z_score ** 2) / n
+    center = (observed_rate + (z_score ** 2) / (2 * n)) / denominator
+    margin = (
+        z_score
+        * math.sqrt(
+            observed_rate * (1 - observed_rate) / n
+            + (z_score ** 2) / (4 * n ** 2)
+        )
+        / denominator
+    )
+    observed_rate_ci_95 = [
+        round(max(0.0, center - margin), 6),
+        round(min(1.0, center + margin), 6),
+    ]
 
     buckets: list[list[tuple[float, int]]] = [[] for _ in range(bins)]
     for probability, outcome in scored:
@@ -369,6 +389,7 @@ def evaluate_binary_forecasts(
         "log_loss": round(log_loss, 8),
         "mean_probability": round(mean_probability, 6),
         "observed_rate": round(observed_rate, 6),
+        "observed_rate_ci_95": observed_rate_ci_95,
         "calibration_gap": round(weighted_gap, 6),
         "reliability": reliability,
         "warnings": [
