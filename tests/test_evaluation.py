@@ -386,7 +386,9 @@ class BinaryForecastEvaluationTests(unittest.TestCase):
         result = evaluate_model_version_comparability(
             rows, probability_key="probability", minimum_common_fixtures=1
         )
-        self.assertEqual(result, [])
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["common_fixture_count"], 0)
+        self.assertIsNone(result[0]["brier_delta_b_minus_a"])
 
 
 
