@@ -388,6 +388,9 @@ class BinaryForecastEvaluationTests(unittest.TestCase):
         )
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]["common_fixture_count"], 1)
+        self.assertEqual(result[0]["matching_outcome_fixture_count"], 1)
+        self.assertEqual(result[0]["paired_metric_fixture_count"], 0)
+        self.assertFalse(result[0]["paired_metrics_available"])
         self.assertIsNone(result[0]["brier_delta_b_minus_a"])
 
 
@@ -414,6 +417,38 @@ class BinaryForecastEvaluationTests(unittest.TestCase):
         self.assertEqual(len(result), 1)
         self.assertAlmostEqual(result[0]["brier_a"], 0.04)
         self.assertAlmostEqual(result[0]["brier_b"], 0.09)
+
+
+    def test_model_version_overlap_does_not_count_unknown_or_disagreeing_outcomes_as_scoring_data(self):
+        from ai_engine.evaluation import evaluate_model_version_comparability
+
+        rows = []
+        cases = [
+            ("unknown", None, None),
+            ("disagree", 1, 0),
+            ("valid", 1, 1),
+        ]
+        for fixture, outcome_a, outcome_b in cases:
+            for version, outcome, probability in (
+                ("1.0", outcome_a, 0.8), ("2.0", outcome_b, 0.7)
+            ):
+                rows.append({
+                    "fixture_id": fixture, "market_type": "goals",
+                    "selection": "over", "line": "2.5", "phase": "live",
+                    "model_id": "goals", "model_version": version,
+                    "outcome": outcome, "outcome_verified": True,
+                    "probability": probability,
+                })
+
+        result = evaluate_model_version_comparability(
+            rows, probability_key="probability", minimum_common_fixtures=2
+        )
+        comparison = result[0]
+        self.assertEqual(comparison["common_fixture_count"], 3)
+        self.assertEqual(comparison["matching_outcome_fixture_count"], 1)
+        self.assertEqual(comparison["paired_metric_fixture_count"], 1)
+        self.assertFalse(comparison["paired_metrics_available"])
+        self.assertIsNone(comparison["brier_a"])
 
     def test_model_version_overlap_can_be_reported_without_valid_paired_probabilities(self):
         from ai_engine.evaluation import evaluate_model_version_comparability
