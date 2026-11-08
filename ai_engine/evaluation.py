@@ -95,8 +95,8 @@ def evaluate_chronological_holdout(
         "train_last_timestamp": datetime.fromtimestamp(train_items[-1][1]["first_timestamp"], timezone.utc).isoformat() if train_items else None,
         "test_first_timestamp": datetime.fromtimestamp(test_items[0][1]["first_timestamp"], timezone.utc).isoformat() if test_items else None,
         "test_metrics": metrics,
-        "test_metrics_by_market": evaluate_forecasts_by_group(
-            test_rows, group_key="market", probability_key=probability_key,
+        "test_metrics_by_market": evaluate_forecasts_by_market(
+            test_rows, probability_key=probability_key,
             outcome_key=outcome_key, verified_key=verified_key,
         ) if enough else [],
         "test_metrics_by_market_line": evaluate_forecasts_by_market_line(
@@ -154,6 +154,30 @@ def evaluate_forecasts_by_group(
     return results
 
 
+
+def evaluate_forecasts_by_market(
+    rows: list[dict[str, Any]],
+    *,
+    probability_key: str = "estimated_probability_exploratory",
+    outcome_key: str = "outcome",
+    verified_key: str = "outcome_verified",
+    minimum_sample: int = 30,
+) -> list[dict[str, Any]]:
+    """Group by canonical market type, with legacy-label fallback."""
+    normalized = []
+    for row in rows if isinstance(rows, list) else []:
+        if not isinstance(row, dict):
+            continue
+        label = str(row.get("market_type") or row.get("market") or "").strip()
+        if label:
+            normalized.append({**row, "_evaluation_market_group": label})
+    return evaluate_forecasts_by_group(
+        normalized, group_key="_evaluation_market_group",
+        probability_key=probability_key, outcome_key=outcome_key,
+        verified_key=verified_key, minimum_sample=minimum_sample,
+    )
+
+
 def evaluate_forecasts_by_market_line(
     rows: list[dict[str, Any]],
     *,
@@ -172,7 +196,7 @@ def evaluate_forecasts_by_market_line(
     for row in rows if isinstance(rows, list) else []:
         if not isinstance(row, dict):
             continue
-        market = str(row.get("market") or "").strip()
+        market = str(row.get("market_type") or row.get("market") or "").strip()
         line = str(row.get("line") or "").strip()
         if not market or not line:
             continue
