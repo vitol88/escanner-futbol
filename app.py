@@ -8269,12 +8269,19 @@ else:
             st.session_state.signal_history_write_error = str(history_exc)
         # Keep a canonical, append-only forecast ledger separate from the legacy CSV.
         # SQLite uniqueness on prediction_id makes repeated Streamlit reruns idempotent.
-        ledger_records_to_sync = [
+        # Migra también filas legacy del CSV si contienen los campos mínimos reales.
+        # La normalización valida cada fila y nunca inventa mercado, fixture, fecha ni probabilidad.
+        normalized_ledger_rows = [
             normalize_prediction_record(saved_row)
             for saved_row in signal_rows
-            if saved_row.get("schema_version") == PREDICTION_SCHEMA_VERSION
+            if isinstance(saved_row, dict)
         ]
-        ledger_records_to_sync = [record for record in ledger_records_to_sync if record["valid"]]
+        ledger_records_to_sync = [record for record in normalized_ledger_rows if record["valid"]]
+        st.session_state.prediction_ledger_sync_diagnostics = {
+            "csv_rows": len(signal_rows),
+            "valid_rows": len(ledger_records_to_sync),
+            "invalid_rows": len(normalized_ledger_rows) - len(ledger_records_to_sync),
+        }
         if ledger_records_to_sync:
             try:
                 # Re-submit canonical CSV rows on each scan: SQLite ignores rows
