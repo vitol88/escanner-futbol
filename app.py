@@ -8905,6 +8905,39 @@ else:
                             "outcome_verified_at": verified_result["outcome_verified_at"],
                         })
                     ledger_report_rows.append(report_item)
+
+                # Exportar una copia portable del registro consultado, incluyendo
+                # únicamente la última verificación disponible por pronóstico.
+                if ledger_report_rows:
+                    export_fields = list(dict.fromkeys(
+                        field for row in ledger_report_rows for field in row.keys()
+                    ))
+                    export_buffer = io.StringIO()
+                    export_writer = csv.DictWriter(
+                        export_buffer,
+                        fieldnames=export_fields,
+                        extrasaction="ignore",
+                    )
+                    export_writer.writeheader()
+                    export_writer.writerows(ledger_report_rows)
+                    st.download_button(
+                        "⬇️ Descargar registro central completo (CSV)",
+                        data=export_buffer.getvalue().encode("utf-8-sig"),
+                        file_name="football_lab_registro_pronosticos_verificados.csv",
+                        mime="text/csv",
+                        key="download_central_prediction_ledger",
+                        help=(
+                            "Exporta los pronósticos consultados junto con su última verificación disponible. "
+                            "No modifica la base SQLite ni inventa resultados."
+                        ),
+                    )
+                    st.caption(
+                        "Guarda este CSV fuera del alojamiento de la aplicación. Incluye los pronósticos "
+                        "y el estado de verificación disponible al momento de la consulta."
+                    )
+                else:
+                    st.info("El registro central está vacío; no hay filas para exportar.")
+
                 ledger_verified = sum(
                     1 for item in ledger_report_rows
                     if item.get("outcome_verified") and item.get("outcome") in (0, 1)
