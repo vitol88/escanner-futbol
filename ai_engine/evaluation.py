@@ -103,6 +103,9 @@ def evaluate_chronological_holdout(
             test_rows, probability_key=probability_key,
             outcome_key=outcome_key, verified_key=verified_key,
         ) if enough else [],
+        "test_model_version_comparability": evaluate_model_version_comparability(
+            test_rows, verified_key=verified_key,
+        ) if enough else [],
         "test_metrics_by_league": evaluate_forecasts_by_group(
             test_rows, group_key="league", probability_key=probability_key,
             outcome_key=outcome_key, verified_key=verified_key,
