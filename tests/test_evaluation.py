@@ -249,3 +249,46 @@ class BinaryForecastEvaluationTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ModelReadinessTests(unittest.TestCase):
+    def test_model_requires_sample_calibration_and_complete_identity(self):
+        from ai_engine.evaluation import assess_model_readiness
+
+        result = assess_model_readiness(
+            {"sample_size": 29, "calibration_gap": 0.12},
+            model_id="",
+            model_version="unknown",
+        )
+        self.assertFalse(result["eligible_for_controlled_monitoring"])
+        self.assertEqual(result["status"], "No habilitado")
+        self.assertEqual(len(result["reasons"]), 4)
+
+    def test_model_passes_only_for_controlled_monitoring(self):
+        from ai_engine.evaluation import assess_model_readiness
+
+        result = assess_model_readiness(
+            {"sample_size": 30, "calibration_gap": 0.099},
+            model_id="corners_live",
+            model_version="2.1",
+        )
+        self.assertTrue(result["eligible_for_controlled_monitoring"])
+        self.assertEqual(result["status"], "Apto para seguimiento controlado")
+
+    def test_calibration_threshold_is_exclusive(self):
+        from ai_engine.evaluation import assess_model_readiness
+
+        result = assess_model_readiness(
+            {"sample_size": 50, "calibration_gap": 0.10},
+            model_id="goals",
+            model_version="1.0",
+        )
+        self.assertFalse(result["eligible_for_controlled_monitoring"])
+
+    def test_invalid_readiness_configuration_raises(self):
+        from ai_engine.evaluation import assess_model_readiness
+
+        with self.assertRaises(ValueError):
+            assess_model_readiness({}, model_id="x", model_version="1", minimum_sample=0)
+        with self.assertRaises(ValueError):
+            assess_model_readiness({}, model_id="x", model_version="1", maximum_calibration_gap=1.1)
