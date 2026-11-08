@@ -3720,7 +3720,7 @@ with st.sidebar:
         st.caption("Haz clic en la tarjeta de un partido para seleccionar el encuentro y habilitar estas herramientas.")
 
     with st.expander("DIAGNÓSTICO DE CONEXIÓN", expanded=False):
-        st.caption("Prueba de solo lectura. No envía mensajes a Telegram ni crea registros.")
+        st.caption("Diagnóstico de Supabase y Telegram. El botón de prueba de Telegram sí envía un mensaje técnico al canal.")
         if st.button("VERIFICAR SUPABASE", key="verify_supabase_connection", use_container_width=True):
             try:
                 _supabase_url_check = str(st.secrets.get("SUPABASE_URL", "") or os.getenv("SUPABASE_URL", "")).strip()
