@@ -8904,10 +8904,20 @@ else:
                     ) if recovery_valid else {
                         "received": 0, "valid": 0, "invalid": 0, "inserted": 0, "duplicates": 0
                     }
+                    try:
+                        csv_size_bytes = SIGNAL_HISTORY_PATH.stat().st_size if SIGNAL_HISTORY_PATH.exists() else 0
+                    except OSError:
+                        csv_size_bytes = None
                     st.session_state.prediction_ledger_recovery_diagnostics = {
                         "csv_rows": len(csv_rows_for_recovery),
                         "valid_rows": len(recovery_valid),
                         "invalid_rows": len(recovery_rows) - len(recovery_valid),
+                        "csv_exists": SIGNAL_HISTORY_PATH.exists(),
+                        "csv_path": str(SIGNAL_HISTORY_PATH),
+                        "csv_size_bytes": csv_size_bytes,
+                        "sqlite_exists": PREDICTION_LEDGER_PATH.exists(),
+                        "sqlite_path": str(PREDICTION_LEDGER_PATH),
+                        "paths_are_absolute": SIGNAL_HISTORY_PATH.is_absolute() and PREDICTION_LEDGER_PATH.is_absolute(),
                         **recovery_result,
                     }
                     ledger_rows = load_prediction_records(PREDICTION_LEDGER_PATH)
@@ -8917,6 +8927,30 @@ else:
                     st.session_state.prediction_ledger_read_error = ""
                 except (OSError, ValueError, TypeError, KeyError) as ledger_read_exc:
                     st.session_state.prediction_ledger_read_error = str(ledger_read_exc)
+            recovery_diagnostics = st.session_state.get("prediction_ledger_recovery_diagnostics")
+            if recovery_diagnostics:
+                st.markdown("##### Diagnóstico de recuperación del histórico")
+                recovery_cols = st.columns(5)
+                recovery_cols[0].metric("Filas CSV", recovery_diagnostics.get("csv_rows", 0))
+                recovery_cols[1].metric("Filas válidas", recovery_diagnostics.get("valid_rows", 0))
+                recovery_cols[2].metric("Filas inválidas", recovery_diagnostics.get("invalid_rows", 0))
+                recovery_cols[3].metric("Insertadas ahora", recovery_diagnostics.get("inserted", 0))
+                recovery_cols[4].metric("Duplicadas", recovery_diagnostics.get("duplicates", 0))
+                st.caption(
+                    f"CSV: {'encontrado' if recovery_diagnostics.get('csv_exists') else 'no encontrado'} · "
+                    f"{recovery_diagnostics.get('csv_path', str(SIGNAL_HISTORY_PATH))} · "
+                    f"{recovery_diagnostics.get('csv_size_bytes') if recovery_diagnostics.get('csv_size_bytes') is not None else 'tamaño no disponible'} bytes"
+                )
+                st.caption(
+                    f"SQLite: {'existente' if recovery_diagnostics.get('sqlite_exists') else 'se creó al recuperar'} · "
+                    f"{recovery_diagnostics.get('sqlite_path', str(PREDICTION_LEDGER_PATH))}"
+                )
+                if not recovery_diagnostics.get("csv_exists"):
+                    st.warning("No se encontró el CSV histórico en la ruta configurada. La base central no puede recuperar filas desde ese archivo.")
+                elif recovery_diagnostics.get("csv_rows", 0) and not recovery_diagnostics.get("valid_rows", 0):
+                    st.warning("El CSV contiene filas, pero ninguna cumple el esquema mínimo del registro central. Revisa los campos requeridos antes de migrar; no se descartó ni modificó el CSV.")
+                if not recovery_diagnostics.get("paths_are_absolute"):
+                    st.info("Al menos una ruta de almacenamiento es relativa. La persistencia después de reinicios depende de la plataforma de alojamiento y de si conserva el disco local; configura rutas/volúmenes persistentes si corresponde.")
             if st.session_state.get("prediction_ledger_read_error"):
                 st.warning(f"No se pudo consultar el registro central: {st.session_state.prediction_ledger_read_error}")
             elif "prediction_ledger_snapshot" in st.session_state:
