@@ -109,3 +109,23 @@ def update_telegram_alert(
         return True
     except Exception:
         return False
+
+
+def check_supabase_connection(supabase_url: str, secret_key: str, *, get=None, timeout: float = 8.0) -> tuple[bool, str]:
+    """Read-only connectivity check against the alert table; never sends Telegram."""
+    url = str(supabase_url or "").strip().rstrip("/")
+    key = str(secret_key or "").strip()
+    if not url or not key:
+        return False, "Faltan SUPABASE_URL o SUPABASE_SECRET_KEY."
+    reader = get or requests.get
+    try:
+        response = reader(
+            f"{url}/rest/v1/telegram_alerts",
+            params={"select": "alert_key", "limit": "1"},
+            headers={"apikey": key, "Authorization": f"Bearer {key}"},
+            timeout=timeout,
+        )
+        response.raise_for_status()
+        return True, "Conexión correcta. Supabase respondió y la tabla telegram_alerts es accesible."
+    except Exception as exc:
+        return False, f"No se pudo verificar Supabase ({type(exc).__name__})."
