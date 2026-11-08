@@ -283,11 +283,7 @@ def evaluate_binary_forecasts(
     bins: int = 10,
     minimum_sample: int = 30,
 ) -> dict[str, Any]:
-    """Score only explicitly verified binary outcomes and report calibration.
-
-    Reliability bins are equal-width intervals over [0, 1]. The upper endpoint
-    is inclusive in the final bin. No accuracy/ROI claim is inferred.
-    """
+    """Score verified outcomes after collapsing repeated fixture snapshots."""
     if isinstance(bins, bool) or not isinstance(bins, int) or bins < 1:
         raise ValueError("bins debe ser un entero mayor que cero")
     if isinstance(minimum_sample, bool) or not isinstance(minimum_sample, int) or minimum_sample < 1:
@@ -302,8 +298,6 @@ def evaluate_binary_forecasts(
         outcome = _outcome(row.get(outcome_key))
         raw_probability = row.get(probability_key)
         if raw_probability in (None, "") and probability_key != "probability":
-            # Canonical versioned records use "probability"; legacy CSVs retain
-            # "estimated_probability_exploratory".
             raw_probability = row.get("probability")
         try:
             probability = float(raw_probability)
@@ -314,13 +308,25 @@ def evaluate_binary_forecasts(
             continue
         scored_rows.append((probability, outcome, row))
 
+    scored, duplicate_snapshots = _deduplicate_fixture_snapshots(scored_rows)
     n = len(scored)
+    base = {
+        "sample_size": n,
+        "raw_verified_sample_size": len(scored_rows),
+        "deduplicated_snapshots": duplicate_snapshots,
+        "excluded": excluded,
+        "minimum_sample": minimum_sample,
+        "minimum_sample_reached": n >= minimum_sample,
+    }
     if not n:
         return {
-            "sample_size": 0, "raw_verified_sample_size": 0,\n            "deduplicated_snapshots": duplicate_snapshots, "excluded": excluded, "brier_score": None,
-            "log_loss": None, "mean_probability": None, "observed_rate": None,
-            "calibration_gap": None, "reliability": [],
-            "minimum_sample": minimum_sample, "minimum_sample_reached": False,
+            **base,
+            "brier_score": None,
+            "log_loss": None,
+            "mean_probability": None,
+            "observed_rate": None,
+            "calibration_gap": None,
+            "reliability": [],
         }
 
     epsilon = 1e-15
@@ -358,18 +364,16 @@ def evaluate_binary_forecasts(
         })
 
     return {
-        "sample_size": n,
-        "excluded": excluded,
+        **base,
         "brier_score": round(brier, 8),
         "log_loss": round(log_loss, 8),
         "mean_probability": round(mean_probability, 6),
         "observed_rate": round(observed_rate, 6),
         "calibration_gap": round(weighted_gap, 6),
         "reliability": reliability,
-        "minimum_sample": minimum_sample,
-        "minimum_sample_reached": n >= minimum_sample,
         "warnings": [
             "Métricas descriptivas: no garantizan rendimiento futuro ni rentabilidad.",
             "Use validación cronológica y separe por liga, mercado y línea antes de comparar modelos.",
         ],
     }
+
