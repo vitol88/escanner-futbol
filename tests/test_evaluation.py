@@ -344,6 +344,52 @@ class BinaryForecastEvaluationTests(unittest.TestCase):
             evaluate_model_version_comparability([], minimum_common_fixtures=0)
 
 
+    def test_model_versions_report_paired_losses_on_exact_common_fixtures(self):
+        from ai_engine.evaluation import evaluate_model_version_comparability
+
+        rows = []
+        outcomes = [1, 0, 1]
+        for index, outcome in enumerate(outcomes):
+            common = {
+                "fixture_id": f"fx-{index}", "market_type": "corners",
+                "selection": "over", "line": "8.5", "phase": "live",
+                "model_id": "corner-model", "outcome": outcome,
+                "outcome_verified": True,
+            }
+            rows.append({**common, "model_version": "1.0", "probability": 0.5})
+            rows.append({**common, "model_version": "2.0", "probability": 0.9 if outcome else 0.1})
+        result = evaluate_model_version_comparability(
+            rows, probability_key="probability", minimum_common_fixtures=3
+        )
+        self.assertEqual(len(result), 1)
+        comparison = result[0]
+        self.assertEqual(comparison["common_fixture_count"], 3)
+        self.assertAlmostEqual(comparison["brier_a"], 0.25)
+        self.assertAlmostEqual(comparison["brier_b"], 0.01)
+        self.assertLess(comparison["brier_delta_b_minus_a"], 0)
+        self.assertLess(comparison["log_loss_delta_b_minus_a"], 0)
+
+    def test_model_version_paired_metrics_exclude_mismatched_outcomes_and_invalid_probabilities(self):
+        from ai_engine.evaluation import evaluate_model_version_comparability
+
+        rows = []
+        for version, outcome, probability in (
+            ("1.0", 1, 0.8), ("2.0", 0, 0.2),
+            ("1.0", 1, 1.2), ("2.0", 1, 0.7),
+        ):
+            rows.append({
+                "fixture_id": "same", "market_type": "goals", "selection": "over",
+                "line": "2.5", "phase": "pre_match", "model_id": "goals",
+                "model_version": version, "outcome": outcome,
+                "outcome_verified": True, "probability": probability,
+            })
+        result = evaluate_model_version_comparability(
+            rows, probability_key="probability", minimum_common_fixtures=1
+        )
+        self.assertEqual(result, [])
+
+
+
 if __name__ == "__main__":
     unittest.main()
 
