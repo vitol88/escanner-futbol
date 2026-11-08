@@ -210,6 +210,7 @@ def evaluate_forecasts_by_market_line(
             str(row.get("phase") or "unknown").strip() or "unknown",
             str(row.get("model_id") or "unknown").strip() or "unknown",
             str(row.get("model_version") or "unknown").strip() or "unknown",
+            str(row.get("league") or "unknown").strip() or "unknown",
         )
         grouped.setdefault(key, []).append(row)
 
@@ -233,6 +234,7 @@ def evaluate_forecasts_by_market_line(
             "phase": key[3],
             "model_id": key[4],
             "model_version": key[5],
+            "league": key[6],
             "readiness_status": readiness["status"],
             "readiness_reasons": readiness["reasons"],
             **metrics,
@@ -259,7 +261,7 @@ def evaluate_model_version_comparability(
     if isinstance(minimum_common_fixtures, bool) or not isinstance(minimum_common_fixtures, int) or minimum_common_fixtures < 1:
         raise ValueError("minimum_common_fixtures debe ser un entero mayor que cero")
 
-    cohorts: dict[tuple[str, str, str, str, str], dict[str, dict[str, tuple[float, int | None, float | None]]]] = {}
+    cohorts: dict[tuple[str, str, str, str, str, str], dict[str, dict[str, tuple[float, int | None, float | None]]]] = {}
     for row_index, row in enumerate(rows if isinstance(rows, list) else []):
         if not isinstance(row, dict) or not _verified(row.get(verified_key, "")):
             continue
@@ -296,7 +298,8 @@ def evaluate_model_version_comparability(
                     break
             except (TypeError, ValueError, OverflowError, OSError):
                 continue
-        cohort_key = (market, selection, line, phase, model_id)
+        league = str(row.get("league") or "unknown").strip() or "unknown"
+        cohort_key = (market, selection, line, phase, model_id, league)
         version_rows = cohorts.setdefault(cohort_key, {}).setdefault(version, {})
         previous = version_rows.get(fixture_id)
         if previous is None or snapshot_order >= previous[0]:
@@ -330,6 +333,7 @@ def evaluate_model_version_comparability(
                     "line": cohort_key[2],
                     "phase": cohort_key[3],
                     "model_id": cohort_key[4],
+                    "league": cohort_key[5],
                     "version_a": version_a,
                     "version_b": version_b,
                     "common_fixture_count": common_count,
