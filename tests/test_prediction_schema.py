@@ -100,8 +100,12 @@ class PredictionSchemaTests(unittest.TestCase):
         later_snapshot = normalize_prediction_record({
             **base, "line": "8.5", "snapshot_id": "stats-v2"
         })
+        opposite_selection = normalize_prediction_record({
+            **base, "line": "8.5", "selection": "Under"
+        })
         self.assertNotEqual(first["prediction_id"], other_line["prediction_id"])
         self.assertNotEqual(first["prediction_id"], later_snapshot["prediction_id"])
+        self.assertNotEqual(first["prediction_id"], opposite_selection["prediction_id"])
 
     def test_live_scanner_record_carries_common_contract_metadata(self):
         row = {
