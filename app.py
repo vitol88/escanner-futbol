@@ -12,7 +12,7 @@ import requests
 import streamlit as st
 
 from ai_engine.data_engine import FootballDataEngine
-from ai_engine.opportunity_engine import evaluate_opportunity
+from ai_engine.opportunity_engine import evaluate_opportunity, classify_goal_tip_market
 from ai_engine.live_corner_capture import capture_live_corner_snapshot
 from ai_engine.live_corner_finalize import finalize_live_corner_fixture
 from models.live_context import qualifies_as_corner_candidate, summarize_live_context
@@ -8153,11 +8153,7 @@ else:
                     "score_home": goals_data.get("home"),
                     "score_away": goals_data.get("away"),
                     "market": market,
-                    "market_type": (
-                        "draw" if str(market).strip().casefold() == "empate final"
-                        else "btts" if str(market).strip().casefold().startswith("ambos equipos marcan")
-                        else "goals"
-                    ),
+                    "market_type": classify_goal_tip_market(market),
                     "probability": round(float(probability), 4),
                     "estimated_probability_exploratory": round(float(probability), 4),
                     "model_id": "estimate_live_goal_markets",
@@ -8192,14 +8188,8 @@ else:
                     if verified_odds:
                         # Segunda validación centralizada: solo admite cuota real
                         # del mercado exacto, fixture identificado y EV mínimo.
-                        _tip_key = str(market).strip().casefold()
-                        _market_type = (
-                            "draw" if _tip_key == "empate final"
-                            else "btts" if _tip_key.startswith("ambos equipos marcan")
-                            else "goals"
-                        )
                         _opportunity = evaluate_opportunity({
-                            "market": _market_type,
+                            "market": classify_goal_tip_market(market),
                             "selection": str(market),
                             "probability": float(probability),
                             "odds": float(verified_odds["odd"]),
