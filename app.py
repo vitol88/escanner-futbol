@@ -7478,7 +7478,7 @@ else:
                                                 current_minute = (match_fixture.get("status") or {}).get("elapsed")
                                                 current_total = (home_c + away_c) if isinstance(home_c, (int, float)) and isinstance(away_c, (int, float)) else None
                                                 history = corner_item.get("automatic_history") or {}
-                                                if history.get("pending") and st.button("📚 Consultar historial de este partido", key=f"load_history_selected_{match_id}"):
+                                                if (history.get("pending") or history.get("corners_pending")) and st.button("📚 Consultar historial de este partido", key=f"load_history_selected_{match_id}"):
                                                     try:
                                                         history_cache = st.session_state.setdefault("automatic_history_cache", {})
                                                         history_cache["_automatic_history_stats_calls"] = 0
@@ -8848,7 +8848,7 @@ else:
                         if item.get("home_corners") is not None and item.get("away_corners") is not None:
                             st.caption(f"Córners actuales: local {item['home_corners']} · visitante {item['away_corners']} · total {item['home_corners'] + item['away_corners']}.")
                         history = item.get("automatic_history") or {}
-                        if history.get("pending") and st.button("📚 Consultar historial de este partido", key=f"load_history_global_{((item.get('fixture') or {}).get('fixture') or {}).get('id')}"):
+                        if (history.get("pending") or history.get("corners_pending")) and st.button("📚 Consultar historial de este partido", key=f"load_history_global_{((item.get('fixture') or {}).get('fixture') or {}).get('id')}"):
                             try:
                                 history_cache = st.session_state.setdefault("automatic_history_cache", {})
                                 history_cache["_automatic_history_stats_calls"] = 0
