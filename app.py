@@ -7896,7 +7896,17 @@ else:
         # pendientes (no se marcan como vacíos) y podrán entrar en escaneos posteriores.
         stats_fetch_progress = st.empty()
         effective_stats_limit = min(stats_limit, 5) if auto_scan_due and not manual_scan else stats_limit
-        stats_fixtures = filtered[:effective_stats_limit]
+        # Rotar el lote para que los partidos que quedan al final de la lista
+        # también reciban estadísticas en escaneos posteriores.
+        stats_cursor = int(st.session_state.get("live_stats_batch_cursor", 0) or 0)
+        if filtered:
+            stats_cursor %= len(filtered)
+            rotated_fixtures = filtered[stats_cursor:] + filtered[:stats_cursor]
+            stats_fixtures = rotated_fixtures[:effective_stats_limit]
+            st.session_state.live_stats_batch_cursor = (stats_cursor + len(stats_fixtures)) % len(filtered)
+        else:
+            stats_fixtures = []
+            st.session_state.live_stats_batch_cursor = 0
         stats_queries_attempted = 0
         stats_rate_limited = False
         for stats_fixture in stats_fixtures:
