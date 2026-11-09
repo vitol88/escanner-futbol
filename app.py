@@ -8143,13 +8143,15 @@ else:
 
         for corner_item in corner_results:
             try:
-                used_history_stats = int(history_cache.get("_automatic_history_stats_calls", 0) or 0)
+                # Give each fixture its own bounded historical-statistics budget.
+                # A shared scan-wide counter starved later fixtures of corner samples,
+                # leaving competition averages as N/D even when their history existed.
                 history_budget = 8 if auto_scan_due and not manual_scan else 20
                 corner_item["automatic_history"] = build_automatic_history(
                     corner_item["fixture"],
                     api_get=api_get,
                     cache=history_cache,
-                    stats_budget=max(0, history_budget - used_history_stats),
+                    stats_budget=history_budget,
                     live_corner_finalizer=lambda completed_fixture, final_stats: (
                         finalize_live_corner_fixture(LIVE_CORNER_CAPTURE_DB, completed_fixture, final_stats)
                     ),
