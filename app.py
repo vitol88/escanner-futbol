@@ -27,7 +27,7 @@ from ai_engine.supabase_evaluation import load_supabase_evaluations, summarize_s
 from ai_engine.outcome_ledger import load_verified_outcomes, record_verified_outcome
 from ai_engine.settlement import resolve_binary_outcome
 from ai_engine.telegram_publisher import send_telegram_signal, send_telegram_test_message
-from ai_engine.telegram_store import reserve_telegram_alert, update_telegram_alert, check_supabase_connection, test_supabase_duplicate_protection
+from ai_engine.telegram_store import build_alert_key, reserve_telegram_alert, update_telegram_alert, check_supabase_connection, test_supabase_duplicate_protection
 from models.automatic_history import build_automatic_history
 from models.deep_goal_context import build_deep_goal_context
 from models.probabilities import (
@@ -3873,16 +3873,6 @@ with st.sidebar:
             st.caption(st.session_state.telegram_publish_status)
 
 
-
-
-def build_telegram_alert_key_safe(row):
-    """Derive the same deterministic key used by the Telegram idempotency store."""
-    import hashlib
-    fixture_id = str((row or {}).get("fixture_id") or "").strip()
-    market = " ".join(str((row or {}).get("verified_odds_market") or "").casefold().split())
-    if not fixture_id or not market:
-        return ""
-    return hashlib.sha256(f"{fixture_id}|{market}".encode("utf-8")).hexdigest()
 
 def get_api_key() -> str:
     try:
@@ -8391,7 +8381,7 @@ else:
                 if processed_alert_keys:
                     telegram_pending = [
                         _row for _row in telegram_pending
-                        if build_telegram_alert_key_safe(_row) not in processed_alert_keys
+                        if build_alert_key(_row) not in processed_alert_keys
                     ]
                     st.session_state.telegram_pending_rows = telegram_pending
                 st.session_state.telegram_auto_publish_last = auto_publish_stats
