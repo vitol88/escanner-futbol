@@ -8375,8 +8375,8 @@ else:
                         supabase_url, supabase_secret_key,
                         error="" if _sent else _send_detail,
                     )
-                    processed_alert_keys.add(_alert_key)
                     if _sent:
+                        processed_alert_keys.add(_alert_key)
                         auto_publish_stats["sent"] += 1
                         if not _updated:
                             # Telegram ya recibió el mensaje; advertir que faltó cerrar el registro.
