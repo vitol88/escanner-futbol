@@ -216,3 +216,33 @@ def test_automatic_history_reuses_cached_completed_stats_for_corner_finalization
     assert calls == []
     assert result["diagnostics"]["live_corner_finalization"]["finalized"] == 1
     assert result["diagnostics"]["live_corner_finalization"]["observations_inserted"] == 2
+
+
+
+def test_goal_history_can_be_available_while_corner_history_remains_pending():
+    current = {
+        "fixture": {"timestamp": 9000},
+        "teams": {"home": {"id": 1, "name": "Home FC"}, "away": {"id": 2, "name": "Away FC"}},
+        "league": {"id": 10, "season": 2026},
+    }
+    past_home = [_fixture(701, 1, 3, 2, 0), _fixture(702, 1, 4, 1, 0)]
+    past_away = [_fixture(703, 5, 2, 0, 1)]
+
+    def fake_api(endpoint, params):
+        if endpoint == "fixtures" and params["team"] == 1:
+            return {"response": past_home}
+        if endpoint == "fixtures" and params["team"] == 2:
+            return {"response": past_away}
+        if endpoint == "fixtures/statistics" and params["fixture"] == 701:
+            return {"response": [
+                {"statistics": [{"type": "Corner Kicks", "value": 6}]},
+                {"statistics": [{"type": "Corner Kicks", "value": 2}]},
+            ]}
+        return {"response": []}
+
+    result = build_automatic_history(current, api_get=fake_api, cache={}, stats_budget=1)
+
+    assert result["available"] is True
+    assert result["home_goal_sample"] == 2
+    assert result["corners_available"] is True
+    assert result["corners_pending"] is True
