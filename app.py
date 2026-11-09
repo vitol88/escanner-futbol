@@ -4247,7 +4247,11 @@ with st.container(key="top_status_controls"):
     [class*="st-key-top_status_controls"] iframe { height:38px !important; }
     @media(max-width:640px) {
       [class*="st-key-top_status_controls"] {
-        margin:14px 0 22px !important; padding:9px 6px 7px !important;
+        /* Compensar la barra superior fija de Streamlit en Safari móvil. */
+        margin:82px 0 24px !important;
+        padding:9px 6px 7px !important;
+        position:relative !important;
+        z-index:20 !important;
       }
       [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { gap:5px !important; }
       [class*="st-key-auto_refresh_control_card"],
