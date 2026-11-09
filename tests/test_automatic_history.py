@@ -108,7 +108,7 @@ def test_automatic_history_does_not_count_cached_statistics_as_new_requests():
     assert shared_cache["_automatic_history_stats_calls"] == 7
     assert not [call for call in calls if call[0] == "fixtures/statistics"]
 
-def test_automatic_history_excludes_card_rows_without_proven_pre_kickoff_timestamps():
+def test_automatic_history_keeps_goal_samples_but_guards_card_rows_by_timestamp():
     current = {
         "fixture": {"timestamp": 2000},
         "teams": {"home": {"id": 1, "name": "Home FC"}, "away": {"id": 2, "name": "Away FC"}},
@@ -134,8 +134,10 @@ def test_automatic_history_excludes_card_rows_without_proven_pre_kickoff_timesta
         return {"response": []}
 
     result = build_automatic_history(current, api_get=fake_api, cache={}, stats_budget=8)
-    assert result["home_matches"] == 1
-    assert result["home_goal_sample"] == 1
+    # Goals/corners history must not disappear when optional timestamps are
+    # absent or out of order; card-model rows keep their strict timestamp guard.
+    assert result["home_matches"] == 4
+    assert result["home_goal_sample"] == 4
     assert [row["fixture_id"] for row in result["card_history_rows"]] == [301]
 
 
