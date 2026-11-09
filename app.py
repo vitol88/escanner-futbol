@@ -7880,49 +7880,49 @@ else:
             for item in st.session_state.get("live_fixtures", [])
             if (item.get("fixture") or {}).get("id") is not None
         }
-        # Si el botón balón acaba de actualizar el listado, conserva las estadísticas
-        # consultadas durante esa misma actualización para no duplicar llamadas a la API.
+        # Conservar estadísticas válidas entre escaneos, pero permitir reintentar
+        # respuestas vacías: pueden deberse a que el proveedor aún no las publicó.
         if not manual_scan:
             for cached_stats_key in list(st.session_state.stats_cache):
                 if str(cached_stats_key) in live_fixture_ids_for_refresh:
                     st.session_state.stats_cache.pop(cached_stats_key, None)
+        else:
+            for cached_stats_key, cached_stats_value in list(st.session_state.stats_cache.items()):
+                if str(cached_stats_key).isdigit() and not cached_stats_value:
+                    st.session_state.stats_cache.pop(cached_stats_key, None)
         st.session_state.goal_scan_results = []
         st.session_state.corner_scan_results = []
-        # Fetch live statistics before estimating goals, so this same scan can
-        # actually use the activity context instead of only using a cache from a
-        # previous run. One request per fixture; subsequent sections reuse the cache.
+        # Consultar un lote acotado por escaneo. Los partidos fuera del lote quedan
+        # pendientes (no se marcan como vacíos) y podrán entrar en escaneos posteriores.
         stats_fetch_progress = st.empty()
         effective_stats_limit = min(stats_limit, 5) if auto_scan_due and not manual_scan else stats_limit
         stats_fixtures = filtered[:effective_stats_limit]
         stats_queries_attempted = 0
-        for stats_idx, stats_fixture in enumerate(stats_fixtures):
+        stats_rate_limited = False
+        for stats_fixture in stats_fixtures:
             stats_fixture_id = (stats_fixture.get("fixture") or {}).get("id")
-            if stats_fixture_id is not None:
-                stats_cache_key = str(stats_fixture_id)
-                if stats_cache_key not in st.session_state.stats_cache:
-                    try:
-                        stats_queries_attempted += 1
-                        stats_payload = api_get("fixtures/statistics", {"fixture": stats_fixture_id})
-                        st.session_state.stats_cache[stats_cache_key] = stats_payload.get("response", [])
-                    except Exception as stats_exc:
-                        st.session_state.stats_cache[stats_cache_key] = []
-                        if "HTTP 429" in str(stats_exc):
-                            st.warning("Se alcanzó el límite de consultas de la API durante la carga de estadísticas. El escaneo continuará con los datos disponibles y no repetirá las solicitudes fallidas en esta ronda.")
-                            # Mark the remaining fixtures as unavailable for this round,
-                            # preventing the corners pass from retrying after HTTP 429.
-                            for remaining_fixture in filtered[stats_idx + 1:]:
-                                remaining_id = (remaining_fixture.get("fixture") or {}).get("id")
-                                if remaining_id is not None:
-                                    st.session_state.stats_cache[str(remaining_id)] = []
-                            break
-        # Mark fixtures beyond the configured detail limit as unavailable for this
-        # scan, so the corners pass does not issue hidden extra API requests.
-        for skipped_fixture in filtered[len(stats_fixtures):]:
-            skipped_id = (skipped_fixture.get("fixture") or {}).get("id")
-            if skipped_id is not None:
-                st.session_state.stats_cache[str(skipped_id)] = []
+            if stats_fixture_id is None:
+                continue
+            stats_cache_key = str(stats_fixture_id)
+            if stats_cache_key in st.session_state.stats_cache:
+                continue
+            try:
+                stats_queries_attempted += 1
+                stats_payload = api_get("fixtures/statistics", {"fixture": stats_fixture_id})
+                stats_response = stats_payload.get("response") or []
+                st.session_state.stats_cache[stats_cache_key] = stats_response
+            except Exception as stats_exc:
+                # Cachear el fallo solo en esta ronda para impedir una segunda llamada
+                # desde el análisis de córners; el siguiente escaneo manual lo reintentará.
+                st.session_state.stats_cache[stats_cache_key] = []
+                if "HTTP 429" in str(stats_exc):
+                    stats_rate_limited = True
+                    st.warning("Se alcanzó el límite de consultas de la API durante la carga de estadísticas. El resto de partidos queda pendiente para el siguiente escaneo.")
+                    break
         stats_fetch_progress.empty()
         st.session_state.last_scan_stats_matches = stats_queries_attempted
+        st.session_state.last_scan_stats_pending = max(0, len(filtered) - len(stats_fixtures))
+        st.session_state.last_scan_stats_rate_limited = stats_rate_limited
 
         # Fetch live odds once per scan for all returned fixtures (never one request per match).
         # Refresh no more often than the scan itself; the API plan limits still apply.
@@ -8068,9 +8068,14 @@ else:
                 continue
             try:
                 cache_key = str(fixture_id)
+                # No hacer consultas ocultas fuera del lote priorizado del escáner.
+                # Si el partido aún no tiene estadísticas cargadas, queda pendiente.
                 if cache_key not in st.session_state.stats_cache:
-                    stats_payload = api_get("fixtures/statistics", {"fixture": fixture_id})
-                    st.session_state.stats_cache[cache_key] = stats_payload.get("response", [])
+                    corner_results.append({
+                        "fixture": fixture,
+                        "error": "Estadísticas pendientes de consulta en el siguiente lote del escáner.",
+                    })
+                    continue
                 stats = st.session_state.stats_cache[cache_key]
                 fixture_teams = fixture.get("teams") or {}
                 home_team_id = (fixture_teams.get("home") or {}).get("id")
