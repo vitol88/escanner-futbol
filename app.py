@@ -8453,7 +8453,6 @@ else:
                 scan_diagnostics["corner_candidates_without_exact_quote_or_below_filters"] += 1
                 continue
 
-            scan_diagnostics["corner_candidates_evaluated"] += 1
             goals_data = fixture.get("goals") or {}
             teams = fixture.get("teams") or {}
             home_name = (teams.get("home") or {}).get("name") or "Local"
@@ -8461,7 +8460,7 @@ else:
             for odds_row in corner_market_rows:
                 market_label = str(odds_row.get("market_label") or "")
                 odd = odds_row.get("odd")
-                line_match = re.search(r"(\\d+(?:[.,]\\d+)?)", market_label)
+                line_match = re.search(r"(\d+(?:[.,]\d+)?)", market_label)
                 if not line_match or not isinstance(odd, (int, float)):
                     continue
                 market_line = float(line_match.group(1).replace(",", "."))
@@ -8483,7 +8482,7 @@ else:
                 if not isinstance(model_probability, (int, float)) or not 0.0 < model_probability < 1.0:
                     continue
 
-                scan_diagnostics["corner_candidates_evaluated"] += 0 if scan_diagnostics["corner_candidates_evaluated"] else 0
+                scan_diagnostics["corner_candidates_evaluated"] += 1
                 row_key = (str(fixture_id), market_label, str(minute),
                            str(goals_data.get("home")), str(goals_data.get("away")))
                 row = {
