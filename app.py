@@ -4248,10 +4248,13 @@ with st.container(key="top_status_controls"):
     @media(max-width:640px) {
       [class*="st-key-top_status_controls"] {
         /* Compensar la barra superior fija de Streamlit en Safari móvil. */
-        margin:82px 0 24px !important;
-        padding:9px 6px 7px !important;
+        /* El menú fijo y la tarjeta de marca ocupan la parte superior en Safari iOS.
+           Reservar espacio real en el flujo para que los interruptores queden debajo. */
+        margin:250px 0 26px !important;
+        padding:10px 8px 9px !important;
         position:relative !important;
-        z-index:20 !important;
+        z-index:2147483005 !important;
+        isolation:isolate !important;
       }
       [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { gap:5px !important; }
       [class*="st-key-auto_refresh_control_card"],
