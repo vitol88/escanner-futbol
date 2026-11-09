@@ -8338,11 +8338,11 @@ else:
             if not all((telegram_token, telegram_chat_id, supabase_url, supabase_secret_key)):
                 auto_publish_stats["waiting"] = len(auto_publish_candidates)
                 st.session_state.telegram_publish_status = (
-                    f"{len(new_signal_rows)} señal(es) elegible(s) en espera: faltan credenciales de Telegram o Supabase."
+                    f"{len(auto_publish_candidates)} señal(es) elegible(s) en espera: faltan credenciales de Telegram o Supabase."
                 )
             else:
                 processed_alert_keys = set()
-                for _signal_row in new_signal_rows:
+                for _signal_row in auto_publish_candidates:
                     # Defensa adicional: nunca publicar filas sin cuota/mercado/edge verificados.
                     _odd = _signal_row.get("verified_live_odd")
                     _edge = _signal_row.get("estimated_edge")
