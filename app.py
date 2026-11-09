@@ -8482,7 +8482,6 @@ else:
                 if not isinstance(model_probability, (int, float)) or not 0.0 < model_probability < 1.0:
                     continue
 
-                scan_diagnostics["corner_candidates_evaluated"] += 1
                 row_key = (str(fixture_id), market_label, str(minute),
                            str(goals_data.get("home")), str(goals_data.get("away")))
                 row = {
