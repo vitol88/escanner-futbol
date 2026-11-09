@@ -8267,7 +8267,26 @@ else:
             for row in signal_rows
         }
         new_signal_rows = []
+        scan_diagnostics = {
+            "fixtures_scanned": len(goal_results_with_context),
+            "goal_estimates_available": sum(1 for _, estimate, _, _ in goal_results_with_context if estimate.get("available")),
+            "goal_model_candidates": 0,
+            "goal_candidates_without_quotes": 0,
+            "goal_candidates_without_exact_quote_or_below_filters": 0,
+            "goal_candidates_evaluated": 0,
+            "eligible_goal_signals": 0,
+            "corner_stats_ready": 0,
+            "corner_stats_pending": 0,
+            "corner_probability_candidates": 0,
+            "corner_model_status": "Sin modelo probabilístico de córners conectado al evaluador central; los promedios son contexto, no pronósticos.",
+        }
+        for _corner_item in corner_results:
+            if _corner_item.get("error"):
+                scan_diagnostics["corner_stats_pending"] += 1
+            elif isinstance(_corner_item.get("home_corners"), (int, float)) and isinstance(_corner_item.get("away_corners"), (int, float)):
+                scan_diagnostics["corner_stats_ready"] += 1
         for fixture, estimate, tips, context in goal_results_with_context:
+            scan_diagnostics["goal_model_candidates"] += len(tips or [])
             for market, probability in tips:
                 fixture_data = fixture.get("fixture") or {}
                 goals_data = fixture.get("goals") or {}
@@ -8314,6 +8333,9 @@ else:
                 if row_key not in existing_keys:
                     signal_rows.append(row)
                     odds_rows_for_fixture = st.session_state.get("live_odds_by_fixture", {}).get(str(fixture_data.get("id")), [])
+                    scan_diagnostics["goal_candidates_evaluated"] += 1
+                    if not odds_rows_for_fixture:
+                        scan_diagnostics["goal_candidates_without_quotes"] += 1
                     verified_odds = match_goal_tip_to_live_odds(
                         str(market), float(probability), odds_rows_for_fixture
                     )
@@ -8348,7 +8370,16 @@ else:
                                 "opportunity_engine": "v1",
                             })
                             new_signal_rows.append(row)
+                            scan_diagnostics["eligible_goal_signals"] += 1
+                        else:
+                            scan_diagnostics["goal_candidates_without_exact_quote_or_below_filters"] += 1
+                    elif odds_rows_for_fixture:
+                        scan_diagnostics["goal_candidates_without_exact_quote_or_below_filters"] += 1
                     existing_keys.add(row_key)
+        scan_diagnostics["corner_probability_candidates"] = 0
+        scan_diagnostics["telegram_queue_after_scan"] = len(st.session_state.get("telegram_pending_rows", [])) + len(new_signal_rows)
+        scan_diagnostics["scan_finished_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        st.session_state["last_scan_diagnostics"] = scan_diagnostics
         st.session_state.signal_rows = signal_rows
         # Telegram recibe solo señales nuevas respaldadas por cuota real, mercado coincidente y ventaja mínima.
         telegram_pending = st.session_state.setdefault("telegram_pending_rows", [])
@@ -8510,6 +8541,27 @@ else:
 
     # El panel global de escaneo no debe mezclarse con la pantalla individual seleccionada.
     if not _analysis_page_active:
+        _scan_diag = st.session_state.get("last_scan_diagnostics") or {}
+        if _scan_diag:
+            st.markdown("### 🔎 Diagnóstico del último escaneo")
+            st.caption(f"Actualizado: {_scan_diag.get('scan_finished_at', '—')} · Los filtros de elegibilidad se mantienen intactos.")
+            _diag_cols = st.columns(4)
+            _diag_cols[0].metric("Partidos analizados", int(_scan_diag.get("fixtures_scanned", 0)))
+            _diag_cols[1].metric("Modelos de goles disponibles", int(_scan_diag.get("goal_estimates_available", 0)))
+            _diag_cols[2].metric("Candidatos de goles", int(_scan_diag.get("goal_model_candidates", 0)))
+            _diag_cols[3].metric("Señales elegibles", int(_scan_diag.get("eligible_goal_signals", 0)))
+            with st.expander("Ver por qué no se generaron señales", expanded=int(_scan_diag.get("eligible_goal_signals", 0)) == 0):
+                _reason_cols = st.columns(3)
+                _reason_cols[0].metric("Candidatos sin cuotas", int(_scan_diag.get("goal_candidates_without_quotes", 0)))
+                _reason_cols[1].metric("Sin mercado exacto / filtro", int(_scan_diag.get("goal_candidates_without_exact_quote_or_below_filters", 0)))
+                _reason_cols[2].metric("Candidatos evaluados", int(_scan_diag.get("goal_candidates_evaluated", 0)))
+                st.markdown("**Córners**")
+                _corner_cols = st.columns(3)
+                _corner_cols[0].metric("Partidos con córners en vivo", int(_scan_diag.get("corner_stats_ready", 0)))
+                _corner_cols[1].metric("Partidos pendientes / error", int(_scan_diag.get("corner_stats_pending", 0)))
+                _corner_cols[2].metric("Candidatos probabilísticos", int(_scan_diag.get("corner_probability_candidates", 0)))
+                st.info(str(_scan_diag.get("corner_model_status", "Estado del modelo de córners no disponible.")))
+                st.caption("Una cuota solo cuenta como válida cuando coincide con el fixture y el mercado exacto. No se generan señales a partir de promedios descriptivos.")
         tab_goals, tab_corners, tab_overview = st.tabs(["⚽ Goles y señales", "🚩 Córners", "📈 Rendimiento del modelo"])
 
         with tab_goals:
