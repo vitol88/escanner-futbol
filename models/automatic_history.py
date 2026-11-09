@@ -113,20 +113,16 @@ def build_automatic_history(
 
     # Solo partidos finalizados de la misma competición y temporada del partido en vivo.
     finished = {"FT", "AET", "PEN"}
-    target_timestamp = (fixture.get("fixture") or {}).get("timestamp")
     def same_competition_finished(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        # Only use completed fixtures with a known kickoff strictly before the
-        # target fixture. This protects every historical feature from temporal leakage.
+        # Keep the same competition/season filter used by main for goals and
+        # corners. Do not require optional timestamp metadata here: some valid
+        # API responses omit it or serialize it differently, which would erase
+        # every historical sample and display N/D despite available fixtures.
         return [
             item for item in items
             if (item.get("fixture") or {}).get("status", {}).get("short") in finished
             and (item.get("league") or {}).get("id") == league_id
             and str((item.get("league") or {}).get("season")) == str(season)
-            and isinstance((item.get("fixture") or {}).get("timestamp"), (int, float))
-            and not isinstance((item.get("fixture") or {}).get("timestamp"), bool)
-            and isinstance(target_timestamp, (int, float))
-            and not isinstance(target_timestamp, bool)
-            and (item.get("fixture") or {}).get("timestamp") < target_timestamp
         ]
     home_raw = team_fixtures(home["id"])
     away_raw = team_fixtures(away["id"])
