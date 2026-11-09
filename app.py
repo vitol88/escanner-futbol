@@ -8125,15 +8125,43 @@ else:
                 corner_results.append({"fixture": fixture, "error": str(exc)})
                 if "HTTP 429" in str(exc):
                     break
-        # Live-first scan: historical requests are deliberately deferred until
-        # the user asks for history on an individual fixture.
+        # Load historical venue averages during the global scan, as in main.
+        # The goals and corners panels both consume this shared result, so they
+        # must not remain pending until the user opens a separate history button.
+        history_calls_before = st.session_state.api_request_count
+        history_cache = st.session_state.setdefault("automatic_history_cache", {})
+        history_cache["_automatic_history_stats_calls"] = 0
+        history_cache["_automatic_history_team_fixture_calls"] = 0
+        history_cache.pop("_automatic_history_rate_limited", None)
+
+        # Give priority to the match currently opened by the user.
+        selected_detail_for_history = st.session_state.get("selected_match_detail") or {}
+        selected_history_fixture_id = str(selected_detail_for_history.get("fixture_id") or "")
+        corner_results.sort(
+            key=lambda item: 0 if str(((item.get("fixture") or {}).get("fixture") or {}).get("id") or "") == selected_history_fixture_id else 1
+        )
+
         for corner_item in corner_results:
-            corner_item["automatic_history"] = {
-                "available": False,
-                "pending": True,
-                "note": "Historial pendiente. Consulta el historial de este partido cuando lo necesites.",
-            }
-        st.session_state.last_scan_history_api_calls = 0
+            try:
+                used_history_stats = int(history_cache.get("_automatic_history_stats_calls", 0) or 0)
+                history_budget = 8 if auto_scan_due and not manual_scan else 20
+                corner_item["automatic_history"] = build_automatic_history(
+                    corner_item["fixture"],
+                    api_get=api_get,
+                    cache=history_cache,
+                    stats_budget=max(0, history_budget - used_history_stats),
+                    live_corner_finalizer=lambda completed_fixture, final_stats: (
+                        finalize_live_corner_fixture(LIVE_CORNER_CAPTURE_DB, completed_fixture, final_stats)
+                    ),
+                )
+            except Exception as history_exc:
+                corner_item["automatic_history"] = {
+                    "available": False,
+                    "pending": True,
+                    "note": f"Historial automático no disponible: {history_exc}",
+                }
+
+        st.session_state.last_scan_history_api_calls = st.session_state.api_request_count - history_calls_before
         st.session_state.last_scan_api_calls = st.session_state.api_request_count - scan_api_calls_start
         st.session_state.corner_scan_results = corner_results
 
