@@ -4293,8 +4293,8 @@ with st.container(key="top_status_controls"):
     with status_cols[2]:
         st.components.v1.html("""
 <style>html,body{margin:0!important;padding:0!important;width:100%!important;background:transparent!important;overflow:hidden!important;}</style>
-<div style="box-sizing:border-box;display:flex;align-items:center;justify-content:center;width:100%;height:34px;min-height:34px;max-height:34px;margin:0;padding:2px 0 0;overflow:visible">
-  <button id="scanner-test-sound" type="button" role="switch" aria-checked="false" title="Activar/desactivar y probar alertas sonoras" style="box-sizing:border-box;position:relative;top:0;display:flex;flex:1 1 auto;align-items:center;justify-content:center;gap:3px;width:100%;max-width:100%;height:22px;min-height:22px;max-height:22px;margin:0;padding:0;border-radius:0;border:0;background:transparent;color:#D8C27A;font:800 12px/1.1 system-ui;white-space:nowrap;cursor:pointer;align-self:center;vertical-align:middle"><span id="scanner-alert-switch" style="display:inline-block;position:relative;width:34px;height:18px;min-width:34px;max-width:34px;border-radius:10px;background:#D94A4A;flex:0 0 30px"><span id="scanner-alert-knob" style="position:absolute;left:2px;top:2px;width:14px;height:14px;max-width:14px;max-height:14px;border-radius:50%;background:#FFF;transition:left .15s"></span></span><span>Alertas</span></button>
+<div style="box-sizing:border-box;display:flex;align-items:center;justify-content:center;width:100%;height:36px;min-height:36px;max-height:36px;margin:0;padding:2px 0 0;overflow:visible">
+  <button id="scanner-test-sound" type="button" role="switch" aria-checked="false" title="Activar/desactivar y probar alertas sonoras" style="box-sizing:border-box;position:relative;top:0;display:flex;flex:1 1 auto;align-items:center;justify-content:center;gap:3px;width:100%;max-width:100%;height:30px;min-height:30px;max-height:30px;margin:0;padding:0;border-radius:0;border:0;background:transparent;color:#D8C27A;font:800 12px/1.1 system-ui;white-space:nowrap;cursor:pointer;align-self:center;vertical-align:middle"><span id="scanner-alert-switch" style="display:inline-block;position:relative;width:34px;height:18px;min-width:34px;max-width:34px;border-radius:10px;background:#D94A4A;flex:0 0 30px"><span id="scanner-alert-knob" style="position:absolute;left:2px;top:2px;width:14px;height:14px;max-width:14px;max-height:14px;border-radius:50%;background:#FFF;transition:left .15s"></span></span><span>Alertas</span></button>
 </div>
 <script>
 (() => {
@@ -4335,7 +4335,7 @@ with st.container(key="top_status_controls"):
  });
 })();
 </script>
-""", height=24, scrolling=False)
+""", height=38, scrolling=False)
 
 def update_scan_progress(value, title, detail, done=False):
     """Actualizar porcentaje real y estado visual de la barra de Football Lab."""
