@@ -8326,9 +8326,17 @@ else:
         # Publicación automática: solo procesa señales nuevas generadas en este escaneo.
         # Supabase reserva cada fixture/mercado de forma atómica antes de contactar Telegram.
         auto_publish_stats = {"sent": 0, "duplicates": 0, "failed": 0, "waiting": 0}
-        if new_signal_rows:
+        auto_publish_candidates = []
+        _candidate_keys = set()
+        for _candidate in telegram_pending:
+            _candidate_key = build_alert_key(_candidate)
+            if _candidate_key and _candidate_key not in _candidate_keys:
+                auto_publish_candidates.append(_candidate)
+                _candidate_keys.add(_candidate_key)
+        _telegram_status_warning = False
+        if auto_publish_candidates:
             if not all((telegram_token, telegram_chat_id, supabase_url, supabase_secret_key)):
-                auto_publish_stats["waiting"] = len(new_signal_rows)
+                auto_publish_stats["waiting"] = len(auto_publish_candidates)
                 st.session_state.telegram_publish_status = (
                     f"{len(new_signal_rows)} señal(es) elegible(s) en espera: faltan credenciales de Telegram o Supabase."
                 )
@@ -8376,6 +8384,7 @@ else:
                                 "Telegram recibió una señal, pero Supabase no confirmó el estado final. "
                                 "La reserva evita que se duplique automáticamente."
                             )
+                            _telegram_status_warning = True
                     else:
                         auto_publish_stats["failed"] += 1
                 if processed_alert_keys:
@@ -8385,7 +8394,7 @@ else:
                     ]
                     st.session_state.telegram_pending_rows = telegram_pending
                 st.session_state.telegram_auto_publish_last = auto_publish_stats
-                if not st.session_state.get("telegram_publish_status", "").startswith("Telegram recibió"):
+                if not _telegram_status_warning:
                     st.session_state.telegram_publish_status = (
                         f"Envío automático del escaneo: {auto_publish_stats['sent']} enviada(s), "
                         f"{auto_publish_stats['duplicates']} duplicada(s) bloqueada(s), "
