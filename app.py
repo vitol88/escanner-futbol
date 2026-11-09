@@ -8267,6 +8267,12 @@ else:
             for row in signal_rows
         }
         new_signal_rows = []
+        odds_index_for_scan = st.session_state.get("live_odds_by_fixture", {}) or {}
+        odds_rows_total = sum(len(rows or []) for rows in odds_index_for_scan.values())
+        fixtures_with_odds = sum(
+            1 for fixture in filtered
+            if odds_index_for_scan.get(str((fixture.get("fixture") or {}).get("id")), [])
+        )
         scan_diagnostics = {
             "fixtures_scanned": len(goal_results_with_context),
             "goal_estimates_available": sum(1 for _, estimate, _, _ in goal_results_with_context if estimate.get("available")),
@@ -8278,22 +8284,36 @@ else:
             "corner_stats_ready": 0,
             "corner_stats_pending": 0,
             "corner_probability_candidates": 0,
-            "corner_model_status": "Sin modelo probabilístico de córners conectado al evaluador central; los promedios son contexto, no pronósticos.",
+            "corner_candidates_without_quotes": 0,
+            "corner_candidates_without_exact_quote_or_below_filters": 0,
+            "corner_candidates_evaluated": 0,
+            "eligible_corner_signals": 0,
+            "odds_fixtures_returned": len(odds_index_for_scan),
+            "odds_rows_returned": odds_rows_total,
+            "fixtures_with_odds": fixtures_with_odds,
+            "fixtures_without_odds": max(0, len(filtered) - fixtures_with_odds),
+            "odds_last_fetch": st.session_state.get("live_odds_last_fetch"),
+            "odds_error": st.session_state.get("live_odds_error", ""),
+            "corner_model_status": "Modelo exploratorio conectado al evaluador central; requiere cuota real del mercado exacto y EV mínimo del 2 %. No equivale a un modelo calibrado.",
         }
         for _corner_item in corner_results:
             if _corner_item.get("error"):
                 scan_diagnostics["corner_stats_pending"] += 1
             elif isinstance(_corner_item.get("home_corners"), (int, float)) and isinstance(_corner_item.get("away_corners"), (int, float)):
                 scan_diagnostics["corner_stats_ready"] += 1
+
+        # GOLES: contar y evaluar cada candidato en cada escaneo, incluso si su
+        # fila ya existe en el historial. Solo se encola una fila nueva una vez.
         for fixture, estimate, tips, context in goal_results_with_context:
             scan_diagnostics["goal_model_candidates"] += len(tips or [])
-            for market, probability in tips:
+            for market, probability in tips or []:
                 fixture_data = fixture.get("fixture") or {}
                 goals_data = fixture.get("goals") or {}
+                fixture_id = fixture_data.get("id")
                 recorded_at = datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
                 row = {
                     "recorded_at": recorded_at,
-                    "fixture_id": fixture_data.get("id"),
+                    "fixture_id": fixture_id,
                     "league_id": (fixture.get("league") or {}).get("id"),
                     "league": (fixture.get("league") or {}).get("name"),
                     "home": ((fixture.get("teams") or {}).get("home") or {}).get("name"),
@@ -8310,8 +8330,7 @@ else:
                     "model_id": "estimate_live_goal_markets",
                     "source": "football_lab_live_scanner",
                     "snapshot_id": ":".join(str(value) for value in (
-                        fixture_data.get("id"), context.get("elapsed"),
-                        goals_data.get("home"), goals_data.get("away"),
+                        fixture_id, context.get("elapsed"), goals_data.get("home"), goals_data.get("away"),
                     )),
                     "context_status": context.get("context_status"),
                     "corners_total": context.get("corners_total"),
@@ -8330,53 +8349,224 @@ else:
                 })
                 row_key = (str(row["fixture_id"]), str(row["market"]), str(row["minute"]),
                            str(row["score_home"]), str(row["score_away"]))
+                odds_rows_for_fixture = odds_index_for_scan.get(str(fixture_id), [])
+                scan_diagnostics["goal_candidates_evaluated"] += 1
+                if not odds_rows_for_fixture:
+                    scan_diagnostics["goal_candidates_without_quotes"] += 1
+                verified_odds = match_goal_tip_to_live_odds(
+                    str(market), float(probability), odds_rows_for_fixture
+                )
+                if verified_odds:
+                    _opportunity = evaluate_opportunity({
+                        "market": classify_goal_tip_market(market),
+                        "selection": str(market),
+                        "probability": float(probability),
+                        "odds": float(verified_odds["odd"]),
+                        "odds_verified": True,
+                        "fixture_id": fixture_id,
+                        "fixture": f"{row.get('home') or 'Local'} vs {row.get('away') or 'Visitante'}",
+                        "minute": row.get("minute"),
+                        "score": f"{row.get('score_home', '?')}-{row.get('score_away', '?')}",
+                        "bookmaker": str(verified_odds.get("bookmaker") or ""),
+                        "source": "api-football-live-odds",
+                    }, min_ev=0.02, min_odds=1.35, max_odds=10.0)
+                    if _opportunity.get("eligible"):
+                        row.update({
+                            "verified_live_odd": float(verified_odds["odd"]),
+                            "verified_bookmaker": str(verified_odds.get("bookmaker") or "Casa no identificada"),
+                            "verified_odds_market": str(verified_odds.get("market_label") or ""),
+                            "odds_decimal": float(verified_odds["odd"]),
+                            "odds_verified": True,
+                            "odds_bookmaker": str(verified_odds.get("bookmaker") or "Casa no identificada"),
+                            "odds_market": str(verified_odds.get("market_label") or ""),
+                            "implied_probability": round(float(_opportunity["implied_probability"]), 4),
+                            "estimated_edge": round(float(_opportunity["edge"]), 4),
+                            "expected_value": _opportunity["expected_value"],
+                            "opportunity_engine": "v1",
+                        })
+                        scan_diagnostics["eligible_goal_signals"] += 1
+                        if row_key not in existing_keys:
+                            signal_rows.append(row)
+                            new_signal_rows.append(row)
+                    else:
+                        scan_diagnostics["goal_candidates_without_exact_quote_or_below_filters"] += 1
+                elif odds_rows_for_fixture:
+                    scan_diagnostics["goal_candidates_without_exact_quote_or_below_filters"] += 1
+                if row_key not in existing_keys:
+                    existing_keys.add(row_key)
+
+        # CÓRNERS: usar la proyección en vivo + promedio histórico por localía.
+        # Solo entra al evaluador si hay muestra histórica mínima, datos en vivo,
+        # puerta experimental de actividad y cuota exacta para el mismo fixture.
+        import math
+        import re
+        for corner_item in corner_results:
+            fixture = corner_item.get("fixture") or {}
+            fixture_data = fixture.get("fixture") or {}
+            fixture_id = fixture_data.get("id")
+            if not fixture_id or corner_item.get("error"):
+                continue
+            minute = (fixture_data.get("status") or {}).get("elapsed")
+            home_corners = corner_item.get("home_corners")
+            away_corners = corner_item.get("away_corners")
+            home_shots = corner_item.get("home_shots")
+            away_shots = corner_item.get("away_shots")
+            total_now = (
+                float(home_corners) + float(away_corners)
+                if isinstance(home_corners, (int, float)) and isinstance(away_corners, (int, float))
+                else None
+            )
+            pace = corner_item.get("pace")
+            history = corner_item.get("automatic_history") or {}
+            home_history = history.get("home_corners_for")
+            away_history = history.get("away_corners_for")
+            home_sample = int(history.get("home_corner_sample", 0) or 0)
+            away_sample = int(history.get("away_corner_sample", 0) or 0)
+            history_ready = (
+                isinstance(home_history, (int, float))
+                and isinstance(away_history, (int, float))
+                and home_sample >= 3 and away_sample >= 3
+            )
+            activity_ready = qualifies_as_corner_candidate(
+                minute, total_now, pace, home_shots, away_shots
+            )
+            if not history_ready or not activity_ready:
+                continue
+
+            scan_diagnostics["corner_probability_candidates"] += 1
+            historical_total_mean = float(home_history) + float(away_history)
+            live_projection = float(total_now) * 90.0 / max(1, int(minute))
+            projected_total = 0.55 * historical_total_mean + 0.45 * live_projection
+            remaining_expected = max(0.0, projected_total - float(total_now))
+            remaining_lambda = max(0.05, remaining_expected * 0.70)
+            odds_rows_for_fixture = odds_index_for_scan.get(str(fixture_id), [])
+            if not odds_rows_for_fixture:
+                scan_diagnostics["corner_candidates_without_quotes"] += 1
+                continue
+
+            corner_market_rows = [
+                row for row in best_live_odds_by_market(odds_rows_for_fixture)
+                if "córners" in str(row.get("market_label") or "").casefold()
+                and isinstance(row.get("odd"), (int, float))
+            ]
+            if not corner_market_rows:
+                scan_diagnostics["corner_candidates_without_exact_quote_or_below_filters"] += 1
+                continue
+
+            scan_diagnostics["corner_candidates_evaluated"] += 1
+            goals_data = fixture.get("goals") or {}
+            teams = fixture.get("teams") or {}
+            home_name = (teams.get("home") or {}).get("name") or "Local"
+            away_name = (teams.get("away") or {}).get("name") or "Visitante"
+            for odds_row in corner_market_rows:
+                market_label = str(odds_row.get("market_label") or "")
+                odd = odds_row.get("odd")
+                line_match = re.search(r"(\\d+(?:[.,]\\d+)?)", market_label)
+                if not line_match or not isinstance(odd, (int, float)):
+                    continue
+                market_line = float(line_match.group(1).replace(",", "."))
+                # Evitar líneas enteras: su liquidación puede incluir push y requiere
+                # probabilidades separadas de ganar/devolver; aquí solo modelamos medio gol.
+                if abs((market_line % 1.0) - 0.5) > 1e-8:
+                    continue
+                if market_label.startswith("Más de "):
+                    required_remaining = math.floor(market_line - float(total_now)) + 1
+                    model_probability = poisson_at_least(remaining_lambda, required_remaining)
+                elif market_label.startswith("Menos de "):
+                    max_remaining = math.ceil(market_line - float(total_now)) - 1
+                    model_probability = sum(
+                        poisson_pmf(remaining_lambda, count)
+                        for count in range(max_remaining + 1)
+                    ) if max_remaining >= 0 else 0.0
+                else:
+                    continue
+                if not isinstance(model_probability, (int, float)) or not 0.0 < model_probability < 1.0:
+                    continue
+
+                scan_diagnostics["corner_candidates_evaluated"] += 0 if scan_diagnostics["corner_candidates_evaluated"] else 0
+                row_key = (str(fixture_id), market_label, str(minute),
+                           str(goals_data.get("home")), str(goals_data.get("away")))
+                row = {
+                    "recorded_at": datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
+                    "fixture_id": fixture_id,
+                    "league_id": (fixture.get("league") or {}).get("id"),
+                    "league": (fixture.get("league") or {}).get("name"),
+                    "home": home_name,
+                    "away": away_name,
+                    "phase": "live",
+                    "minute": minute,
+                    "score_home": goals_data.get("home"),
+                    "score_away": goals_data.get("away"),
+                    "market": market_label,
+                    "market_type": "corners",
+                    "selection": market_label,
+                    "probability": round(float(model_probability), 4),
+                    "estimated_probability_exploratory": round(float(model_probability), 4),
+                    "model_id": "live_corner_poisson_exploratory",
+                    "source": "football_lab_live_scanner",
+                    "snapshot_id": ":".join(str(value) for value in (
+                        fixture_id, minute, goals_data.get("home"), goals_data.get("away"),
+                        total_now, market_label,
+                    )),
+                    "corners_total": total_now,
+                    "shots_total": float(home_shots) + float(away_shots),
+                    "historical_home_corners_for": float(home_history),
+                    "historical_away_corners_for": float(away_history),
+                    "historical_home_corner_sample": home_sample,
+                    "historical_away_corner_sample": away_sample,
+                    "projected_total_corners": round(projected_total, 3),
+                    "remaining_expected_corners": round(remaining_expected, 3),
+                    "final_score": "",
+                    "outcome": "",
+                    "outcome_verified": "",
+                }
+                scan_diagnostics["corner_candidates_evaluated"] += 1
+                _opportunity = evaluate_opportunity({
+                    "market": "corners",
+                    "selection": market_label,
+                    "probability": float(model_probability),
+                    "odds": float(odd),
+                    "odds_verified": True,
+                    "fixture_id": fixture_id,
+                    "fixture": f"{home_name} vs {away_name}",
+                    "minute": minute,
+                    "score": f"{goals_data.get('home', '?')}-{goals_data.get('away', '?')}",
+                    "bookmaker": str(odds_row.get("bookmaker") or ""),
+                    "source": "api-football-live-odds",
+                }, min_ev=0.02, min_odds=1.35, max_odds=10.0)
+                if not _opportunity.get("eligible"):
+                    scan_diagnostics["corner_candidates_without_exact_quote_or_below_filters"] += 1
+                    continue
+                row.update({
+                    "verified_live_odd": float(odd),
+                    "verified_bookmaker": str(odds_row.get("bookmaker") or "Casa no identificada"),
+                    "verified_odds_market": market_label,
+                    "odds_decimal": float(odd),
+                    "odds_verified": True,
+                    "odds_bookmaker": str(odds_row.get("bookmaker") or "Casa no identificada"),
+                    "odds_market": market_label,
+                    "implied_probability": round(float(_opportunity["implied_probability"]), 4),
+                    "estimated_edge": round(float(_opportunity["edge"]), 4),
+                    "expected_value": _opportunity["expected_value"],
+                    "opportunity_engine": "v1",
+                })
+                scan_diagnostics["eligible_corner_signals"] += 1
                 if row_key not in existing_keys:
                     signal_rows.append(row)
-                    odds_rows_for_fixture = st.session_state.get("live_odds_by_fixture", {}).get(str(fixture_data.get("id")), [])
-                    scan_diagnostics["goal_candidates_evaluated"] += 1
-                    if not odds_rows_for_fixture:
-                        scan_diagnostics["goal_candidates_without_quotes"] += 1
-                    verified_odds = match_goal_tip_to_live_odds(
-                        str(market), float(probability), odds_rows_for_fixture
-                    )
-                    if verified_odds:
-                        # Segunda validación centralizada: solo admite cuota real
-                        # del mercado exacto, fixture identificado y EV mínimo.
-                        _opportunity = evaluate_opportunity({
-                            "market": classify_goal_tip_market(market),
-                            "selection": str(market),
-                            "probability": float(probability),
-                            "odds": float(verified_odds["odd"]),
-                            "odds_verified": True,
-                            "fixture_id": fixture_data.get("id"),
-                            "fixture": f"{row.get('home') or 'Local'} vs {row.get('away') or 'Visitante'}",
-                            "minute": row.get("minute"),
-                            "score": f"{row.get('score_home', '?')}-{row.get('score_away', '?')}",
-                            "bookmaker": str(verified_odds.get("bookmaker") or ""),
-                            "source": "api-football-live-odds",
-                        }, min_ev=0.02, min_odds=1.35, max_odds=10.0)
-                        if _opportunity.get("eligible"):
-                            row.update({
-                                "verified_live_odd": float(verified_odds["odd"]),
-                                "verified_bookmaker": str(verified_odds.get("bookmaker") or "Casa no identificada"),
-                                "verified_odds_market": str(verified_odds.get("market_label") or ""),
-                                "odds_decimal": float(verified_odds["odd"]),
-                                "odds_verified": True,
-                                "odds_bookmaker": str(verified_odds.get("bookmaker") or "Casa no identificada"),
-                                "odds_market": str(verified_odds.get("market_label") or ""),
-                                "implied_probability": round(float(verified_odds["implied_probability"]), 4),
-                                "estimated_edge": round(float(verified_odds["estimated_edge"]), 4),
-                                "expected_value": _opportunity["expected_value"],
-                                "opportunity_engine": "v1",
-                            })
-                            new_signal_rows.append(row)
-                            scan_diagnostics["eligible_goal_signals"] += 1
-                        else:
-                            scan_diagnostics["goal_candidates_without_exact_quote_or_below_filters"] += 1
-                    elif odds_rows_for_fixture:
-                        scan_diagnostics["goal_candidates_without_exact_quote_or_below_filters"] += 1
+                    new_signal_rows.append(row)
                     existing_keys.add(row_key)
-        scan_diagnostics["corner_probability_candidates"] = 0
+
+        if scan_diagnostics["corner_probability_candidates"]:
+            scan_diagnostics["corner_model_status"] = (
+                "Modelo exploratorio conectado: candidatos calculados con muestra histórica mínima, "
+                "ritmo en vivo y actividad. Solo se aprueban cuotas exactas con EV ≥ 2 %; "
+                "las probabilidades aún no están calibradas."
+            )
+        elif scan_diagnostics["corner_stats_ready"]:
+            scan_diagnostics["corner_model_status"] = (
+                "Datos de córners disponibles, pero ningún partido superó simultáneamente "
+                "la muestra histórica mínima y el filtro experimental de actividad."
+            )
         scan_diagnostics["telegram_queue_after_scan"] = len(st.session_state.get("telegram_pending_rows", [])) + len(new_signal_rows)
         scan_diagnostics["scan_finished_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         st.session_state["last_scan_diagnostics"] = scan_diagnostics
