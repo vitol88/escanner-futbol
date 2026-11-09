@@ -315,8 +315,8 @@ def build_automatic_history(
         "available": bool(h["matches"] or a["matches"]),
         "corners_available": bool(h["corner_sample"] or a["corner_sample"]),
         "corners_pending": bool(
-            (h["matches"] > 0 and h["corner_sample"] == 0)
-            or (a["matches"] > 0 and a["corner_sample"] == 0)
+            (h["matches"] > 0 and h["corner_sample"] < min(3, h["matches"]))
+            or (a["matches"] > 0 and a["corner_sample"] < min(3, a["matches"]))
         ),
         "home_matches": h["matches"], "away_matches": a["matches"],
         "home_goals_for": h["gf"], "home_goals_against": h["ga"],
