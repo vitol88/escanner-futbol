@@ -4214,6 +4214,50 @@ if "signal_history_warning_shown" not in st.session_state:
     st.session_state.signal_history_warning_shown = False
 
 with st.container(key="top_status_controls"):
+    st.markdown("""<style>
+    [class*="st-key-top_status_controls"] {
+      position:relative !important; z-index:8 !important;
+      display:block !important; width:100% !important;
+      margin:12px 0 18px !important; padding:10px 9px 8px !important;
+      border:1px solid rgba(250,204,21,.58) !important;
+      border-radius:15px !important;
+      background:linear-gradient(135deg,rgba(35,31,19,.98),rgba(16,18,23,.98)) !important;
+      box-shadow:0 5px 18px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.04) !important;
+    }
+    [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] {
+      display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+      gap:8px !important; align-items:center !important;
+    }
+    [class*="st-key-top_status_controls"] [data-testid="column"] {
+      min-width:0 !important; width:auto !important; flex:none !important;
+    }
+    [class*="st-key-auto_refresh_control_card"],
+    [class*="st-key-sound_control_card"] {
+      min-height:42px !important; display:flex !important; align-items:center !important;
+      justify-content:center !important; padding:5px 4px !important;
+      border:1px solid rgba(212,167,44,.48) !important; border-radius:10px !important;
+      background:rgba(250,204,21,.055) !important;
+    }
+    [class*="st-key-top_status_controls"] [data-testid="stMarkdownContainer"] div {
+      font-size:12px !important; font-weight:800 !important; letter-spacing:.02em !important;
+    }
+    [class*="st-key-top_status_controls"] [role="switch"] {
+      transform:scale(1.08) !important; transform-origin:center !important;
+    }
+    [class*="st-key-top_status_controls"] iframe { height:38px !important; }
+    @media(max-width:640px) {
+      [class*="st-key-top_status_controls"] {
+        margin:14px 0 22px !important; padding:9px 6px 7px !important;
+      }
+      [class*="st-key-top_status_controls"] [data-testid="stHorizontalBlock"] { gap:5px !important; }
+      [class*="st-key-auto_refresh_control_card"],
+      [class*="st-key-sound_control_card"] { min-height:44px !important; padding:4px 2px !important; }
+      [class*="st-key-top_status_controls"] [data-testid="stMarkdownContainer"] div {
+        font-size:10px !important; letter-spacing:0 !important;
+      }
+      [class*="st-key-top_status_controls"] [role="switch"] { transform:scale(1.12) !important; }
+    }
+    </style>""", unsafe_allow_html=True)
     status_cols = st.columns([1, 1, 1], gap="small")
     with status_cols[0]:
         with st.container(key="auto_refresh_control_card"):
@@ -4227,7 +4271,7 @@ with st.container(key="top_status_controls"):
                 )
             with auto_cols[1]:
                 st.markdown(
-                    '<div style="height:22px;display:flex;align-items:center;justify-content:flex-start;color:#D8C27A;-webkit-text-fill-color:#D8C27A;font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;font-size:8px;font-weight:600;line-height:1;letter-spacing:0;white-space:nowrap">⟳ Auto 60s</div>',
+                    '<div style="height:22px;display:flex;align-items:center;justify-content:flex-start;color:#D8C27A;-webkit-text-fill-color:#D8C27A;font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;font-size:12px;font-weight:800;line-height:1.1;letter-spacing:.01em;white-space:nowrap">⟳ Auto 60s</div>',
                     unsafe_allow_html=True,
                 )
     with status_cols[1]:
@@ -4243,14 +4287,14 @@ with st.container(key="top_status_controls"):
                 st.session_state.sound_muted = not sound_enabled
             with sound_cols[1]:
                 st.markdown(
-                    '<div style="height:22px;display:flex;align-items:center;justify-content:flex-start;color:#D8C27A;-webkit-text-fill-color:#D8C27A;font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;font-size:8px;font-weight:600;line-height:1;letter-spacing:0;white-space:nowrap">♫ Sonido</div>',
+                    '<div style="height:22px;display:flex;align-items:center;justify-content:flex-start;color:#D8C27A;-webkit-text-fill-color:#D8C27A;font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;font-size:12px;font-weight:800;line-height:1.1;letter-spacing:.01em;white-space:nowrap">♫ Sonido</div>',
                     unsafe_allow_html=True,
                 )
     with status_cols[2]:
         st.components.v1.html("""
 <style>html,body{margin:0!important;padding:0!important;width:100%!important;background:transparent!important;overflow:hidden!important;}</style>
 <div style="box-sizing:border-box;display:flex;align-items:center;justify-content:center;width:100%;height:34px;min-height:34px;max-height:34px;margin:0;padding:2px 0 0;overflow:visible">
-  <button id="scanner-test-sound" type="button" role="switch" aria-checked="false" title="Activar/desactivar y probar alertas sonoras" style="box-sizing:border-box;position:relative;top:0;display:flex;flex:1 1 auto;align-items:center;justify-content:center;gap:3px;width:100%;max-width:100%;height:22px;min-height:22px;max-height:22px;margin:0;padding:0;border-radius:0;border:0;background:transparent;color:#D8C27A;font:600 8px/1 system-ui;white-space:nowrap;cursor:pointer;align-self:center;vertical-align:middle"><span id="scanner-alert-switch" style="display:inline-block;position:relative;width:30px;height:16px;min-width:30px;max-width:30px;border-radius:10px;background:#D94A4A;flex:0 0 30px"><span id="scanner-alert-knob" style="position:absolute;left:2px;top:2px;width:12px;height:12px;max-width:12px;max-height:12px;border-radius:50%;background:#FFF;transition:left .15s"></span></span><span>Alertas</span></button>
+  <button id="scanner-test-sound" type="button" role="switch" aria-checked="false" title="Activar/desactivar y probar alertas sonoras" style="box-sizing:border-box;position:relative;top:0;display:flex;flex:1 1 auto;align-items:center;justify-content:center;gap:3px;width:100%;max-width:100%;height:22px;min-height:22px;max-height:22px;margin:0;padding:0;border-radius:0;border:0;background:transparent;color:#D8C27A;font:800 12px/1.1 system-ui;white-space:nowrap;cursor:pointer;align-self:center;vertical-align:middle"><span id="scanner-alert-switch" style="display:inline-block;position:relative;width:34px;height:18px;min-width:34px;max-width:34px;border-radius:10px;background:#D94A4A;flex:0 0 30px"><span id="scanner-alert-knob" style="position:absolute;left:2px;top:2px;width:14px;height:14px;max-width:14px;max-height:14px;border-radius:50%;background:#FFF;transition:left .15s"></span></span><span>Alertas</span></button>
 </div>
 <script>
 (() => {
@@ -4259,7 +4303,7 @@ with st.container(key="top_status_controls"):
  b.dataset.bound='1';
  let alertOn = localStorage.getItem('football-lab-alerts-enabled') === 'true';
   const track=document.getElementById('scanner-alert-switch'), knob=document.getElementById('scanner-alert-knob');
-  const paint=()=>{b.setAttribute('aria-checked',String(alertOn)); track.style.background=alertOn?'#22A06B':'#D94A4A'; knob.style.left=alertOn?'16px':'2px';};
+  const paint=()=>{b.setAttribute('aria-checked',String(alertOn)); track.style.background=alertOn?'#22A06B':'#D94A4A'; knob.style.left=alertOn?'18px':'2px';};
   paint();
   b.addEventListener('click', () => {
     alertOn=!alertOn;
