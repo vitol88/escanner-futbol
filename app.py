@@ -8462,11 +8462,13 @@ else:
                 odd = odds_row.get("odd")
                 line_match = re.search(r"(\d+(?:[.,]\d+)?)", market_label)
                 if not line_match or not isinstance(odd, (int, float)):
+                    scan_diagnostics["corner_candidates_without_exact_quote_or_below_filters"] += 1
                     continue
                 market_line = float(line_match.group(1).replace(",", "."))
                 # Evitar líneas enteras: su liquidación puede incluir push y requiere
                 # probabilidades separadas de ganar/devolver; aquí solo modelamos medio gol.
                 if abs((market_line % 1.0) - 0.5) > 1e-8:
+                    scan_diagnostics["corner_candidates_without_exact_quote_or_below_filters"] += 1
                     continue
                 if market_label.startswith("Más de "):
                     required_remaining = math.floor(market_line - float(total_now)) + 1
@@ -8480,6 +8482,7 @@ else:
                 else:
                     continue
                 if not isinstance(model_probability, (int, float)) or not 0.0 < model_probability < 1.0:
+                    scan_diagnostics["corner_candidates_without_exact_quote_or_below_filters"] += 1
                     continue
 
                 row_key = (str(fixture_id), market_label, str(minute),
