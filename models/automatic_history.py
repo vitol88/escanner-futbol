@@ -68,7 +68,7 @@ def build_automatic_history(
     league_id = league.get("id")
     season = league.get("season")
     result: dict[str, Any] = {
-        "available": False, "home_team": home.get("name"), "away_team": away.get("name"),
+        "available": False, "corners_available": False, "corners_pending": False, "home_team": home.get("name"), "away_team": away.get("name"),
         "home_matches": 0, "away_matches": 0, "h2h_matches": 0,
         "home_corners_for": None, "home_corners_against": None,
         "card_history_rows": [],
@@ -215,7 +215,9 @@ def build_automatic_history(
                     })
 
             half_stats = cache.get(half_stats_key)
-            if old_id and full_stats_key in cache and half_stats is None and time.time() >= float(cache.get(half_retry_key, 0) or 0) and request_budget[0] > 0 and not cache.get("_automatic_history_rate_limited"):
+            if old_id and full_stats_key in cache and half_stats is None and len(cf) >= 3 and request_budget[0] > 1 and time.time() >= float(cache.get(half_retry_key, 0) or 0) and not cache.get("_automatic_history_rate_limited"):
+                # Prioritize full-match corner samples; half splits are secondary
+                # and must not consume the budget before venue averages exist.
                 try:
                     # Half-time statistics consume the same shared API budget.
                     cache["_automatic_history_stats_calls"] = int(cache.get("_automatic_history_stats_calls", 0) or 0) + 1
@@ -311,6 +313,11 @@ def build_automatic_history(
     a = averages(away_fixtures, away["id"], "away", away_budget)
     result.update({
         "available": bool(h["matches"] or a["matches"]),
+        "corners_available": bool(h["corner_sample"] or a["corner_sample"]),
+        "corners_pending": bool(
+            (h["matches"] > 0 and h["corner_sample"] == 0)
+            or (a["matches"] > 0 and a["corner_sample"] == 0)
+        ),
         "home_matches": h["matches"], "away_matches": a["matches"],
         "home_goals_for": h["gf"], "home_goals_against": h["ga"],
         "away_goals_for": a["gf"], "away_goals_against": a["ga"],
