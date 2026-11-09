@@ -3788,8 +3788,8 @@ with st.sidebar:
                 st.error(_telegram_test_message)
 
         st.divider()
-        st.markdown("**APROBACIÓN MANUAL DE SEÑALES**")
-        st.caption("El escaneo solo prepara señales. Ninguna se publica sin que selecciones y confirmes una individualmente.")
+        st.markdown("**ENVÍO AUTOMÁTICO Y CONTROL DE SEÑALES**")
+        st.caption("Las señales nuevas que superan los filtros se reservan en Supabase y se envían automáticamente a Telegram durante el escaneo. Esta cola queda como respaldo para revisar o reenviar casos pendientes.")
         _telegram_queue = st.session_state.get("telegram_pending_rows", [])
         if _telegram_queue:
             _telegram_options = list(range(len(_telegram_queue)))
@@ -3872,6 +3872,17 @@ with st.sidebar:
         if st.session_state.get("telegram_publish_status"):
             st.caption(st.session_state.telegram_publish_status)
 
+
+
+
+def build_telegram_alert_key_safe(row):
+    """Derive the same deterministic key used by the Telegram idempotency store."""
+    import hashlib
+    fixture_id = str((row or {}).get("fixture_id") or "").strip()
+    market = " ".join(str((row or {}).get("verified_odds_market") or "").casefold().split())
+    if not fixture_id or not market:
+        return ""
+    return hashlib.sha256(f"{fixture_id}|{market}".encode("utf-8")).hexdigest()
 
 def get_api_key() -> str:
     try:
@@ -8322,14 +8333,80 @@ else:
             telegram_chat_id = str(os.getenv("TELEGRAM_CHAT_ID", "-1004668474905")).strip()
             supabase_url = str(os.getenv("SUPABASE_URL", "")).strip()
             supabase_secret_key = str(os.getenv("SUPABASE_SECRET_KEY", "")).strip()
-        # Modo seguro: el escaneo nunca publica automáticamente. Las señales elegibles
-        # quedan en cola para que el usuario apruebe y envíe una por una desde Diagnóstico.
-        if telegram_pending:
+        # Publicación automática: solo procesa señales nuevas generadas en este escaneo.
+        # Supabase reserva cada fixture/mercado de forma atómica antes de contactar Telegram.
+        auto_publish_stats = {"sent": 0, "duplicates": 0, "failed": 0, "waiting": 0}
+        if new_signal_rows:
+            if not all((telegram_token, telegram_chat_id, supabase_url, supabase_secret_key)):
+                auto_publish_stats["waiting"] = len(new_signal_rows)
+                st.session_state.telegram_publish_status = (
+                    f"{len(new_signal_rows)} señal(es) elegible(s) en espera: faltan credenciales de Telegram o Supabase."
+                )
+            else:
+                processed_alert_keys = set()
+                for _signal_row in new_signal_rows:
+                    # Defensa adicional: nunca publicar filas sin cuota/mercado/edge verificados.
+                    _odd = _signal_row.get("verified_live_odd")
+                    _edge = _signal_row.get("estimated_edge")
+                    if (
+                        not isinstance(_odd, (int, float))
+                        or not _signal_row.get("verified_bookmaker")
+                        or not _signal_row.get("verified_odds_market")
+                        or not isinstance(_edge, (int, float))
+                        or float(_edge) < 0.02
+                        or not (1.35 <= float(_odd) <= 1.60 or float(_odd) >= 1.70)
+                    ):
+                        auto_publish_stats["waiting"] += 1
+                        continue
+                    _reserved, _alert_key, _reserve_detail = reserve_telegram_alert(
+                        _signal_row, supabase_url, supabase_secret_key
+                    )
+                    if not _reserved:
+                        if _alert_key:
+                            # Ya enviada o reservada: se retira de la cola para no insistir.
+                            auto_publish_stats["duplicates"] += 1
+                            processed_alert_keys.add(_alert_key)
+                        else:
+                            auto_publish_stats["failed"] += 1
+                        continue
+                    _sent, _send_detail = send_telegram_signal(
+                        _signal_row, telegram_token, telegram_chat_id
+                    )
+                    _updated = update_telegram_alert(
+                        _alert_key, "sent" if _sent else "failed",
+                        supabase_url, supabase_secret_key,
+                        error="" if _sent else _send_detail,
+                    )
+                    processed_alert_keys.add(_alert_key)
+                    if _sent:
+                        auto_publish_stats["sent"] += 1
+                        if not _updated:
+                            # Telegram ya recibió el mensaje; advertir que faltó cerrar el registro.
+                            st.session_state.telegram_publish_status = (
+                                "Telegram recibió una señal, pero Supabase no confirmó el estado final. "
+                                "La reserva evita que se duplique automáticamente."
+                            )
+                    else:
+                        auto_publish_stats["failed"] += 1
+                if processed_alert_keys:
+                    telegram_pending = [
+                        _row for _row in telegram_pending
+                        if build_telegram_alert_key_safe(_row) not in processed_alert_keys
+                    ]
+                    st.session_state.telegram_pending_rows = telegram_pending
+                st.session_state.telegram_auto_publish_last = auto_publish_stats
+                if not st.session_state.get("telegram_publish_status", "").startswith("Telegram recibió"):
+                    st.session_state.telegram_publish_status = (
+                        f"Envío automático del escaneo: {auto_publish_stats['sent']} enviada(s), "
+                        f"{auto_publish_stats['duplicates']} duplicada(s) bloqueada(s), "
+                        f"{auto_publish_stats['failed']} fallida(s), "
+                        f"{auto_publish_stats['waiting']} en espera."
+                    )
+        elif telegram_pending:
             st.session_state.telegram_publish_status = (
-                f"{len(telegram_pending)} señal(es) elegible(s) esperando aprobación manual."
+                f"{len(telegram_pending)} señal(es) elegible(s) conservada(s) en cola; "
+                "se procesarán al generarse una nueva señal verificada."
             )
-        elif new_signal_rows and not (telegram_token and telegram_chat_id):
-            st.session_state.telegram_publish_status = "Señales en espera: configura TELEGRAM_BOT_TOKEN en los secretos del despliegue."
         try:
             if signal_rows:
                 SIGNAL_HISTORY_PATH.parent.mkdir(parents=True, exist_ok=True)
