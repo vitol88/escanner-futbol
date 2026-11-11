@@ -7994,14 +7994,28 @@ else:
         if get_api_key() and odds_now - last_odds_epoch >= 60:
             try:
                 odds_payload = api_get("odds/live")
+                odds_response_items = odds_payload.get("response") or []
+                st.session_state.live_odds_api_response_count = len(odds_response_items)
+                st.session_state.live_odds_api_errors = odds_payload.get("errors") or {}
+                st.session_state.live_odds_api_fixture_ids = [
+                    str(((item.get("fixture") or {}).get("id")))
+                    for item in odds_response_items
+                    if (item.get("fixture") or {}).get("id") is not None
+                ]
                 st.session_state.live_odds_by_fixture = extract_live_odds(odds_payload)
                 st.session_state.live_odds_last_fetch = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 st.session_state.live_odds_last_fetch_epoch = odds_now
                 st.session_state.live_odds_error = ""
             except Exception as odds_exc:
                 st.session_state.live_odds_error = str(odds_exc)
+                st.session_state.live_odds_api_response_count = 0
+                st.session_state.live_odds_api_errors = {}
+                st.session_state.live_odds_api_fixture_ids = []
         elif "live_odds_by_fixture" not in st.session_state:
             st.session_state.live_odds_by_fixture = {}
+            st.session_state.live_odds_api_response_count = 0
+            st.session_state.live_odds_api_errors = {}
+            st.session_state.live_odds_api_fixture_ids = []
 
         # Compare current scores with the previous completed scan without extra API calls.
         previous_scores = st.session_state.get("previous_scan_scores", {})
@@ -8292,6 +8306,9 @@ else:
             "odds_rows_returned": odds_rows_total,
             "fixtures_with_odds": fixtures_with_odds,
             "fixtures_without_odds": max(0, len(filtered) - fixtures_with_odds),
+            "odds_api_response_count": int(st.session_state.get("live_odds_api_response_count", 0) or 0),
+            "odds_api_fixture_ids": st.session_state.get("live_odds_api_fixture_ids", []),
+            "odds_api_errors": st.session_state.get("live_odds_api_errors", {}),
             "odds_last_fetch": st.session_state.get("live_odds_last_fetch"),
             "odds_error": st.session_state.get("live_odds_error", ""),
             "corner_model_status": "Modelo exploratorio conectado al evaluador central; requiere cuota real del mercado exacto y EV mínimo del 2 %. No equivale a un modelo calibrado.",
@@ -8762,10 +8779,18 @@ else:
                 _odds_cols[0].metric("Partidos con cuotas", int(_scan_diag.get("fixtures_with_odds", 0)))
                 _odds_cols[1].metric("Partidos sin cuotas", int(_scan_diag.get("fixtures_without_odds", 0)))
                 _odds_cols[2].metric("Mercados recibidos", int(_scan_diag.get("odds_rows_returned", 0)))
+                st.caption(
+                    f"Respuesta de API-Football: {_scan_diag.get('odds_api_response_count', 0)} partidos · "
+                    f"IDs recibidos: {', '.join(_scan_diag.get('odds_api_fixture_ids', [])[:12]) or 'ninguno'}"
+                )
                 if _scan_diag.get("odds_error"):
-                    st.warning(f"Último error al consultar cuotas: {_scan_diag.get('odds_error')}")
+                    st.warning(f"Error de consulta de cuotas: {_scan_diag.get('odds_error')}")
+                elif _scan_diag.get("odds_api_errors"):
+                    st.warning(f"API-Football reportó: {_scan_diag.get('odds_api_errors')}")
                 elif _scan_diag.get("odds_last_fetch"):
                     st.caption(f"Última consulta de cuotas: {_scan_diag.get('odds_last_fetch')}")
+                if int(_scan_diag.get("odds_api_response_count", 0) or 0) == 0 and not _scan_diag.get("odds_error"):
+                    st.info("La consulta global /odds/live respondió sin partidos. Esto apunta a cobertura/respuesta del proveedor; todavía no significa que los 5 partidos no tengan cuotas en todas las casas.")
                 st.caption("Una cuota solo cuenta como válida cuando coincide con el fixture y el mercado exacto. No se generan señales a partir de promedios descriptivos.")
         tab_goals, tab_corners, tab_overview = st.tabs(["⚽ Goles y señales", "🚩 Córners", "📈 Rendimiento del modelo"])
 
