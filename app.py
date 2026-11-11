@@ -8190,7 +8190,13 @@ else:
                     len(_item.get("bookmakers") or [])
                     for _item in _targeted_items if isinstance(_item, dict)
                 )
+                # /odds/live devuelve mercados en odds[].values[], no solo bookmakers[].bets[].
                 _targeted_bets = sum(
+                    len(_market.get("values") or [])
+                    for _item in _targeted_items if isinstance(_item, dict)
+                    for _market in (_item.get("odds") or [])
+                    if isinstance(_market, dict)
+                ) + sum(
                     len(_bet.get("values") or [])
                     for _item in _targeted_items if isinstance(_item, dict)
                     for _bookmaker in (_item.get("bookmakers") or [])
@@ -8213,6 +8219,17 @@ else:
                         "returned_fixture_id": str(_raw_fixture.get("id") or ""),
                         "response_keys": sorted(str(_key) for _key in _raw_item.keys())[:24],
                         "bookmaker_count": len(_raw_bookmakers) if isinstance(_raw_bookmakers, list) else None,
+                        "live_market_count": len(_raw_item.get("odds") or []) if isinstance(_raw_item.get("odds"), list) else 0,
+                        "live_value_count": sum(
+                            len(_market.get("values") or [])
+                            for _market in (_raw_item.get("odds") or [])
+                            if isinstance(_market, dict)
+                        ) if isinstance(_raw_item.get("odds"), list) else 0,
+                        "live_market_names": [
+                            str(_market.get("name") or "")
+                            for _market in (_raw_item.get("odds") or [])[:8]
+                            if isinstance(_market, dict)
+                        ] if isinstance(_raw_item.get("odds"), list) else [],
                         "bookmaker_names": [
                             str(_book.get("name") or _book.get("id") or "")
                             for _book in _raw_bookmakers[:8] if isinstance(_book, dict)
@@ -8621,7 +8638,7 @@ else:
                 verified_odds = match_goal_tip_to_live_odds(
                     str(market), float(probability), odds_rows_for_fixture
                 )
-                if verified_odds:
+                if verified_odds and verified_odds.get("bookmaker_verified") is True:
                     _opportunity = evaluate_opportunity({
                         "market": classify_goal_tip_market(market),
                         "selection": str(market),
@@ -8747,6 +8764,9 @@ else:
                 else:
                     continue
                 if not isinstance(model_probability, (int, float)) or not 0.0 < model_probability < 1.0:
+                    scan_diagnostics["corner_candidates_without_exact_quote_or_below_filters"] += 1
+                    continue
+                if odds_row.get("bookmaker_verified") is not True:
                     scan_diagnostics["corner_candidates_without_exact_quote_or_below_filters"] += 1
                     continue
 
@@ -9096,7 +9116,10 @@ else:
                                 "Respuesta recibida · "
                                 f"fixture={_item_summary.get('returned_fixture_id') or 'sin ID'} · "
                                 f"claves={', '.join(_item_summary.get('response_keys', [])) or 'ninguna'} · "
-                                f"casas={', '.join(_item_summary.get('bookmaker_names', [])) or 'ninguna'} · "
+                                f"casas={', '.join(_item_summary.get('bookmaker_names', [])) or 'no desglosadas'} · "
+                                f"mercados LIVE={_item_summary.get('live_market_count', 0)} · "
+                                f"valores LIVE={_item_summary.get('live_value_count', 0)} · "
+                                f"nombres={', '.join(_item_summary.get('live_market_names', [])) or 'ninguno'} · "
                                 f"estado={_item_summary.get('status', {})}"
                             )
                             if _item_summary.get("league") or _item_summary.get("home") or _item_summary.get("away"):
