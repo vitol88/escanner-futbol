@@ -9965,7 +9965,7 @@ else:
             st.caption("Historial de señales, verificación retrospectiva y evaluación de calidad del pronóstico.")
 
             st.markdown("#### Resultados finales · Supabase")
-            st.caption("Busca los partidos guardados en el histórico, verifica su estado final en API-Football y registra marcadores, córners y tarjetas amarillas. Los resultados idénticos no se vuelven a insertar.")
+            st.caption("Verifica en API-Football los últimos 100 partidos referenciados tanto por el registro central de pronósticos como por las capturas históricas. Registra marcadores, córners y tarjetas amarillas confirmados; los resultados idénticos no se vuelven a insertar. El escaneo está limitado para proteger el cupo diario de API-Football.")
             if st.button("Verificar y sincronizar resultados finales", key="sync_finished_outcomes"):
                 try:
                     _outcome_url = str(st.secrets.get("SUPABASE_URL", "") or os.getenv("SUPABASE_URL", "")).strip()
