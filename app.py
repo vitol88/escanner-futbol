@@ -3886,7 +3886,7 @@ def _api_cache_ttl(endpoint: str, params: dict[str, Any] | None = None) -> int:
     if endpoint == "fixtures" and (params or {}).get("live") == "all":
         return 25
     if endpoint == "odds/live":
-        return 120
+        return 30
     if endpoint == "fixtures/statistics":
         fixture_id = str((params or {}).get("fixture") or "")
         live_ids = {
@@ -7920,7 +7920,7 @@ else:
     auto_scan_due = (
         st.session_state.auto_refresh_enabled
         and should_refresh
-        and now_epoch - int(st.session_state.last_auto_market_scan_epoch) >= 300
+        and now_epoch - int(st.session_state.last_auto_market_scan_epoch) >= 120
     )
     if manual_scan or auto_scan_due:
         st.session_state.last_auto_market_scan_epoch = now_epoch
@@ -7991,7 +7991,7 @@ else:
         odds_now = datetime.now().timestamp()
         last_odds_epoch = float(st.session_state.get("live_odds_last_fetch_epoch", 0) or 0)
         # El pipeline del balón ya consultó cuotas en la fase de actualización; reutilizar ese resultado.
-        if get_api_key() and odds_now - last_odds_epoch >= 300:
+        if get_api_key() and odds_now - last_odds_epoch >= 60:
             try:
                 odds_payload = api_get("odds/live")
                 st.session_state.live_odds_by_fixture = extract_live_odds(odds_payload)
