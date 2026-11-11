@@ -86,3 +86,18 @@ def test_format_signal_message_labels_high_risk_odds():
     assert "MODO ARRIESGADO" in message
     assert "CUOTA: 1.75" in message
     assert "Casa B" in message
+
+def test_format_signal_message_does_not_claim_unknown_bookmaker():
+    message = format_signal_message({
+        "home": "Local", "away": "Visitante", "market": "Más de 8.5 córners",
+        "verified_live_odd": 1.55,
+        "verified_bookmaker": "Referencia API-Football LIVE (casa no especificada)",
+        "bookmaker_verified": False,
+        "odds_source": "API-Football LIVE",
+        "verified_odds_market": "Más de 8.5 córners",
+        "estimated_edge": 0.04,
+    })
+    assert "CUOTA: 1.55" in message
+    assert "Fuente: API-Football LIVE" in message
+    assert "casa no especificada" in message
+    assert "Casa: Referencia" not in message
