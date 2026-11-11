@@ -9110,6 +9110,20 @@ else:
         if _scan_diag:
             st.markdown("### 🔎 Diagnóstico del último escaneo")
             st.caption(f"Actualizado: {_scan_diag.get('scan_finished_at', '—')} · Los filtros de elegibilidad se mantienen intactos.")
+            _ledger_sync = st.session_state.get("prediction_ledger_sync_diagnostics") or {}
+            _ledger_write = st.session_state.get("prediction_ledger_last_write") or {}
+            if _ledger_sync:
+                st.caption(
+                    f"Registro independiente: {_ledger_sync.get('forecast_candidates_this_scan', 0)} "
+                    f"pronóstico(s) exploratorio(s) detectado(s) en este escaneo · "
+                    f"{_ledger_write.get('inserted', 0)} nuevo(s) guardado(s) · "
+                    f"{_ledger_write.get('duplicates', 0)} duplicado(s) controlado(s). "
+                    "Se guardan aunque no generen señal."
+                )
+            if st.session_state.get("prediction_ledger_write_error"):
+                st.warning(f"No se pudo guardar el registro local de pronósticos: {st.session_state['prediction_ledger_write_error']}")
+            if st.session_state.get("prediction_supabase_write_error"):
+                st.warning(f"No se pudo sincronizar el registro remoto de pronósticos: {st.session_state['prediction_supabase_write_error']}")
             _diag_cols = st.columns(4)
             _diag_cols[0].metric("Partidos analizados", int(_scan_diag.get("fixtures_scanned", 0)))
             _diag_cols[1].metric("Modelos de goles disponibles", int(_scan_diag.get("goal_estimates_available", 0)))
