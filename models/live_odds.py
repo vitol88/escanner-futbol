@@ -156,7 +156,7 @@ def numerology_context(
 
 
 def best_live_odds_by_market(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Return the highest currently listed price per recognized market."""
+    """Prefer a named bookmaker; otherwise use the highest provider-level live quote."""
     best: dict[str, dict[str, Any]] = {}
     for row in rows:
         label = classify_market(row)
@@ -164,7 +164,12 @@ def best_live_odds_by_market(rows: list[dict[str, Any]]) -> list[dict[str, Any]]
         if not label or not isinstance(odd, (int, float)) or odd <= 1:
             continue
         current = best.get(label)
-        if current is None or float(odd) > float(current.get("odd", 0)):
+        candidate_rank = (row.get("bookmaker_verified") is True, float(odd))
+        current_rank = (
+            current.get("bookmaker_verified") is True,
+            float(current.get("odd", 0)),
+        ) if current else None
+        if current is None or candidate_rank > current_rank:
             best[label] = {**row, "market_label": label}
     return list(best.values())
 
