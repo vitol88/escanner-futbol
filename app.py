@@ -8150,7 +8150,8 @@ else:
             for _returned_fixture_id, _returned_rows in _league_rows.items():
                 _returned_fixture_key = str(_returned_fixture_id)
                 if _returned_fixture_key in _league_fixture_ids and _returned_rows:
-                    global_odds_index.setdefault(_returned_fixture_key, []).extend(_returned_rows)
+                    if not global_odds_index.get(_returned_fixture_key):
+                        global_odds_index[_returned_fixture_key] = list(_returned_rows)
                     _matched_fixture_ids.append(_returned_fixture_key)
                     _parsed_league_rows += len(_returned_rows)
             league_odds_details.append({
