@@ -16,7 +16,7 @@ def test_format_signal_message_includes_match_market_and_probability():
     message = format_signal_message({
         "home": "América", "away": "Cali", "score_home": 1, "score_away": 0,
         "minute": 67, "market": "Más de 1.5 goles", "probability": 0.82,
-        "verified_live_odd": 1.55, "verified_bookmaker": "Casa A",
+        "verified_live_odd": 1.55, "verified_bookmaker": "Casa A", "bookmaker_verified": True,
         "verified_odds_market": "Más de 1.5 goles", "estimated_edge": 0.04,
     })
     assert "América vs Cali" in message
@@ -40,7 +40,7 @@ def test_send_telegram_signal_uses_chat_id_and_does_not_leak_token():
 
     ok, detail = send_telegram_signal(
         {"home": "A", "away": "B", "market": "Empate", "verified_live_odd": 1.50,
-         "verified_bookmaker": "Casa A", "verified_odds_market": "Empate final", "estimated_edge": 0.03},
+         "verified_bookmaker": "Casa A", "bookmaker_verified": True, "verified_odds_market": "Empate final", "estimated_edge": 0.03},
         "secret-token", "-1004668474905", post=fake_post,
     )
     assert ok is True
@@ -80,7 +80,7 @@ def test_send_telegram_signal_rejects_missing_or_out_of_band_odds():
 def test_format_signal_message_labels_high_risk_odds():
     message = format_signal_message({
         "home": "Local", "away": "Visitante", "market": "Ambos marcan",
-        "verified_live_odd": 1.75, "verified_bookmaker": "Casa B",
+        "verified_live_odd": 1.75, "verified_bookmaker": "Casa B", "bookmaker_verified": True,
         "verified_odds_market": "Ambos equipos marcan: Sí", "estimated_edge": 0.03,
     })
     assert "MODO ARRIESGADO" in message
@@ -101,3 +101,26 @@ def test_format_signal_message_does_not_claim_unknown_bookmaker():
     assert "Fuente: API-Football LIVE" in message
     assert "casa no especificada" in message
     assert "Casa: Referencia" not in message
+
+
+def test_send_telegram_signal_rejects_unidentified_bookmaker_even_with_fallback_label():
+    calls = []
+
+    def fake_post(url, **kwargs):
+        calls.append(url)
+        return FakeResponse()
+
+    ok, detail = send_telegram_signal(
+        {
+            "home": "Local", "away": "Visitante", "market": "Menos de 2.5 goles",
+            "verified_live_odd": 1.48,
+            "verified_bookmaker": "Referencia API-Football LIVE (casa no especificada)",
+            "bookmaker_verified": False,
+            "verified_odds_market": "Menos de 2.5 goles",
+            "estimated_edge": 0.163,
+        },
+        "secret-token", "-1004668474905", post=fake_post,
+    )
+    assert ok is False
+    assert "cuota real" in detail
+    assert calls == []
