@@ -9050,20 +9050,32 @@ else:
                 st.info(str(_scan_diag.get("corner_model_status", "Estado del modelo de córners no disponible.")))
                 st.markdown("**Cobertura de cuotas en vivo**")
                 # Prueba aislada del fixture de referencia: no genera ni publica señales.
-                with st.expander("Prueba directa del partido Czarni Sosnowiec W vs Brann W (1644158)"):
-                    st.caption(
-                        "Consulta individual a API-Football /odds/live?fixture=1644158. "
-                        "Solo diagnóstico; no atribuye las cuotas a RushBet."
-                    )
-                    if st.button("Consultar fixture 1644158 ahora", key="test_live_odds_fixture_1644158"):
+                _probe_selected_fixture_id = str(st.session_state.get("selected_live_fixture_id") or "").strip()
+                _probe_selected_fixture = st.session_state.get("selected_live_fixture") or {}
+                _probe_selected_teams = _probe_selected_fixture.get("teams") or {}
+                _probe_selected_home = str((_probe_selected_teams.get("home") or {}).get("name") or "Local")
+                _probe_selected_away = str((_probe_selected_teams.get("away") or {}).get("name") or "Visitante")
+                with st.expander("Prueba directa de cuotas del partido seleccionado", expanded=False):
+                    if _probe_selected_fixture_id:
+                        st.caption(
+                            f"Partido seleccionado: {_probe_selected_home} vs {_probe_selected_away} · "
+                            f"fixture={_probe_selected_fixture_id}. Consulta individual a API-Football "
+                            "/odds/live; diagnóstico solamente, no atribuye cuotas a RushBet."
+                        )
+                    else:
+                        st.info("Primero selecciona un partido en la lista «En vivo ahora» para obtener su fixture ID.")
+                    if st.button(
+                        f"Consultar cuotas del fixture {_probe_selected_fixture_id or 'seleccionado'}",
+                        key="test_live_odds_selected_fixture",
+                        disabled=not bool(_probe_selected_fixture_id),
+                    ):
                         try:
-                            _probe_payload = api_get("odds/live", {"fixture": 1644158})
+                            _probe_payload = api_get("odds/live", {"fixture": int(_probe_selected_fixture_id)})
                             _probe_items = _probe_payload.get("response") or []
                             _probe_markets = []
                             for _probe_item in _probe_items:
                                 if not isinstance(_probe_item, dict):
                                     continue
-                                _probe_status = _probe_item.get("status") or {}
                                 for _probe_market in (_probe_item.get("odds") or []):
                                     if not isinstance(_probe_market, dict):
                                         continue
@@ -9083,7 +9095,8 @@ else:
                                         "market": str(_probe_market.get("name") or "Mercado sin nombre"),
                                         "values": _probe_values,
                                     })
-                            st.session_state["live_odds_fixture_1644158_probe"] = {
+                            st.session_state["live_odds_selected_fixture_probe"] = {
+                                "fixture_id": _probe_selected_fixture_id,
                                 "response_count": len(_probe_items),
                                 "markets": _probe_markets,
                                 "errors": _probe_payload.get("errors") or {},
@@ -9097,11 +9110,12 @@ else:
                                 ],
                             }
                         except Exception as _probe_exc:
-                            st.session_state["live_odds_fixture_1644158_probe"] = {
+                            st.session_state["live_odds_selected_fixture_probe"] = {
+                                "fixture_id": _probe_selected_fixture_id,
                                 "error": f"{type(_probe_exc).__name__}: {_probe_exc}"
                             }
-                    _probe_result = st.session_state.get("live_odds_fixture_1644158_probe")
-                    if _probe_result:
+                    _probe_result = st.session_state.get("live_odds_selected_fixture_probe")
+                    if _probe_result and str(_probe_result.get("fixture_id")) == _probe_selected_fixture_id:
                         if _probe_result.get("error"):
                             st.error(_probe_result["error"])
                         else:
