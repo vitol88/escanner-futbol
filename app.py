@@ -8088,6 +8088,88 @@ else:
         st.session_state.live_odds_league_coverage_cache = _coverage_cache
         st.session_state.live_odds_league_coverage_details = _coverage_details
 
+        # Consulta adicional por competición: odds/live admite el filtro league.
+        # Se cachea 60 s para evitar repetir llamadas en cada rerun de Streamlit.
+        league_odds_cache = st.session_state.get("live_odds_by_league_cache", {}) or {}
+        league_odds_details = []
+        league_odds_calls = 0
+        league_odds_errors = []
+        league_odds_now = datetime.now().timestamp()
+        league_ids_seen = set()
+        for _league_fixture in filtered:
+            _league_data = _league_fixture.get("league") or {}
+            _league_id = _league_data.get("id")
+            if not _league_id or str(_league_id) in league_ids_seen:
+                continue
+            _league_key = str(_league_id)
+            league_ids_seen.add(_league_key)
+            _cached_league_odds = league_odds_cache.get(_league_key) or {}
+            if league_odds_now - float(_cached_league_odds.get("fetched_epoch", 0) or 0) >= 60:
+                try:
+                    _league_odds_payload = api_get("odds/live", {"league": _league_id})
+                    _league_odds_items = _league_odds_payload.get("response") or []
+                    _league_odds_rows = extract_live_odds(_league_odds_payload)
+                    _league_bookmakers = sum(
+                        len(_item.get("bookmakers") or []) for _item in _league_odds_items
+                    )
+                    _league_bet_values = sum(
+                        len(_bet.get("values") or [])
+                        for _item in _league_odds_items
+                        for _bookmaker in (_item.get("bookmakers") or [])
+                        for _bet in (_bookmaker.get("bets") or [])
+                    )
+                    _cached_league_odds = {
+                        "fetched_epoch": league_odds_now,
+                        "response_items": len(_league_odds_items),
+                        "bookmakers": _league_bookmakers,
+                        "bet_values": _league_bet_values,
+                        "rows": _league_odds_rows,
+                        "api_errors": _league_odds_payload.get("errors") or {},
+                    }
+                    league_odds_calls += 1
+                except Exception as _league_odds_exc:
+                    _cached_league_odds = {
+                        "fetched_epoch": league_odds_now,
+                        "response_items": 0,
+                        "bookmakers": 0,
+                        "bet_values": 0,
+                        "rows": {},
+                        "api_errors": f"{type(_league_odds_exc).__name__}: {_league_odds_exc}",
+                    }
+                    league_odds_calls += 1
+                    league_odds_errors.append(f"{_league_key}: {_cached_league_odds['api_errors']}")
+                league_odds_cache[_league_key] = _cached_league_odds
+            _league_fixture_ids = {
+                str((item.get("fixture") or {}).get("id"))
+                for item in filtered
+                if str(((item.get("league") or {}).get("id") or "")) == _league_key
+            }
+            _league_rows = _cached_league_odds.get("rows") or {}
+            _matched_fixture_ids = []
+            _parsed_league_rows = 0
+            for _returned_fixture_id, _returned_rows in _league_rows.items():
+                _returned_fixture_key = str(_returned_fixture_id)
+                if _returned_fixture_key in _league_fixture_ids and _returned_rows:
+                    global_odds_index.setdefault(_returned_fixture_key, []).extend(_returned_rows)
+                    _matched_fixture_ids.append(_returned_fixture_key)
+                    _parsed_league_rows += len(_returned_rows)
+            league_odds_details.append({
+                "league_id": _league_key,
+                "league_name": _league_data.get("name") or "Competición",
+                "fixtures_scanned": len(_league_fixture_ids),
+                "response_items": int(_cached_league_odds.get("response_items", 0) or 0),
+                "matched_fixtures": len(_matched_fixture_ids),
+                "matched_fixture_ids": _matched_fixture_ids[:20],
+                "bookmakers": int(_cached_league_odds.get("bookmakers", 0) or 0),
+                "bet_values": int(_cached_league_odds.get("bet_values", 0) or 0),
+                "parsed_rows": _parsed_league_rows,
+                "api_errors": _cached_league_odds.get("api_errors") or {},
+            })
+        st.session_state.live_odds_by_league_cache = league_odds_cache
+        st.session_state.live_odds_league_calls = league_odds_calls
+        st.session_state.live_odds_league_details = league_odds_details
+        st.session_state.live_odds_league_errors = league_odds_errors
+
         # Fallback individual por partido: se ejecuta en CADA escaneo, incluso si
         # la consulta global fue reutilizada desde el refresco previo del encabezado.
         targeted_calls = 0
@@ -8430,6 +8512,9 @@ else:
             "odds_targeted_calls": int(st.session_state.get("live_odds_targeted_calls", 0) or 0),
             "odds_targeted_errors": st.session_state.get("live_odds_targeted_errors", []),
             "odds_targeted_details": st.session_state.get("live_odds_targeted_details", []),
+            "odds_league_calls": int(st.session_state.get("live_odds_league_calls", 0) or 0),
+            "odds_league_details": st.session_state.get("live_odds_league_details", []),
+            "odds_league_errors": st.session_state.get("live_odds_league_errors", []),
             "odds_league_coverage_details": st.session_state.get("live_odds_league_coverage_details", []),
             "odds_live_bets_catalog_count": int(st.session_state.get("live_odds_bets_catalog_count", 0) or 0),
             "odds_live_bets_catalog_sample": st.session_state.get("live_odds_bets_catalog_sample", []),
@@ -8918,6 +9003,29 @@ else:
                     st.warning(f"API-Football reportó: {_scan_diag.get('odds_api_errors')}")
                 if _scan_diag.get("odds_targeted_errors"):
                     st.warning("Errores en consultas por partido: " + " | ".join(_scan_diag.get("odds_targeted_errors", [])[:5]))
+                st.markdown("### Prueba de cuotas LIVE por competición")
+                st.caption(
+                    f"Consultas nuevas por liga en este escaneo: {_scan_diag.get('odds_league_calls', 0)} "
+                    "· Se reutilizan respuestas durante 60 segundos."
+                )
+                _league_live_rows = _scan_diag.get("odds_league_details", [])
+                if _league_live_rows:
+                    for _live_league in _league_live_rows:
+                        st.write(
+                            f"{_live_league.get('league_name')} (ID {_live_league.get('league_id')}): "
+                            f"{_live_league.get('response_items', 0)} respuestas · "
+                            f"{_live_league.get('fixtures_scanned', 0)} partidos escaneados · "
+                            f"{_live_league.get('matched_fixtures', 0)} coincidencias · "
+                            f"{_live_league.get('bookmakers', 0)} casas · "
+                            f"{_live_league.get('bet_values', 0)} valores · "
+                            f"{_live_league.get('parsed_rows', 0)} cuotas interpretadas"
+                        )
+                        if _live_league.get("api_errors"):
+                            st.caption(f"Respuesta/errores API para liga {_live_league.get('league_id')}: {_live_league.get('api_errors')}")
+                else:
+                    st.info("La prueba por competición todavía no tiene resultados.")
+                if _scan_diag.get("odds_league_errors"):
+                    st.warning("Errores en consultas LIVE por competición: " + " | ".join(_scan_diag.get("odds_league_errors", [])[:5]))
                 st.markdown("### Cobertura de cuotas por competición")
                 _coverage_rows = _scan_diag.get("odds_league_coverage_details", [])
                 if _coverage_rows:
