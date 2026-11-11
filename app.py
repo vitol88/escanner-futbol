@@ -7986,11 +7986,9 @@ else:
         st.session_state.last_scan_stats_pending = max(0, len(filtered) - len(stats_fixtures))
         st.session_state.last_scan_stats_rate_limited = stats_rate_limited
 
-        # Fetch live odds once per scan for all returned fixtures (never one request per match).
-        # Refresh no more often than the scan itself; the API plan limits still apply.
+        # Refresh global live odds at most once per 60 seconds.
         odds_now = datetime.now().timestamp()
         last_odds_epoch = float(st.session_state.get("live_odds_last_fetch_epoch", 0) or 0)
-        # El pipeline del balón ya consultó cuotas en la fase de actualización; reutilizar ese resultado.
         if get_api_key() and odds_now - last_odds_epoch >= 60:
             try:
                 odds_payload = api_get("odds/live")
@@ -8003,30 +8001,6 @@ else:
                     if (item.get("fixture") or {}).get("id") is not None
                 ]
                 st.session_state.live_odds_by_fixture = extract_live_odds(odds_payload)
-                # Fallback dirigido: si el endpoint global omite partidos activos, consultar
-                # /odds/live?fixture=ID para cada fixture sin mercados en la lista analizada.
-                targeted_calls = 0
-                targeted_errors = []
-                global_odds_index = st.session_state.live_odds_by_fixture
-                for _live_fixture in filtered:
-                    _live_fixture_id = str(((_live_fixture.get("fixture") or {}).get("id") or "")).strip()
-                    if not _live_fixture_id or global_odds_index.get(_live_fixture_id):
-                        continue
-                    try:
-                        _targeted_payload = api_get("odds/live", {"fixture": _live_fixture_id})
-                        targeted_calls += 1
-                        _targeted_rows = extract_live_odds(_targeted_payload)
-                        if _targeted_rows.get(_live_fixture_id):
-                            global_odds_index.setdefault(_live_fixture_id, []).extend(_targeted_rows[_live_fixture_id])
-                        _targeted_api_errors = _targeted_payload.get("errors") or {}
-                        if _targeted_api_errors:
-                            targeted_errors.append(f"{_live_fixture_id}: {_targeted_api_errors}")
-                    except Exception as _targeted_exc:
-                        targeted_calls += 1
-                        targeted_errors.append(f"{_live_fixture_id}: {type(_targeted_exc).__name__}: {_targeted_exc}")
-                st.session_state.live_odds_by_fixture = global_odds_index
-                st.session_state.live_odds_targeted_calls = targeted_calls
-                st.session_state.live_odds_targeted_errors = targeted_errors
                 st.session_state.live_odds_last_fetch = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 st.session_state.live_odds_last_fetch_epoch = odds_now
                 st.session_state.live_odds_error = ""
@@ -8035,11 +8009,33 @@ else:
                 st.session_state.live_odds_api_response_count = 0
                 st.session_state.live_odds_api_errors = {}
                 st.session_state.live_odds_api_fixture_ids = []
-        elif "live_odds_by_fixture" not in st.session_state:
+        if "live_odds_by_fixture" not in st.session_state:
             st.session_state.live_odds_by_fixture = {}
-            st.session_state.live_odds_api_response_count = 0
-            st.session_state.live_odds_api_errors = {}
-            st.session_state.live_odds_api_fixture_ids = []
+
+        # Fallback individual por partido: se ejecuta en CADA escaneo, incluso si
+        # la consulta global fue reutilizada desde el refresco previo del encabezado.
+        targeted_calls = 0
+        targeted_errors = []
+        global_odds_index = st.session_state.get("live_odds_by_fixture") or {}
+        for _live_fixture in filtered:
+            _live_fixture_id = str(((_live_fixture.get("fixture") or {}).get("id") or "")).strip()
+            if not _live_fixture_id or global_odds_index.get(_live_fixture_id):
+                continue
+            try:
+                _targeted_payload = api_get("odds/live", {"fixture": _live_fixture_id})
+                targeted_calls += 1
+                _targeted_rows = extract_live_odds(_targeted_payload)
+                if _targeted_rows.get(_live_fixture_id):
+                    global_odds_index.setdefault(_live_fixture_id, []).extend(_targeted_rows[_live_fixture_id])
+                _targeted_api_errors = _targeted_payload.get("errors") or {}
+                if _targeted_api_errors:
+                    targeted_errors.append(f"{_live_fixture_id}: {_targeted_api_errors}")
+            except Exception as _targeted_exc:
+                targeted_calls += 1
+                targeted_errors.append(f"{_live_fixture_id}: {type(_targeted_exc).__name__}: {_targeted_exc}")
+        st.session_state.live_odds_by_fixture = global_odds_index
+        st.session_state.live_odds_targeted_calls = targeted_calls
+        st.session_state.live_odds_targeted_errors = targeted_errors
 
         # Compare current scores with the previous completed scan without extra API calls.
         previous_scores = st.session_state.get("previous_scan_scores", {})
