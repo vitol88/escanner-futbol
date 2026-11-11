@@ -20,11 +20,47 @@ def extract_live_odds(payload: dict[str, Any]) -> dict[str, list[dict[str, Any]]
         if fixture_id is None:
             continue
         rows = indexed.setdefault(str(fixture_id), [])
+
+        # /odds/live usa una estructura distinta de /odds: mercados bajo
+        # item["odds"] y valores bajo market["values"], sin desglose de casa.
+        live_markets = item.get("odds") or []
+        if isinstance(live_markets, list) and live_markets:
+            for market in live_markets:
+                if not isinstance(market, dict):
+                    continue
+                market_name = market.get("name") or "Mercado LIVE"
+                for value in market.get("values") or []:
+                    if not isinstance(value, dict):
+                        continue
+                    try:
+                        odd = float(str(value.get("odd", "")).replace(",", "."))
+                    except (TypeError, ValueError):
+                        continue
+                    if odd <= 1.0 or value.get("suspended") is True:
+                        continue
+                    rows.append({
+                        "bookmaker": "Casa no especificada por API-Football LIVE",
+                        "bookmaker_verified": False,
+                        "odds_source": "API-Football LIVE",
+                        "market": market_name,
+                        "value": str(value.get("value") or ""),
+                        "odd": odd,
+                        "handicap": value.get("handicap"),
+                        "main": value.get("main"),
+                    })
+
+        # Compatibilidad con respuestas históricas /odds que sí incluyen casas.
         for bookmaker in item.get("bookmakers") or []:
+            if not isinstance(bookmaker, dict):
+                continue
             bookmaker_name = bookmaker.get("name") or "Casa no identificada"
             for bet in bookmaker.get("bets") or []:
+                if not isinstance(bet, dict):
+                    continue
                 market_name = bet.get("name") or "Mercado"
                 for value in bet.get("values") or []:
+                    if not isinstance(value, dict):
+                        continue
                     try:
                         odd = float(str(value.get("odd", "")).replace(",", "."))
                     except (TypeError, ValueError):
@@ -33,6 +69,8 @@ def extract_live_odds(payload: dict[str, Any]) -> dict[str, list[dict[str, Any]]
                         continue
                     rows.append({
                         "bookmaker": bookmaker_name,
+                        "bookmaker_verified": bool(bookmaker_name != "Casa no identificada"),
+                        "odds_source": "API-Football",
                         "market": market_name,
                         "value": str(value.get("value") or ""),
                         "odd": odd,
