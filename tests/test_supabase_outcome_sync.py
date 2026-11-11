@@ -129,3 +129,29 @@ class OutcomeSyncIntegrationTests(unittest.TestCase):
         )
         self.assertEqual(result["fixtures_found"], 2)
         self.assertEqual(checked_ids, ["1", "2"])
+
+
+class LatestOutcomeReaderTests(unittest.TestCase):
+    def test_load_latest_outcomes_indexes_fixture_and_uses_verified_fields(self):
+        from ai_engine.supabase_outcome_sync import load_latest_match_outcomes
+
+        calls = []
+        def fake_get(url, params, headers, timeout):
+            calls.append((url, params))
+            return _FakeResponse([{
+                "fixture_id": 321,
+                "final_home_score": 2,
+                "final_away_score": 1,
+                "final_total_corners": 10,
+                "final_total_yellow_cards": 4,
+                "source": "api-football",
+                "verified_at": "2026-11-11T12:00:00+00:00",
+            }])
+
+        outcomes = load_latest_match_outcomes(
+            "https://example.supabase.co", "service-key", get=fake_get
+        )
+        self.assertEqual(outcomes["321"]["final_home_score"], 2)
+        self.assertEqual(outcomes["321"]["final_total_corners"], 10)
+        self.assertIn("/latest_match_outcomes", calls[0][0])
+        self.assertIn("verified_at", calls[0][1]["select"])
