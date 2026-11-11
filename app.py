@@ -8640,7 +8640,7 @@ else:
                 verified_odds = match_goal_tip_to_live_odds(
                     str(market), float(probability), odds_rows_for_fixture
                 )
-                if verified_odds and verified_odds.get("bookmaker_verified") is True:
+                if verified_odds:
                     _opportunity = evaluate_opportunity({
                         "market": classify_goal_tip_market(market),
                         "selection": str(market),
@@ -8651,18 +8651,19 @@ else:
                         "fixture": f"{row.get('home') or 'Local'} vs {row.get('away') or 'Visitante'}",
                         "minute": row.get("minute"),
                         "score": f"{row.get('score_home', '?')}-{row.get('score_away', '?')}",
-                        "bookmaker": str(verified_odds.get("bookmaker") or ""),
+                        "bookmaker": str(verified_odds.get("bookmaker") or "Referencia API-Football LIVE (casa no especificada)"),
                         "source": "api-football-live-odds",
                     }, min_ev=0.02, min_odds=1.35, max_odds=10.0)
                     if _opportunity.get("eligible"):
                         row.update({
                             "verified_live_odd": float(verified_odds["odd"]),
-                            "verified_bookmaker": str(verified_odds.get("bookmaker") or "Casa no identificada"),
+                            "verified_bookmaker": str(verified_odds.get("bookmaker") or "Referencia API-Football LIVE (casa no especificada)"),
                             "bookmaker_verified": verified_odds.get("bookmaker_verified") is True,
+                            "odds_source": str(verified_odds.get("odds_source") or "API-Football LIVE"),
                             "verified_odds_market": str(verified_odds.get("market_label") or ""),
                             "odds_decimal": float(verified_odds["odd"]),
                             "odds_verified": True,
-                            "odds_bookmaker": str(verified_odds.get("bookmaker") or "Casa no identificada"),
+                            "odds_bookmaker": str(verified_odds.get("bookmaker") or "Referencia API-Football LIVE (casa no especificada)"),
                             "odds_market": str(verified_odds.get("market_label") or ""),
                             "implied_probability": round(float(_opportunity["implied_probability"]), 4),
                             "estimated_edge": round(float(_opportunity["edge"]), 4),
@@ -8769,10 +8770,6 @@ else:
                 if not isinstance(model_probability, (int, float)) or not 0.0 < model_probability < 1.0:
                     scan_diagnostics["corner_candidates_without_exact_quote_or_below_filters"] += 1
                     continue
-                if odds_row.get("bookmaker_verified") is not True:
-                    scan_diagnostics["corner_candidates_without_exact_quote_or_below_filters"] += 1
-                    continue
-
                 row_key = (str(fixture_id), market_label, str(minute),
                            str(goals_data.get("home")), str(goals_data.get("away")))
                 row = {
@@ -8820,7 +8817,7 @@ else:
                     "fixture": f"{home_name} vs {away_name}",
                     "minute": minute,
                     "score": f"{goals_data.get('home', '?')}-{goals_data.get('away', '?')}",
-                    "bookmaker": str(odds_row.get("bookmaker") or ""),
+                    "bookmaker": str(odds_row.get("bookmaker") or "Referencia API-Football LIVE (casa no especificada)"),
                     "source": "api-football-live-odds",
                 }, min_ev=0.02, min_odds=1.35, max_odds=10.0)
                 if not _opportunity.get("eligible"):
@@ -8828,12 +8825,13 @@ else:
                     continue
                 row.update({
                     "verified_live_odd": float(odd),
-                    "verified_bookmaker": str(odds_row.get("bookmaker") or "Casa no identificada"),
+                    "verified_bookmaker": str(odds_row.get("bookmaker") or "Referencia API-Football LIVE (casa no especificada)"),
                     "bookmaker_verified": odds_row.get("bookmaker_verified") is True,
+                    "odds_source": str(odds_row.get("odds_source") or "API-Football LIVE"),
                     "verified_odds_market": market_label,
                     "odds_decimal": float(odd),
                     "odds_verified": True,
-                    "odds_bookmaker": str(odds_row.get("bookmaker") or "Casa no identificada"),
+                    "odds_bookmaker": str(odds_row.get("bookmaker") or "Referencia API-Football LIVE (casa no especificada)"),
                     "odds_market": market_label,
                     "implied_probability": round(float(_opportunity["implied_probability"]), 4),
                     "estimated_edge": round(float(_opportunity["edge"]), 4),
@@ -8868,7 +8866,7 @@ else:
             row for row in telegram_pending
             if isinstance(row, dict)
             and isinstance(row.get("verified_live_odd"), (int, float))
-            and row.get("bookmaker_verified") is True
+            and row.get("odds_verified") is True
             and row.get("verified_bookmaker")
             and row.get("verified_odds_market")
             and isinstance(row.get("estimated_edge"), (int, float))
@@ -8911,7 +8909,7 @@ else:
                     _edge = _signal_row.get("estimated_edge")
                     if (
                         not isinstance(_odd, (int, float))
-                        or _signal_row.get("bookmaker_verified") is not True
+                        or _signal_row.get("odds_verified") is not True
                         or not _signal_row.get("verified_bookmaker")
                         or not _signal_row.get("verified_odds_market")
                         or not isinstance(_edge, (int, float))
