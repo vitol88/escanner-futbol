@@ -20,7 +20,9 @@ def format_signal_message(row: dict[str, Any]) -> str:
     probability = row.get("probability")
     live_odd = row.get("verified_live_odd")
     bookmaker = str(row.get("verified_bookmaker") or "")
-    bookmaker_verified = row.get("bookmaker_verified") is True or (row.get("bookmaker_verified") is None and bool(bookmaker))
+    # A fallback label such as "casa no especificada" is descriptive only;
+    # it must never be promoted to a verified bookmaker.
+    bookmaker_verified = row.get("bookmaker_verified") is True and bool(bookmaker)
     odds_source = str(row.get("odds_source") or "API-Football LIVE")
     edge = row.get("estimated_edge")
 
@@ -74,8 +76,9 @@ def send_telegram_signal(
         return False, "Falta configurar TELEGRAM_CHAT_ID."
     odd = row.get("verified_live_odd")
     edge = row.get("estimated_edge")
-    if (not isinstance(odd, (int, float)) or not row.get("verified_bookmaker")
-        or not row.get("verified_odds_market") or not isinstance(edge, (int, float))
+    if (not isinstance(odd, (int, float)) or row.get("bookmaker_verified") is not True
+        or not row.get("verified_bookmaker") or not row.get("verified_odds_market")
+        or not isinstance(edge, (int, float))
         or edge < 0.02 or not (1.35 <= float(odd) <= 1.60 or float(odd) >= 1.70)):
         return False, "Señal retenida: falta una cuota real coincidente dentro de los rangos permitidos."
 
