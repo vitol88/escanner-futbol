@@ -20,7 +20,7 @@ def format_signal_message(row: dict[str, Any]) -> str:
     probability = row.get("probability")
     live_odd = row.get("verified_live_odd")
     bookmaker = str(row.get("verified_bookmaker") or "")
-    bookmaker_verified = row.get("bookmaker_verified") is True
+    bookmaker_verified = row.get("bookmaker_verified") is True or (row.get("bookmaker_verified") is None and bool(bookmaker))
     odds_source = str(row.get("odds_source") or "API-Football LIVE")
     edge = row.get("estimated_edge")
 
