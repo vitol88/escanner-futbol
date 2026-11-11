@@ -8186,19 +8186,53 @@ else:
                 targeted_calls += 1
                 _targeted_items = _targeted_payload.get("response") or []
                 _targeted_rows = extract_live_odds(_targeted_payload)
-                _targeted_bookmakers = sum(len(_item.get("bookmakers") or []) for _item in _targeted_items)
+                _targeted_bookmakers = sum(
+                    len(_item.get("bookmakers") or [])
+                    for _item in _targeted_items if isinstance(_item, dict)
+                )
                 _targeted_bets = sum(
                     len(_bet.get("values") or [])
-                    for _item in _targeted_items
+                    for _item in _targeted_items if isinstance(_item, dict)
                     for _bookmaker in (_item.get("bookmakers") or [])
+                    if isinstance(_bookmaker, dict)
                     for _bet in (_bookmaker.get("bets") or [])
+                    if isinstance(_bet, dict)
                 )
+                # Diagnóstico estructural sin guardar ni mostrar la clave API ni el payload completo.
+                _targeted_item_summaries = []
+                for _raw_item in _targeted_items[:3]:
+                    if not isinstance(_raw_item, dict):
+                        _targeted_item_summaries.append({"item_type": type(_raw_item).__name__})
+                        continue
+                    _raw_fixture = _raw_item.get("fixture") or {}
+                    _raw_league = _raw_item.get("league") or {}
+                    _raw_teams = _raw_item.get("teams") or {}
+                    _raw_status = _raw_item.get("status") or {}
+                    _raw_bookmakers = _raw_item.get("bookmakers") or []
+                    _targeted_item_summaries.append({
+                        "returned_fixture_id": str(_raw_fixture.get("id") or ""),
+                        "response_keys": sorted(str(_key) for _key in _raw_item.keys())[:24],
+                        "bookmaker_count": len(_raw_bookmakers) if isinstance(_raw_bookmakers, list) else None,
+                        "bookmaker_names": [
+                            str(_book.get("name") or _book.get("id") or "")
+                            for _book in _raw_bookmakers[:8] if isinstance(_book, dict)
+                        ] if isinstance(_raw_bookmakers, list) else [],
+                        "status": {
+                            "stopped": _raw_status.get("stopped"),
+                            "blocked": _raw_status.get("blocked"),
+                            "finished": _raw_status.get("finished"),
+                        },
+                        "league": str(_raw_league.get("name") or ""),
+                        "home": str(((_raw_teams.get("home") or {}).get("name")) or ""),
+                        "away": str(((_raw_teams.get("away") or {}).get("name")) or ""),
+                    })
                 targeted_response_details.append({
                     "fixture_id": _live_fixture_id,
                     "response_items": len(_targeted_items),
                     "bookmakers": _targeted_bookmakers,
                     "bet_values": _targeted_bets,
                     "parsed_rows": len(_targeted_rows.get(_live_fixture_id, [])),
+                    "response_item_summaries": _targeted_item_summaries,
                     "api_errors": _targeted_payload.get("errors") or {},
                 })
                 if _targeted_rows.get(_live_fixture_id):
@@ -9057,6 +9091,20 @@ else:
                             f"{_detail.get('bet_values', 0)} valores de mercado, "
                             f"{_detail.get('parsed_rows', 0)} cuotas interpretadas"
                         )
+                        for _item_summary in _detail.get("response_item_summaries", []):
+                            st.caption(
+                                "Respuesta recibida · "
+                                f"fixture={_item_summary.get('returned_fixture_id') or 'sin ID'} · "
+                                f"claves={', '.join(_item_summary.get('response_keys', [])) or 'ninguna'} · "
+                                f"casas={', '.join(_item_summary.get('bookmaker_names', [])) or 'ninguna'} · "
+                                f"estado={_item_summary.get('status', {})}"
+                            )
+                            if _item_summary.get("league") or _item_summary.get("home") or _item_summary.get("away"):
+                                st.caption(
+                                    f"Partido devuelto: {_item_summary.get('league') or 'liga N/D'} · "
+                                    f"{_item_summary.get('home') or 'local N/D'} vs "
+                                    f"{_item_summary.get('away') or 'visitante N/D'}"
+                                )
                         if _detail.get("api_errors"):
                             st.caption(f"Errores API: {_detail.get('api_errors')}")
                         if _detail.get("exception"):
