@@ -8601,6 +8601,7 @@ else:
             "goal_candidates_without_quotes": 0,
             "goal_candidates_without_exact_quote_or_below_filters": 0,
             "goal_candidates_evaluated": 0,
+            "goal_candidates_model_not_validated": 0,
             "eligible_goal_signals": 0,
             "corner_stats_ready": 0,
             "corner_stats_pending": 0,
@@ -8688,6 +8689,14 @@ else:
                            str(row["score_home"]), str(row["score_away"]))
                 odds_rows_for_fixture = odds_index_for_scan.get(str(fixture_id), [])
                 scan_diagnostics["goal_candidates_evaluated"] += 1
+                # The current league-average Poisson estimator is exploratory,
+                # not calibrated. Keep its analysis visible, but never promote it
+                # to an automatic betting signal until validation is approved.
+                if estimate.get("signal_eligible") is not True:
+                    scan_diagnostics["goal_candidates_model_not_validated"] += 1
+                    if row_key not in existing_keys:
+                        existing_keys.add(row_key)
+                    continue
                 if not odds_rows_for_fixture:
                     scan_diagnostics["goal_candidates_without_quotes"] += 1
                 verified_odds = match_goal_tip_to_live_odds(
