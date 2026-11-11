@@ -71,6 +71,17 @@ class LiveOddsTests(unittest.TestCase):
         self.assertEqual(by_market["Empate final"]["bookmaker"], "Casa B")
         self.assertEqual(by_market["Ambos equipos marcan: Sí"]["bookmaker"], "Casa C")
 
+    def test_named_bookmaker_is_preferred_over_unattributed_provider_quote(self):
+        rows = [
+            {"market": "Match Winner", "value": "Draw", "odd": 3.40,
+             "bookmaker": "Referencia API-Football LIVE", "bookmaker_verified": False},
+            {"market": "Match Winner", "value": "Draw", "odd": 3.20,
+             "bookmaker": "Bet365", "bookmaker_verified": True},
+        ]
+        best = best_live_odds_by_market(rows)
+        self.assertEqual(best[0]["bookmaker"], "Bet365")
+        self.assertEqual(best[0]["odd"], 3.20)
+
     def test_matches_goal_tips_only_to_real_odds_in_allowed_bands_with_edge(self):
         rows = [
             {"market": "Over/Under", "value": "Over 1.5", "odd": 1.55, "bookmaker": "Casa A"},
