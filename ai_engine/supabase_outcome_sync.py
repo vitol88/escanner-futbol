@@ -160,3 +160,41 @@ def sync_finished_fixture_outcomes(supabase_url: str, secret_key: str, api_get,
         "inserted": inserted, "unchanged": unchanged, "skipped": skipped,
         "errors": errors,
     }
+
+
+def load_latest_match_outcomes(supabase_url: str, secret_key: str, *, get=None,
+                               timeout: float = 15.0) -> dict[str, dict[str, Any]]:
+    """Load verified final outcomes indexed by fixture ID for read-only settlement."""
+    url = str(supabase_url or "").strip().rstrip("/")
+    key = str(secret_key or "").strip()
+    if not url or not key:
+        raise ValueError("Faltan SUPABASE_URL o SUPABASE_SECRET_KEY.")
+    reader = get or requests.get
+    outcomes: dict[str, dict[str, Any]] = {}
+    start, page_size = 0, 500
+    while True:
+        response = reader(
+            f"{url}/rest/v1/latest_match_outcomes",
+            params={
+                "select": "fixture_id,final_home_score,final_away_score,final_total_corners,final_total_yellow_cards,source,verified_at",
+                "order": "verified_at.desc",
+                "offset": start,
+                "limit": page_size,
+            },
+            headers={"apikey": key, "Authorization": f"Bearer {key}"},
+            timeout=timeout,
+        )
+        response.raise_for_status()
+        page = response.json()
+        if not isinstance(page, list):
+            raise ValueError("Respuesta inesperada de latest_match_outcomes.")
+        for row in page:
+            if not isinstance(row, dict):
+                continue
+            fixture_id = str(row.get("fixture_id") or "").strip()
+            if fixture_id and fixture_id not in outcomes:
+                outcomes[fixture_id] = row
+        if len(page) < page_size:
+            break
+        start += page_size
+    return outcomes
