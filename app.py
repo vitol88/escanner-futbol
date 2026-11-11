@@ -8179,9 +8179,19 @@ else:
         targeted_calls = 0
         targeted_errors = []
         targeted_response_details = []
+        targeted_odds_cache = st.session_state.get("live_odds_targeted_cache", {}) or {}
+        targeted_now = datetime.now().timestamp()
         for _live_fixture in filtered:
             _live_fixture_id = str(((_live_fixture.get("fixture") or {}).get("id") or "")).strip()
             if not _live_fixture_id or global_odds_index.get(_live_fixture_id):
+                continue
+            _cached_targeted = targeted_odds_cache.get(_live_fixture_id) or {}
+            if targeted_now - float(_cached_targeted.get("fetched_epoch", 0) or 0) < 60:
+                _cached_rows = _cached_targeted.get("rows") or []
+                if _cached_rows:
+                    global_odds_index[_live_fixture_id] = list(_cached_rows)
+                if _cached_targeted.get("detail"):
+                    targeted_response_details.append(_cached_targeted["detail"])
                 continue
             try:
                 _targeted_payload = api_get("odds/live", {"fixture": _live_fixture_id})
@@ -8245,7 +8255,7 @@ else:
                         "home": str(((_raw_teams.get("home") or {}).get("name")) or ""),
                         "away": str(((_raw_teams.get("away") or {}).get("name")) or ""),
                     })
-                targeted_response_details.append({
+                _targeted_detail = {
                     "fixture_id": _live_fixture_id,
                     "response_items": len(_targeted_items),
                     "bookmakers": _targeted_bookmakers,
@@ -8253,7 +8263,13 @@ else:
                     "parsed_rows": len(_targeted_rows.get(_live_fixture_id, [])),
                     "response_item_summaries": _targeted_item_summaries,
                     "api_errors": _targeted_payload.get("errors") or {},
-                })
+                }
+                targeted_response_details.append(_targeted_detail)
+                targeted_odds_cache[_live_fixture_id] = {
+                    "fetched_epoch": targeted_now,
+                    "rows": list(_targeted_rows.get(_live_fixture_id, [])),
+                    "detail": _targeted_detail,
+                }
                 if _targeted_rows.get(_live_fixture_id):
                     global_odds_index.setdefault(_live_fixture_id, []).extend(_targeted_rows[_live_fixture_id])
                 _targeted_api_errors = _targeted_payload.get("errors") or {}
@@ -8262,10 +8278,17 @@ else:
             except Exception as _targeted_exc:
                 targeted_calls += 1
                 targeted_errors.append(f"{_live_fixture_id}: {type(_targeted_exc).__name__}: {_targeted_exc}")
-                targeted_response_details.append({
+                _targeted_detail = {
                     "fixture_id": _live_fixture_id,
                     "exception": f"{type(_targeted_exc).__name__}: {_targeted_exc}",
-                })
+                }
+                targeted_response_details.append(_targeted_detail)
+                targeted_odds_cache[_live_fixture_id] = {
+                    "fetched_epoch": targeted_now,
+                    "rows": [],
+                    "detail": _targeted_detail,
+                }
+        st.session_state.live_odds_targeted_cache = targeted_odds_cache
         st.session_state.live_odds_by_fixture = global_odds_index
         st.session_state.live_odds_targeted_calls = targeted_calls
         st.session_state.live_odds_targeted_errors = targeted_errors
