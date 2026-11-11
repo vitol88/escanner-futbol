@@ -8183,7 +8183,31 @@ else:
         targeted_now = datetime.now().timestamp()
         for _live_fixture in filtered:
             _live_fixture_id = str(((_live_fixture.get("fixture") or {}).get("id") or "")).strip()
-            if not _live_fixture_id or global_odds_index.get(_live_fixture_id):
+            _live_teams = _live_fixture.get("teams") or {}
+            _live_home = str(((_live_teams.get("home") or {}).get("name")) or "Local N/D")
+            _live_away = str(((_live_teams.get("away") or {}).get("name")) or "Visitante N/D")
+            if not _live_fixture_id:
+                targeted_response_details.append({
+                    "fixture_id": "sin ID",
+                    "home": _live_home,
+                    "away": _live_away,
+                    "source": "validación local",
+                    "exception": "El partido no contiene fixture_id; no se pudo consultar su cuota.",
+                })
+                continue
+            _existing_global_rows = global_odds_index.get(_live_fixture_id) or []
+            if _existing_global_rows:
+                targeted_response_details.append({
+                    "fixture_id": _live_fixture_id,
+                    "home": _live_home,
+                    "away": _live_away,
+                    "source": "respuesta global/caché",
+                    "response_items": 1,
+                    "bookmakers": sum(1 for _r in _existing_global_rows if _r.get("bookmaker_verified") is True),
+                    "bet_values": len(_existing_global_rows),
+                    "parsed_rows": len(_existing_global_rows),
+                    "note": "Se omitió la consulta individual porque ya había cuotas asociadas a este partido.",
+                })
                 continue
             _cached_targeted = targeted_odds_cache.get(_live_fixture_id) or {}
             if targeted_now - float(_cached_targeted.get("fetched_epoch", 0) or 0) < 60:
@@ -8257,6 +8281,9 @@ else:
                     })
                 _targeted_detail = {
                     "fixture_id": _live_fixture_id,
+                    "home": _live_home,
+                    "away": _live_away,
+                    "source": "consulta individual /odds/live",
                     "response_items": len(_targeted_items),
                     "bookmakers": _targeted_bookmakers,
                     "bet_values": _targeted_bets,
@@ -8280,6 +8307,9 @@ else:
                 targeted_errors.append(f"{_live_fixture_id}: {type(_targeted_exc).__name__}: {_targeted_exc}")
                 _targeted_detail = {
                     "fixture_id": _live_fixture_id,
+                    "home": _live_home,
+                    "away": _live_away,
+                    "source": "consulta individual /odds/live",
                     "exception": f"{type(_targeted_exc).__name__}: {_targeted_exc}",
                 }
                 targeted_response_details.append(_targeted_detail)
@@ -9214,7 +9244,14 @@ else:
                     if _scan_diag.get("odds_bookmakers_catalog_errors"):
                         st.warning(f"Error catálogo casas: {_scan_diag.get('odds_bookmakers_catalog_errors')}")
                 with st.expander("Detalle de respuesta por partido"):
-                    for _detail in _scan_diag.get("odds_targeted_details", []):
+                    _party_details = _scan_diag.get("odds_targeted_details", []) or []
+                    if not _party_details:
+                        st.info(
+                            "No hay respuestas individuales registradas para este escaneo. "
+                            "Revisa si el proveedor devolvió cuotas globales, si la consulta individual se ejecutó "
+                            "o si el escáner no llegó a recorrer los partidos. Vuelve a pulsar «Escanear en vivo»."
+                        )
+                    for _detail in _party_details:
                         st.write(
                             f"Fixture {_detail.get('fixture_id')}: "
                             f"{_detail.get('response_items', 0)} registros, "
@@ -9222,6 +9259,13 @@ else:
                             f"{_detail.get('bet_values', 0)} valores de mercado, "
                             f"{_detail.get('parsed_rows', 0)} cuotas interpretadas"
                         )
+                        if _detail.get("home") or _detail.get("away"):
+                            st.caption(
+                                f"{_detail.get('home') or 'Local N/D'} vs {_detail.get('away') or 'Visitante N/D'}"
+                                f" · origen: {_detail.get('source') or 'no informado'}"
+                            )
+                        if _detail.get("note"):
+                            st.caption(_detail.get("note"))
                         for _item_summary in _detail.get("response_item_summaries", []):
                             st.caption(
                                 "Respuesta recibida · "
