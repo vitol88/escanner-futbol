@@ -64,27 +64,39 @@ def _supabase_get(url: str, key: str, table: str, params: dict[str, Any],
 
 
 def sync_finished_fixture_outcomes(supabase_url: str, secret_key: str, api_get,
-                                   *, max_fixtures: int | None = None,
+                                   *, max_fixtures: int | None = 100,
                                    get=None, post=None) -> dict[str, Any]:
-    """Evaluate stored fixture IDs, fetch final API data and append changed outcomes."""
+    """Verify recent fixtures referenced by either raw snapshots or predictions.
+
+    The bounded default protects the API-Football request budget. Newest fixture
+    references are considered first; repeated references across tables collapse
+    to one fixture lookup. Pass max_fixtures=None only for an intentional full scan.
+    """
     url, key = str(supabase_url or "").strip().rstrip("/"), str(secret_key or "").strip()
     if not url or not key:
         raise ValueError("Faltan SUPABASE_URL o SUPABASE_SECRET_KEY.")
-    fixture_rows: list[dict[str, Any]] = []
-    start, page_size = 0, 500
-    while True:
-        page = _supabase_get(url, key, "analysis_snapshots",
-            {"select": "fixture_id", "order": "fixture_id.asc",
-             "offset": start, "limit": page_size}, get=get)
-        fixture_rows.extend(page)
-        if len(page) < page_size:
-            break
-        start += page_size
-    fixture_ids = list(dict.fromkeys(
-        str(row.get("fixture_id")) for row in fixture_rows if row.get("fixture_id")
-    ))
-    if max_fixtures:
-        fixture_ids = fixture_ids[:max_fixtures]
+
+    fixture_ids: list[str] = []
+    seen_fixture_ids: set[str] = set()
+    # The canonical prediction ledger is now the source of truth for evaluated
+    # candidates, including forecasts that were not promoted to Telegram signals.
+    # Keep raw snapshots too, since they contain model projections for MAE reports.
+    for table in ("prediction_ledger", "analysis_snapshots"):
+        start, page_size = 0, 500
+        while True:
+            page = _supabase_get(url, key, table,
+                {"select": "fixture_id", "order": "recorded_at.desc",
+                 "offset": start, "limit": page_size}, get=get)
+            for row in page:
+                fixture_id = str(row.get("fixture_id") or "").strip()
+                if fixture_id and fixture_id not in seen_fixture_ids:
+                    seen_fixture_ids.add(fixture_id)
+                    fixture_ids.append(fixture_id)
+            if len(page) < page_size:
+                break
+            start += page_size
+    if max_fixtures is not None:
+        fixture_ids = fixture_ids[:max(0, int(max_fixtures))]
 
     existing_rows: list[dict[str, Any]] = []
     for offset in range(0, len(fixture_ids), 50):
