@@ -8588,6 +8588,9 @@ else:
             for row in signal_rows
         }
         new_signal_rows = []
+        # Registro de pronósticos: conserva candidatos del modelo aunque no tengan
+        # cuota exacta o no superen los filtros de publicación.
+        forecast_rows_to_persist = []
         odds_index_for_scan = st.session_state.get("live_odds_by_fixture", {}) or {}
         odds_rows_total = sum(len(rows or []) for rows in odds_index_for_scan.values())
         fixtures_with_odds = sum(
@@ -8690,6 +8693,7 @@ else:
                            str(row["score_home"]), str(row["score_away"]))
                 odds_rows_for_fixture = odds_index_for_scan.get(str(fixture_id), [])
                 scan_diagnostics["goal_candidates_evaluated"] += 1
+                forecast_rows_to_persist.append(dict(row))
                 # The current league-average Poisson estimator is exploratory,
                 # not calibrated. Keep its analysis visible, but never promote it
                 # to an automatic betting signal until validation is approved.
@@ -8871,6 +8875,19 @@ else:
                     "outcome_verified": "",
                 }
                 scan_diagnostics["corner_candidates_evaluated"] += 1
+                # Guardar la estimación aunque la cuota/EV no permita publicar señal.
+                row.update({
+                    "verified_live_odd": float(odd),
+                    "verified_bookmaker": str(odds_row.get("bookmaker") or "Referencia API-Football LIVE (casa no especificada)"),
+                    "bookmaker_verified": odds_row.get("bookmaker_verified") is True,
+                    "odds_source": str(odds_row.get("odds_source") or "API-Football LIVE"),
+                    "verified_odds_market": market_label,
+                    "odds_decimal": float(odd),
+                    "odds_verified": True,
+                    "odds_bookmaker": str(odds_row.get("bookmaker") or "Referencia API-Football LIVE (casa no especificada)"),
+                    "odds_market": market_label,
+                })
+                forecast_rows_to_persist.append(dict(row))
                 _opportunity = evaluate_opportunity({
                     "market": "corners",
                     "selection": market_label,
@@ -9050,14 +9067,17 @@ else:
         # SQLite uniqueness on prediction_id makes repeated Streamlit reruns idempotent.
         # Migra también filas legacy del CSV si contienen los campos mínimos reales.
         # La normalización valida cada fila y nunca inventa mercado, fixture, fecha ni probabilidad.
+        _ledger_source_rows = list(signal_rows) + list(forecast_rows_to_persist)
         normalized_ledger_rows = [
             normalize_prediction_record(saved_row)
-            for saved_row in signal_rows
+            for saved_row in _ledger_source_rows
             if isinstance(saved_row, dict)
         ]
         ledger_records_to_sync = [record for record in normalized_ledger_rows if record["valid"]]
         st.session_state.prediction_ledger_sync_diagnostics = {
             "csv_rows": len(signal_rows),
+            "forecast_candidates_this_scan": len(forecast_rows_to_persist),
+            "ledger_source_rows": len(_ledger_source_rows),
             "valid_rows": len(ledger_records_to_sync),
             "invalid_rows": len(normalized_ledger_rows) - len(ledger_records_to_sync),
         }
