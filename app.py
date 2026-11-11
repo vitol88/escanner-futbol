@@ -22,10 +22,10 @@ from ai_engine.prediction_schema import PREDICTION_SCHEMA_VERSION, normalize_pre
 from ai_engine.prediction_ledger import append_prediction_records, load_prediction_records
 from ai_engine.supabase_prediction_ledger import append_supabase_prediction_records, load_supabase_prediction_records
 from ai_engine.supabase_analysis_snapshots import build_analysis_snapshot, append_supabase_analysis_snapshots
-from ai_engine.supabase_outcome_sync import sync_finished_fixture_outcomes
+from ai_engine.supabase_outcome_sync import sync_finished_fixture_outcomes, load_latest_match_outcomes
 from ai_engine.supabase_evaluation import load_supabase_evaluations, summarize_supabase_evaluations, summarize_evaluations_by_minute
 from ai_engine.outcome_ledger import load_verified_outcomes, record_verified_outcome
-from ai_engine.settlement import resolve_binary_outcome
+from ai_engine.settlement import resolve_binary_outcome, settle_prediction_rows
 from ai_engine.telegram_publisher import send_telegram_signal, send_telegram_test_message
 from ai_engine.telegram_store import build_alert_key, reserve_telegram_alert, update_telegram_alert, check_supabase_connection, test_supabase_duplicate_protection
 from models.automatic_history import build_automatic_history
@@ -10135,6 +10135,12 @@ else:
                     verified_outcomes = load_verified_outcomes(PREDICTION_LEDGER_PATH)
                     st.session_state.prediction_ledger_snapshot = ledger_rows
                     st.session_state.prediction_outcome_snapshot = verified_outcomes
+                    # Read-only projection from canonical forecasts to verified final results.
+                    settlement_outcomes = load_latest_match_outcomes(_sb_url, _sb_key) if _sb_url and _sb_key else {}
+                    st.session_state.prediction_settlement_projection = settle_prediction_rows(
+                        ledger_rows, settlement_outcomes
+                    )
+                    st.session_state.prediction_settlement_error = ""
                     st.session_state.prediction_ledger_read_error = ""
                 except (OSError, ValueError, TypeError, KeyError) as ledger_read_exc:
                     st.session_state.prediction_ledger_read_error = str(ledger_read_exc)
@@ -10174,6 +10180,28 @@ else:
             elif "prediction_ledger_snapshot" in st.session_state:
                 ledger_rows = st.session_state.prediction_ledger_snapshot
                 verified_outcomes = st.session_state.get("prediction_outcome_snapshot", {})
+                settlement_projection = st.session_state.get("prediction_settlement_projection")
+                if settlement_projection:
+                    st.markdown("##### Liquidación automática proyectada · resultados verificados")
+                    st.caption("Cruce de solo lectura entre el registro central y latest_match_outcomes. No modifica pronósticos ni representa rentabilidad real; solo clasifica aciertos/fallos cuando mercado, selección y datos finales son inequívocos.")
+                    settlement_cols = st.columns(4)
+                    settlement_cols[0].metric("Pronósticos liquidados", settlement_projection["settled_count"])
+                    settlement_cols[1].metric("Aciertos", settlement_projection["hit_count"])
+                    settlement_cols[2].metric("Fallos", settlement_projection["miss_count"])
+                    settlement_cols[3].metric("Pendientes de revisión", settlement_projection["pending_count"])
+                    settled_rows = settlement_projection.get("settled", [])
+                    if settled_rows:
+                        recent_settled = sorted(settled_rows, key=lambda row: str(row.get("recorded_at") or ""), reverse=True)[:25]
+                        st.dataframe([{
+                            "Partido": f"{row.get('home') or 'Local'} vs {row.get('away') or 'Visitante'}",
+                            "Mercado": row.get("market_type") or row.get("market") or "N/D",
+                            "Selección": row.get("selection") or "N/D",
+                            "Resultado": "ACIERTO" if row.get("outcome") == 1 else "FALLO",
+                            "Fuente": row.get("outcome_source") or "resultado verificado",
+                        } for row in recent_settled], use_container_width=True, hide_index=True)
+                    if settlement_projection["settled_count"] == 0:
+                        st.info("Aún no hay pronósticos que puedan liquidarse automáticamente con los resultados finales disponibles.")
+                # Join only in memory for reporting; the original prediction rows remain immutable.
                 # Join only in memory for reporting; the original prediction rows remain immutable.
                 ledger_report_rows = []
                 for item in ledger_rows:
