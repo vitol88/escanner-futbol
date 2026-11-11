@@ -9101,6 +9101,28 @@ else:
                 st.session_state.prediction_supabase_write_error = (
                     f"{type(supabase_ledger_exc).__name__}: {supabase_ledger_exc}"
                 )
+
+        # Reconcile final results periodically during normal scanning. A strict
+        # 30-minute cooldown and 25-fixture cap protect the daily API request budget.
+        _outcome_now = datetime.now(timezone.utc).timestamp()
+        _last_outcome_sync = float(st.session_state.get("automatic_outcome_sync_at", 0) or 0)
+        if _outcome_now - _last_outcome_sync >= 1800:
+            try:
+                _outcome_url = str(st.secrets.get("SUPABASE_URL", "") or os.getenv("SUPABASE_URL", "")).strip()
+                _outcome_key = str(st.secrets.get("SUPABASE_SECRET_KEY", "") or os.getenv("SUPABASE_SECRET_KEY", "")).strip()
+                if _outcome_url and _outcome_key:
+                    _auto_outcome_result = sync_finished_fixture_outcomes(
+                        _outcome_url, _outcome_key, api_get, max_fixtures=25
+                    )
+                    st.session_state["automatic_outcome_sync_result"] = _auto_outcome_result
+                    st.session_state["automatic_outcome_sync_error"] = ""
+                    st.session_state["automatic_outcome_sync_at"] = _outcome_now
+                else:
+                    st.session_state["automatic_outcome_sync_error"] = "Faltan credenciales de Supabase."
+            except Exception as _auto_outcome_exc:
+                st.session_state["automatic_outcome_sync_error"] = (
+                    f"{type(_auto_outcome_exc).__name__}: {_auto_outcome_exc}"
+                )
         st.session_state.last_scan_api_calls = st.session_state.api_request_count - scan_api_calls_start
 
     # Mostrar el diagnóstico del último escaneo también cuando hay un partido seleccionado,
@@ -9124,6 +9146,17 @@ else:
                 st.warning(f"No se pudo guardar el registro local de pronósticos: {st.session_state['prediction_ledger_write_error']}")
             if st.session_state.get("prediction_supabase_write_error"):
                 st.warning(f"No se pudo sincronizar el registro remoto de pronósticos: {st.session_state['prediction_supabase_write_error']}")
+            _auto_outcomes = st.session_state.get("automatic_outcome_sync_result") or {}
+            if _auto_outcomes:
+                st.caption(
+                    f"Verificación automática de resultados (cada 30 min, máximo 25 partidos): "
+                    f"{_auto_outcomes.get('checked', 0)} revisados · "
+                    f"{_auto_outcomes.get('finished', 0)} finalizados · "
+                    f"{_auto_outcomes.get('inserted', 0)} resultados nuevos · "
+                    f"{_auto_outcomes.get('unchanged', 0)} sin cambios."
+                )
+            if st.session_state.get("automatic_outcome_sync_error"):
+                st.warning(f"Verificación automática de resultados: {st.session_state['automatic_outcome_sync_error']}")
             _diag_cols = st.columns(4)
             _diag_cols[0].metric("Partidos analizados", int(_scan_diag.get("fixtures_scanned", 0)))
             _diag_cols[1].metric("Modelos de goles disponibles", int(_scan_diag.get("goal_estimates_available", 0)))
