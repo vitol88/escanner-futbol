@@ -165,3 +165,56 @@ def resolve_binary_outcome(
         return {"resolved": False, "reason": "unsupported_total_selection"}
 
     return {"resolved": False, "reason": "unsupported_market"}
+
+
+def settle_prediction_rows(
+    prediction_rows: list[dict[str, Any]],
+    final_outcomes_by_fixture: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """Join immutable predictions to verified fixture outcomes without mutating either.
+
+    Unsupported selections, missing final stats, and Asian-line pushes remain
+    pending. Each output row is an evaluation projection, not a ledger update.
+    """
+    settled: list[dict[str, Any]] = []
+    pending: list[dict[str, Any]] = []
+    for row in prediction_rows if isinstance(prediction_rows, list) else []:
+        if not isinstance(row, dict):
+            continue
+        fixture_id = str(row.get("fixture_id") or "").strip()
+        final = final_outcomes_by_fixture.get(fixture_id) if fixture_id else None
+        if not isinstance(final, dict):
+            pending.append({**row, "settlement_status": "pending_final_result"})
+            continue
+        market_type = str(row.get("market_type") or "").strip()
+        if not market_type:
+            market_type = str(row.get("market") or "").strip().casefold()
+        selection = str(row.get("selection") or "").strip()
+        result = resolve_binary_outcome(
+            market_type=market_type,
+            selection=selection,
+            final_home_score=final.get("final_home_score"),
+            final_away_score=final.get("final_away_score"),
+            final_total_corners=final.get("final_total_corners"),
+            final_total_yellow_cards=final.get("final_total_yellow_cards"),
+            home_team_name=row.get("home"),
+            away_team_name=row.get("away"),
+        )
+        enriched = {
+            **row,
+            "settlement_status": "settled" if result.get("resolved") else "pending_review",
+            "settlement_reason": result.get("reason"),
+            "outcome": result.get("outcome") if result.get("resolved") else None,
+            "outcome_verified": bool(result.get("resolved")),
+            "outcome_source": final.get("source") or "verified_fixture_result",
+            "outcome_verified_at": final.get("verified_at"),
+        }
+        (settled if result.get("resolved") else pending).append(enriched)
+    return {
+        "settled": settled,
+        "pending": pending,
+        "settled_count": len(settled),
+        "pending_count": len(pending),
+        "hit_count": sum(row["outcome"] == 1 for row in settled),
+        "miss_count": sum(row["outcome"] == 0 for row in settled),
+    }
