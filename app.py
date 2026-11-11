@@ -9049,6 +9049,76 @@ else:
                 _corner_detail_cols[2].metric("Mercados evaluados", int(_scan_diag.get("corner_candidates_evaluated", 0)))
                 st.info(str(_scan_diag.get("corner_model_status", "Estado del modelo de córners no disponible.")))
                 st.markdown("**Cobertura de cuotas en vivo**")
+                # Prueba aislada del fixture de referencia: no genera ni publica señales.
+                with st.expander("Prueba directa del partido Czarni Sosnowiec W vs Brann W (1644158)"):
+                    st.caption(
+                        "Consulta individual a API-Football /odds/live?fixture=1644158. "
+                        "Solo diagnóstico; no atribuye las cuotas a RushBet."
+                    )
+                    if st.button("Consultar fixture 1644158 ahora", key="test_live_odds_fixture_1644158"):
+                        try:
+                            _probe_payload = api_get("odds/live", {"fixture": 1644158})
+                            _probe_items = _probe_payload.get("response") or []
+                            _probe_markets = []
+                            for _probe_item in _probe_items:
+                                if not isinstance(_probe_item, dict):
+                                    continue
+                                _probe_status = _probe_item.get("status") or {}
+                                for _probe_market in (_probe_item.get("odds") or []):
+                                    if not isinstance(_probe_market, dict):
+                                        continue
+                                    _probe_values = []
+                                    for _probe_value in (_probe_market.get("values") or []):
+                                        if not isinstance(_probe_value, dict):
+                                            continue
+                                        _probe_values.append({
+                                            "selection": str(_probe_value.get("value") or ""),
+                                            "odd": str(_probe_value.get("odd") or ""),
+                                            "handicap": str(_probe_value.get("handicap") or ""),
+                                            "suspended": bool(_probe_value.get("suspended")),
+                                            "main": _probe_value.get("main"),
+                                        })
+                                    _probe_markets.append({
+                                        "market_id": _probe_market.get("id"),
+                                        "market": str(_probe_market.get("name") or "Mercado sin nombre"),
+                                        "values": _probe_values,
+                                    })
+                            st.session_state["live_odds_fixture_1644158_probe"] = {
+                                "response_count": len(_probe_items),
+                                "markets": _probe_markets,
+                                "errors": _probe_payload.get("errors") or {},
+                                "response_fixtures": [
+                                    str((((_x.get("fixture") or {}).get("id")) or ""))
+                                    for _x in _probe_items if isinstance(_x, dict)
+                                ],
+                                "statuses": [
+                                    _x.get("status") or {}
+                                    for _x in _probe_items if isinstance(_x, dict)
+                                ],
+                            }
+                        except Exception as _probe_exc:
+                            st.session_state["live_odds_fixture_1644158_probe"] = {
+                                "error": f"{type(_probe_exc).__name__}: {_probe_exc}"
+                            }
+                    _probe_result = st.session_state.get("live_odds_fixture_1644158_probe")
+                    if _probe_result:
+                        if _probe_result.get("error"):
+                            st.error(_probe_result["error"])
+                        else:
+                            st.write(f"Registros devueltos: {_probe_result.get('response_count', 0)}")
+                            st.write(f"IDs devueltos: {', '.join(_probe_result.get('response_fixtures', [])) or 'ninguno'}")
+                            st.write(f"Mercados recibidos: {len(_probe_result.get('markets', []))}")
+                            st.write(f"Estados: {_probe_result.get('statuses', [])}")
+                            if _probe_result.get("errors"):
+                                st.warning(f"Errores del proveedor: {_probe_result['errors']}")
+                            for _probe_market in _probe_result.get("markets", []):
+                                st.write(f"{_probe_market.get('market')} (ID {_probe_market.get('market_id')})")
+                                if _probe_market.get("values"):
+                                    st.dataframe(_probe_market["values"], use_container_width=True, hide_index=True)
+                                else:
+                                    st.caption("El mercado llegó sin valores.")
+                            if not _probe_result.get("markets"):
+                                st.info("La API no devolvió mercados para este fixture en esta consulta.")
                 _odds_cols = st.columns(3)
                 _odds_cols[0].metric("Partidos con cuotas", int(_scan_diag.get("fixtures_with_odds", 0)))
                 _odds_cols[1].metric("Partidos sin cuotas", int(_scan_diag.get("fixtures_without_odds", 0)))
