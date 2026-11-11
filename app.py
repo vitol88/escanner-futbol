@@ -8918,14 +8918,18 @@ else:
                     st.warning(f"API-Football reportó: {_scan_diag.get('odds_api_errors')}")
                 if _scan_diag.get("odds_targeted_errors"):
                     st.warning("Errores en consultas por partido: " + " | ".join(_scan_diag.get("odds_targeted_errors", [])[:5]))
-                with st.expander("Cobertura de cuotas por competición"):
-                    for _coverage in _scan_diag.get("odds_league_coverage_details", []):
+                st.markdown("### Cobertura de cuotas por competición")
+                _coverage_rows = _scan_diag.get("odds_league_coverage_details", [])
+                if _coverage_rows:
+                    for _coverage in _coverage_rows:
                         st.write(
                             f"{_coverage.get('country') or ''} · {_coverage.get('league_name') or _coverage.get('league_id')} "
-                            f"({ _coverage.get('season') }): odds = {_coverage.get('odds_coverage')}"
+                            f"({_coverage.get('season')}): odds = {_coverage.get('odds_coverage')}"
                         )
                         if _coverage.get("api_errors"):
                             st.caption(f"Respuesta de cobertura: {_coverage.get('api_errors')}")
+                else:
+                    st.info("Todavía no hay datos de cobertura para las ligas de este escaneo. Ejecuta «Escanear en vivo» para consultarlas.")
                 with st.expander("Catálogos de cuotas disponibles"):
                     st.write(f"Tipos de mercado LIVE: {_scan_diag.get('odds_live_bets_catalog_count', 0)}")
                     st.caption(", ".join(_scan_diag.get("odds_live_bets_catalog_sample", [])) or "Sin nombres de mercados recibidos")
