@@ -8088,6 +8088,7 @@ else:
         st.session_state.live_odds_league_coverage_cache = _coverage_cache
         st.session_state.live_odds_league_coverage_details = _coverage_details
 
+        global_odds_index = st.session_state.get("live_odds_by_fixture") or {}
         # Consulta adicional por competición: odds/live admite el filtro league.
         # Se cachea 60 s para evitar repetir llamadas en cada rerun de Streamlit.
         league_odds_cache = st.session_state.get("live_odds_by_league_cache", {}) or {}
@@ -8176,7 +8177,6 @@ else:
         targeted_calls = 0
         targeted_errors = []
         targeted_response_details = []
-        global_odds_index = st.session_state.get("live_odds_by_fixture") or {}
         for _live_fixture in filtered:
             _live_fixture_id = str(((_live_fixture.get("fixture") or {}).get("id") or "")).strip()
             if not _live_fixture_id or global_odds_index.get(_live_fixture_id):
