@@ -160,5 +160,59 @@ class SettlementTests(unittest.TestCase):
         )
         self.assertFalse(unresolved["resolved"])
 
+
+    def test_prediction_rows_join_verified_outcomes_without_mutating_source(self):
+        from ai_engine.settlement import settle_prediction_rows
+
+        predictions = [
+            {"prediction_id": "p1", "fixture_id": "101", "market_type": "goals",
+             "selection": "Over 2.5", "probability": 0.8},
+            {"prediction_id": "p2", "fixture_id": "101", "market_type": "btts",
+             "selection": "Yes", "probability": 0.7},
+            {"prediction_id": "p3", "fixture_id": "202", "market_type": "corners",
+             "selection": "Over 8.5", "probability": 0.6},
+        ]
+        outcomes = {
+            "101": {"final_home_score": 2, "final_away_score": 1,
+                    "source": "api-football", "verified_at": "2026-11-11T12:00:00Z"},
+            "202": {"final_home_score": 0, "final_away_score": 0,
+                    "final_total_corners": None},
+        }
+
+        result = settle_prediction_rows(predictions, outcomes)
+
+        self.assertEqual(result["settled_count"], 2)
+        self.assertEqual(result["pending_count"], 1)
+        self.assertEqual(result["hit_count"], 2)
+        self.assertEqual(result["miss_count"], 0)
+        self.assertEqual({row["prediction_id"] for row in result["settled"]}, {"p1", "p2"})
+        self.assertEqual(result["pending"][0]["settlement_status"], "pending_review")
+        self.assertNotIn("outcome", predictions[0])
+        self.assertNotIn("outcome_verified", predictions[0])
+
+    def test_prediction_without_verified_fixture_result_stays_pending(self):
+        from ai_engine.settlement import settle_prediction_rows
+
+        result = settle_prediction_rows(
+            [{"fixture_id": "missing", "market_type": "draw",
+              "selection": "Empate final"}],
+            {},
+        )
+        self.assertEqual(result["settled_count"], 0)
+        self.assertEqual(result["pending_count"], 1)
+        self.assertEqual(result["pending"][0]["settlement_status"], "pending_final_result")
+
+    def test_unsupported_prediction_market_is_not_guessed(self):
+        from ai_engine.settlement import settle_prediction_rows
+
+        result = settle_prediction_rows(
+            [{"fixture_id": "1", "market_type": "first_goal",
+              "selection": "Home scores first"}],
+            {"1": {"final_home_score": 2, "final_away_score": 1}},
+        )
+        self.assertEqual(result["settled_count"], 0)
+        self.assertEqual(result["pending"][0]["settlement_status"], "pending_review")
+
+
 if __name__ == "__main__":
     unittest.main()
