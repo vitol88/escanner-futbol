@@ -279,6 +279,11 @@ def estimate_live_goal_markets(
     warning_reason = result.get("reason")
     result.update({
         "available": True,
+        # The current Poisson/league-average estimator is explicitly exploratory
+        # and has not passed out-of-sample calibration. It may inform analysis,
+        # but must not independently create betting alerts until approved.
+        "signal_eligible": False,
+        "model_validation_status": "exploratory_not_calibrated",
         "reason": warning_reason,
         "baseline_league": baseline["league"],
         "baseline_matches": matches,
