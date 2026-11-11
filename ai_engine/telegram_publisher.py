@@ -20,6 +20,8 @@ def format_signal_message(row: dict[str, Any]) -> str:
     probability = row.get("probability")
     live_odd = row.get("verified_live_odd")
     bookmaker = str(row.get("verified_bookmaker") or "")
+    bookmaker_verified = row.get("bookmaker_verified") is True
+    odds_source = str(row.get("odds_source") or "API-Football LIVE")
     edge = row.get("estimated_edge")
 
     score = ""
@@ -27,7 +29,11 @@ def format_signal_message(row: dict[str, Any]) -> str:
         score = f"Marcador: {score_home}-{score_away}\n"
     minute_text = f"Minuto: {minute}'\n" if minute is not None else ""
 
-    odds_text = f"CUOTA: {float(live_odd):.2f} · Casa: {bookmaker}\n"
+    if bookmaker_verified:
+        odds_origin = f"Casa: {bookmaker}"
+    else:
+        odds_origin = f"Fuente: {odds_source} · casa no especificada"
+    odds_text = f"CUOTA: {float(live_odd):.2f} · {odds_origin}\n"
     risk_mode = "MODO SEGURO" if 1.35 <= float(live_odd) <= 1.60 else "MODO ARRIESGADO"
 
     analysis_parts = []
