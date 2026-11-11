@@ -9094,10 +9094,13 @@ else:
             _diag_cols[2].metric("Candidatos de goles", int(_scan_diag.get("goal_model_candidates", 0)))
             _diag_cols[3].metric("Señales elegibles", int(_scan_diag.get("eligible_goal_signals", 0)))
             with st.expander("Ver por qué no se generaron señales", expanded=int(_scan_diag.get("eligible_goal_signals", 0)) == 0):
-                _reason_cols = st.columns(3)
+                _reason_cols = st.columns(4)
                 _reason_cols[0].metric("Candidatos sin cuotas", int(_scan_diag.get("goal_candidates_without_quotes", 0)))
                 _reason_cols[1].metric("Sin mercado exacto / filtro", int(_scan_diag.get("goal_candidates_without_exact_quote_or_below_filters", 0)))
-                _reason_cols[2].metric("Candidatos evaluados", int(_scan_diag.get("goal_candidates_evaluated", 0)))
+                _reason_cols[2].metric("Modelo no calibrado", int(_scan_diag.get("goal_candidates_model_not_validated", 0)))
+                _reason_cols[3].metric("Candidatos evaluados", int(_scan_diag.get("goal_candidates_evaluated", 0)))
+                if int(_scan_diag.get("goal_candidates_model_not_validated", 0)):
+                    st.warning("Las estimaciones actuales de goles son exploratorias y aún no están calibradas. Se muestran para análisis, pero no se publican como señales automáticas.")
                 st.markdown("**Córners**")
                 _corner_cols = st.columns(3)
                 _corner_cols[0].metric("Partidos con córners en vivo", int(_scan_diag.get("corner_stats_ready", 0)))
