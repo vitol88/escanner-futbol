@@ -8038,6 +8038,56 @@ else:
         if "live_odds_by_fixture" not in st.session_state:
             st.session_state.live_odds_by_fixture = {}
 
+        # Verificar cobertura oficial de cuotas por competición/temporada.
+        # La presencia de una casa o mercado en los catálogos no garantiza cobertura
+        # para cada liga; esta consulta permite distinguirlo sin repetir llamadas.
+        _coverage_cache = st.session_state.get("live_odds_league_coverage_cache", {})
+        _coverage_now = datetime.now().timestamp()
+        _coverage_details = []
+        _coverage_keys_seen = set()
+        for _coverage_fixture in filtered:
+            _coverage_league = _coverage_fixture.get("league") or {}
+            _coverage_league_id = _coverage_league.get("id")
+            _coverage_season = _coverage_league.get("season")
+            if not _coverage_league_id or not _coverage_season:
+                continue
+            _coverage_key = f"{_coverage_league_id}:{_coverage_season}"
+            if _coverage_key in _coverage_keys_seen:
+                continue
+            _coverage_keys_seen.add(_coverage_key)
+            _cached_coverage = _coverage_cache.get(_coverage_key) or {}
+            if _coverage_now - float(_cached_coverage.get("checked_epoch", 0) or 0) >= 86400:
+                try:
+                    _league_payload = api_get("leagues", {"id": _coverage_league_id, "season": _coverage_season})
+                    _league_items = _league_payload.get("response") or []
+                    _coverage_value = None
+                    if _league_items:
+                        _coverage_value = (((_league_items[0].get("seasons") or [{}])[0].get("coverage") or {}).get("odds"))
+                    _cached_coverage = {
+                        "league_id": _coverage_league_id,
+                        "season": _coverage_season,
+                        "league_name": _coverage_league.get("name"),
+                        "country": _coverage_league.get("country"),
+                        "odds_coverage": _coverage_value,
+                        "api_errors": _league_payload.get("errors") or {},
+                        "checked_epoch": _coverage_now,
+                    }
+                    _coverage_cache[_coverage_key] = _cached_coverage
+                except Exception as _coverage_exc:
+                    _cached_coverage = {
+                        "league_id": _coverage_league_id,
+                        "season": _coverage_season,
+                        "league_name": _coverage_league.get("name"),
+                        "country": _coverage_league.get("country"),
+                        "odds_coverage": None,
+                        "api_errors": str(_coverage_exc),
+                        "checked_epoch": _coverage_now,
+                    }
+                    _coverage_cache[_coverage_key] = _cached_coverage
+            _coverage_details.append(_cached_coverage)
+        st.session_state.live_odds_league_coverage_cache = _coverage_cache
+        st.session_state.live_odds_league_coverage_details = _coverage_details
+
         # Fallback individual por partido: se ejecuta en CADA escaneo, incluso si
         # la consulta global fue reutilizada desde el refresco previo del encabezado.
         targeted_calls = 0
@@ -8380,6 +8430,7 @@ else:
             "odds_targeted_calls": int(st.session_state.get("live_odds_targeted_calls", 0) or 0),
             "odds_targeted_errors": st.session_state.get("live_odds_targeted_errors", []),
             "odds_targeted_details": st.session_state.get("live_odds_targeted_details", []),
+            "odds_league_coverage_details": st.session_state.get("live_odds_league_coverage_details", []),
             "odds_live_bets_catalog_count": int(st.session_state.get("live_odds_bets_catalog_count", 0) or 0),
             "odds_live_bets_catalog_sample": st.session_state.get("live_odds_bets_catalog_sample", []),
             "odds_live_bets_catalog_errors": st.session_state.get("live_odds_bets_catalog_errors", {}),
@@ -8867,6 +8918,14 @@ else:
                     st.warning(f"API-Football reportó: {_scan_diag.get('odds_api_errors')}")
                 if _scan_diag.get("odds_targeted_errors"):
                     st.warning("Errores en consultas por partido: " + " | ".join(_scan_diag.get("odds_targeted_errors", [])[:5]))
+                with st.expander("Cobertura de cuotas por competición"):
+                    for _coverage in _scan_diag.get("odds_league_coverage_details", []):
+                        st.write(
+                            f"{_coverage.get('country') or ''} · {_coverage.get('league_name') or _coverage.get('league_id')} "
+                            f"({ _coverage.get('season') }): odds = {_coverage.get('odds_coverage')}"
+                        )
+                        if _coverage.get("api_errors"):
+                            st.caption(f"Respuesta de cobertura: {_coverage.get('api_errors')}")
                 with st.expander("Catálogos de cuotas disponibles"):
                     st.write(f"Tipos de mercado LIVE: {_scan_diag.get('odds_live_bets_catalog_count', 0)}")
                     st.caption(", ".join(_scan_diag.get("odds_live_bets_catalog_sample", [])) or "Sin nombres de mercados recibidos")
