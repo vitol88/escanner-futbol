@@ -7986,6 +7986,32 @@ else:
         st.session_state.last_scan_stats_pending = max(0, len(filtered) - len(stats_fixtures))
         st.session_state.last_scan_stats_rate_limited = stats_rate_limited
 
+        # Catálogos de referencia propios del mercado EN VIVO (cacheados 24 h).
+        catalog_now = datetime.now().timestamp()
+        catalog_last = float(st.session_state.get("live_odds_catalog_epoch", 0) or 0)
+        if get_api_key() and catalog_now - catalog_last >= 86400:
+            try:
+                _live_bets_payload = api_get("odds/live/bets")
+                _live_bets_items = _live_bets_payload.get("response") or []
+                st.session_state.live_odds_bets_catalog_count = len(_live_bets_items)
+                st.session_state.live_odds_bets_catalog_sample = [
+                    str(_x.get("name") or _x.get("id") or "") for _x in _live_bets_items[:30]
+                ]
+                st.session_state.live_odds_bets_catalog_errors = _live_bets_payload.get("errors") or {}
+            except Exception as _catalog_exc:
+                st.session_state.live_odds_bets_catalog_errors = str(_catalog_exc)
+            try:
+                _bookmakers_payload = api_get("odds/bookmakers")
+                _bookmakers_items = _bookmakers_payload.get("response") or []
+                st.session_state.live_odds_bookmakers_count = len(_bookmakers_items)
+                st.session_state.live_odds_bookmakers_sample = [
+                    str(_x.get("name") or _x.get("id") or "") for _x in _bookmakers_items[:30]
+                ]
+                st.session_state.live_odds_bookmakers_errors = _bookmakers_payload.get("errors") or {}
+            except Exception as _bookmakers_exc:
+                st.session_state.live_odds_bookmakers_errors = str(_bookmakers_exc)
+            st.session_state.live_odds_catalog_epoch = catalog_now
+
         # Refresh global live odds at most once per 60 seconds.
         odds_now = datetime.now().timestamp()
         last_odds_epoch = float(st.session_state.get("live_odds_last_fetch_epoch", 0) or 0)
@@ -8354,6 +8380,12 @@ else:
             "odds_targeted_calls": int(st.session_state.get("live_odds_targeted_calls", 0) or 0),
             "odds_targeted_errors": st.session_state.get("live_odds_targeted_errors", []),
             "odds_targeted_details": st.session_state.get("live_odds_targeted_details", []),
+            "odds_live_bets_catalog_count": int(st.session_state.get("live_odds_bets_catalog_count", 0) or 0),
+            "odds_live_bets_catalog_sample": st.session_state.get("live_odds_bets_catalog_sample", []),
+            "odds_live_bets_catalog_errors": st.session_state.get("live_odds_bets_catalog_errors", {}),
+            "odds_bookmakers_catalog_count": int(st.session_state.get("live_odds_bookmakers_count", 0) or 0),
+            "odds_bookmakers_catalog_sample": st.session_state.get("live_odds_bookmakers_sample", []),
+            "odds_bookmakers_catalog_errors": st.session_state.get("live_odds_bookmakers_errors", {}),
             "odds_last_fetch": st.session_state.get("live_odds_last_fetch"),
             "odds_error": st.session_state.get("live_odds_error", ""),
             "corner_model_status": "Modelo exploratorio conectado al evaluador central; requiere cuota real del mercado exacto y EV mínimo del 2 %. No equivale a un modelo calibrado.",
@@ -8835,6 +8867,15 @@ else:
                     st.warning(f"API-Football reportó: {_scan_diag.get('odds_api_errors')}")
                 if _scan_diag.get("odds_targeted_errors"):
                     st.warning("Errores en consultas por partido: " + " | ".join(_scan_diag.get("odds_targeted_errors", [])[:5]))
+                with st.expander("Catálogos de cuotas disponibles"):
+                    st.write(f"Tipos de mercado LIVE: {_scan_diag.get('odds_live_bets_catalog_count', 0)}")
+                    st.caption(", ".join(_scan_diag.get("odds_live_bets_catalog_sample", [])) or "Sin nombres de mercados recibidos")
+                    st.write(f"Casas de apuestas en catálogo: {_scan_diag.get('odds_bookmakers_catalog_count', 0)}")
+                    st.caption(", ".join(_scan_diag.get("odds_bookmakers_catalog_sample", [])) or "Sin casas recibidas")
+                    if _scan_diag.get("odds_live_bets_catalog_errors"):
+                        st.warning(f"Error catálogo LIVE: {_scan_diag.get('odds_live_bets_catalog_errors')}")
+                    if _scan_diag.get("odds_bookmakers_catalog_errors"):
+                        st.warning(f"Error catálogo casas: {_scan_diag.get('odds_bookmakers_catalog_errors')}")
                 with st.expander("Detalle de respuesta por partido"):
                     for _detail in _scan_diag.get("odds_targeted_details", []):
                         st.write(
