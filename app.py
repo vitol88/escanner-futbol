@@ -8656,6 +8656,7 @@ else:
                         row.update({
                             "verified_live_odd": float(verified_odds["odd"]),
                             "verified_bookmaker": str(verified_odds.get("bookmaker") or "Casa no identificada"),
+                            "bookmaker_verified": verified_odds.get("bookmaker_verified") is True,
                             "verified_odds_market": str(verified_odds.get("market_label") or ""),
                             "odds_decimal": float(verified_odds["odd"]),
                             "odds_verified": True,
@@ -8826,6 +8827,7 @@ else:
                 row.update({
                     "verified_live_odd": float(odd),
                     "verified_bookmaker": str(odds_row.get("bookmaker") or "Casa no identificada"),
+                    "bookmaker_verified": odds_row.get("bookmaker_verified") is True,
                     "verified_odds_market": market_label,
                     "odds_decimal": float(odd),
                     "odds_verified": True,
@@ -8864,6 +8866,7 @@ else:
             row for row in telegram_pending
             if isinstance(row, dict)
             and isinstance(row.get("verified_live_odd"), (int, float))
+            and row.get("bookmaker_verified") is True
             and row.get("verified_bookmaker")
             and row.get("verified_odds_market")
             and isinstance(row.get("estimated_edge"), (int, float))
@@ -8906,6 +8909,7 @@ else:
                     _edge = _signal_row.get("estimated_edge")
                     if (
                         not isinstance(_odd, (int, float))
+                        or _signal_row.get("bookmaker_verified") is not True
                         or not _signal_row.get("verified_bookmaker")
                         or not _signal_row.get("verified_odds_market")
                         or not isinstance(_edge, (int, float))
