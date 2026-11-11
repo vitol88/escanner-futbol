@@ -8730,8 +8730,9 @@ else:
                 )
         st.session_state.last_scan_api_calls = st.session_state.api_request_count - scan_api_calls_start
 
-    # El panel global de escaneo no debe mezclarse con la pantalla individual seleccionada.
-    if not _analysis_page_active:
+    # Mostrar el diagnóstico del último escaneo también cuando hay un partido seleccionado,
+    # para que siempre quede accesible encima de las pestañas principales.
+    if not _analysis_page_active or st.session_state.get("last_scan_diagnostics"):
         _scan_diag = st.session_state.get("last_scan_diagnostics") or {}
         if _scan_diag:
             st.markdown("### 🔎 Diagnóstico del último escaneo")
