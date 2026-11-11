@@ -8016,6 +8016,7 @@ else:
         # la consulta global fue reutilizada desde el refresco previo del encabezado.
         targeted_calls = 0
         targeted_errors = []
+        targeted_response_details = []
         global_odds_index = st.session_state.get("live_odds_by_fixture") or {}
         for _live_fixture in filtered:
             _live_fixture_id = str(((_live_fixture.get("fixture") or {}).get("id") or "")).strip()
@@ -8024,7 +8025,23 @@ else:
             try:
                 _targeted_payload = api_get("odds/live", {"fixture": _live_fixture_id})
                 targeted_calls += 1
+                _targeted_items = _targeted_payload.get("response") or []
                 _targeted_rows = extract_live_odds(_targeted_payload)
+                _targeted_bookmakers = sum(len(_item.get("bookmakers") or []) for _item in _targeted_items)
+                _targeted_bets = sum(
+                    len(_bet.get("values") or [])
+                    for _item in _targeted_items
+                    for _bookmaker in (_item.get("bookmakers") or [])
+                    for _bet in (_bookmaker.get("bets") or [])
+                )
+                targeted_response_details.append({
+                    "fixture_id": _live_fixture_id,
+                    "response_items": len(_targeted_items),
+                    "bookmakers": _targeted_bookmakers,
+                    "bet_values": _targeted_bets,
+                    "parsed_rows": len(_targeted_rows.get(_live_fixture_id, [])),
+                    "api_errors": _targeted_payload.get("errors") or {},
+                })
                 if _targeted_rows.get(_live_fixture_id):
                     global_odds_index.setdefault(_live_fixture_id, []).extend(_targeted_rows[_live_fixture_id])
                 _targeted_api_errors = _targeted_payload.get("errors") or {}
@@ -8033,9 +8050,14 @@ else:
             except Exception as _targeted_exc:
                 targeted_calls += 1
                 targeted_errors.append(f"{_live_fixture_id}: {type(_targeted_exc).__name__}: {_targeted_exc}")
+                targeted_response_details.append({
+                    "fixture_id": _live_fixture_id,
+                    "exception": f"{type(_targeted_exc).__name__}: {_targeted_exc}",
+                })
         st.session_state.live_odds_by_fixture = global_odds_index
         st.session_state.live_odds_targeted_calls = targeted_calls
         st.session_state.live_odds_targeted_errors = targeted_errors
+        st.session_state.live_odds_targeted_details = targeted_response_details
 
         # Compare current scores with the previous completed scan without extra API calls.
         previous_scores = st.session_state.get("previous_scan_scores", {})
@@ -8331,6 +8353,7 @@ else:
             "odds_api_errors": st.session_state.get("live_odds_api_errors", {}),
             "odds_targeted_calls": int(st.session_state.get("live_odds_targeted_calls", 0) or 0),
             "odds_targeted_errors": st.session_state.get("live_odds_targeted_errors", []),
+            "odds_targeted_details": st.session_state.get("live_odds_targeted_details", []),
             "odds_last_fetch": st.session_state.get("live_odds_last_fetch"),
             "odds_error": st.session_state.get("live_odds_error", ""),
             "corner_model_status": "Modelo exploratorio conectado al evaluador central; requiere cuota real del mercado exacto y EV mínimo del 2 %. No equivale a un modelo calibrado.",
@@ -8812,6 +8835,19 @@ else:
                     st.warning(f"API-Football reportó: {_scan_diag.get('odds_api_errors')}")
                 if _scan_diag.get("odds_targeted_errors"):
                     st.warning("Errores en consultas por partido: " + " | ".join(_scan_diag.get("odds_targeted_errors", [])[:5]))
+                with st.expander("Detalle de respuesta por partido"):
+                    for _detail in _scan_diag.get("odds_targeted_details", []):
+                        st.write(
+                            f"Fixture {_detail.get('fixture_id')}: "
+                            f"{_detail.get('response_items', 0)} registros, "
+                            f"{_detail.get('bookmakers', 0)} casas, "
+                            f"{_detail.get('bet_values', 0)} valores de mercado, "
+                            f"{_detail.get('parsed_rows', 0)} cuotas interpretadas"
+                        )
+                        if _detail.get("api_errors"):
+                            st.caption(f"Errores API: {_detail.get('api_errors')}")
+                        if _detail.get("exception"):
+                            st.caption(f"Error local: {_detail.get('exception')}")
                 if _scan_diag.get("odds_last_fetch"):
                     st.caption(f"Última consulta de cuotas: {_scan_diag.get('odds_last_fetch')}")
                 if int(_scan_diag.get("odds_api_response_count", 0) or 0) == 0 and not _scan_diag.get("odds_error"):
