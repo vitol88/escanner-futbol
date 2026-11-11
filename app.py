@@ -8666,6 +8666,7 @@ else:
                     "probability": round(float(probability), 4),
                     "estimated_probability_exploratory": round(float(probability), 4),
                     "model_id": "estimate_live_goal_markets",
+                    "model_version": "exploratory-poisson-v1",
                     "source": "football_lab_live_scanner",
                     "snapshot_id": ":".join(str(value) for value in (
                         fixture_id, context.get("elapsed"), goals_data.get("home"), goals_data.get("away"),
