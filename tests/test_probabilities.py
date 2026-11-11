@@ -55,6 +55,8 @@ class ProbabilityModelTests(unittest.TestCase):
         self.assertTrue(result["baseline_fallback"])
         self.assertIn("genérica", result["baseline_league"])
         self.assertIsNotNone(result.get("draw_final"))
+        self.assertFalse(result["signal_eligible"])
+        self.assertEqual(result["model_validation_status"], "exploratory_not_calibrated")
 
     def test_low_sample_uses_explicit_generic_fallback(self):
         small = {"minimum_matches_for_estimate": 30, "leagues": [dict(TEST_DATA["leagues"][0], matches=10)]}
@@ -68,6 +70,8 @@ class ProbabilityModelTests(unittest.TestCase):
         result = estimate_live_goal_markets(country="England", league_name="EPL",
             score_home=1, score_away=0, elapsed_minute=45, data=TEST_DATA)
         self.assertTrue(result["available"])
+        self.assertFalse(result["signal_eligible"])
+        self.assertEqual(result["model_validation_status"], "exploratory_not_calibrated")
         values = list(result["over_total_goals"].values()) + [result["draw_final"], result["btts_final"]]
         self.assertTrue(all(0.0 <= p <= 1.0 for p in values))
         self.assertGreater(result["btts_final"], 0.0)
