@@ -8852,6 +8852,7 @@ else:
                     "probability": round(float(model_probability), 4),
                     "estimated_probability_exploratory": round(float(model_probability), 4),
                     "model_id": "live_corner_poisson_exploratory",
+                    "model_version": "live-corner-poisson-exploratory-v1",
                     "source": "football_lab_live_scanner",
                     "snapshot_id": ":".join(str(value) for value in (
                         fixture_id, minute, goals_data.get("home"), goals_data.get("away"),
