@@ -5907,6 +5907,8 @@ else:
                                     st.session_state["selected_live_fixture"] = match
                                     st.session_state["main_fixture_tool"] = {}
                                     st.rerun()
+                                if str(st.session_state.get("selected_live_fixture_id") or "") == str(match_id):
+                                    st.caption(f"ID del partido (fixture): {match_id}")
                                 selected_tool = st.session_state.get("main_fixture_tool") or {}
                                 if str(selected_tool.get("fixture_id")) == str(match_id):
                                     tool_name = selected_tool.get("tool")
