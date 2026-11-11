@@ -21,6 +21,34 @@ class LiveOddsTests(unittest.TestCase):
         self.assertEqual(result["123"][0]["odd"], 3.2)
         self.assertEqual(result["123"][0]["bookmaker"], "ExampleBook")
 
+    def test_extracts_live_market_prices_without_falsely_assigning_a_bookmaker(self):
+        payload = {"response": [{
+            "fixture": {"id": 456},
+            "odds": [{"name": "Match Winner", "values": [
+                {"value": "Draw", "odd": "3.25", "suspended": False},
+            ]}],
+        }]}
+        rows = extract_live_odds(payload)["456"]
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["odd"], 3.25)
+        self.assertEqual(rows[0]["odds_source"], "API-Football LIVE")
+        self.assertFalse(rows[0]["bookmaker_verified"])
+        self.assertIn("no especificada", rows[0]["bookmaker"])
+
+    def test_goal_tip_can_match_exact_live_price_without_bookmaker_attribution(self):
+        payload = {"response": [{
+            "fixture": {"id": 789},
+            "odds": [{"name": "Match Winner", "values": [
+                {"value": "Draw", "odd": "1.55", "suspended": False},
+            ]}],
+        }]}
+        rows = extract_live_odds(payload)["789"]
+        matched = match_goal_tip_to_live_odds("Empate final", 0.70, rows)
+        self.assertIsNotNone(matched)
+        self.assertEqual(matched["odd"], 1.55)
+        self.assertFalse(matched["bookmaker_verified"])
+        self.assertEqual(matched["odds_source"], "API-Football LIVE")
+
     def test_classifies_draw_and_btts(self):
         self.assertEqual(
             classify_market({"market": "Match Winner", "value": "Draw", "odd": 3.2}),
