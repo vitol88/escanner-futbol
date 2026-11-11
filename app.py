@@ -8003,6 +8003,30 @@ else:
                     if (item.get("fixture") or {}).get("id") is not None
                 ]
                 st.session_state.live_odds_by_fixture = extract_live_odds(odds_payload)
+                # Fallback dirigido: si el endpoint global omite partidos activos, consultar
+                # /odds/live?fixture=ID para cada fixture sin mercados en la lista analizada.
+                targeted_calls = 0
+                targeted_errors = []
+                global_odds_index = st.session_state.live_odds_by_fixture
+                for _live_fixture in filtered:
+                    _live_fixture_id = str(((_live_fixture.get("fixture") or {}).get("id") or "")).strip()
+                    if not _live_fixture_id or global_odds_index.get(_live_fixture_id):
+                        continue
+                    try:
+                        _targeted_payload = api_get("odds/live", {"fixture": _live_fixture_id})
+                        targeted_calls += 1
+                        _targeted_rows = extract_live_odds(_targeted_payload)
+                        if _targeted_rows.get(_live_fixture_id):
+                            global_odds_index.setdefault(_live_fixture_id, []).extend(_targeted_rows[_live_fixture_id])
+                        _targeted_api_errors = _targeted_payload.get("errors") or {}
+                        if _targeted_api_errors:
+                            targeted_errors.append(f"{_live_fixture_id}: {_targeted_api_errors}")
+                    except Exception as _targeted_exc:
+                        targeted_calls += 1
+                        targeted_errors.append(f"{_live_fixture_id}: {type(_targeted_exc).__name__}: {_targeted_exc}")
+                st.session_state.live_odds_by_fixture = global_odds_index
+                st.session_state.live_odds_targeted_calls = targeted_calls
+                st.session_state.live_odds_targeted_errors = targeted_errors
                 st.session_state.live_odds_last_fetch = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 st.session_state.live_odds_last_fetch_epoch = odds_now
                 st.session_state.live_odds_error = ""
@@ -8309,6 +8333,8 @@ else:
             "odds_api_response_count": int(st.session_state.get("live_odds_api_response_count", 0) or 0),
             "odds_api_fixture_ids": st.session_state.get("live_odds_api_fixture_ids", []),
             "odds_api_errors": st.session_state.get("live_odds_api_errors", {}),
+            "odds_targeted_calls": int(st.session_state.get("live_odds_targeted_calls", 0) or 0),
+            "odds_targeted_errors": st.session_state.get("live_odds_targeted_errors", []),
             "odds_last_fetch": st.session_state.get("live_odds_last_fetch"),
             "odds_error": st.session_state.get("live_odds_error", ""),
             "corner_model_status": "Modelo exploratorio conectado al evaluador central; requiere cuota real del mercado exacto y EV mínimo del 2 %. No equivale a un modelo calibrado.",
@@ -8783,11 +8809,14 @@ else:
                     f"Respuesta de API-Football: {_scan_diag.get('odds_api_response_count', 0)} partidos · "
                     f"IDs recibidos: {', '.join(_scan_diag.get('odds_api_fixture_ids', [])[:12]) or 'ninguno'}"
                 )
+                st.caption(f"Consultas individuales de respaldo: {_scan_diag.get('odds_targeted_calls', 0)}")
                 if _scan_diag.get("odds_error"):
                     st.warning(f"Error de consulta de cuotas: {_scan_diag.get('odds_error')}")
                 elif _scan_diag.get("odds_api_errors"):
                     st.warning(f"API-Football reportó: {_scan_diag.get('odds_api_errors')}")
-                elif _scan_diag.get("odds_last_fetch"):
+                if _scan_diag.get("odds_targeted_errors"):
+                    st.warning("Errores en consultas por partido: " + " | ".join(_scan_diag.get("odds_targeted_errors", [])[:5]))
+                if _scan_diag.get("odds_last_fetch"):
                     st.caption(f"Última consulta de cuotas: {_scan_diag.get('odds_last_fetch')}")
                 if int(_scan_diag.get("odds_api_response_count", 0) or 0) == 0 and not _scan_diag.get("odds_error"):
                     st.info("La consulta global /odds/live respondió sin partidos. Esto apunta a cobertura/respuesta del proveedor; todavía no significa que los 5 partidos no tengan cuotas en todas las casas.")
