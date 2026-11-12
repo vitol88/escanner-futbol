@@ -8815,6 +8815,9 @@ else:
                 history_failures.append(f"visitante: {away_sample}/3 partidos")
             history_stats_diag = history.get("diagnostics") or {}
             history_historical_stats_diag = history_stats_diag.get("historical_stats") or {}
+            history_team_diag = history_stats_diag.get("teams") or {}
+            history_home_team_diag = history_team_diag.get(str((teams_for_diagnostic.get("home") or {}).get("id")) or "") or {}
+            history_away_team_diag = history_team_diag.get(str((teams_for_diagnostic.get("away") or {}).get("id")) or "") or {}
             history_diagnostic = {
                 "Partido": (
                     f"{(teams_for_diagnostic.get('home') or {}).get('name') or 'Local'}"
@@ -8827,12 +8830,20 @@ else:
                 "Tiros visitante": away_shots,
                 "Muestra local": home_sample,
                 "Muestra visitante": away_sample,
+                "Partidos recibidos API local": history_home_team_diag.get("returned", 0),
+                "Partidos recibidos API visitante": history_away_team_diag.get("returned", 0),
                 "Partidos local revisados": history_stats_diag.get("home_venue_matches_checked", 0),
                 "Partidos visitante revisados": history_stats_diag.get("away_venue_matches_checked", 0),
+                "Consultas stats local": history_stats_diag.get("home_stats_attempted", 0),
+                "Consultas stats visitante": history_stats_diag.get("away_stats_attempted", 0),
+                "Respuestas con córners local": history_stats_diag.get("home_stats_with_corners", 0),
+                "Respuestas con córners visitante": history_stats_diag.get("away_stats_with_corners", 0),
                 "Consultas históricas": history_historical_stats_diag.get("requested", 0),
                 "Respuestas con datos": history_historical_stats_diag.get("nonempty_responses", 0),
                 "Respuestas con córners": history_historical_stats_diag.get("responses_with_corners", 0),
                 "Respuestas vacías": history_historical_stats_diag.get("empty_responses", 0),
+                "Error consulta local": history_home_team_diag.get("error") or "",
+                "Error consulta visitante": history_away_team_diag.get("error") or "",
                 "Presupuesto restante": history_stats_diag.get("stats_budget_remaining", 0),
                 "Media córners local": home_history,
                 "Media córners visitante": away_history,
