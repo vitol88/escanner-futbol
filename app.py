@@ -8609,6 +8609,9 @@ else:
             "corner_stats_ready": 0,
             "corner_stats_pending": 0,
             "corner_probability_candidates": 0,
+            "corner_history_gate_failed": 0,
+            "corner_activity_gate_failed": 0,
+            "corner_gate_diagnostics": [],
             "corner_candidates_without_quotes": 0,
             "corner_candidates_without_exact_quote_or_below_filters": 0,
             "corner_candidates_evaluated": 0,
@@ -8783,6 +8786,38 @@ else:
             activity_ready = qualifies_as_corner_candidate(
                 minute, total_now, pace, home_shots, away_shots
             )
+            if not history_ready:
+                scan_diagnostics["corner_history_gate_failed"] += 1
+            if not activity_ready:
+                scan_diagnostics["corner_activity_gate_failed"] += 1
+            teams_for_diagnostic = fixture.get("teams") or {}
+            history_diagnostic = {
+                "Partido": (
+                    f"{(teams_for_diagnostic.get('home') or {}).get('name') or 'Local'}"
+                    f" vs {(teams_for_diagnostic.get('away') or {}).get('name') or 'Visitante'}"
+                ),
+                "Minuto": minute,
+                "Córners en vivo": total_now,
+                "Ritmo / 90": pace,
+                "Tiros local": home_shots,
+                "Tiros visitante": away_shots,
+                "Muestra local": home_sample,
+                "Muestra visitante": away_sample,
+                "Media córners local": home_history,
+                "Media córners visitante": away_history,
+                "Historial válido": history_ready,
+                "Actividad válida": activity_ready,
+                "Motivo": (
+                    "Historial insuficiente"
+                    if not history_ready and activity_ready
+                    else "Actividad insuficiente"
+                    if history_ready and not activity_ready
+                    else "Historial y actividad insuficientes"
+                    if not history_ready and not activity_ready
+                    else "Superó filtros iniciales"
+                ),
+            }
+            scan_diagnostics["corner_gate_diagnostics"].append(history_diagnostic)
             if not history_ready or not activity_ready:
                 continue
 
@@ -9186,6 +9221,13 @@ else:
                 _corner_detail_cols[0].metric("Candidatos sin cuotas", int(_scan_diag.get("corner_candidates_without_quotes", 0)))
                 _corner_detail_cols[1].metric("Sin cuota exacta / EV", int(_scan_diag.get("corner_candidates_without_exact_quote_or_below_filters", 0)))
                 _corner_detail_cols[2].metric("Mercados evaluados", int(_scan_diag.get("corner_candidates_evaluated", 0)))
+                _corner_gate_cols = st.columns(2)
+                _corner_gate_cols[0].metric("Fallaron muestra histórica", int(_scan_diag.get("corner_history_gate_failed", 0)))
+                _corner_gate_cols[1].metric("Fallaron actividad en vivo", int(_scan_diag.get("corner_activity_gate_failed", 0)))
+                _corner_gate_rows = _scan_diag.get("corner_gate_diagnostics") or []
+                if _corner_gate_rows:
+                    with st.expander("Ver diagnóstico por partido: historial y actividad", expanded=False):
+                        st.dataframe(_corner_gate_rows, use_container_width=True, hide_index=True)
                 st.info(str(_scan_diag.get("corner_model_status", "Estado del modelo de córners no disponible.")))
                 st.markdown("**Cobertura de cuotas en vivo**")
                 # Prueba aislada del fixture de referencia: no genera ni publica señales.
