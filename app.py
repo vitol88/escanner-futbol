@@ -10170,7 +10170,18 @@ else:
                     f"{recovery_diagnostics.get('sqlite_path', str(PREDICTION_LEDGER_PATH))}"
                 )
                 if not recovery_diagnostics.get("csv_exists"):
-                    st.warning("No se encontró el CSV histórico en la ruta configurada. La base central no puede recuperar filas desde ese archivo.")
+                    if recovery_diagnostics.get("supabase_configured") and recovery_diagnostics.get("supabase_rows") is not None:
+                        st.info(
+                            f"CSV histórico legado no encontrado en esta instancia. "
+                            f"El registro central se recuperó desde Supabase: "
+                            f"{recovery_diagnostics.get('supabase_rows', 0)} pronóstico(s). "
+                            "Supabase es la fuente persistente; el CSV local no se usa como sustituto."
+                        )
+                    else:
+                        st.warning(
+                            "No se encontró el CSV histórico y Supabase no está disponible para recuperar "
+                            "el registro central. Revisa la conexión antes de continuar."
+                        )
                 elif recovery_diagnostics.get("csv_rows", 0) and not recovery_diagnostics.get("valid_rows", 0):
                     st.warning("El CSV contiene filas, pero ninguna cumple el esquema mínimo del registro central. Revisa los campos requeridos antes de migrar; no se descartó ni modificó el CSV.")
                 if recovery_diagnostics.get("supabase_configured"):
