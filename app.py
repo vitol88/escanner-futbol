@@ -1197,8 +1197,7 @@ st.markdown("""
     font-size:.76rem !important; font-weight:700 !important; line-height:1.2 !important;
     white-space:pre-line !important; overflow-wrap:anywhere !important;
     box-shadow:inset 0 0 0 1px rgba(250,204,21,.04) !important;
-  }
-  [class*="st-key-live_match_"] [data-testid="stButton"] > button:hover {
+  }  [class*="st-key-live_match_"] [data-testid="stButton"] > button:hover {
     border-color:#FACC15 !important; color:#FFE566 !important;
     background:linear-gradient(145deg,#302916,#17191F) !important;
   }
@@ -2397,8 +2396,7 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         -webkit-text-stroke:0 !important; mix-blend-mode:normal !important;
         caret-color:#303744 !important; opacity:1 !important; visibility:visible !important;
         text-shadow:none !important; filter:none !important;
-        border:1.5px solid #C7A43A !important; border-right:0 !important;
-        box-shadow:inset 0 1px 0 rgba(255,255,255,.95) !important;
+        border:1.5px solid #C7A43A !important; border-right:0 !important;        box-shadow:inset 0 1px 0 rgba(255,255,255,.95) !important;
       }
       html body .stApp div[class*="st-key-home_search_bar"] input::placeholder { color:#7A8492 !important; -webkit-text-fill-color:#7A8492 !important; }
       html body .stApp div[class*="st-key-home_search_button"] button {
@@ -3597,8 +3595,7 @@ if st.session_state.get("appearance_mode") not in {"☀️", "☀️ Claro"}:
         -webkit-text-fill-color:#FACC15 !important;
         font-weight:850 !important;
       }
-      .goal-h2h-average-badge > span:last-child {
-        display:inline-flex !important;
+      .goal-h2h-average-badge > span:last-child {        display:inline-flex !important;
         align-items:center !important;
         justify-content:center !important;
         padding:5px 10px !important;
@@ -4797,8 +4794,7 @@ if manual_scan:
         border:0 !important;
         box-shadow:none !important;
         outline:0 !important;
-        appearance:none !important;
-        -webkit-appearance:none !important;
+        appearance:none !important;        -webkit-appearance:none !important;
         -webkit-tap-highlight-color:transparent !important;
       }
       /* Neutralizar cualquier superficie HTML interna que herede el fondo del botón.
@@ -5997,8 +5993,7 @@ else:
                                                     f'<div class="live-stat-track"><span class="live-stat-home" style="width:{hwidth:.1f}%"></span><span class="live-stat-away" style="width:{awidth:.1f}%"></span></div></div>'
                                                 )
                                                 rendered += 1
-                                            stats_html += '</div></section>'
-                                            if rendered:
+                                            stats_html += '</div></section>'                                            if rendered:
                                                 st.markdown(stats_html, unsafe_allow_html=True)
                                             else:
                                                 st.info("La API no entregó estadísticas detalladas para este partido.")
@@ -7197,8 +7192,7 @@ else:
                                                                             with result_button_cols[1]:
                                                                                 if recent_id:
                                                                                     if st.button("📊", key=f"goal_timeline_btn_{match_row_key}", help="Ver estadísticas completas de este partido"):
-                                                                                        st.session_state[active_goal_match_key] = None if is_timeline_open else str(recent_id)
-                                                                                        st.rerun()
+                                                                                        st.session_state[active_goal_match_key] = None if is_timeline_open else str(recent_id)                                                                                        st.rerun()
                                                                                 else:
                                                                                     st.caption("—")
                                                                         if is_timeline_open and recent_id:
@@ -8397,8 +8391,7 @@ else:
                         candidates.append((f"Menos de {line} goles totales", probability))
 
                 # Team-specific goal markets: e.g. local/visitor to finish with 2+ goals.
-                home_name = ((fixture.get("teams") or {}).get("home") or {}).get("name", "Local")
-                away_name = ((fixture.get("teams") or {}).get("away") or {}).get("name", "Visitante")
+                home_name = ((fixture.get("teams") or {}).get("home") or {}).get("name", "Local")                away_name = ((fixture.get("teams") or {}).get("away") or {}).get("name", "Visitante")
                 for target, item in estimate.get("home_final_goals_at_least", {}).items():
                     if not item.get("already_settled"):
                         goal_word = "gol" if int(target) == 1 else "goles"
@@ -9597,8 +9590,7 @@ else:
                                         else:
                                             max_remaining = int(line - current_corners)
                                             model_prob = (
-                                                sum(poisson_pmf(remaining_mean, n) for n in range(max_remaining + 1))
-                                                if max_remaining >= 0 else 0.0
+                                                sum(poisson_pmf(remaining_mean, n) for n in range(max_remaining + 1))                                                if max_remaining >= 0 else 0.0
                                             )
                                 elif market_label.startswith("Más de "):
                                     target = str(int(line + 0.5))
@@ -10204,9 +10196,18 @@ else:
                 # Join only in memory for reporting; the original prediction rows remain immutable.
                 # Join only in memory for reporting; the original prediction rows remain immutable.
                 ledger_report_rows = []
+                settlement_by_prediction = {
+                    str(item.get("prediction_id") or ""): item
+                    for item in (settlement_projection or {}).get("settled", [])
+                    if str(item.get("prediction_id") or "").strip()
+                }
+                settlement_conflicts = []
+                settlement_applied = 0
                 for item in ledger_rows:
                     report_item = dict(item)
-                    verified_result = verified_outcomes.get(str(item.get("prediction_id") or ""))
+                    prediction_id = str(item.get("prediction_id") or "")
+                    verified_result = verified_outcomes.get(prediction_id)
+                    projected_result = settlement_by_prediction.get(prediction_id)
                     if verified_result:
                         report_item.update({
                             "outcome": verified_result["outcome"],
@@ -10214,7 +10215,42 @@ else:
                             "outcome_source": verified_result["outcome_source"],
                             "outcome_verified_at": verified_result["outcome_verified_at"],
                         })
+                        if (
+                            projected_result
+                            and projected_result.get("outcome") in (0, 1)
+                            and verified_result.get("outcome") in (0, 1)
+                            and projected_result["outcome"] != verified_result["outcome"]
+                        ):
+                            settlement_conflicts.append({
+                                "prediction_id": prediction_id,
+                                "fixture_id": item.get("fixture_id"),
+                                "market": item.get("market_type") or item.get("market"),
+                                "selection": item.get("selection"),
+                                "outcome_ledger": verified_result["outcome"],
+                                "final_result_projection": projected_result["outcome"],
+                            })
+                    elif projected_result and projected_result.get("outcome") in (0, 1):
+                        report_item.update({
+                            "outcome": projected_result["outcome"],
+                            "outcome_verified": True,
+                            "outcome_source": projected_result.get("outcome_source") or "latest_match_outcomes",
+                            "outcome_verified_at": projected_result.get("outcome_verified_at"),
+                        })
+                        settlement_applied += 1
                     ledger_report_rows.append(report_item)
+
+                if settlement_applied:
+                    st.info(
+                        f"Se incorporaron {settlement_applied} resultados finales liquidados "
+                        "a la evaluación estadística en esta consulta. El registro original permanece intacto."
+                    )
+                if settlement_conflicts:
+                    st.error(
+                        f"Se detectaron {len(settlement_conflicts)} discrepancias entre verificaciones previas "
+                        "y la proyección del resultado final. Se conservaron las verificaciones previas y "
+                        "se excluyen de cualquier corrección automática."
+                    )
+                    st.dataframe(settlement_conflicts, use_container_width=True, hide_index=True)
 
                 # Exportar una copia portable del registro consultado, incluyendo
                 # únicamente la última verificación disponible por pronóstico.
@@ -10813,5 +10849,4 @@ else:
         elif not goal_results:
             st.info("En esta ronda no hubo señales de goles que superaran el umbral experimental del 65%. Esto no significa que todos los partidos carezcan de datos ni que no existan candidatos de córners.")
             st.caption("El modelo necesita una referencia histórica compatible para estimar goles. Si no la encuentra, la señal se marca como no disponible; las estadísticas en vivo no sustituyen por sí solas una base histórica fiable.")
-
 
