@@ -8791,6 +8791,28 @@ else:
             if not activity_ready:
                 scan_diagnostics["corner_activity_gate_failed"] += 1
             teams_for_diagnostic = fixture.get("teams") or {}
+            activity_failures = []
+            if not isinstance(minute, int) or isinstance(minute, bool):
+                activity_failures.append("minuto no disponible")
+            elif minute < 15 or minute > 78:
+                activity_failures.append("minuto fuera de 15–78")
+            if not isinstance(total_now, (int, float)):
+                activity_failures.append("córners en vivo no disponibles")
+            elif total_now < 5:
+                activity_failures.append("menos de 5 córners")
+            if not isinstance(pace, (int, float)):
+                activity_failures.append("ritmo no disponible")
+            elif pace < 10:
+                activity_failures.append("ritmo inferior a 10/90")
+            if not isinstance(home_shots, (int, float)) or not isinstance(away_shots, (int, float)):
+                activity_failures.append("tiros incompletos")
+            elif home_shots + away_shots < 8:
+                activity_failures.append("menos de 8 tiros totales")
+            history_failures = []
+            if home_sample < 3:
+                history_failures.append(f"local: {home_sample}/3 partidos")
+            if away_sample < 3:
+                history_failures.append(f"visitante: {away_sample}/3 partidos")
             history_diagnostic = {
                 "Partido": (
                     f"{(teams_for_diagnostic.get('home') or {}).get('name') or 'Local'}"
@@ -8806,7 +8828,9 @@ else:
                 "Media córners local": home_history,
                 "Media córners visitante": away_history,
                 "Historial válido": history_ready,
+                "Detalle historial": "Cumple" if not history_failures else "; ".join(history_failures),
                 "Actividad válida": activity_ready,
+                "Detalle actividad": "Cumple" if not activity_failures else "; ".join(activity_failures),
                 "Motivo": (
                     "Historial insuficiente"
                     if not history_ready and activity_ready
