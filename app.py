@@ -9074,9 +9074,15 @@ else:
             if isinstance(saved_row, dict)
         ]
         ledger_records_to_sync = [record for record in normalized_ledger_rows if record["valid"]]
+        unversioned_forecast_candidates = sum(
+            1 for row in forecast_rows_to_persist
+            if not str(row.get("model_id") or "").strip()
+            or not str(row.get("model_version") or "").strip()
+        )
         st.session_state.prediction_ledger_sync_diagnostics = {
             "csv_rows": len(signal_rows),
             "forecast_candidates_this_scan": len(forecast_rows_to_persist),
+            "unversioned_forecast_candidates": unversioned_forecast_candidates,
             "ledger_source_rows": len(_ledger_source_rows),
             "valid_rows": len(ledger_records_to_sync),
             "invalid_rows": len(normalized_ledger_rows) - len(ledger_records_to_sync),
@@ -9139,8 +9145,9 @@ else:
                     f"Registro independiente: {_ledger_sync.get('forecast_candidates_this_scan', 0)} "
                     f"pronóstico(s) exploratorio(s) detectado(s) en este escaneo · "
                     f"{_ledger_write.get('inserted', 0)} nuevo(s) guardado(s) · "
-                    f"{_ledger_write.get('duplicates', 0)} duplicado(s) controlado(s). "
-                    "Se guardan aunque no generen señal."
+                    f"{_ledger_write.get('duplicates', 0)} duplicado(s) controlado(s) · "
+                    f"{_ledger_sync.get('unversioned_forecast_candidates', 0)} candidato(s) sin versión de modelo. "
+                    "Se guardan aunque no generen señal; los metadatos ausentes no se inventan."
                 )
             if st.session_state.get("prediction_ledger_write_error"):
                 st.warning(f"No se pudo guardar el registro local de pronósticos: {st.session_state['prediction_ledger_write_error']}")
