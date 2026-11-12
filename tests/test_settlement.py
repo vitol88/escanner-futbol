@@ -68,6 +68,18 @@ class SettlementTests(unittest.TestCase):
             final_home_score=0, final_away_score=1,
         )["outcome"], 1)
 
+    def test_spanish_total_goals_with_totales_suffix(self):
+        won = resolve_binary_outcome(
+            market_type="goals", selection="Menos de 2.5 goles totales",
+            final_home_score=1, final_away_score=0,
+        )
+        lost = resolve_binary_outcome(
+            market_type="goals", selection="Menos de 2.5 goles totales",
+            final_home_score=2, final_away_score=1,
+        )
+        self.assertEqual(won, {"resolved": True, "outcome": 1, "reason": "final_score"})
+        self.assertEqual(lost, {"resolved": True, "outcome": 0, "reason": "final_score"})
+
     def test_real_spanish_corner_and_card_labels(self):
         self.assertEqual(resolve_binary_outcome(
             market_type="corners", selection="Más de 8.5 córners",
