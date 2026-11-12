@@ -8838,10 +8838,17 @@ else:
                 "Consultas stats visitante": history_stats_diag.get("away_stats_attempted", 0),
                 "Respuestas con córners local": history_stats_diag.get("home_stats_with_corners", 0),
                 "Respuestas con córners visitante": history_stats_diag.get("away_stats_with_corners", 0),
+                "Cobertura stats de la liga": (
+                    "Sí" if history_stats_diag.get("league_statistics_coverage") is True
+                    else "No" if history_stats_diag.get("league_statistics_coverage") is False
+                    else "Sin confirmar"
+                ),
+                "Error cobertura liga": history_stats_diag.get("league_statistics_coverage_error") or "",
                 "Consultas históricas": history_historical_stats_diag.get("requested", 0),
                 "Respuestas con datos": history_historical_stats_diag.get("nonempty_responses", 0),
                 "Respuestas con córners": history_historical_stats_diag.get("responses_with_corners", 0),
                 "Respuestas vacías": history_historical_stats_diag.get("empty_responses", 0),
+                "Omitidas por cobertura no disponible": history_historical_stats_diag.get("skipped_unsupported", 0),
                 "Error consulta local": history_home_team_diag.get("error") or "",
                 "Error consulta visitante": history_away_team_diag.get("error") or "",
                 "Presupuesto restante": history_stats_diag.get("stats_budget_remaining", 0),
