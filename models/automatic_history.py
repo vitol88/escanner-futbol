@@ -82,7 +82,34 @@ def build_automatic_history(
         result["note"] = "Faltan IDs de equipos, liga o temporada para consultar el historial."
         return result
 
-    diagnostics: dict[str, Any] = {"league_id": league_id, "season": season, "teams": {}, "historical_stats": {"requested": 0, "nonempty_responses": 0, "responses_with_corners": 0, "empty_responses": 0, "errors": []}, "live_corner_finalization": {"attempted": 0, "finalized": 0, "observations_inserted": 0, "errors": []}}
+    coverage_key = f"league-statistics-coverage-v1:{league_id}:{season}"
+    coverage_error = None
+    if coverage_key not in cache:
+        try:
+            coverage_payload = api_get("leagues", {"id": league_id, "season": season})
+            coverage_rows = coverage_payload.get("response") or []
+            coverage_value = None
+            if coverage_rows:
+                seasons = (coverage_rows[0].get("seasons") or [])
+                season_row = next((row for row in seasons if str(row.get("year")) == str(season)), None)
+                if season_row is not None:
+                    fixtures_coverage = ((season_row.get("coverage") or {}).get("fixtures") or {})
+                    raw_coverage = fixtures_coverage.get("statistics_fixtures")
+                    coverage_value = raw_coverage if isinstance(raw_coverage, bool) else None
+            cache[coverage_key] = coverage_value
+        except Exception as exc:
+            coverage_error = str(exc)
+            cache[coverage_key] = None
+    league_statistics_coverage = cache.get(coverage_key)
+    diagnostics: dict[str, Any] = {
+        "league_id": league_id,
+        "season": season,
+        "teams": {},
+        "league_statistics_coverage": league_statistics_coverage,
+        "league_statistics_coverage_error": coverage_error,
+        "historical_stats": {"requested": 0, "nonempty_responses": 0, "responses_with_corners": 0, "empty_responses": 0, "skipped_unsupported": 0, "errors": []},
+        "live_corner_finalization": {"attempted": 0, "finalized": 0, "observations_inserted": 0, "errors": []},
+    }
 
     def team_fixtures(team_id: int) -> list[dict[str, Any]]:
         key = f"team-fixtures-v5:{team_id}:{league_id}:{season}"
@@ -172,7 +199,7 @@ def build_automatic_history(
             half_stats_key = f"historical-stats-halves-v5:{old_id}"
             half_retry_key = f"{half_stats_key}:retry_after"
             full_retry_key = f"{full_stats_key}:retry_after"
-            if old_id and full_stats_key not in cache and time.time() >= float(cache.get(full_retry_key, 0) or 0) and request_budget[0] > 0 and not cache.get("_automatic_history_rate_limited"):
+            if old_id and full_stats_key not in cache and time.time() >= float(cache.get(full_retry_key, 0) or 0) and request_budget[0] > 0 and not cache.get("_automatic_history_rate_limited") and league_statistics_coverage is not False:
                 try:
                     # Count every real historical-statistics request across all fixtures
                     # in this scan, including attempts that fail or return no data.
@@ -195,6 +222,8 @@ def build_automatic_history(
                     cache[full_retry_key] = time.time() + (300 if "429" in str(exc) else 180)
                     if "HTTP 429" in str(exc):
                         cache["_automatic_history_rate_limited"] = True
+            if old_id and full_stats_key not in cache and league_statistics_coverage is False:
+                diagnostics["historical_stats"]["skipped_unsupported"] += 1
             stats = cache.get(full_stats_key, [])
 
             # Reuse the same completed-fixture statistics already fetched for
@@ -215,7 +244,7 @@ def build_automatic_history(
                     })
 
             half_stats = cache.get(half_stats_key)
-            if old_id and full_stats_key in cache and half_stats is None and len(cf) >= 3 and request_budget[0] > 1 and time.time() >= float(cache.get(half_retry_key, 0) or 0) and not cache.get("_automatic_history_rate_limited"):
+            if old_id and full_stats_key in cache and half_stats is None and len(cf) >= 3 and request_budget[0] > 1 and time.time() >= float(cache.get(half_retry_key, 0) or 0) and not cache.get("_automatic_history_rate_limited") and league_statistics_coverage is not False:
                 # Prioritize full-match corner samples; half splits are secondary
                 # and must not consume the budget before venue averages exist.
                 try:
