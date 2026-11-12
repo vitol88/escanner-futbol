@@ -10170,7 +10170,7 @@ else:
                     f"{recovery_diagnostics.get('sqlite_path', str(PREDICTION_LEDGER_PATH))}"
                 )
                 if not recovery_diagnostics.get("csv_exists"):
-                    if recovery_diagnostics.get("supabase_configured") and recovery_diagnostics.get("supabase_rows") is not None:
+                    if recovery_diagnostics.get("supabase_configured") and int(recovery_diagnostics.get("supabase_rows") or 0) > 0:
                         st.info(
                             f"CSV histórico legado no encontrado en esta instancia. "
                             f"El registro central se recuperó desde Supabase: "
