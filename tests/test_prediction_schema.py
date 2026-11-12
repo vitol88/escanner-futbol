@@ -137,9 +137,31 @@ class PredictionSchemaTests(unittest.TestCase):
         self.assertEqual(result["market_type"], "goals")
         self.assertEqual(result["probability"], 0.64)
         self.assertEqual(result["model_id"], "estimate_live_goal_markets")
+        self.assertIsNone(result["model_version"])
         self.assertEqual(result["source"], "football_lab_live_scanner")
         self.assertEqual(result["snapshot_id"], "123:67:1:0")
         self.assertIsNone(result["outcome"])
+
+    def test_model_version_is_preserved_and_legacy_version_stays_unknown(self):
+        base = {
+            "recorded_at": "2026-11-07T00:14:00Z",
+            "fixture_id": "model-version-fixture",
+            "market": "Más de 8.5 córners",
+            "market_type": "corners",
+            "selection": "Más de 8.5 córners",
+            "probability": 0.67,
+            "phase": "live",
+        }
+        versioned = normalize_prediction_record({
+            **base,
+            "model_id": "live_corner_poisson_exploratory",
+            "model_version": "live-corner-poisson-exploratory-v1",
+        })
+        legacy = normalize_prediction_record(base)
+        self.assertEqual(versioned["model_id"], "live_corner_poisson_exploratory")
+        self.assertEqual(versioned["model_version"], "live-corner-poisson-exploratory-v1")
+        self.assertIsNone(legacy["model_id"])
+        self.assertIsNone(legacy["model_version"])
 
     def test_verified_odds_metadata_is_preserved_for_auditing(self):
         result = normalize_prediction_record({
