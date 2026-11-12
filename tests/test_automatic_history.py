@@ -246,3 +246,43 @@ def test_goal_history_can_be_available_while_corner_history_remains_pending():
     assert result["home_goal_sample"] == 2
     assert result["corners_available"] is True
     assert result["corners_pending"] is True
+
+
+def test_automatic_history_skips_corner_stats_when_league_coverage_is_false():
+    current = {
+        "fixture": {"timestamp": 8000},
+        "teams": {
+            "home": {"id": 1, "name": "Home FC"},
+            "away": {"id": 2, "name": "Away FC"},
+        },
+        "league": {"id": 10, "season": 2026},
+    }
+    past_home = _fixture(801, 1, 3, 2, 0)
+    past_away = _fixture(802, 4, 2, 1, 1)
+    calls = []
+
+    def fake_api(endpoint, params):
+        calls.append((endpoint, params))
+        if endpoint == "leagues":
+            return {"response": [{
+                "seasons": [{
+                    "year": 2026,
+                    "coverage": {"fixtures": {"statistics_fixtures": False}},
+                }]
+            }]}
+        if endpoint == "fixtures" and params["team"] == 1:
+            return {"response": [past_home]}
+        if endpoint == "fixtures" and params["team"] == 2:
+            return {"response": [past_away]}
+        return {"response": []}
+
+    result = build_automatic_history(current, api_get=fake_api, cache={}, stats_budget=8)
+
+    assert result["home_goals_for"] == 2.0
+    assert result["away_goals_for"] == 1.0
+    assert result["home_corner_sample"] == 0
+    assert result["away_corner_sample"] == 0
+    assert result["diagnostics"]["league_statistics_coverage"] is False
+    assert result["diagnostics"]["historical_stats"]["requested"] == 0
+    assert result["diagnostics"]["historical_stats"]["skipped_unsupported"] == 2
+    assert not [call for call in calls if call[0] == "fixtures/statistics"]
