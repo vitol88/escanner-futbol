@@ -10226,6 +10226,11 @@ else:
                             report_item["outcome_ledger_verified"] = True
                             report_item["outcome_verified"] = False
                             report_item["evaluation_excluded_reason"] = "conflicting_verified_outcome_sources"
+                            # Conflicting verified sources are preserved for audit but
+                            # excluded from statistical scoring until manually reconciled.
+                            report_item["outcome_ledger_verified"] = True
+                            report_item["outcome_verified"] = False
+                            report_item["evaluation_excluded_reason"] = "conflicting_verified_outcome_sources"
                     elif projected_result and projected_result.get("outcome") in (0, 1):
                         report_item.update({
                             "outcome": projected_result["outcome"],
