@@ -10536,7 +10536,7 @@ else:
                             f"{ledger_temporal['excluded_temporal_rows']}."
                         )
 
-                if verified_outcomes:
+                if verified_outcomes or settlement_applied:
                     st.markdown("##### Últimos resultados verificados")
                     result_rows = []
                     for item in reversed(ledger_report_rows):
