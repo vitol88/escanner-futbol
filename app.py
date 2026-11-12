@@ -10563,10 +10563,16 @@ else:
                 st.info("Primero consulta el registro central para cargar los pronósticos disponibles.")
             else:
                 existing_outcomes = st.session_state.get("prediction_outcome_snapshot", {})
+                automatically_settled_ids = {
+                    str(item.get("prediction_id") or "")
+                    for item in (settlement_projection or {}).get("settled", [])
+                    if str(item.get("prediction_id") or "").strip()
+                }
                 pending_predictions = [
                     item for item in st.session_state.prediction_ledger_snapshot
                     if item.get("prediction_id")
                     and str(item.get("prediction_id")) not in existing_outcomes
+                    and str(item.get("prediction_id")) not in automatically_settled_ids
                 ]
                 supported_predictions = [
                     item for item in pending_predictions
