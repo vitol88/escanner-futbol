@@ -140,7 +140,7 @@ def resolve_binary_outcome(
             }
 
         for direction in ("over", "under"):
-            line = _line_from_selection(pick, direction, ("", " goles"))
+            line = _line_from_selection(pick, direction, ("", " goles", " goles totales"))
             if line is not None:
                 # Equality is not a binary win/loss; never force a push.
                 if total == line:
