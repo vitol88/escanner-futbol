@@ -1197,8 +1197,7 @@ st.markdown("""
     font-size:.76rem !important; font-weight:700 !important; line-height:1.2 !important;
     white-space:pre-line !important; overflow-wrap:anywhere !important;
     box-shadow:inset 0 0 0 1px rgba(250,204,21,.04) !important;
-  }  [class*="st-key-live_match_"] [data-testid="stButton"] > button:hover {
-    border-color:#FACC15 !important; color:#FFE566 !important;
+  }  [class*="st-key-live_match_"] [data-testid="stButton"] > button:hover {    border-color:#FACC15 !important; color:#FFE566 !important;
     background:linear-gradient(145deg,#302916,#17191F) !important;
   }
   [class*="st-key-live_match_"] [data-testid="stButton"] > button[kind="primary"] {
@@ -2397,8 +2396,7 @@ if st.session_state.get("appearance_mode") in {"☀️", "☀️ Claro"}:
         caret-color:#303744 !important; opacity:1 !important; visibility:visible !important;
         text-shadow:none !important; filter:none !important;
         border:1.5px solid #C7A43A !important; border-right:0 !important;        box-shadow:inset 0 1px 0 rgba(255,255,255,.95) !important;
-      }
-      html body .stApp div[class*="st-key-home_search_bar"] input::placeholder { color:#7A8492 !important; -webkit-text-fill-color:#7A8492 !important; }
+      }      html body .stApp div[class*="st-key-home_search_bar"] input::placeholder { color:#7A8492 !important; -webkit-text-fill-color:#7A8492 !important; }
       html body .stApp div[class*="st-key-home_search_button"] button {
         background:linear-gradient(145deg,#FFE98A 0%,#F2C94C 52%,#DDAA16 100%) !important;
         color:#242424 !important; border:1.5px solid #C7A43A !important; border-left:0 !important;
@@ -3597,8 +3595,7 @@ if st.session_state.get("appearance_mode") not in {"☀️", "☀️ Claro"}:
       }
       .goal-h2h-average-badge > span:last-child {        display:inline-flex !important;
         align-items:center !important;
-        justify-content:center !important;
-        padding:5px 10px !important;
+        justify-content:center !important;        padding:5px 10px !important;
         border:1px solid #E6BD24 !important;
         border-radius:8px !important;
         background:#FACC15 !important;
@@ -4797,8 +4794,7 @@ if manual_scan:
         appearance:none !important;        -webkit-appearance:none !important;
         -webkit-tap-highlight-color:transparent !important;
       }
-      /* Neutralizar cualquier superficie HTML interna que herede el fondo del botón.
-         No se seleccionan ::before ni ::after: radar y balón conservan sus efectos. */
+      /* Neutralizar cualquier superficie HTML interna que herede el fondo del botón.         No se seleccionan ::before ni ::after: radar y balón conservan sus efectos. */
       html body .stApp [class*="st-key-scan_cta_card"],
       html body .stApp [class*="st-key-scan_cta_card"] *,
       html body .stApp [class*="st-key-scan_cta_card"] button:hover,
@@ -5997,8 +5993,7 @@ else:
                                                 st.markdown(stats_html, unsafe_allow_html=True)
                                             else:
                                                 st.info("La API no entregó estadísticas detalladas para este partido.")
-                                        else:
-                                            if st.session_state.get("fixture_mode", "live") == "upcoming":
+                                        else:                                            if st.session_state.get("fixture_mode", "live") == "upcoming":
                                                 st.info("El partido aún no comienza. Las estadísticas en vivo aparecerán al iniciar; mientras tanto puedes consultar los indicadores históricos y las proyecciones.")
                                             else:
                                                 st.info("La API no entregó estadísticas para este partido.")
@@ -7197,8 +7192,7 @@ else:
                                                                                     st.caption("—")
                                                                         if is_timeline_open and recent_id:
                                                                             _goal_stats_cache = st.session_state.setdefault("goal_recent_stats_cache", {})
-                                                                            _goal_stats_key = str(recent_id)
-                                                                            if _goal_stats_key not in _goal_stats_cache:
+                                                                            _goal_stats_key = str(recent_id)                                                                            if _goal_stats_key not in _goal_stats_cache:
                                                                                 _goal_stats_cache[_goal_stats_key] = {}
                                                                                 try:
                                                                                     _events_payload = api_get("fixtures/events", {"fixture": recent_id})
@@ -8397,8 +8391,7 @@ else:
                         goal_word = "gol" if int(target) == 1 else "goles"
                         candidates.append((f"{home_name}: terminará con {target} {goal_word} o más", item["probability"]))
                 for target, item in estimate.get("away_final_goals_at_least", {}).items():
-                    if not item.get("already_settled"):
-                        goal_word = "gol" if int(target) == 1 else "goles"
+                    if not item.get("already_settled"):                        goal_word = "gol" if int(target) == 1 else "goles"
                         candidates.append((f"{away_name}: terminará con {target} {goal_word} o más", item["probability"]))
 
                 candidates.append(("Empate final", estimate["draw_final"]))
@@ -9597,8 +9590,7 @@ else:
                                     model_prob = estimate.get("over_total_goals", {}).get(target)
                                 else:
                                     model_prob = estimate.get("under_total_goals", {}).get(str(line))
-                        # Do not promote a market just because its price fits the range:
-                        # require a mapped model probability and a provisional edge over
+                        # Do not promote a market just because its price fits the range:                        # require a mapped model probability and a provisional edge over
                         # the odds-implied probability. The model is not calibrated yet.
                         if not isinstance(model_prob, (int, float)) or not 0.0 < model_prob < 1.0:
                             continue
@@ -10229,6 +10221,11 @@ else:
                                 "outcome_ledger": verified_result["outcome"],
                                 "final_result_projection": projected_result["outcome"],
                             })
+                            # Conflicting verified sources are preserved for audit but
+                            # excluded from statistical scoring until manually reconciled.
+                            report_item["outcome_ledger_verified"] = True
+                            report_item["outcome_verified"] = False
+                            report_item["evaluation_excluded_reason"] = "conflicting_verified_outcome_sources"
                     elif projected_result and projected_result.get("outcome") in (0, 1):
                         report_item.update({
                             "outcome": projected_result["outcome"],
@@ -10849,4 +10846,3 @@ else:
         elif not goal_results:
             st.info("En esta ronda no hubo señales de goles que superaran el umbral experimental del 65%. Esto no significa que todos los partidos carezcan de datos ni que no existan candidatos de córners.")
             st.caption("El modelo necesita una referencia histórica compatible para estimar goles. Si no la encuentra, la señal se marca como no disponible; las estadísticas en vivo no sustituyen por sí solas una base histórica fiable.")
-
