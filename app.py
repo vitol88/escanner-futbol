@@ -9077,6 +9077,16 @@ else:
                     "opportunity_engine": "v1",
                 })
                 scan_diagnostics["eligible_corner_signals"] += 1
+                scan_diagnostics.setdefault("eligible_corner_signal_details", []).append({
+                    "Partido": f"{home_name} vs {away_name}",
+                    "Minuto": minute,
+                    "Marcador": f"{goals_data.get('home', '?')}-{goals_data.get('away', '?')}",
+                    "Mercado": market_label,
+                    "Cuota": float(odd),
+                    "Probabilidad estimada": f"{float(model_probability) * 100:.1f}%",
+                    "EV": f"{float(_opportunity['expected_value']) * 100:.1f}%",
+                    "Casa / fuente": str(odds_row.get("bookmaker") or "Referencia API-Football LIVE (casa no especificada)"),
+                })
                 if row_key not in existing_keys:
                     signal_rows.append(row)
                     new_signal_rows.append(row)
@@ -9339,6 +9349,11 @@ else:
                 _corner_cols[0].metric("Partidos con córners en vivo", int(_scan_diag.get("corner_stats_ready", 0)))
                 _corner_cols[1].metric("Candidatos probabilísticos", int(_scan_diag.get("corner_probability_candidates", 0)))
                 _corner_cols[2].metric("Señales elegibles", int(_scan_diag.get("eligible_corner_signals", 0)))
+                _eligible_corner_details = _scan_diag.get("eligible_corner_signal_details") or []
+                if _eligible_corner_details:
+                    with st.expander("Ver señales elegibles de córners: partido, cuota y EV", expanded=True):
+                        st.dataframe(_eligible_corner_details, use_container_width=True, hide_index=True)
+                        st.caption("Diagnóstico del último escaneo; no publica señales adicionales. Probabilidades exploratorias, aún no calibradas.")
                 _corner_detail_cols = st.columns(3)
                 _corner_detail_cols[0].metric("Candidatos sin cuotas", int(_scan_diag.get("corner_candidates_without_quotes", 0)))
                 _corner_detail_cols[1].metric("Sin cuota exacta / EV", int(_scan_diag.get("corner_candidates_without_exact_quote_or_below_filters", 0)))
