@@ -8485,11 +8485,9 @@ else:
                 # No hacer consultas ocultas fuera del lote priorizado del escáner.
                 # Si el partido aún no tiene estadísticas cargadas, queda pendiente.
                 if cache_key not in st.session_state.stats_cache:
-                    corner_results.append({
-                        "fixture": fixture,
-                        "error": "Estadísticas pendientes de consulta en el siguiente lote del escáner.",
-                    })
-                    continue
+                    # Do not suppress historical corner analysis just because live
+                    # statistics are not part of the current scanner batch.
+                    st.session_state.stats_cache[cache_key] = []
                 stats = st.session_state.stats_cache[cache_key]
                 fixture_teams = fixture.get("teams") or {}
                 home_team_id = (fixture_teams.get("home") or {}).get("id")
@@ -9550,8 +9548,6 @@ else:
                     if search_matches and search_matches not in fixture_label(fixture).casefold():
                         continue
                     history = corner_history_by_id.get(fixture_id, {})
-                    if not estimate.get("available"):
-                        continue
                     home = (fixture.get("teams") or {}).get("home") or {}
                     away = (fixture.get("teams") or {}).get("away") or {}
                     home_name = home.get("name", "Local")
@@ -9575,6 +9571,17 @@ else:
                         goal_table_html += f"<tr><td>{html.escape(str(row['Indicador']))}</td><td>{avg_text}</td><td>{row['Muestra']}</td></tr>"
                     goal_table_html += "</tbody></table>"
                     st.markdown(goal_table_html, unsafe_allow_html=True)
+
+                    # Historical venue averages remain visible for upcoming matches,
+                    # even when live probabilities cannot be computed yet.
+                    if not estimate.get("available"):
+                        st.info(
+                            "Las probabilidades y señales en vivo aparecerán cuando el partido "
+                            "comience y la API entregue los datos necesarios. "
+                            "Los promedios históricos se muestran arriba cuando están disponibles."
+                        )
+                        cards_shown += 1
+                        continue
 
                     # Choose one main tip: favor a team-goal signal when live pressure supports it.
                     candidates = list(tips or [])
