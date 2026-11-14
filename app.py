@@ -8844,6 +8844,14 @@ else:
                     else "Sin confirmar"
                 ),
                 "Error cobertura liga": history_stats_diag.get("league_statistics_coverage_error") or "",
+                "Cobertura por temporada": ", ".join(
+                    f"{season_key}: {'Sí' if coverage_value is True else 'No' if coverage_value is False else 'N/D'}"
+                    for season_key, coverage_value in (history_stats_diag.get("league_statistics_coverage_by_season") or {}).items()
+                ),
+                "Consultas fallback histórico": (history_stats_diag.get("historical_fallback") or {}).get("requested", 0),
+                "Partidos fallback recibidos": (history_stats_diag.get("historical_fallback") or {}).get("returned", 0),
+                "Partidos anteriores añadidos local": (history_stats_diag.get("historical_fallback") or {}).get("home_candidates_added", 0),
+                "Partidos anteriores añadidos visitante": (history_stats_diag.get("historical_fallback") or {}).get("away_candidates_added", 0),
                 "Consultas históricas": history_historical_stats_diag.get("requested", 0),
                 "Respuestas con datos": history_historical_stats_diag.get("nonempty_responses", 0),
                 "Respuestas con córners": history_historical_stats_diag.get("responses_with_corners", 0),
