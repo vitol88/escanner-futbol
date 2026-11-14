@@ -191,39 +191,64 @@ def build_automatic_history(
                 diagnostics["historical_fallback"]["errors"] = str(exc)
         return cache[key]
 
-    def merge_fixture_rows(primary: list[dict[str, Any]], fallback: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        merged: dict[str, dict[str, Any]] = {}
-        for item in primary + fallback:
-            fixture_id = (item.get("fixture") or {}).get("id")
-            if fixture_id:
-                merged[str(fixture_id)] = item
-        return sorted(
-            merged.values(),
+    def ordered_venue_fixtures(
+        current_rows: list[dict[str, Any]],
+        fallback_rows: list[dict[str, Any]],
+        team_id: int,
+        venue: str,
+    ) -> list[dict[str, Any]]:
+        def is_venue_match(item: dict[str, Any]) -> bool:
+            home_id = ((item.get("teams") or {}).get("home") or {}).get("id")
+            return (home_id == team_id) == (venue == "home")
+
+        current_matches = sorted(
+            [item for item in current_rows if is_venue_match(item)],
             key=lambda item: (item.get("fixture") or {}).get("timestamp") or 0,
             reverse=True,
         )
+        prior_matches = sorted(
+            [
+                item for item in fallback_rows
+                if is_venue_match(item)
+                and str((item.get("league") or {}).get("season")) != str(season)
+            ],
+            key=lambda item: (item.get("fixture") or {}).get("timestamp") or 0,
+            reverse=True,
+        )
+        # Give both current and prior seasons a chance to contribute within the
+        # per-team request budget: two current-season fixtures, then two prior.
+        ordered: list[dict[str, Any]] = []
+        current_index = prior_index = 0
+        while current_index < len(current_matches) or prior_index < len(prior_matches):
+            ordered.extend(current_matches[current_index:current_index + 2])
+            current_index += 2
+            ordered.extend(prior_matches[prior_index:prior_index + 2])
+            prior_index += 2
+        return ordered
 
     home_raw = team_fixtures(home["id"])
     away_raw = team_fixtures(away["id"])
-    home_fixtures = same_competition_finished(home_raw, current_season_only=True)
-    away_fixtures = same_competition_finished(away_raw, current_season_only=True)
+    home_current_fixtures = same_competition_finished(home_raw, current_season_only=True)
+    away_current_fixtures = same_competition_finished(away_raw, current_season_only=True)
+    home_fallback_rows: list[dict[str, Any]] = []
+    away_fallback_rows: list[dict[str, Any]] = []
 
-    def venue_count(items: list[dict[str, Any]], team_id: int, venue: str) -> int:
-        return sum(
-            1 for item in items
-            if (((item.get("teams") or {}).get("home") or {}).get("id") == team_id) == (venue == "home")
-        )
+    # Check older seasons when the current season lacks enough venue fixtures
+    # or declares statistics coverage. This can recover usable data even when
+    # individual current-season fixture-statistics responses are empty.
+    if league_statistics_coverage is not False or venue_count(home_current_fixtures, home["id"], "home") < 3:
+        home_fallback_rows = same_competition_finished(team_fixtures_all_seasons(home["id"]), current_season_only=False)
+    if league_statistics_coverage is not False or venue_count(away_current_fixtures, away["id"], "away") < 3:
+        away_fallback_rows = same_competition_finished(team_fixtures_all_seasons(away["id"]), current_season_only=False)
 
-    if venue_count(home_fixtures, home["id"], "home") < 3:
-        fallback = same_competition_finished(team_fixtures_all_seasons(home["id"]), current_season_only=False)
-        before = len(home_fixtures)
-        home_fixtures = merge_fixture_rows(home_fixtures, fallback)
-        diagnostics["historical_fallback"]["home_candidates_added"] = max(0, len(home_fixtures) - before)
-    if venue_count(away_fixtures, away["id"], "away") < 3:
-        fallback = same_competition_finished(team_fixtures_all_seasons(away["id"]), current_season_only=False)
-        before = len(away_fixtures)
-        away_fixtures = merge_fixture_rows(away_fixtures, fallback)
-        diagnostics["historical_fallback"]["away_candidates_added"] = max(0, len(away_fixtures) - before)
+    home_fixtures = ordered_venue_fixtures(home_current_fixtures, home_fallback_rows, home["id"], "home")
+    away_fixtures = ordered_venue_fixtures(away_current_fixtures, away_fallback_rows, away["id"], "away")
+    diagnostics["historical_fallback"]["home_candidates_added"] = sum(
+        1 for item in home_fixtures if str((item.get("league") or {}).get("season")) != str(season)
+    )
+    diagnostics["historical_fallback"]["away_candidates_added"] = sum(
+        1 for item in away_fixtures if str((item.get("league") or {}).get("season")) != str(season)
+    )
     diagnostics["home_fixture_rows"] = len(home_raw)
     diagnostics["away_fixture_rows"] = len(away_raw)
     diagnostics["home_finished_same_competition"] = len(home_fixtures)
