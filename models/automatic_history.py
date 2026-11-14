@@ -82,31 +82,39 @@ def build_automatic_history(
         result["note"] = "Faltan IDs de equipos, liga o temporada para consultar el historial."
         return result
 
-    coverage_key = f"league-statistics-coverage-v1:{league_id}:{season}"
-    coverage_error = None
-    if coverage_key not in cache:
-        try:
-            coverage_payload = api_get("leagues", {"id": league_id, "season": season})
-            coverage_rows = coverage_payload.get("response") or []
-            coverage_value = None
-            if coverage_rows:
-                seasons = (coverage_rows[0].get("seasons") or [])
-                season_row = next((row for row in seasons if str(row.get("year")) == str(season)), None)
-                if season_row is not None:
-                    fixtures_coverage = ((season_row.get("coverage") or {}).get("fixtures") or {})
-                    raw_coverage = fixtures_coverage.get("statistics_fixtures")
-                    coverage_value = raw_coverage if isinstance(raw_coverage, bool) else None
-            cache[coverage_key] = coverage_value
-        except Exception as exc:
-            coverage_error = str(exc)
-            cache[coverage_key] = None
-    league_statistics_coverage = cache.get(coverage_key)
+    def season_statistics_coverage(season_value: Any) -> tuple[bool | None, str | None]:
+        coverage_key = f"league-statistics-coverage-v1:{league_id}:{season_value}"
+        coverage_error = None
+        if coverage_key not in cache:
+            try:
+                coverage_payload = api_get("leagues", {"id": league_id, "season": season_value})
+                coverage_rows = coverage_payload.get("response") or []
+                coverage_value = None
+                if coverage_rows:
+                    seasons = (coverage_rows[0].get("seasons") or [])
+                    season_row = next((row for row in seasons if str(row.get("year")) == str(season_value)), None)
+                    if season_row is not None:
+                        fixtures_coverage = ((season_row.get("coverage") or {}).get("fixtures") or {})
+                        raw_coverage = fixtures_coverage.get("statistics_fixtures")
+                        coverage_value = raw_coverage if isinstance(raw_coverage, bool) else None
+                cache[coverage_key] = coverage_value
+            except Exception as exc:
+                coverage_error = str(exc)
+                cache[coverage_key] = None
+                cache["error:" + coverage_key] = coverage_error
+        else:
+            coverage_error = cache.get("error:" + coverage_key)
+        return cache.get(coverage_key), coverage_error
+
+    league_statistics_coverage, coverage_error = season_statistics_coverage(season)
     diagnostics: dict[str, Any] = {
         "league_id": league_id,
         "season": season,
         "teams": {},
         "league_statistics_coverage": league_statistics_coverage,
         "league_statistics_coverage_error": coverage_error,
+        "league_statistics_coverage_by_season": {str(season): league_statistics_coverage},
+        "historical_fallback": {"requested": 0, "returned": 0, "home_candidates_added": 0, "away_candidates_added": 0},
         "historical_stats": {"requested": 0, "nonempty_responses": 0, "responses_with_corners": 0, "empty_responses": 0, "skipped_unsupported": 0, "errors": []},
         "live_corner_finalization": {"attempted": 0, "finalized": 0, "observations_inserted": 0, "errors": []},
     }
@@ -138,23 +146,83 @@ def build_automatic_history(
             diagnostics["teams"][str(team_id)] = {"returned": len(cache[key]), "error": cache.get("error:" + key), "source": "cache"}
         return cache[key]
 
-    # Solo partidos finalizados de la misma competición y temporada del partido en vivo.
+    # Prefer the current season. If a team has fewer than three venue-specific
+    # fixtures, supplement from earlier seasons of the same competition only.
     finished = {"FT", "AET", "PEN"}
-    def same_competition_finished(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        # Keep the same competition/season filter used by main for goals and
-        # corners. Do not require optional timestamp metadata here: some valid
-        # API responses omit it or serialize it differently, which would erase
-        # every historical sample and display N/D despite available fixtures.
-        return [
-            item for item in items
-            if (item.get("fixture") or {}).get("status", {}).get("short") in finished
-            and (item.get("league") or {}).get("id") == league_id
-            and str((item.get("league") or {}).get("season")) == str(season)
-        ]
+    target_timestamp = (fixture.get("fixture") or {}).get("timestamp")
+
+    def same_competition_finished(items: list[dict[str, Any]], *, current_season_only: bool) -> list[dict[str, Any]]:
+        valid = []
+        for item in items:
+            item_fixture = item.get("fixture") or {}
+            item_league = item.get("league") or {}
+            if item_fixture.get("status", {}).get("short") not in finished or item_league.get("id") != league_id:
+                continue
+            if current_season_only and str(item_league.get("season")) != str(season):
+                continue
+            item_timestamp = item_fixture.get("timestamp")
+            if (
+                isinstance(target_timestamp, (int, float))
+                and isinstance(item_timestamp, (int, float))
+                and item_timestamp >= target_timestamp
+            ):
+                continue
+            valid.append(item)
+        return valid
+
+    def team_fixtures_all_seasons(team_id: int) -> list[dict[str, Any]]:
+        key = f"team-fixtures-all-seasons-v1:{team_id}:{league_id}"
+        if key not in cache:
+            if int(cache.get("_automatic_history_team_fixture_calls", 0)) >= 40:
+                diagnostics["historical_fallback"]["errors"] = "Límite de consultas históricas por escaneo alcanzado."
+                return []
+            params = {"team": team_id, "last": 30, "league": league_id}
+            try:
+                cache["_automatic_history_team_fixture_calls"] = int(cache.get("_automatic_history_team_fixture_calls", 0)) + 1
+                payload = api_get("fixtures", params)
+                cache[key] = payload.get("response") or []
+                diagnostics["historical_fallback"]["requested"] += 1
+                diagnostics["historical_fallback"]["returned"] += len(cache[key])
+            except Exception as exc:
+                cache[key] = []
+                cache["error:" + key] = str(exc)
+                diagnostics["historical_fallback"]["requested"] += 1
+                diagnostics["historical_fallback"]["errors"] = str(exc)
+        return cache[key]
+
+    def merge_fixture_rows(primary: list[dict[str, Any]], fallback: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        merged: dict[str, dict[str, Any]] = {}
+        for item in primary + fallback:
+            fixture_id = (item.get("fixture") or {}).get("id")
+            if fixture_id:
+                merged[str(fixture_id)] = item
+        return sorted(
+            merged.values(),
+            key=lambda item: (item.get("fixture") or {}).get("timestamp") or 0,
+            reverse=True,
+        )
+
     home_raw = team_fixtures(home["id"])
     away_raw = team_fixtures(away["id"])
-    home_fixtures = same_competition_finished(home_raw)
-    away_fixtures = same_competition_finished(away_raw)
+    home_fixtures = same_competition_finished(home_raw, current_season_only=True)
+    away_fixtures = same_competition_finished(away_raw, current_season_only=True)
+
+    def venue_count(items: list[dict[str, Any]], team_id: int, venue: str) -> int:
+        return sum(
+            1 for item in items
+            if (((item.get("teams") or {}).get("home") or {}).get("id") == team_id) == (venue == "home")
+        )
+
+    if venue_count(home_fixtures, home["id"], "home") < 3:
+        fallback = same_competition_finished(team_fixtures_all_seasons(home["id"]), current_season_only=False)
+        before = len(home_fixtures)
+        home_fixtures = merge_fixture_rows(home_fixtures, fallback)
+        diagnostics["historical_fallback"]["home_candidates_added"] = max(0, len(home_fixtures) - before)
+    if venue_count(away_fixtures, away["id"], "away") < 3:
+        fallback = same_competition_finished(team_fixtures_all_seasons(away["id"]), current_season_only=False)
+        before = len(away_fixtures)
+        away_fixtures = merge_fixture_rows(away_fixtures, fallback)
+        diagnostics["historical_fallback"]["away_candidates_added"] = max(0, len(away_fixtures) - before)
     diagnostics["home_fixture_rows"] = len(home_raw)
     diagnostics["away_fixture_rows"] = len(away_raw)
     diagnostics["home_finished_same_competition"] = len(home_fixtures)
@@ -199,7 +267,10 @@ def build_automatic_history(
             half_stats_key = f"historical-stats-halves-v5:{old_id}"
             half_retry_key = f"{half_stats_key}:retry_after"
             full_retry_key = f"{full_stats_key}:retry_after"
-            if old_id and full_stats_key not in cache and time.time() >= float(cache.get(full_retry_key, 0) or 0) and request_budget[0] > 0 and not cache.get("_automatic_history_rate_limited") and league_statistics_coverage is not False:
+            match_season = (old.get("league") or {}).get("season") or season
+            match_coverage, match_coverage_error = season_statistics_coverage(match_season)
+            diagnostics["league_statistics_coverage_by_season"][str(match_season)] = match_coverage
+            if old_id and full_stats_key not in cache and time.time() >= float(cache.get(full_retry_key, 0) or 0) and request_budget[0] > 0 and not cache.get("_automatic_history_rate_limited") and match_coverage is not False:
                 try:
                     # Count every real historical-statistics request across all fixtures
                     # in this scan, including attempts that fail or return no data.
@@ -222,7 +293,7 @@ def build_automatic_history(
                     cache[full_retry_key] = time.time() + (300 if "429" in str(exc) else 180)
                     if "HTTP 429" in str(exc):
                         cache["_automatic_history_rate_limited"] = True
-            if old_id and full_stats_key not in cache and league_statistics_coverage is False:
+            if old_id and full_stats_key not in cache and match_coverage is False:
                 diagnostics["historical_stats"]["skipped_unsupported"] += 1
             stats = cache.get(full_stats_key, [])
 
@@ -244,7 +315,7 @@ def build_automatic_history(
                     })
 
             half_stats = cache.get(half_stats_key)
-            if old_id and full_stats_key in cache and half_stats is None and len(cf) >= 3 and request_budget[0] > 1 and time.time() >= float(cache.get(half_retry_key, 0) or 0) and not cache.get("_automatic_history_rate_limited") and league_statistics_coverage is not False:
+            if old_id and full_stats_key in cache and half_stats is None and len(cf) >= 3 and request_budget[0] > 1 and time.time() >= float(cache.get(half_retry_key, 0) or 0) and not cache.get("_automatic_history_rate_limited") and match_coverage is not False:
                 # Prioritize full-match corner samples; half splits are secondary
                 # and must not consume the budget before venue averages exist.
                 try:
