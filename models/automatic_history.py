@@ -124,7 +124,7 @@ def build_automatic_history(
         if key not in cache:
             # Cap team-fixture discovery calls for the whole scan; cached teams do not
             # consume the budget again. This avoids one hidden request per live fixture.
-            if int(cache.get("_automatic_history_team_fixture_calls", 0)) >= 40:
+            if int(cache.get("_automatic_history_team_fixture_calls", 0)) >= 80:
                 # No guardar [] como si la API hubiera confirmado que no hay partidos.
                 # Es un límite temporal de esta pasada; el equipo debe poder reintentarse
                 # en el siguiente escaneo, especialmente si es el partido seleccionado.
@@ -174,7 +174,7 @@ def build_automatic_history(
     def team_fixtures_all_seasons(team_id: int) -> list[dict[str, Any]]:
         key = f"team-fixtures-all-seasons-v1:{team_id}:{league_id}"
         if key not in cache:
-            if int(cache.get("_automatic_history_team_fixture_calls", 0)) >= 40:
+            if int(cache.get("_automatic_history_team_fixture_calls", 0)) >= 80:
                 diagnostics["historical_fallback"]["errors"] = "Límite de consultas históricas por escaneo alcanzado."
                 return []
             params = {"team": team_id, "last": 30, "league": league_id}
