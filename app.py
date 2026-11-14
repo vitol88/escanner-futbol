@@ -8569,7 +8569,10 @@ else:
                 # Keep the reduced request budget from the integration branch,
                 # but share it across fixtures as Main does. Never defer all fixtures.
                 history_budget = 8 if auto_scan_due and not manual_scan else 12
-                remaining_history_budget = max(0, history_budget - used_history_stats)
+                # Spread new historical-statistics requests across several fixtures.
+                # Cached historical results remain reusable without consuming this cap.
+                # Subsequent scans can fill in the remaining samples progressively.
+                remaining_history_budget = min(4, max(0, history_budget - used_history_stats))
                 corner_item["automatic_history"] = build_automatic_history(
                     corner_item["fixture"],
                     api_get=api_get,
