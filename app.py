@@ -6998,6 +6998,12 @@ else:
                                     elif tool_name == "market":
                                         market_key = selected_tool.get("market")
                                         if market_key == "goals":
+                                            # Mantener identificado el partido abierto para que el siguiente
+                                            # escaneo le reserve prioridad en la consulta de estadísticas.
+                                            st.session_state["selected_match_detail"] = {
+                                                "fixture_id": match_id,
+                                                "market": "goals",
+                                            }
                                             _pending_scan_request = st.session_state.get("analysis_scan_request") or {}
                                             _pending_goals_request = str(_pending_scan_request.get("fixture_id")) == str(match_id) and _pending_scan_request.get("market") == "goals"
                                             _goal_radar_clicked = _pending_goals_request and _pending_scan_request.get("action") == "scan"
@@ -7956,8 +7962,27 @@ else:
         if filtered:
             stats_cursor %= len(filtered)
             rotated_fixtures = filtered[stats_cursor:] + filtered[:stats_cursor]
-            stats_fixtures = rotated_fixtures[:effective_stats_limit]
-            st.session_state.live_stats_batch_cursor = (stats_cursor + len(stats_fixtures)) % len(filtered)
+            # El partido abierto ocupa siempre el primer puesto del lote. Así,
+            # el límite de consultas automáticas no deja sin estadísticas al
+            # usuario cuando abre un encuentro que no estaba en los primeros 5.
+            selected_detail_for_stats = st.session_state.get("selected_match_detail") or {}
+            selected_stats_fixture_id = str(selected_detail_for_stats.get("fixture_id") or "")
+            selected_stats_fixture = next(
+                (
+                    item for item in filtered
+                    if str(((item.get("fixture") or {}).get("id") or "")) == selected_stats_fixture_id
+                ),
+                None,
+            )
+            stats_fixtures = (
+                ([selected_stats_fixture] if selected_stats_fixture is not None else [])
+                + [
+                    item for item in rotated_fixtures
+                    if selected_stats_fixture is None
+                    or str(((item.get("fixture") or {}).get("id") or "")) != selected_stats_fixture_id
+                ][:max(0, effective_stats_limit - (1 if selected_stats_fixture is not None else 0))]
+            )
+            st.session_state.live_stats_batch_cursor = (stats_cursor + max(0, len(stats_fixtures) - (1 if selected_stats_fixture is not None else 0))) % len(filtered)
         else:
             stats_fixtures = []
             st.session_state.live_stats_batch_cursor = 0
