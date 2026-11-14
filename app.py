@@ -8529,16 +8529,16 @@ else:
                 corner_results.append({"fixture": fixture, "error": str(exc)})
                 if "HTTP 429" in str(exc):
                     break
-        # Load historical venue averages during the global scan, as in main.
-        # The goals and corners panels both consume this shared result, so they
-        # must not remain pending until the user opens a separate history button.
+        # Restore Main's behavior: load historical venue averages during the scan,
+        # prioritizing the opened match but allowing every fixture to use the shared budget.
+        # This keeps the history visible in both Goals and Corners instead of leaving
+        # every match pending when selected_match_detail is not populated.
         history_calls_before = st.session_state.api_request_count
         history_cache = st.session_state.setdefault("automatic_history_cache", {})
         history_cache["_automatic_history_stats_calls"] = 0
         history_cache["_automatic_history_team_fixture_calls"] = 0
         history_cache.pop("_automatic_history_rate_limited", None)
 
-        # Give priority to the match currently opened by the user.
         selected_detail_for_history = st.session_state.get("selected_match_detail") or {}
         selected_history_fixture_id = str(selected_detail_for_history.get("fixture_id") or "")
         corner_results.sort(
@@ -8546,44 +8546,41 @@ else:
         )
 
         history_loaded_fixture_ids = []
-        history_deferred_fixture_ids = []
+        history_pending_fixture_ids = []
         for corner_item in corner_results:
             history_fixture_id = str((((corner_item.get("fixture") or {}).get("fixture") or {}).get("id")) or "")
-            # El historial detallado se calcula primero para el partido que el usuario
-            # abrió. Consultarlo para TODOS los partidos en cada escaneo multiplicaba
-            # hasta 20 consultas de estadísticas por encuentro y dejaba el radar cargando.
-            if not selected_history_fixture_id or history_fixture_id != selected_history_fixture_id:
-                history_deferred_fixture_ids.append(history_fixture_id)
-                corner_item["automatic_history"] = {
-                    "available": False,
-                    "pending": True,
-                    "corners_pending": True,
-                    "note": "Historial pendiente: se consulta al abrir y analizar este partido.",
-                }
-                continue
             try:
-                # Presupuesto acotado para que el análisis del partido abierto termine
-                # antes de que el escáner intente enriquecer otros encuentros.
+                used_history_stats = int(history_cache.get("_automatic_history_stats_calls", 0) or 0)
+                # Keep the reduced request budget from the integration branch,
+                # but share it across fixtures as Main does. Never defer all fixtures.
                 history_budget = 8 if auto_scan_due and not manual_scan else 12
+                remaining_history_budget = max(0, history_budget - used_history_stats)
                 corner_item["automatic_history"] = build_automatic_history(
                     corner_item["fixture"],
                     api_get=api_get,
                     cache=history_cache,
-                    stats_budget=history_budget,
+                    stats_budget=remaining_history_budget,
                     live_corner_finalizer=lambda completed_fixture, final_stats: (
                         finalize_live_corner_fixture(LIVE_CORNER_CAPTURE_DB, completed_fixture, final_stats)
                     ),
                 )
-                history_loaded_fixture_ids.append(history_fixture_id)
+                history = corner_item.get("automatic_history") or {}
+                if history.get("available") or any(
+                    isinstance(history.get(key), (int, float))
+                    for key in ("home_goals_for", "home_corners_for", "away_goals_for", "away_corners_for")
+                ):
+                    history_loaded_fixture_ids.append(history_fixture_id)
+                else:
+                    history_pending_fixture_ids.append(history_fixture_id)
             except Exception as history_exc:
                 corner_item["automatic_history"] = {
                     "available": False,
                     "pending": True,
                     "note": f"Historial automático no disponible: {history_exc}",
                 }
+                history_pending_fixture_ids.append(history_fixture_id)
         st.session_state.last_scan_history_loaded_fixture_ids = history_loaded_fixture_ids
-        st.session_state.last_scan_history_deferred_count = len(history_deferred_fixture_ids)
-
+        st.session_state.last_scan_history_deferred_count = len(history_pending_fixture_ids)
         st.session_state.last_scan_history_api_calls = st.session_state.api_request_count - history_calls_before
         st.session_state.last_scan_api_calls = st.session_state.api_request_count - scan_api_calls_start
         st.session_state.corner_scan_results = corner_results
