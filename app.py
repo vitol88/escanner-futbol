@@ -7486,6 +7486,12 @@ else:
                                             else:
                                                 st.info("Primero pulsa «Escanear todos los partidos en vivo». Después, vuelve a abrir Goles y señales para ver promedios por localía, lectura en vivo y tip principal.")
                                         elif market_key == "corners":
+                                            # El partido abierto también tiene prioridad en el lote
+                                            # de estadísticas, aunque no se pulse el radar individual.
+                                            st.session_state["selected_match_detail"] = {
+                                                "fixture_id": match_id,
+                                                "market": "corners",
+                                            }
                                             _pending_scan_request = st.session_state.get("analysis_scan_request") or {}
                                             _pending_corners_request = str(_pending_scan_request.get("fixture_id")) == str(match_id) and _pending_scan_request.get("market") == "corners"
                                             _corner_radar_clicked = _pending_corners_request and _pending_scan_request.get("action") == "scan"
