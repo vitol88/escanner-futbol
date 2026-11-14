@@ -8539,9 +8539,26 @@ else:
 
         selected_detail_for_history = st.session_state.get("selected_match_detail") or {}
         selected_history_fixture_id = str(selected_detail_for_history.get("fixture_id") or "")
-        corner_results.sort(
-            key=lambda item: 0 if str(((item.get("fixture") or {}).get("fixture") or {}).get("id") or "") == selected_history_fixture_id else 1
-        )
+        # Prioritize the selected fixture, then live matches with usable corner
+        # observations and active match time. Historical API requests are bounded,
+        # so spending them first on fixtures with actionable live data improves
+        # coverage without weakening historical sample or activity requirements.
+        def _history_priority(item):
+            fixture_info = (item.get("fixture") or {}).get("fixture") or {}
+            fixture_id = str(fixture_info.get("id") or "")
+            status = fixture_info.get("status") or {}
+            elapsed = status.get("elapsed")
+            active = status.get("short") in {"1H", "2H", "HT", "ET", "BT", "P", "LIVE", "INT"}
+            corners_present = isinstance(item.get("home_corners"), (int, float)) and isinstance(item.get("away_corners"), (int, float))
+            shots_present = isinstance(item.get("home_shots"), (int, float)) or isinstance(item.get("away_shots"), (int, float))
+            return (
+                0 if fixture_id == selected_history_fixture_id and selected_history_fixture_id else 1,
+                0 if active and isinstance(elapsed, (int, float)) and elapsed < 90 else 1,
+                0 if corners_present else 1,
+                0 if shots_present else 1,
+            )
+
+        corner_results.sort(key=_history_priority)
 
         history_loaded_fixture_ids = []
         history_pending_fixture_ids = []
