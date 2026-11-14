@@ -1,6 +1,7 @@
 """Helpers to normalize API-Football in-play odds without inventing prices."""
 from __future__ import annotations
 
+import math
 import re
 import unicodedata
 from typing import Any
@@ -10,6 +11,19 @@ def _norm(value: Any) -> str:
     text = unicodedata.normalize("NFKD", str(value or ""))
     text = "".join(ch for ch in text if not unicodedata.combining(ch))
     return re.sub(r"\s+", " ", text.casefold()).strip()
+
+
+def _valid_quote(value: dict[str, Any], market: dict[str, Any] | None = None) -> float | None:
+    """Accept only active, finite decimal odds; never infer availability."""
+    market = market or {}
+    for source in (market, value):
+        if any(source.get(flag) is True for flag in ("suspended", "blocked", "finished", "stopped")):
+            return None
+    try:
+        odd = float(str(value.get("odd", "")).replace(",", "."))
+    except (TypeError, ValueError):
+        return None
+    return odd if math.isfinite(odd) and odd > 1.0 else None
 
 
 def extract_live_odds(payload: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
@@ -32,11 +46,8 @@ def extract_live_odds(payload: dict[str, Any]) -> dict[str, list[dict[str, Any]]
                 for value in market.get("values") or []:
                     if not isinstance(value, dict):
                         continue
-                    try:
-                        odd = float(str(value.get("odd", "")).replace(",", "."))
-                    except (TypeError, ValueError):
-                        continue
-                    if odd <= 1.0 or value.get("suspended") is True:
+                    odd = _valid_quote(value, market)
+                    if odd is None:
                         continue
                     rows.append({
                         "bookmaker": "Casa no especificada por API-Football LIVE",
@@ -61,11 +72,8 @@ def extract_live_odds(payload: dict[str, Any]) -> dict[str, list[dict[str, Any]]
                 for value in bet.get("values") or []:
                     if not isinstance(value, dict):
                         continue
-                    try:
-                        odd = float(str(value.get("odd", "")).replace(",", "."))
-                    except (TypeError, ValueError):
-                        continue
-                    if odd <= 1.0 or value.get("suspended") is True:
+                    odd = _valid_quote(value, bet)
+                    if odd is None:
                         continue
                     rows.append({
                         "bookmaker": bookmaker_name,
@@ -156,21 +164,20 @@ def numerology_context(
 
 
 def best_live_odds_by_market(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Prefer a named bookmaker; otherwise use the highest provider-level live quote."""
+    """Select highest valid quote per exact normalized market/line/selection.
+
+    Bookmaker identity is retained as provided, never inferred. A named
+    bookmaker does not outrank a better valid provider-level quote.
+    """
     best: dict[str, dict[str, Any]] = {}
     for row in rows:
         label = classify_market(row)
-        odd = row.get("odd")
-        if not label or not isinstance(odd, (int, float)) or odd <= 1:
+        odd = _valid_quote(row)
+        if not label or odd is None:
             continue
         current = best.get(label)
-        candidate_rank = (row.get("bookmaker_verified") is True, float(odd))
-        current_rank = (
-            current.get("bookmaker_verified") is True,
-            float(current.get("odd", 0)),
-        ) if current else None
-        if current is None or candidate_rank > current_rank:
-            best[label] = {**row, "market_label": label}
+        if current is None or odd > float(current["odd"]):
+            best[label] = {**row, "odd": odd, "market_label": label}
     return list(best.values())
 
 
@@ -208,7 +215,7 @@ def match_goal_tip_to_live_odds(
         if row.get("market_label") != expected_market:
             continue
         odd = row.get("odd")
-        if not isinstance(odd, (int, float)) or not (1.35 <= float(odd) <= 1.60 or float(odd) >= 1.70):
+        if not isinstance(odd, (int, float)) or not (1.35 <= float(odd) <= 10.0):
             continue
         implied = 1.0 / float(odd)
         edge = float(probability) - implied
