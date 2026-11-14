@@ -8545,12 +8545,26 @@ else:
             key=lambda item: 0 if str(((item.get("fixture") or {}).get("fixture") or {}).get("id") or "") == selected_history_fixture_id else 1
         )
 
+        history_loaded_fixture_ids = []
+        history_deferred_fixture_ids = []
         for corner_item in corner_results:
+            history_fixture_id = str((((corner_item.get("fixture") or {}).get("fixture") or {}).get("id")) or "")
+            # El historial detallado se calcula primero para el partido que el usuario
+            # abrió. Consultarlo para TODOS los partidos en cada escaneo multiplicaba
+            # hasta 20 consultas de estadísticas por encuentro y dejaba el radar cargando.
+            if not selected_history_fixture_id or history_fixture_id != selected_history_fixture_id:
+                history_deferred_fixture_ids.append(history_fixture_id)
+                corner_item["automatic_history"] = {
+                    "available": False,
+                    "pending": True,
+                    "corners_pending": True,
+                    "note": "Historial pendiente: se consulta al abrir y analizar este partido.",
+                }
+                continue
             try:
-                # Give each fixture its own bounded historical-statistics budget.
-                # A shared scan-wide counter starved later fixtures of corner samples,
-                # leaving competition averages as N/D even when their history existed.
-                history_budget = 8 if auto_scan_due and not manual_scan else 20
+                # Presupuesto acotado para que el análisis del partido abierto termine
+                # antes de que el escáner intente enriquecer otros encuentros.
+                history_budget = 8 if auto_scan_due and not manual_scan else 12
                 corner_item["automatic_history"] = build_automatic_history(
                     corner_item["fixture"],
                     api_get=api_get,
@@ -8560,12 +8574,15 @@ else:
                         finalize_live_corner_fixture(LIVE_CORNER_CAPTURE_DB, completed_fixture, final_stats)
                     ),
                 )
+                history_loaded_fixture_ids.append(history_fixture_id)
             except Exception as history_exc:
                 corner_item["automatic_history"] = {
                     "available": False,
                     "pending": True,
                     "note": f"Historial automático no disponible: {history_exc}",
                 }
+        st.session_state.last_scan_history_loaded_fixture_ids = history_loaded_fixture_ids
+        st.session_state.last_scan_history_deferred_count = len(history_deferred_fixture_ids)
 
         st.session_state.last_scan_history_api_calls = st.session_state.api_request_count - history_calls_before
         st.session_state.last_scan_api_calls = st.session_state.api_request_count - scan_api_calls_start
