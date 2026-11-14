@@ -286,3 +286,57 @@ def test_automatic_history_skips_corner_stats_when_league_coverage_is_false():
     assert result["diagnostics"]["historical_stats"]["requested"] == 0
     assert result["diagnostics"]["historical_stats"]["skipped_unsupported"] == 2
     assert not [call for call in calls if call[0] == "fixtures/statistics"]
+
+
+def test_automatic_history_supplements_short_current_season_from_prior_seasons():
+    current = {
+        "fixture": {"timestamp": 9000},
+        "teams": {
+            "home": {"id": 1, "name": "Home FC"},
+            "away": {"id": 2, "name": "Away FC"},
+        },
+        "league": {"id": 10, "season": 2026},
+    }
+    prior_home = _fixture(901, 1, 3, 2, 0)
+    prior_away = _fixture(902, 4, 2, 1, 1)
+    prior_home["league"]["season"] = 2025
+    prior_away["league"]["season"] = 2025
+    calls = []
+
+    def fake_api(endpoint, params):
+        calls.append((endpoint, params))
+        if endpoint == "leagues":
+            return {"response": [{
+                "seasons": [{
+                    "year": params["season"],
+                    "coverage": {"fixtures": {"statistics_fixtures": True}},
+                }]
+            }]}
+        if endpoint == "fixtures" and "season" in params:
+            return {"response": []}
+        if endpoint == "fixtures" and params["team"] == 1:
+            return {"response": [prior_home]}
+        if endpoint == "fixtures" and params["team"] == 2:
+            return {"response": [prior_away]}
+        if endpoint == "fixtures/statistics" and params["fixture"] == 901:
+            return {"response": [
+                {"team": {"id": 1}, "statistics": [{"type": "Corner Kicks", "value": 7}]},
+                {"team": {"id": 3}, "statistics": [{"type": "Corner Kicks", "value": 4}]},
+            ]}
+        if endpoint == "fixtures/statistics" and params["fixture"] == 902:
+            return {"response": [
+                {"team": {"id": 4}, "statistics": [{"type": "Corner Kicks", "value": 3}]},
+                {"team": {"id": 2}, "statistics": [{"type": "Corner Kicks", "value": 6}]},
+            ]}
+        return {"response": []}
+
+    result = build_automatic_history(current, api_get=fake_api, cache={}, stats_budget=2)
+
+    assert result["home_corner_sample"] == 1
+    assert result["away_corner_sample"] == 1
+    assert result["home_corners_for"] == 7.0
+    assert result["away_corners_for"] == 6.0
+    assert result["diagnostics"]["historical_fallback"]["requested"] == 2
+    assert result["diagnostics"]["historical_fallback"]["home_candidates_added"] == 1
+    assert result["diagnostics"]["historical_fallback"]["away_candidates_added"] == 1
+    assert result["diagnostics"]["league_statistics_coverage_by_season"]["2025"] is True
