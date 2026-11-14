@@ -257,8 +257,8 @@ def test_automatic_history_skips_corner_stats_when_league_coverage_is_false():
         },
         "league": {"id": 10, "season": 2026},
     }
-    past_home = _fixture(801, 1, 3, 2, 0)
-    past_away = _fixture(802, 4, 2, 1, 1)
+    past_home = _fixture(801, 1, 3, 2, 0, timestamp=7000)
+    past_away = _fixture(802, 4, 2, 1, 1, timestamp=7100)
     calls = []
 
     def fake_api(endpoint, params):
@@ -297,8 +297,8 @@ def test_automatic_history_supplements_short_current_season_from_prior_seasons()
         },
         "league": {"id": 10, "season": 2026},
     }
-    prior_home = _fixture(901, 1, 3, 2, 0)
-    prior_away = _fixture(902, 4, 2, 1, 1)
+    prior_home = _fixture(901, 1, 3, 2, 0, timestamp=8000)
+    prior_away = _fixture(902, 4, 2, 1, 1, timestamp=8100)
     prior_home["league"]["season"] = 2025
     prior_away["league"]["season"] = 2025
     calls = []
