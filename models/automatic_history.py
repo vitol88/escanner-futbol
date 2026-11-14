@@ -233,13 +233,15 @@ def build_automatic_history(
     home_fallback_rows: list[dict[str, Any]] = []
     away_fallback_rows: list[dict[str, Any]] = []
 
-    # Check older seasons when the current season lacks enough venue fixtures
-    # or declares statistics coverage. This can recover usable data even when
-    # individual current-season fixture-statistics responses are empty.
-    if league_statistics_coverage is not False or venue_count(home_current_fixtures, home["id"], "home") < 3:
-        home_fallback_rows = same_competition_finished(team_fixtures_all_seasons(home["id"]), current_season_only=False)
-    if league_statistics_coverage is not False or venue_count(away_current_fixtures, away["id"], "away") < 3:
-        away_fallback_rows = same_competition_finished(team_fixtures_all_seasons(away["id"]), current_season_only=False)
+    # Always inspect the same competition's last 30 fixtures across seasons.
+    # Current-season coverage can be incomplete at fixture level even when the
+    # league metadata says statistics are supported; older seasons may still help.
+    home_fallback_rows = same_competition_finished(
+        team_fixtures_all_seasons(home["id"]), current_season_only=False
+    )
+    away_fallback_rows = same_competition_finished(
+        team_fixtures_all_seasons(away["id"]), current_season_only=False
+    )
 
     home_fixtures = ordered_venue_fixtures(home_current_fixtures, home_fallback_rows, home["id"], "home")
     away_fixtures = ordered_venue_fixtures(away_current_fixtures, away_fallback_rows, away["id"], "away")
