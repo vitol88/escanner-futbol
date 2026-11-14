@@ -162,7 +162,8 @@ def build_automatic_history(
                 continue
             item_timestamp = item_fixture.get("timestamp")
             if (
-                isinstance(target_timestamp, (int, float))
+                not current_season_only
+                and isinstance(target_timestamp, (int, float))
                 and isinstance(item_timestamp, (int, float))
                 and item_timestamp >= target_timestamp
             ):
