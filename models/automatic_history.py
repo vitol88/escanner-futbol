@@ -139,9 +139,10 @@ def build_automatic_history(
                 cache[key] = (payload.get("response") or [])
                 diagnostics["teams"][str(team_id)] = {"returned": len(cache[key]), "params": params, "error": None}
             except Exception as exc:
-                cache[key] = []
+                # Failed API calls must not be cached as confirmed empty histories.
                 cache["error:" + key] = str(exc)
                 diagnostics["teams"][str(team_id)] = {"returned": 0, "params": params, "error": str(exc)}
+                return []
         if str(team_id) not in diagnostics["teams"]:
             diagnostics["teams"][str(team_id)] = {"returned": len(cache[key]), "error": cache.get("error:" + key), "source": "cache"}
         return cache[key]
@@ -185,7 +186,7 @@ def build_automatic_history(
                 diagnostics["historical_fallback"]["requested"] += 1
                 diagnostics["historical_fallback"]["returned"] += len(cache[key])
             except Exception as exc:
-                cache[key] = []
+                # Allow a later scan to retry after transient API errors.
                 cache["error:" + key] = str(exc)
                 diagnostics["historical_fallback"]["requested"] += 1
                 diagnostics["historical_fallback"]["errors"] = str(exc)
