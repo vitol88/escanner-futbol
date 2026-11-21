@@ -8539,21 +8539,35 @@ else:
 
         selected_detail_for_history = st.session_state.get("selected_match_detail") or {}
         selected_history_fixture_id = str(selected_detail_for_history.get("fixture_id") or "")
-        # Prioritize the selected fixture, then live matches with usable corner
-        # observations and active match time. Historical API requests are bounded,
-        # so spending them first on fixtures with actionable live data improves
-        # coverage without weakening historical sample or activity requirements.
+        # Prioritize the opened match and fixtures closest to meeting the existing
+        # live-activity requirements. This only changes request order, not thresholds.
+        # Ineligible fixtures still retain their cached history and are processed.
         def _history_priority(item):
             fixture_info = (item.get("fixture") or {}).get("fixture") or {}
             fixture_id = str(fixture_info.get("id") or "")
             status = fixture_info.get("status") or {}
             elapsed = status.get("elapsed")
             active = status.get("short") in {"1H", "2H", "HT", "ET", "BT", "P", "LIVE", "INT"}
-            corners_present = isinstance(item.get("home_corners"), (int, float)) and isinstance(item.get("away_corners"), (int, float))
-            shots_present = isinstance(item.get("home_shots"), (int, float)) or isinstance(item.get("away_shots"), (int, float))
+            home_c = item.get("home_corners")
+            away_c = item.get("away_corners")
+            corners_present = isinstance(home_c, (int, float)) and isinstance(away_c, (int, float))
+            total_corners = home_c + away_c if corners_present else None
+            pace = item.get("pace")
+            home_shots = item.get("home_shots")
+            away_shots = item.get("away_shots")
+            shots_present = isinstance(home_shots, (int, float)) and isinstance(away_shots, (int, float))
+            total_shots = home_shots + away_shots if shots_present else None
+            in_activity_window = active and isinstance(elapsed, (int, float)) and 15 <= elapsed <= 78
+            activity_ready = (
+                in_activity_window
+                and total_corners is not None and total_corners >= 5
+                and isinstance(pace, (int, float)) and pace >= 10
+                and total_shots is not None and total_shots >= 8
+            )
             return (
                 0 if fixture_id == selected_history_fixture_id and selected_history_fixture_id else 1,
-                0 if active and isinstance(elapsed, (int, float)) and elapsed < 90 else 1,
+                0 if activity_ready else 1,
+                0 if in_activity_window else 1,
                 0 if corners_present else 1,
                 0 if shots_present else 1,
             )
