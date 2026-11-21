@@ -8227,7 +8227,15 @@ else:
                 })
                 continue
             _existing_global_rows = global_odds_index.get(_live_fixture_id) or []
-            if _existing_global_rows:
+            # Una cuota de goles no implica cobertura del mercado de córners.
+            # Conservar las consultas ya resueltas, pero permitir el fallback
+            # individual cuando las cuotas generales carecen de córners.
+            _existing_corner_rows = [
+                _r for _r in _existing_global_rows
+                if "córners" in str(_r.get("market_label") or "").casefold()
+                or "corners" in str(_r.get("market_label") or "").casefold()
+            ]
+            if _existing_global_rows and _existing_corner_rows:
                 targeted_response_details.append({
                     "fixture_id": _live_fixture_id,
                     "home": _live_home,
@@ -8237,7 +8245,7 @@ else:
                     "bookmakers": sum(1 for _r in _existing_global_rows if _r.get("bookmaker_verified") is True),
                     "bet_values": len(_existing_global_rows),
                     "parsed_rows": len(_existing_global_rows),
-                    "note": "Se omitió la consulta individual porque ya había cuotas asociadas a este partido.",
+                    "note": "Cuotas de córners ya disponibles; no se requiere consulta individual.",
                 })
                 continue
             _cached_targeted = targeted_odds_cache.get(_live_fixture_id) or {}
